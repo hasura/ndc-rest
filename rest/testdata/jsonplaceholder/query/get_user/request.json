@@ -1,0 +1,96 @@
+{
+  "collection": "getUser",
+  "query": {
+    "fields": {
+      "__value": {
+        "type": "column",
+        "column": "__value",
+        "fields": {
+          "type": "object",
+          "fields": {
+            "id": { "type": "column", "column": "id", "fields": null },
+            "website": {
+              "type": "column",
+              "column": "website",
+              "fields": null
+            },
+            "username": {
+              "type": "column",
+              "column": "username",
+              "fields": null
+            },
+            "phone": { "type": "column", "column": "phone", "fields": null },
+            "name": { "type": "column", "column": "name", "fields": null },
+            "email": { "type": "column", "column": "email", "fields": null },
+            "address": {
+              "type": "column",
+              "column": "address",
+              "fields": {
+                "type": "object",
+                "fields": {
+                  "city": {
+                    "type": "column",
+                    "column": "city",
+                    "fields": null
+                  },
+                  "geo": {
+                    "type": "column",
+                    "column": "geo",
+                    "fields": {
+                      "type": "object",
+                      "fields": {
+                        "lat": {
+                          "type": "column",
+                          "column": "lat",
+                          "fields": null
+                        },
+                        "lng": {
+                          "type": "column",
+                          "column": "lng",
+                          "fields": null
+                        }
+                      }
+                    }
+                  },
+                  "suite": {
+                    "type": "column",
+                    "column": "suite",
+                    "fields": null
+                  },
+                  "street": {
+                    "type": "column",
+                    "column": "street",
+                    "fields": null
+                  },
+                  "zipcode": {
+                    "type": "column",
+                    "column": "zipcode",
+                    "fields": null
+                  }
+                }
+              }
+            },
+            "company": {
+              "type": "column",
+              "column": "company",
+              "fields": {
+                "type": "object",
+                "fields": {
+                  "bs": { "type": "column", "column": "bs", "fields": null },
+                  "catchPhrase": {
+                    "type": "column",
+                    "column": "catchPhrase",
+                    "fields": null
+                  },
+                  "name": { "type": "column", "column": "name", "fields": null }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "arguments": { "id": { "type": "literal", "value": 1 } },
+  "collection_relationships": {}
+}

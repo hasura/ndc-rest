@@ -1,0 +1,839 @@
+{
+  "scalar_types": {
+    "Boolean": {
+      "aggregate_functions": {},
+      "comparison_operators": {}
+    },
+    "Int": {
+      "aggregate_functions": {},
+      "comparison_operators": {}
+    },
+    "NotFoundError": {
+      "aggregate_functions": {},
+      "comparison_operators": {}
+    },
+    "String": {
+      "aggregate_functions": {},
+      "comparison_operators": {}
+    }
+  },
+  "object_types": {
+    "Album": {
+      "fields": {
+        "id": {
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "type": "named",
+              "name": "Int"
+            }
+          }
+        },
+        "title": {
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "type": "named",
+              "name": "String"
+            }
+          }
+        },
+        "userId": {
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "type": "named",
+              "name": "Int"
+            }
+          }
+        }
+      }
+    },
+    "Comment": {
+      "fields": {
+        "body": {
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "type": "named",
+              "name": "String"
+            }
+          }
+        },
+        "email": {
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "type": "named",
+              "name": "String"
+            }
+          }
+        },
+        "id": {
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "type": "named",
+              "name": "Int"
+            }
+          }
+        },
+        "name": {
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "type": "named",
+              "name": "String"
+            }
+          }
+        },
+        "postId": {
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "type": "named",
+              "name": "Int"
+            }
+          }
+        }
+      }
+    },
+    "Photo": {
+      "fields": {
+        "albumId": {
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "type": "named",
+              "name": "Int"
+            }
+          }
+        },
+        "id": {
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "type": "named",
+              "name": "Int"
+            }
+          }
+        },
+        "thumbnailUrl": {
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "type": "named",
+              "name": "String"
+            }
+          }
+        },
+        "title": {
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "type": "named",
+              "name": "String"
+            }
+          }
+        },
+        "url": {
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "type": "named",
+              "name": "String"
+            }
+          }
+        }
+      }
+    },
+    "Post": {
+      "fields": {
+        "body": {
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "type": "named",
+              "name": "String"
+            }
+          }
+        },
+        "id": {
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "type": "named",
+              "name": "Int"
+            }
+          }
+        },
+        "title": {
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "type": "named",
+              "name": "String"
+            }
+          }
+        },
+        "userId": {
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "type": "named",
+              "name": "Int"
+            }
+          }
+        }
+      }
+    },
+    "Todo": {
+      "fields": {
+        "completed": {
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "type": "named",
+              "name": "Boolean"
+            }
+          }
+        },
+        "id": {
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "type": "named",
+              "name": "Int"
+            }
+          }
+        },
+        "title": {
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "type": "named",
+              "name": "String"
+            }
+          }
+        },
+        "userId": {
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "type": "named",
+              "name": "Int"
+            }
+          }
+        }
+      }
+    },
+    "User": {
+      "fields": {
+        "address": {
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "type": "named",
+              "name": "UserAddress"
+            }
+          }
+        },
+        "company": {
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "type": "named",
+              "name": "UserCompany"
+            }
+          }
+        },
+        "email": {
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "type": "named",
+              "name": "String"
+            }
+          }
+        },
+        "id": {
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "type": "named",
+              "name": "Int"
+            }
+          }
+        },
+        "name": {
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "type": "named",
+              "name": "String"
+            }
+          }
+        },
+        "phone": {
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "type": "named",
+              "name": "String"
+            }
+          }
+        },
+        "username": {
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "type": "named",
+              "name": "String"
+            }
+          }
+        },
+        "website": {
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "type": "named",
+              "name": "String"
+            }
+          }
+        }
+      }
+    },
+    "UserAddress": {
+      "fields": {
+        "city": {
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "type": "named",
+              "name": "String"
+            }
+          }
+        },
+        "geo": {
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "type": "named",
+              "name": "UserAddressGeo"
+            }
+          }
+        },
+        "street": {
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "type": "named",
+              "name": "String"
+            }
+          }
+        },
+        "suite": {
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "type": "named",
+              "name": "String"
+            }
+          }
+        },
+        "zipcode": {
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "type": "named",
+              "name": "String"
+            }
+          }
+        }
+      }
+    },
+    "UserAddressGeo": {
+      "fields": {
+        "lat": {
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "type": "named",
+              "name": "String"
+            }
+          }
+        },
+        "lng": {
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "type": "named",
+              "name": "String"
+            }
+          }
+        }
+      }
+    },
+    "UserCompany": {
+      "fields": {
+        "bs": {
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "type": "named",
+              "name": "String"
+            }
+          }
+        },
+        "catchPhrase": {
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "type": "named",
+              "name": "String"
+            }
+          }
+        },
+        "name": {
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "type": "named",
+              "name": "String"
+            }
+          }
+        }
+      }
+    }
+  },
+  "collections": [],
+  "functions": [
+    {
+      "name": "getPosts",
+      "description": "Get all available posts",
+      "arguments": {
+        "id": {
+          "description": "Filter by post ID",
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "type": "named",
+              "name": "Int"
+            }
+          }
+        },
+        "userId": {
+          "description": "Filter by user ID",
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "type": "named",
+              "name": "Int"
+            }
+          }
+        }
+      },
+      "result_type": {
+        "type": "array",
+        "element_type": {
+          "type": "named",
+          "name": "Post"
+        }
+      }
+    },
+    {
+      "name": "getPostById",
+      "description": "Get specific post",
+      "arguments": {
+        "id": {
+          "description": "The ID of the post to retrieve",
+          "type": {
+            "type": "named",
+            "name": "Int"
+          }
+        }
+      },
+      "result_type": {
+        "type": "named",
+        "name": "Post"
+      }
+    },
+    {
+      "name": "getPostsIdComments",
+      "description": "Get comments for a specific post",
+      "arguments": {
+        "id": {
+          "description": "post id",
+          "type": {
+            "type": "named",
+            "name": "Int"
+          }
+        }
+      },
+      "result_type": {
+        "type": "array",
+        "element_type": {
+          "type": "named",
+          "name": "Comment"
+        }
+      }
+    },
+    {
+      "name": "getComments",
+      "description": "Get all available comments",
+      "arguments": {
+        "id": {
+          "description": "Filter by comment ID",
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "type": "named",
+              "name": "Int"
+            }
+          }
+        },
+        "postId": {
+          "description": "Filter by post ID",
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "type": "named",
+              "name": "Int"
+            }
+          }
+        }
+      },
+      "result_type": {
+        "type": "array",
+        "element_type": {
+          "type": "named",
+          "name": "Comment"
+        }
+      }
+    },
+    {
+      "name": "getComment",
+      "description": "Get specific comment",
+      "arguments": {
+        "id": {
+          "description": "The ID of the comment to retrieve",
+          "type": {
+            "type": "named",
+            "name": "Int"
+          }
+        }
+      },
+      "result_type": {
+        "type": "named",
+        "name": "Comment"
+      }
+    },
+    {
+      "name": "getAlbums",
+      "description": "Get all available albums",
+      "arguments": {
+        "id": {
+          "description": "Filter by album ID",
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "type": "named",
+              "name": "Int"
+            }
+          }
+        },
+        "userId": {
+          "description": "Filter by user ID",
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "type": "named",
+              "name": "Int"
+            }
+          }
+        }
+      },
+      "result_type": {
+        "type": "array",
+        "element_type": {
+          "type": "named",
+          "name": "Album"
+        }
+      }
+    },
+    {
+      "name": "getAlbumsId",
+      "description": "Get specific album",
+      "arguments": {
+        "id": {
+          "description": "The ID of the album to retrieve",
+          "type": {
+            "type": "named",
+            "name": "Int"
+          }
+        }
+      },
+      "result_type": {
+        "type": "named",
+        "name": "Album"
+      }
+    },
+    {
+      "name": "getAlbumsIdPhotos",
+      "description": "Get photos for a specific album",
+      "arguments": {
+        "id": {
+          "description": "post id",
+          "type": {
+            "type": "named",
+            "name": "Int"
+          }
+        }
+      },
+      "result_type": {
+        "type": "array",
+        "element_type": {
+          "type": "named",
+          "name": "Photo"
+        }
+      }
+    },
+    {
+      "name": "getPhotos",
+      "description": "Get all available photos",
+      "arguments": {
+        "albumId": {
+          "description": "Filter by album ID",
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "type": "named",
+              "name": "Int"
+            }
+          }
+        },
+        "id": {
+          "description": "Filter by photo ID",
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "type": "named",
+              "name": "Int"
+            }
+          }
+        }
+      },
+      "result_type": {
+        "type": "array",
+        "element_type": {
+          "type": "named",
+          "name": "Photo"
+        }
+      }
+    },
+    {
+      "name": "getPhoto",
+      "description": "Get specific photo",
+      "arguments": {
+        "id": {
+          "description": "The ID of the photo to retrieve",
+          "type": {
+            "type": "named",
+            "name": "Int"
+          }
+        }
+      },
+      "result_type": {
+        "type": "named",
+        "name": "Photo"
+      }
+    },
+    {
+      "name": "getTodos",
+      "description": "Get all available todos",
+      "arguments": {
+        "id": {
+          "description": "Filter by todo ID",
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "type": "named",
+              "name": "Int"
+            }
+          }
+        },
+        "userId": {
+          "description": "Filter by user ID",
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "type": "named",
+              "name": "Int"
+            }
+          }
+        }
+      },
+      "result_type": {
+        "type": "array",
+        "element_type": {
+          "type": "named",
+          "name": "Todo"
+        }
+      }
+    },
+    {
+      "name": "getTodo",
+      "description": "Get specific todo",
+      "arguments": {
+        "id": {
+          "description": "The ID of the todo to retrieve",
+          "type": {
+            "type": "named",
+            "name": "Int"
+          }
+        }
+      },
+      "result_type": {
+        "type": "named",
+        "name": "Todo"
+      }
+    },
+    {
+      "name": "getUsers",
+      "description": "Get all available users",
+      "arguments": {
+        "email": {
+          "description": "Filter by user email address",
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "type": "named",
+              "name": "Int"
+            }
+          }
+        },
+        "id": {
+          "description": "Filter by user ID",
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "type": "named",
+              "name": "Int"
+            }
+          }
+        }
+      },
+      "result_type": {
+        "type": "array",
+        "element_type": {
+          "type": "named",
+          "name": "User"
+        }
+      }
+    },
+    {
+      "name": "getUser",
+      "description": "Get specific user",
+      "arguments": {
+        "id": {
+          "description": "The ID of the user to retrieve",
+          "type": {
+            "type": "named",
+            "name": "Int"
+          }
+        }
+      },
+      "result_type": {
+        "type": "named",
+        "name": "User"
+      }
+    }
+  ],
+  "procedures": [
+    {
+      "name": "createPost",
+      "description": "Create a post",
+      "arguments": {
+        "body": {
+          "description": "Post object that needs to be added",
+          "type": {
+            "type": "named",
+            "name": "Post"
+          }
+        }
+      },
+      "result_type": {
+        "type": "named",
+        "name": "Post"
+      }
+    },
+    {
+      "name": "updatePostById",
+      "description": "Update specific post",
+      "arguments": {
+        "body": {
+          "description": "Post object that needs to be updated",
+          "type": {
+            "type": "named",
+            "name": "Post"
+          }
+        },
+        "id": {
+          "description": "The ID of the post to retrieve",
+          "type": {
+            "type": "named",
+            "name": "Int"
+          }
+        }
+      },
+      "result_type": {
+        "type": "named",
+        "name": "Post"
+      }
+    },
+    {
+      "name": "patchPostById",
+      "description": "patch specific post",
+      "arguments": {
+        "body": {
+          "description": "Post object that needs to be updated",
+          "type": {
+            "type": "named",
+            "name": "Post"
+          }
+        },
+        "id": {
+          "description": "The ID of the post to retrieve",
+          "type": {
+            "type": "named",
+            "name": "Int"
+          }
+        }
+      },
+      "result_type": {
+        "type": "named",
+        "name": "Post"
+      }
+    },
+    {
+      "name": "deletePostById",
+      "description": "Delete specific post",
+      "arguments": {
+        "id": {
+          "description": "The ID of the post to retrieve",
+          "type": {
+            "type": "named",
+            "name": "Int"
+          }
+        }
+      },
+      "result_type": {
+        "type": "nullable",
+        "underlying_type": {
+          "type": "named",
+          "name": "Boolean"
+        }
+      }
+    }
+  ]
+}

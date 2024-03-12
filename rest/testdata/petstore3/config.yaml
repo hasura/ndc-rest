@@ -1,0 +1,3 @@
+files:
+  - path: openapi.json
+    spec: openapi3

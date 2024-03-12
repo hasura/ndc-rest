@@ -1,0 +1,26 @@
+{
+  "operations": [
+    {
+      "type": "procedure",
+      "name": "createPost",
+      "arguments": {
+        "body": {
+          "id": 101,
+          "title": "Hello world",
+          "userId": 10,
+          "body": "A test post"
+        }
+      },
+      "fields": {
+        "type": "object",
+        "fields": {
+          "id": { "type": "column", "column": "id", "fields": null },
+          "title": { "type": "column", "column": "title", "fields": null },
+          "userId": { "type": "column", "column": "userId", "fields": null },
+          "body": { "type": "column", "column": "body", "fields": null }
+        }
+      }
+    }
+  ],
+  "collection_relationships": {}
+}

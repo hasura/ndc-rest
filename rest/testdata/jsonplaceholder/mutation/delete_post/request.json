@@ -1,0 +1,6 @@
+{
+  "operations": [
+    { "type": "procedure", "name": "deletePostById", "arguments": { "id": 10 } }
+  ],
+  "collection_relationships": {}
+}

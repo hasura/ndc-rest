@@ -1,0 +1,3 @@
+files:
+  - path: swagger.json
+    spec: openapi2

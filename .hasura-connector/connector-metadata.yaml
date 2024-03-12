@@ -1,0 +1,9 @@
+packagingDefinition:
+  type: ManagedDockerBuild
+supportedEnvironmentVariables: []
+commands: {}
+dockerComposeWatch:
+  # copy config files into the existing container and restart it
+  - path: ./config
+    target: /config
+    action: sync+restart
