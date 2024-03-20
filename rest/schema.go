@@ -6,6 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"log/slog"
+	"os"
 	"path"
 	"strings"
 
@@ -21,18 +22,38 @@ func (c *RESTConnector) GetSchema(ctx context.Context, configuration *Configurat
 	return c.schema, nil
 }
 
+func getEnvVariables() map[string]string {
+	results := make(map[string]string)
+	for _, env := range os.Environ() {
+		if env == "" {
+			continue
+		}
+		keyValues := strings.Split(env, "=")
+		if len(keyValues) < 2 {
+			continue
+		}
+		value := strings.Trim(strings.Join(keyValues[1:], "="), `"`)
+		results[keyValues[0]] = value
+	}
+	return results
+}
+
 // build NDC REST schema from file list
-func buildSchemaFiles(configDir string, files []SchemaFile, logger *slog.Logger) (map[string]*rest.NDCRestSchema, map[string][]string) {
-	schemas := make(map[string]*rest.NDCRestSchema)
+func buildSchemaFiles(configDir string, files []SchemaFile, logger *slog.Logger) ([]ndcRestSchemaWithName, map[string][]string) {
+	envVars := getEnvVariables()
+	schemas := make([]ndcRestSchemaWithName, len(files))
 	errors := make(map[string][]string)
-	for _, file := range files {
+	for i, file := range files {
 		var errs []string
-		schemaOutput, err := buildSchemaFile(configDir, &file, logger)
+		schemaOutput, err := buildSchemaFile(configDir, &file, envVars, logger)
 		if err != nil {
 			errs = append(errs, err.Error())
 		}
 		if schemaOutput != nil {
-			schemas[file.Path] = schemaOutput
+			schemas[i] = ndcRestSchemaWithName{
+				name:   file.Path,
+				schema: schemaOutput,
+			}
 		}
 		if len(errs) > 0 {
 			errors[file.Path] = errs
@@ -42,7 +63,7 @@ func buildSchemaFiles(configDir string, files []SchemaFile, logger *slog.Logger)
 	return schemas, errors
 }
 
-func buildSchemaFile(configDir string, conf *SchemaFile, logger *slog.Logger) (*rest.NDCRestSchema, error) {
+func buildSchemaFile(configDir string, conf *SchemaFile, envVars map[string]string, logger *slog.Logger) (*rest.NDCRestSchema, error) {
 	if conf.Path == "" {
 		return nil, errors.New("file path is empty")
 	}
@@ -55,6 +76,13 @@ func buildSchemaFile(configDir string, conf *SchemaFile, logger *slog.Logger) (*
 	if err != nil {
 		return nil, err
 	}
+
+	// replace environment variables
+	rawString := string(rawBytes)
+	for key, val := range envVars {
+		rawString = strings.ReplaceAll(rawString, fmt.Sprintf("{{%s}}", key), val)
+	}
+
 	switch conf.Spec {
 	case rest.NDCSpec:
 		var result rest.NDCRestSchema
@@ -64,12 +92,12 @@ func buildSchemaFile(configDir string, conf *SchemaFile, logger *slog.Logger) (*
 		}
 		switch fileFormat {
 		case rest.SchemaFileJSON:
-			if err := json.Unmarshal(rawBytes, &result); err != nil {
+			if err := json.Unmarshal([]byte(rawString), &result); err != nil {
 				return nil, err
 			}
 			return &result, nil
 		case rest.SchemaFileYAML:
-			if err := yaml.Unmarshal(rawBytes, &result); err != nil {
+			if err := yaml.Unmarshal([]byte(rawString), &result); err != nil {
 				return nil, err
 			}
 			return &result, nil
@@ -105,7 +133,7 @@ func buildSchemaFile(configDir string, conf *SchemaFile, logger *slog.Logger) (*
 	}
 }
 
-func (c *RESTConnector) applyNDCRestSchemas(schemas map[string]*rest.NDCRestSchema) map[string][]string {
+func (c *RESTConnector) applyNDCRestSchemas(schemas []ndcRestSchemaWithName) map[string][]string {
 	ndcSchema := &schema.SchemaResponse{
 		Collections: []schema.CollectionInfo{},
 		ScalarTypes: make(schema.SchemaResponseScalarTypes),
@@ -115,33 +143,34 @@ func (c *RESTConnector) applyNDCRestSchemas(schemas map[string]*rest.NDCRestSche
 	procedures := map[string]rest.RESTProcedureInfo{}
 	errors := make(map[string][]string)
 
-	for key, item := range schemas {
-		var host string
-		var errs []string
-		timeout := defaultTimeout
-
-		if item.Settings != nil {
-			if item.Settings.Timeout > 0 {
-				timeout = item.Settings.Timeout
+	for _, item := range schemas {
+		settings := item.schema.Settings
+		if settings == nil {
+			settings = &rest.NDCRestSettings{}
+			if settings.Timeout == 0 {
+				settings.Timeout = defaultTimeout
 			}
-			host = item.Settings.URL
 		}
+		meta := RESTMetadata{
+			settings: settings,
+		}
+		var errs []string
 
-		for name, scalar := range item.ScalarTypes {
+		for name, scalar := range item.schema.ScalarTypes {
 			ndcSchema.ScalarTypes[name] = scalar
 		}
-		for name, object := range item.ObjectTypes {
+		for name, object := range item.schema.ObjectTypes {
 			ndcSchema.ObjectTypes[name] = object
 		}
-		ndcSchema.Collections = append(ndcSchema.Collections, item.Collections...)
+		ndcSchema.Collections = append(ndcSchema.Collections, item.schema.Collections...)
 
 		var functionSchemas []schema.FunctionInfo
 		var procedureSchemas []schema.ProcedureInfo
-		for _, fnItem := range item.Functions {
+		for _, fnItem := range item.schema.Functions {
 			if fnItem.Request == nil || fnItem.Request.URL == "" {
 				continue
 			}
-			req, err := validateRequestSchema(fnItem.Request, host, "get", timeout)
+			req, err := validateRequestSchema(fnItem.Request, "get", settings.Timeout)
 			if err != nil {
 				errs = append(errs, fmt.Sprintf("function %s: %s", fnItem.Name, err))
 				continue
@@ -154,11 +183,11 @@ func (c *RESTConnector) applyNDCRestSchemas(schemas map[string]*rest.NDCRestSche
 			functionSchemas = append(functionSchemas, fn.FunctionInfo)
 		}
 
-		for _, procItem := range item.Procedures {
+		for _, procItem := range item.schema.Procedures {
 			if procItem.Request == nil || procItem.Request.URL == "" {
 				continue
 			}
-			req, err := validateRequestSchema(procItem.Request, host, "", timeout)
+			req, err := validateRequestSchema(procItem.Request, "", settings.Timeout)
 			if err != nil {
 				errs = append(errs, fmt.Sprintf("procedure %s: %s", procItem.Name, err))
 				continue
@@ -171,11 +200,15 @@ func (c *RESTConnector) applyNDCRestSchemas(schemas map[string]*rest.NDCRestSche
 		}
 
 		if len(errs) > 0 {
-			errors[key] = errs
+			errors[item.name] = errs
 			continue
 		}
 		ndcSchema.Functions = append(ndcSchema.Functions, functionSchemas...)
 		ndcSchema.Procedures = append(ndcSchema.Procedures, procedureSchemas...)
+
+		meta.functions = functions
+		meta.procedures = procedures
+		c.metadata = append(c.metadata, meta)
 	}
 
 	schemaBytes, err := json.Marshal(ndcSchema)
@@ -188,20 +221,10 @@ func (c *RESTConnector) applyNDCRestSchemas(schemas map[string]*rest.NDCRestSche
 	}
 
 	c.schema = schema.NewRawSchemaResponseUnsafe(schemaBytes)
-	c.functions = functions
-	c.procedures = procedures
 	return nil
 }
 
-func validateRequestSchema(req *rest.Request, host string, defaultMethod string, defTimeout uint) (*rest.Request, error) {
-	endpoint := req.URL
-	if !strings.HasPrefix(endpoint, "http") && host != "" {
-		endpoint = fmt.Sprintf("%s%s", host, req.URL)
-	}
-	if !strings.HasPrefix(endpoint, "http") {
-		return nil, fmt.Errorf("the URL is invalid: %s", endpoint)
-	}
-
+func validateRequestSchema(req *rest.Request, defaultMethod string, defTimeout uint) (*rest.Request, error) {
 	if req.Method == "" {
 		if defaultMethod == "" {
 			return nil, fmt.Errorf("the HTTP method is required")
@@ -212,19 +235,11 @@ func validateRequestSchema(req *rest.Request, host string, defaultMethod string,
 	if req.Type == "" {
 		req.Type = rest.RequestTypeREST
 	}
-	timeout := req.Timeout
-	if timeout == 0 {
-		timeout = defTimeout
+	if req.Timeout == 0 {
+		req.Timeout = defTimeout
 	}
 
-	return &rest.Request{
-		URL:        endpoint,
-		Method:     req.Method,
-		Type:       req.Type,
-		Headers:    req.Headers,
-		Parameters: req.Parameters,
-		Timeout:    timeout,
-	}, nil
+	return req, nil
 }
 
 func printSchemaValidationError(logger *slog.Logger, errors map[string][]string) {

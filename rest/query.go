@@ -18,7 +18,7 @@ import (
 func (c *RESTConnector) Query(ctx context.Context, configuration *Configuration, state *State, request *schema.QueryRequest) (schema.QueryResponse, error) {
 	valueField, err := utils.EvalFunctionSelectionFieldValue(request)
 	if err != nil {
-		return nil, schema.BadRequestError(err.Error(), nil)
+		return nil, schema.UnprocessableContentError(err.Error(), nil)
 	}
 	requestVars := request.Variables
 	if len(requestVars) == 0 {
@@ -46,38 +46,30 @@ func (c *RESTConnector) Query(ctx context.Context, configuration *Configuration,
 
 func (c *RESTConnector) execQuery(ctx context.Context, request *schema.QueryRequest, queryFields schema.NestedField, variables map[string]any) (any, error) {
 
-	function := c.getFunction(request.Collection)
-	if function == nil {
-		return nil, schema.BadRequestError(fmt.Sprintf("unsupported query: %s", request.Collection), nil)
+	function, err := c.metadata.GetFunction(request.Collection)
+	if err != nil {
+		return nil, err
 	}
 
 	// 1. resolve arguments, evaluate URL and query parameters
 	rawArgs, err := utils.ResolveArgumentVariables(request.Arguments, variables)
 	if err != nil {
-		return nil, schema.BadRequestError("failed to resolve argument variables", map[string]any{
+		return nil, schema.UnprocessableContentError("failed to resolve argument variables", map[string]any{
 			"cause": err.Error(),
 		})
 	}
 
 	endpoint, headers, err := evalURLAndHeaderParameters(function.Request, function.Arguments, rawArgs)
 	if err != nil {
-		return nil, schema.BadRequestError("failed to evaluate URL and Headers from parameters", map[string]any{
+		return nil, schema.UnprocessableContentError("failed to evaluate URL and Headers from parameters", map[string]any{
 			"cause": err.Error(),
 		})
 	}
 	// 2. create and execute request
 	// 3. evaluate response selection
-	rawRequest := function.Request.Clone()
-	rawRequest.URL = endpoint
+	function.Request.URL = endpoint
 
-	return c.client.Send(ctx, rawRequest, headers, nil, queryFields)
-}
-
-func (c *RESTConnector) getFunction(key string) *rest.RESTFunctionInfo {
-	if item, ok := c.functions[key]; ok {
-		return &item
-	}
-	return nil
+	return c.client.Send(ctx, function.Request, headers, nil, queryFields)
 }
 
 func evalURLAndHeaderParameters(request *rest.Request, argumentsSchema map[string]schema.ArgumentInfo, arguments map[string]any) (string, http.Header, error) {
@@ -142,7 +134,7 @@ func evalURLAndHeaderParameterBySchema(endpoint *url.URL, header *http.Header, p
 
 	switch param.In {
 	case rest.InHeader:
-		// TODO: set header
+		header.Set(param.Name, valueStr)
 	case rest.InQuery:
 		q := endpoint.Query()
 		q.Add(param.Name, valueStr)

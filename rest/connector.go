@@ -7,7 +7,6 @@ import (
 	"fmt"
 	"os"
 
-	rest "github.com/hasura/ndc-rest-schema/schema"
 	"github.com/hasura/ndc-sdk-go/connector"
 	"github.com/hasura/ndc-sdk-go/schema"
 	"gopkg.in/yaml.v3"
@@ -15,10 +14,9 @@ import (
 
 // RESTConnector implements the SDK interface of NDC specification
 type RESTConnector struct {
+	metadata     RESTMetadataCollection
 	capabilities *schema.RawCapabilitiesResponse
 	schema       *schema.RawSchemaResponse
-	functions    map[string]rest.RESTFunctionInfo
-	procedures   map[string]rest.RESTProcedureInfo
 	client       *httpClient
 }
 

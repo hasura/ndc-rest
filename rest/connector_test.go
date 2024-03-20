@@ -85,6 +85,10 @@ func TestRESTConnector_configurationFailure(t *testing.T) {
 	assertError(t, err, "the config.{json,yaml,yml} file does not exist at")
 }
 
+func TestRESTConnector_authentication(t *testing.T) {
+
+}
+
 func assertNdcOperations(t *testing.T, dir string, targetURL string) {
 	queryFiles, err := os.ReadDir(dir)
 	if err != nil {

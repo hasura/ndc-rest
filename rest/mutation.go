@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"fmt"
 
-	rest "github.com/hasura/ndc-rest-schema/schema"
 	"github.com/hasura/ndc-sdk-go/schema"
 )
 
@@ -33,9 +32,9 @@ func (c *RESTConnector) Mutation(ctx context.Context, configuration *Configurati
 
 func (c *RESTConnector) execProcedure(ctx context.Context, operation *schema.MutationOperation) (schema.MutationOperationResults, error) {
 
-	procedure := c.getProcedure(operation.Name)
-	if procedure == nil {
-		return nil, schema.BadRequestError(fmt.Sprintf("unsupported procedure operation: %s", operation.Name), nil)
+	procedure, err := c.metadata.GetProcedure(operation.Name)
+	if err != nil {
+		return nil, err
 	}
 
 	// 1. resolve arguments, evaluate URL and query parameters
@@ -55,18 +54,10 @@ func (c *RESTConnector) execProcedure(ctx context.Context, operation *schema.Mut
 
 	// 2. create and execute request
 	// 3. evaluate response selection
-	rawRequest := procedure.Request.Clone()
-	rawRequest.URL = endpoint
-	result, err := c.client.Send(ctx, rawRequest, headers, rawArgs["body"], operation.Fields)
+	procedure.Request.URL = endpoint
+	result, err := c.client.Send(ctx, procedure.Request, headers, rawArgs["body"], operation.Fields)
 	if err != nil {
 		return nil, err
 	}
 	return schema.NewProcedureResult(result).Encode(), nil
-}
-
-func (c *RESTConnector) getProcedure(key string) *rest.RESTProcedureInfo {
-	if item, ok := c.procedures[key]; ok {
-		return &item
-	}
-	return nil
 }

@@ -11,7 +11,7 @@ FROM gcr.io/distroless/base-debian12:nonroot
 # Copy the binary to the production image from the builder stage.
 COPY --from=builder /app/ndc-cli /ndc-cli
 
-ENV CONFIGURATION /config
+ENV HASURA_CONFIGURATION_DIRECTORY /config
 
 # Run the web service on container startup.
 CMD ["/ndc-cli", "serve"]

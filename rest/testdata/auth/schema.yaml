@@ -1,0 +1,120 @@
+---
+settings:
+  servers:
+    - url: "{{PET_STORE_URL}}"
+  securitySchemes:
+    api_key:
+      type: apiKey
+      value: "{{PET_STORE_API_KEY}}"
+      in: header
+      name: api_key
+    bearer:
+      type: http
+      value: "{{PET_STORE_BEARER_TOKEN}}"
+      scheme: bearer
+    petstore_auth:
+      type: oauth2
+      flows:
+        implicit:
+          authorizationUrl: https://petstore3.swagger.io/oauth/authorize
+          scopes:
+            read:pets: read your pets
+            write:pets: modify pets in your account
+  security:
+    - api_key
+  version: 1.0.18
+collections: []
+functions:
+  - request:
+      url: "/pet"
+      method: get
+      parameters: {}
+      security:
+        - petstore_auth:
+            - write:pets
+            - read:pets
+    arguments: {}
+    description: Finds Pets
+    name: findPets
+    result_type:
+      element_type:
+        name: Pet
+        type: named
+      type: array
+  - request:
+      url: "/pet/findByStatus"
+      method: get
+      parameters:
+        - name: status
+          in: query
+          required: false
+          schema:
+            type: String
+            enum:
+              - available
+              - pending
+              - sold
+      security:
+        - bearer
+    arguments:
+      status:
+        description: Status values that need to be considered for filter
+        type:
+          type: nullable
+          underlying_type:
+            name: String
+            type: named
+    description: Finds Pets by status
+    name: findPetsByStatus
+    result_type:
+      element_type:
+        name: Pet
+        type: named
+      type: array
+procedures:
+  - request:
+      url: "/pet"
+      method: post
+      headers:
+        Content-Type: application/json
+      security:
+        - petstore_auth:
+            - write:pets
+            - read:pets
+    arguments:
+      body:
+        description: Request body of /pet
+        type:
+          name: Pet
+          type: named
+    description: Add a new pet to the store
+    name: addPet
+    result_type:
+      name: Pet
+      type: named
+object_types:
+  Pet:
+    fields:
+      id:
+        type:
+          type: nullable
+          underlying_type:
+            name: Int
+            type: named
+      name:
+        type:
+          name: String
+          type: named
+scalar_types:
+  Boolean:
+    aggregate_functions: {}
+    comparison_operators: {}
+  Int:
+    aggregate_functions: {}
+    comparison_operators: {}
+  JSON:
+    aggregate_functions: {}
+    comparison_operators: {}
+  String:
+    aggregate_functions: {}
+    comparison_operators: {}
