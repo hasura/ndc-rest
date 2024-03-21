@@ -189,8 +189,7 @@ func createMockServer(t *testing.T, apiKey string, bearerToken string) *httptest
 	writeResponse := func(w http.ResponseWriter) {
 		w.Header().Add("Content-Type", "application/json")
 		w.WriteHeader(http.StatusOK)
-		w.Write([]byte(`{}`))
-
+		_, _ = w.Write([]byte(`{}`))
 	}
 	mux.HandleFunc("/pet", func(w http.ResponseWriter, r *http.Request) {
 		switch r.Method {
