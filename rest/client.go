@@ -155,7 +155,9 @@ func evalHTTPResponse(resp *http.Response, selection schema.NestedField) (any, e
 
 		return utils.EvalNestedColumnFields(selection, result)
 	default:
-		return nil, fmt.Errorf("unsupported content type %s", contentType)
+		return nil, schema.NewConnectorError(http.StatusInternalServerError, "failed to evaluate response", map[string]any{
+			"cause": fmt.Sprintf("unsupported content type %s", contentType),
+		})
 	}
 }
 

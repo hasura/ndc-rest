@@ -21,18 +21,15 @@ settings:
             read:pets: read your pets
             write:pets: modify pets in your account
   security:
-    - api_key
+    - api_key: []
   version: 1.0.18
 collections: []
 functions:
   - request:
       url: "/pet"
       method: get
-      parameters: {}
-      security:
-        - petstore_auth:
-            - write:pets
-            - read:pets
+      parameters: []
+      security: []
     arguments: {}
     description: Finds Pets
     name: findPets
@@ -55,7 +52,7 @@ functions:
               - pending
               - sold
       security:
-        - bearer
+        - bearer: []
     arguments:
       status:
         description: Status values that need to be considered for filter
@@ -78,9 +75,7 @@ procedures:
       headers:
         Content-Type: application/json
       security:
-        - petstore_auth:
-            - write:pets
-            - read:pets
+        - api_key: []
     arguments:
       body:
         description: Request body of /pet

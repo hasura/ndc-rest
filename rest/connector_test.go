@@ -6,7 +6,9 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"log/slog"
 	"net/http"
+	"net/http/httptest"
 	"os"
 	"path"
 	"reflect"
@@ -86,7 +88,141 @@ func TestRESTConnector_configurationFailure(t *testing.T) {
 }
 
 func TestRESTConnector_authentication(t *testing.T) {
+	apiKey := "random_api_key"
+	bearerToken := "random_bearer_token"
+	slog.SetLogLoggerLevel(slog.LevelDebug)
+	server := createMockServer(t, apiKey, bearerToken)
+	defer server.Close()
 
+	t.Setenv("PET_STORE_URL", server.URL)
+	t.Setenv("PET_STORE_API_KEY", apiKey)
+	t.Setenv("PET_STORE_BEARER_TOKEN", bearerToken)
+	connServer, err := connector.NewServer(NewRESTConnector(), &connector.ServerOptions{
+		Configuration: "testdata/auth",
+	}, connector.WithoutRecovery())
+	assertNoError(t, err)
+	testServer := connServer.BuildTestServer()
+	defer testServer.Close()
+
+	t.Run("auth_default", func(t *testing.T) {
+		reqBody := []byte(`{
+			"collection": "findPets",
+			"query": {
+				"fields": {
+					"__value": {
+						"type": "column",
+						"column": "__value"
+					}
+				}
+			},
+			"arguments": {},
+			"collection_relationships": {}
+		}`)
+
+		res, err := http.Post(fmt.Sprintf("%s/query", testServer.URL), "application/json", bytes.NewBuffer(reqBody))
+		assertNoError(t, err)
+		assertHTTPResponse(t, res, http.StatusOK, schema.QueryResponse{
+			{
+				Rows: []map[string]any{
+					{"__value": map[string]any{}},
+				},
+			},
+		})
+	})
+
+	t.Run("auth_api_key", func(t *testing.T) {
+		reqBody := []byte(`{
+			"operation": "addPet",
+			"query": {
+				"fields": {
+					"__value": {
+						"type": "column",
+						"column": "__value"
+					}
+				}
+			},
+			"arguments": {},
+			"collection_relationships": {}
+		}`)
+
+		res, err := http.Post(fmt.Sprintf("%s/mutation", testServer.URL), "application/json", bytes.NewBuffer(reqBody))
+		assertNoError(t, err)
+		assertHTTPResponse(t, res, http.StatusOK, schema.QueryResponse{
+			{
+				Rows: []map[string]any{
+					{"__value": map[string]any{}},
+				},
+			},
+		})
+	})
+
+	t.Run("auth_bearer", func(t *testing.T) {
+		reqBody := []byte(`{
+			"collection": "findPetsByStatus",
+			"query": {
+				"fields": {
+					"__value": {
+						"type": "column",
+						"column": "__value"
+					}
+				}
+			},
+			"arguments": {},
+			"collection_relationships": {}
+		}`)
+
+		res, err := http.Post(fmt.Sprintf("%s/query", testServer.URL), "application/json", bytes.NewBuffer(reqBody))
+		assertNoError(t, err)
+		assertHTTPResponse(t, res, http.StatusOK, schema.QueryResponse{
+			{
+				Rows: []map[string]any{
+					{"__value": map[string]any{}},
+				},
+			},
+		})
+	})
+}
+
+func createMockServer(t *testing.T, apiKey string, bearerToken string) *httptest.Server {
+	mux := http.NewServeMux()
+
+	writeResponse := func(w http.ResponseWriter) {
+		w.Header().Add("Content-Type", "application/json")
+		w.WriteHeader(http.StatusOK)
+		w.Write([]byte(`{}`))
+
+	}
+	mux.HandleFunc("/pet", func(w http.ResponseWriter, r *http.Request) {
+		switch r.Method {
+		case http.MethodGet, http.MethodPost:
+			if r.Header.Get("api_key") != apiKey {
+				t.Errorf("invalid api key, expected %s, got %s", apiKey, r.Header.Get("api_key"))
+				t.FailNow()
+				return
+			}
+			writeResponse(w)
+		default:
+			w.WriteHeader(http.StatusMethodNotAllowed)
+			return
+		}
+	})
+
+	mux.HandleFunc("/pet/findByStatus", func(w http.ResponseWriter, r *http.Request) {
+		switch r.Method {
+		case http.MethodGet:
+			if r.Header.Get("Authorization") != fmt.Sprintf("Bearer %s", bearerToken) {
+				t.Errorf("invalid bearer token, expected %s, got %s", bearerToken, r.Header.Get("Authorization"))
+				t.FailNow()
+				return
+			}
+			writeResponse(w)
+		default:
+			w.WriteHeader(http.StatusMethodNotAllowed)
+			return
+		}
+	})
+
+	return httptest.NewServer(mux)
 }
 
 func assertNdcOperations(t *testing.T, dir string, targetURL string) {

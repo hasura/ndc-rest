@@ -2,6 +2,7 @@ package rest
 
 import (
 	"fmt"
+	"log"
 	"net/url"
 	"strings"
 
@@ -99,6 +100,7 @@ func (rm RESTMetadata) buildURL(endpoint string) string {
 }
 
 func (rm RESTMetadata) applySecurity(req *rest.Request) (*rest.Request, error) {
+	log.Println("security", req.URL, req.Security)
 	if req.Security.IsEmpty() {
 		req.Security = rm.settings.Security
 	}
@@ -115,15 +117,16 @@ func (rm RESTMetadata) applySecurity(req *rest.Request) (*rest.Request, error) {
 	if req.Headers == nil {
 		req.Headers = make(map[string]string)
 	}
+
 	switch securityScheme.Type {
 	case rest.HTTPAuthScheme:
 		headerName := securityScheme.Header
 		if headerName == "" {
 			headerName = "Authorization"
 		}
-		scheme := securityScheme.Name
-		if securityScheme.Name == "bearer" || securityScheme.Name == "basic" {
-			scheme = utils.ToPascalCase(securityScheme.Name)
+		scheme := securityScheme.Scheme
+		if scheme == "bearer" || scheme == "basic" {
+			scheme = utils.ToPascalCase(securityScheme.Scheme)
 		}
 		req.Headers[headerName] = fmt.Sprintf("%s %s", scheme, securityScheme.Value)
 	case rest.APIKeyScheme:

@@ -86,7 +86,7 @@ func buildSchemaFile(configDir string, conf *SchemaFile, envVars map[string]stri
 	switch conf.Spec {
 	case rest.NDCSpec:
 		var result rest.NDCRestSchema
-		fileFormat, err := rest.ParseSchemaFileFormat(conf.Path)
+		fileFormat, err := rest.ParseSchemaFileFormat(strings.Trim(path.Ext(conf.Path), "."))
 		if err != nil {
 			return nil, err
 		}
