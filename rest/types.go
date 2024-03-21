@@ -19,6 +19,7 @@ type SchemaFile struct {
 	Spec        schema.SchemaSpecType `json:"spec" yaml:"spec"`
 	MethodAlias map[string]string     `json:"methodAlias" yaml:"methodAlias"`
 	TrimPrefix  string                `json:"trimPrefix" yaml:"trimPrefix"`
+	EnvPrefix   string                `json:"envPrefix" yaml:"envPrefix"`
 }
 
 // Configuration contains required settings for the connector.
@@ -49,4 +50,9 @@ func WithClient(client Doer) Option {
 	return func(opts *options) {
 		opts.client = client
 	}
+}
+
+type ndcRestSchemaWithName struct {
+	name   string
+	schema *schema.NDCRestSchema
 }

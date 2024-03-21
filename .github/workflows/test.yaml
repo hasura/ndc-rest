@@ -39,13 +39,15 @@ jobs:
       - name: Vet
         run: go vet ./...
       - name: Lint
-        uses: golangci/golangci-lint-action@v3
+        uses: golangci/golangci-lint-action@v4
         with:
           version: latest
           only-new-issues: true
           skip-cache: true
       - name: Run Go unit tests
-        run: go test -v -coverpkg=./... -race -timeout 3m -coverprofile=coverage.out ./...
+        run: |
+          go test -v -coverpkg=./... -race -timeout 3m -coverprofile=coverage.out.tmp ./...
+          cat coverage.out.tmp | grep -v "main.go" > coverage.out
       - name: Go coverage format
         if: ${{ github.event_name == 'pull_request' }}
         run: |

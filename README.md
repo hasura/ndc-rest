@@ -28,9 +28,16 @@ files:
     spec: openapi2
   - path: openapi.yaml
     spec: openapi3
+    trimPrefix: /v1
+    envPrefix: PET_STORE
+    methodAlias:
+      post: create
+      put: update
   - path: schema.json
     spec: ndc
 ```
+
+`trimPrefix`, `envPrefix` and `methodAlias` options are used to convert OpenAPI by [ndc-rest-schema](https://github.com/hasura/ndc-rest-schema#openapi).
 
 **Supported specs**
 
@@ -45,3 +52,13 @@ ndc-rest convert -f ./rest/testdata/jsonplaceholder/swagger.json -o ./rest/testd
 ```
 
 > The `convert` command is imported from the [NDC REST Schema](https://github.com/hasura/ndc-rest-schema#quick-start) CLI tool.
+
+### Environment variable template
+
+The connector can replaces `{{xxx}}` templates with environment variables. The converter automatically renders variables for API keys and tokens when converting OpenAPI documents. However, you can add your custom variables as well.
+
+### Authentication
+
+The current version supports API key and Auth token authentication schemes. The configuration is inspired from `securitySchemes` [with env variables](https://github.com/hasura/ndc-rest-schema#authentication)
+
+See [this example](rest/testdata/auth/schema.yaml) for more context.
