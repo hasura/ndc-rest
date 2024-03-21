@@ -2,7 +2,6 @@ package rest
 
 import (
 	"fmt"
-	"log"
 	"net/url"
 	"strings"
 
@@ -100,7 +99,6 @@ func (rm RESTMetadata) buildURL(endpoint string) string {
 }
 
 func (rm RESTMetadata) applySecurity(req *rest.Request) (*rest.Request, error) {
-	log.Println("security", req.URL, req.Security)
 	if req.Security.IsEmpty() {
 		req.Security = rm.settings.Security
 	}

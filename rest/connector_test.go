@@ -6,7 +6,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
-	"log/slog"
 	"net/http"
 	"net/http/httptest"
 	"os"
@@ -90,7 +89,6 @@ func TestRESTConnector_configurationFailure(t *testing.T) {
 func TestRESTConnector_authentication(t *testing.T) {
 	apiKey := "random_api_key"
 	bearerToken := "random_bearer_token"
-	slog.SetLogLoggerLevel(slog.LevelDebug)
 	server := createMockServer(t, apiKey, bearerToken)
 	defer server.Close()
 
@@ -132,26 +130,21 @@ func TestRESTConnector_authentication(t *testing.T) {
 
 	t.Run("auth_api_key", func(t *testing.T) {
 		reqBody := []byte(`{
-			"operation": "addPet",
-			"query": {
-				"fields": {
-					"__value": {
-						"type": "column",
-						"column": "__value"
-					}
+			"operations": [
+				{
+					"type": "procedure",
+					"name": "addPet",
+					"arguments": {}
 				}
-			},
-			"arguments": {},
+			],
 			"collection_relationships": {}
 		}`)
 
 		res, err := http.Post(fmt.Sprintf("%s/mutation", testServer.URL), "application/json", bytes.NewBuffer(reqBody))
 		assertNoError(t, err)
-		assertHTTPResponse(t, res, http.StatusOK, schema.QueryResponse{
-			{
-				Rows: []map[string]any{
-					{"__value": map[string]any{}},
-				},
+		assertHTTPResponse(t, res, http.StatusOK, schema.MutationResponse{
+			OperationResults: []schema.MutationOperationResults{
+				schema.NewProcedureResult(map[string]any{}).Encode(),
 			},
 		})
 	})
@@ -256,7 +249,7 @@ func test_createServer(t *testing.T, dir string) *connector.Server[Configuration
 	c := NewRESTConnector()
 	server, err := connector.NewServer(c, &connector.ServerOptions{
 		Configuration: dir,
-	})
+	}, connector.WithoutRecovery())
 	if err != nil {
 		t.Errorf("failed to start server: %s", err)
 		t.FailNow()
