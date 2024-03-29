@@ -30,8 +30,8 @@ func (c CLI) Execute(ctx context.Context, cmd string) error {
 			Level:      logLevel,
 			TimeFormat: "15:04",
 		}))
-		command.ConvertToNDCSchema(&c.Convert, logger)
-		return nil
+
+		return command.ConvertToNDCSchema(&c.Convert, logger)
 	default:
 		return c.ServeCLI.Execute(ctx, cmd)
 	}
