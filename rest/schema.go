@@ -257,7 +257,7 @@ func applyEnvVariablesToSchema(input *rest.NDCRestSchema, logger *slog.Logger) *
 	if input.Settings != nil {
 		input.Settings.Headers = replaceEnvTemplateInHeader(input.Settings.Headers, logger)
 		for i, server := range input.Settings.Servers {
-			server.URL = replaceEnvTemplate(server.URL, logger)
+			server.URL = strings.TrimRight(replaceEnvTemplate(server.URL, logger), "/")
 			input.Settings.Servers[i] = server
 		}
 		for key, ss := range input.Settings.SecuritySchemes {
