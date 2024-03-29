@@ -82,7 +82,7 @@ func TestRESTConnector(t *testing.T) {
 func TestRESTConnector_configurationFailure(t *testing.T) {
 	c := NewRESTConnector()
 	_, err := c.ParseConfiguration(context.Background(), "")
-	assert.NoError(t, err, "the config.{json,yaml,yml} file does not exist at")
+	assert.Error(t, err, "the config.{json,yaml,yml} file does not exist at")
 }
 
 func TestRESTConnector_authentication(t *testing.T) {
