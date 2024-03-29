@@ -22,30 +22,13 @@ func (c *RESTConnector) GetSchema(ctx context.Context, configuration *Configurat
 	return c.schema, nil
 }
 
-func getEnvVariables() map[string]string {
-	results := make(map[string]string)
-	for _, env := range os.Environ() {
-		if env == "" {
-			continue
-		}
-		keyValues := strings.Split(env, "=")
-		if len(keyValues) < 2 {
-			continue
-		}
-		value := strings.Trim(strings.Join(keyValues[1:], "="), `"`)
-		results[keyValues[0]] = value
-	}
-	return results
-}
-
 // build NDC REST schema from file list
 func buildSchemaFiles(configDir string, files []SchemaFile, logger *slog.Logger) ([]ndcRestSchemaWithName, map[string][]string) {
-	envVars := getEnvVariables()
 	schemas := make([]ndcRestSchemaWithName, len(files))
 	errors := make(map[string][]string)
 	for i, file := range files {
 		var errs []string
-		schemaOutput, err := buildSchemaFile(configDir, &file, envVars, logger)
+		schemaOutput, err := buildSchemaFile(configDir, &file, logger)
 		if err != nil {
 			errs = append(errs, err.Error())
 		}
@@ -63,7 +46,7 @@ func buildSchemaFiles(configDir string, files []SchemaFile, logger *slog.Logger)
 	return schemas, errors
 }
 
-func buildSchemaFile(configDir string, conf *SchemaFile, envVars map[string]string, logger *slog.Logger) (*rest.NDCRestSchema, error) {
+func buildSchemaFile(configDir string, conf *SchemaFile, logger *slog.Logger) (*rest.NDCRestSchema, error) {
 	if conf.Path == "" {
 		return nil, errors.New("file path is empty")
 	}
@@ -77,12 +60,6 @@ func buildSchemaFile(configDir string, conf *SchemaFile, envVars map[string]stri
 		return nil, err
 	}
 
-	// replace environment variables
-	rawString := string(rawBytes)
-	for key, val := range envVars {
-		rawString = strings.ReplaceAll(rawString, fmt.Sprintf("{{%s}}", key), val)
-	}
-
 	switch conf.Spec {
 	case rest.NDCSpec:
 		var result rest.NDCRestSchema
@@ -92,18 +69,18 @@ func buildSchemaFile(configDir string, conf *SchemaFile, envVars map[string]stri
 		}
 		switch fileFormat {
 		case rest.SchemaFileJSON:
-			if err := json.Unmarshal([]byte(rawString), &result); err != nil {
+			if err := json.Unmarshal(rawBytes, &result); err != nil {
 				return nil, err
 			}
-			return &result, nil
 		case rest.SchemaFileYAML:
-			if err := yaml.Unmarshal([]byte(rawString), &result); err != nil {
+			if err := yaml.Unmarshal(rawBytes, &result); err != nil {
 				return nil, err
 			}
-			return &result, nil
 		default:
 			return nil, fmt.Errorf("invalid file format: %s", fileFormat)
 		}
+
+		return applyEnvVariablesToSchema(&result, logger), nil
 	case rest.OpenAPIv2Spec:
 		result, errs := openapi.OpenAPIv2ToNDCSchema(rawBytes, &openapi.ConvertOptions{
 			MethodAlias: conf.MethodAlias,
@@ -113,7 +90,7 @@ func buildSchemaFile(configDir string, conf *SchemaFile, envVars map[string]stri
 			if len(errs) > 0 {
 				logger.Warn("some errors happened when parsing OpenAPI", slog.Any("errors", errs))
 			}
-			return result, nil
+			return applyEnvVariablesToSchema(result, logger), nil
 		}
 		return nil, errors.Join(errs...)
 	case rest.OpenAPIv3Spec:
@@ -125,7 +102,7 @@ func buildSchemaFile(configDir string, conf *SchemaFile, envVars map[string]stri
 			if len(errs) > 0 {
 				logger.Warn("some errors happened when parsing OpenAPI", slog.Any("errors", errs))
 			}
-			return result, nil
+			return applyEnvVariablesToSchema(result, logger), nil
 		}
 		return nil, errors.Join(errs...)
 	default:
@@ -244,4 +221,64 @@ func validateRequestSchema(req *rest.Request, defaultMethod string, defTimeout u
 
 func printSchemaValidationError(logger *slog.Logger, errors map[string][]string) {
 	logger.Error("errors happen when validating NDC REST schemas", slog.Any("errors", errors))
+}
+
+func replaceEnvTemplate(input string, logger *slog.Logger) string {
+	envTemplates := rest.FindAllEnvTemplates(input)
+	if len(envTemplates) == 0 {
+		return input
+	}
+
+	for _, env := range envTemplates {
+		value, ok := os.LookupEnv(env.Name)
+		if !ok {
+			if env.DefaultValue == nil {
+				logger.Warn(fmt.Sprintf("%s env does not exist", env.Name))
+				continue
+			}
+			value = *env.DefaultValue
+		}
+		input = strings.ReplaceAll(input, env.String(), value)
+	}
+
+	return input
+}
+
+func replaceEnvTemplateInHeader(input map[string]string, logger *slog.Logger) map[string]string {
+	result := map[string]string{}
+	for k, v := range input {
+		result[replaceEnvTemplate(k, logger)] = replaceEnvTemplate(v, logger)
+	}
+	return result
+}
+
+func applyEnvVariablesToSchema(input *rest.NDCRestSchema, logger *slog.Logger) *rest.NDCRestSchema {
+
+	if input.Settings != nil {
+		input.Settings.Headers = replaceEnvTemplateInHeader(input.Settings.Headers, logger)
+		for i, server := range input.Settings.Servers {
+			server.URL = replaceEnvTemplate(server.URL, logger)
+			input.Settings.Servers[i] = server
+		}
+		for key, ss := range input.Settings.SecuritySchemes {
+			ss.Value = replaceEnvTemplate(ss.Value, logger)
+			input.Settings.SecuritySchemes[key] = ss
+		}
+	}
+
+	for _, fn := range input.Functions {
+		if fn.Request == nil {
+			continue
+		}
+		fn.Request.Headers = replaceEnvTemplateInHeader(fn.Request.Headers, logger)
+	}
+
+	for _, proc := range input.Procedures {
+		if proc.Request == nil {
+			continue
+		}
+		proc.Request.Headers = replaceEnvTemplateInHeader(proc.Request.Headers, logger)
+	}
+
+	return input
 }
