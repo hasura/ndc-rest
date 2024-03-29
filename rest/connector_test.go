@@ -10,12 +10,11 @@ import (
 	"net/http/httptest"
 	"os"
 	"path"
-	"reflect"
-	"strings"
 	"testing"
 
 	"github.com/hasura/ndc-sdk-go/connector"
 	"github.com/hasura/ndc-sdk-go/schema"
+	"github.com/stretchr/testify/assert"
 )
 
 func TestRESTConnector(t *testing.T) {
@@ -28,7 +27,7 @@ func TestRESTConnector(t *testing.T) {
 			Dir:  "testdata/jsonplaceholder",
 		},
 		{
-			Name: "jsonplaceholder",
+			Name: "petstore3",
 			Dir:  "testdata/petstore3",
 		},
 	}
@@ -50,9 +49,9 @@ func TestRESTConnector(t *testing.T) {
 				}
 
 				var capabilities schema.CapabilitiesResponse
-				assertNoError(t, json.Unmarshal(rawBytes, &capabilities))
+				assert.NoError(t, json.Unmarshal(rawBytes, &capabilities))
 				resp, err := http.Get(fmt.Sprintf("%s/capabilities", testServer.URL))
-				assertNoError(t, err)
+				assert.NoError(t, err)
 				assertHTTPResponse(t, resp, http.StatusOK, capabilities)
 			})
 
@@ -68,9 +67,9 @@ func TestRESTConnector(t *testing.T) {
 				}
 
 				var expected schema.SchemaResponse
-				assertNoError(t, json.Unmarshal(rawBytes, &expected))
+				assert.NoError(t, json.Unmarshal(rawBytes, &expected))
 				resp, err := http.Get(fmt.Sprintf("%s/schema", testServer.URL))
-				assertNoError(t, err)
+				assert.NoError(t, err)
 				assertHTTPResponse(t, resp, http.StatusOK, expected)
 			})
 
@@ -83,7 +82,7 @@ func TestRESTConnector(t *testing.T) {
 func TestRESTConnector_configurationFailure(t *testing.T) {
 	c := NewRESTConnector()
 	_, err := c.ParseConfiguration(context.Background(), "")
-	assertError(t, err, "the config.{json,yaml,yml} file does not exist at")
+	assert.Error(t, err, "the config.{json,yaml,yml} file does not exist at")
 }
 
 func TestRESTConnector_authentication(t *testing.T) {
@@ -98,7 +97,7 @@ func TestRESTConnector_authentication(t *testing.T) {
 	connServer, err := connector.NewServer(NewRESTConnector(), &connector.ServerOptions{
 		Configuration: "testdata/auth",
 	}, connector.WithoutRecovery())
-	assertNoError(t, err)
+	assert.NoError(t, err)
 	testServer := connServer.BuildTestServer()
 	defer testServer.Close()
 
@@ -118,7 +117,7 @@ func TestRESTConnector_authentication(t *testing.T) {
 		}`)
 
 		res, err := http.Post(fmt.Sprintf("%s/query", testServer.URL), "application/json", bytes.NewBuffer(reqBody))
-		assertNoError(t, err)
+		assert.NoError(t, err)
 		assertHTTPResponse(t, res, http.StatusOK, schema.QueryResponse{
 			{
 				Rows: []map[string]any{
@@ -141,7 +140,7 @@ func TestRESTConnector_authentication(t *testing.T) {
 		}`)
 
 		res, err := http.Post(fmt.Sprintf("%s/mutation", testServer.URL), "application/json", bytes.NewBuffer(reqBody))
-		assertNoError(t, err)
+		assert.NoError(t, err)
 		assertHTTPResponse(t, res, http.StatusOK, schema.MutationResponse{
 			OperationResults: []schema.MutationOperationResults{
 				schema.NewProcedureResult(map[string]any{}).Encode(),
@@ -165,7 +164,7 @@ func TestRESTConnector_authentication(t *testing.T) {
 		}`)
 
 		res, err := http.Post(fmt.Sprintf("%s/query", testServer.URL), "application/json", bytes.NewBuffer(reqBody))
-		assertNoError(t, err)
+		assert.NoError(t, err)
 		assertHTTPResponse(t, res, http.StatusOK, schema.QueryResponse{
 			{
 				Rows: []map[string]any{
@@ -232,14 +231,14 @@ func assertNdcOperations(t *testing.T, dir string, targetURL string) {
 		}
 		t.Run(entry.Name(), func(t *testing.T) {
 			requestBytes, err := os.ReadFile(path.Join(dir, entry.Name(), "request.json"))
-			assertNoError(t, err)
+			assert.NoError(t, err)
 			expectedBytes, err := os.ReadFile(path.Join(dir, entry.Name(), "expected.json"))
-			assertNoError(t, err)
+			assert.NoError(t, err)
 
 			var expected any
-			assertNoError(t, json.Unmarshal(expectedBytes, &expected))
+			assert.NoError(t, json.Unmarshal(expectedBytes, &expected))
 			resp, err := http.Post(targetURL, "application/json", bytes.NewBuffer(requestBytes))
-			assertNoError(t, err)
+			assert.NoError(t, err)
 			assertHTTPResponse(t, resp, http.StatusOK, expected)
 		})
 	}
@@ -256,41 +255,6 @@ func test_createServer(t *testing.T, dir string) *connector.Server[Configuration
 	}
 
 	return server
-}
-
-func assertNoError(t *testing.T, err error) {
-	if err != nil {
-		t.Errorf("expected no error, got: %s", err)
-		t.FailNow()
-	}
-}
-
-func assertError(t *testing.T, err error, message string) {
-	if err == nil {
-		t.Error("expected error, got nil")
-		t.FailNow()
-	} else if !strings.Contains(err.Error(), message) {
-		t.Errorf("expected error with content: %s, got: %s", err.Error(), message)
-		t.FailNow()
-	}
-}
-
-func assertDeepEqual(t *testing.T, expected any, reality any, msgs ...string) {
-	if reflect.DeepEqual(expected, reality) {
-		return
-	}
-
-	expectedJson, _ := json.Marshal(expected)
-	realityJson, _ := json.Marshal(reality)
-
-	var expected1, reality1 any
-	assertNoError(t, json.Unmarshal(expectedJson, &expected1))
-	assertNoError(t, json.Unmarshal(realityJson, &reality1))
-
-	if !reflect.DeepEqual(expected1, reality1) {
-		t.Errorf("%s: not equal.\nexpected: %s\ngot			: %s", strings.Join(msgs, " "), string(expectedJson), string(realityJson))
-		t.FailNow()
-	}
 }
 
 func assertHTTPResponse[B any](t *testing.T, res *http.Response, statusCode int, expectedBody B) {
@@ -311,5 +275,5 @@ func assertHTTPResponse[B any](t *testing.T, res *http.Response, statusCode int,
 		t.FailNow()
 	}
 
-	assertDeepEqual(t, body, expectedBody)
+	assert.Equal(t, expectedBody, body)
 }

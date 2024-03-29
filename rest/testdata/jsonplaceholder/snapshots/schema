@@ -2,9 +2,19 @@
   "scalar_types": {
     "Boolean": {
       "aggregate_functions": {},
-      "comparison_operators": {}
+      "comparison_operators": {},
+      "representation": {
+        "type": "boolean"
+      }
     },
     "Int": {
+      "aggregate_functions": {},
+      "comparison_operators": {},
+      "representation": {
+        "type": "integer"
+      }
+    },
+    "JSON": {
       "aggregate_functions": {},
       "comparison_operators": {}
     },
@@ -14,7 +24,10 @@
     },
     "String": {
       "aggregate_functions": {},
-      "comparison_operators": {}
+      "comparison_operators": {},
+      "representation": {
+        "type": "string"
+      }
     }
   },
   "object_types": {
