@@ -15,5 +15,7 @@ COPY --from=builder /app/ndc-cli /ndc-cli
 
 ENV HASURA_CONFIGURATION_DIRECTORY /config
 
+ENTRYPOINT ["/ndc-cli"]
+
 # Run the web service on container startup.
-CMD ["/ndc-cli", "serve"]
+CMD ["serve"]
