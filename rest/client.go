@@ -8,6 +8,9 @@ import (
 	"io"
 	"log/slog"
 	"net/http"
+	"net/url"
+	"reflect"
+	"slices"
 	"strings"
 	"time"
 
@@ -102,9 +105,6 @@ func createRequest(ctx context.Context, rawRequest *rest.Request, headers http.H
 	for key, header := range headers {
 		request.Header[key] = header
 	}
-	if request.Header.Get("accept") == "" {
-		request.Header.Set("Accept", contentTypeJSON)
-	}
 
 	return request, nil
 }
@@ -159,6 +159,99 @@ func evalHTTPResponse(resp *http.Response, selection schema.NestedField) (any, e
 			"cause": fmt.Sprintf("unsupported content type %s", contentType),
 		})
 	}
+}
+
+func evalURLAndHeaderParameters(request *rest.Request, argumentsSchema map[string]schema.ArgumentInfo, arguments map[string]any) (string, http.Header, error) {
+	endpoint, err := url.Parse(request.URL)
+	if err != nil {
+		return "", nil, err
+	}
+	headers := http.Header{}
+	for k, h := range request.Headers {
+		headers.Add(k, h)
+	}
+
+	for _, param := range request.Parameters {
+		argSchema, schemaOk := argumentsSchema[param.Name]
+		value, ok := arguments[param.Name]
+
+		if !schemaOk || !ok || utils.IsNil(value) {
+			if param.Required {
+				return "", nil, fmt.Errorf("parameter %s is required", param.Name)
+			}
+		} else if err := evalURLAndHeaderParameterBySchema(endpoint, &headers, &param, argSchema.Type, value); err != nil {
+			return "", nil, err
+		}
+	}
+	return endpoint.String(), headers, nil
+}
+
+// the query parameters serialization follows [OAS 3.1 spec]
+//
+// [OAS 3.1 spec]: https://swagger.io/docs/specification/serialization/
+func evalURLAndHeaderParameterBySchema(endpoint *url.URL, header *http.Header, param *rest.RequestParameter, argumentType schema.Type, value any) error {
+	if utils.IsNil(value) {
+		return nil
+	}
+
+	var values []string
+	switch arg := argumentType.Interface().(type) {
+	case *schema.NamedType:
+		switch arg.Name {
+		case "Boolean":
+			values = []string{fmt.Sprintf("%t", value)}
+		case "Int", "Float", "String":
+			values = []string{fmt.Sprint(value)}
+		default:
+			b, err := json.Marshal(value)
+			if err != nil {
+				return err
+			}
+			values = []string{string(b)}
+		}
+	case *schema.NullableType:
+		return evalURLAndHeaderParameterBySchema(endpoint, header, param, arg.UnderlyingType, value)
+	case *schema.ArrayType:
+		if !slices.Contains([]rest.ParameterLocation{rest.InHeader, rest.InQuery}, param.In) {
+			return fmt.Errorf("cannot evaluate array parameter to %s", param.In)
+		}
+		if !utils.IsNil(value) {
+			arrayValue, ok := value.([]any)
+			if !ok {
+				return fmt.Errorf("cannot evaluate array parameter, expected array, got: %+v", reflect.TypeOf(value).Name())
+			}
+			for _, item := range arrayValue {
+				values = append(values, fmt.Sprint(item))
+			}
+		}
+	}
+
+	// following the OAS spec to serialize parameters
+	// https://swagger.io/docs/specification/serialization/
+	switch param.In {
+	case rest.InHeader:
+		header.Set(param.Name, strings.Join(values, ","))
+	case rest.InQuery:
+		q := endpoint.Query()
+		if param.Explode {
+			for _, v := range values {
+				q.Add(param.Name, v)
+			}
+		} else {
+			switch param.Style {
+			case rest.EncodingStyleSpaceDelimited:
+				q.Add(param.Name, strings.Join(values, "%20"))
+			case rest.EncodingStylePipeDelimited:
+				q.Add(param.Name, strings.Join(values, "|"))
+			default:
+				q.Add(param.Name, strings.Join(values, ","))
+			}
+		}
+		endpoint.RawQuery = q.Encode()
+	case rest.InPath:
+		endpoint.Path = strings.ReplaceAll(endpoint.Path, fmt.Sprintf("{%s}", param.Name), strings.Join(values, ","))
+	}
+	return nil
 }
 
 func parseContentType(input string) string {

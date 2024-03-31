@@ -5,8 +5,8 @@ go 1.21
 toolchain go1.22.0
 
 require (
-	github.com/hasura/ndc-rest-schema v0.0.0-20240328031759-67ecd08d8e10
-	github.com/hasura/ndc-sdk-go v1.0.0
+	github.com/hasura/ndc-rest-schema v0.0.0-20240331093809-e65320e1560c
+	github.com/hasura/ndc-sdk-go v1.0.1-0.20240331071727-9c3db01b3219
 	github.com/lmittmann/tint v1.0.4
 	github.com/stretchr/testify v1.9.0
 	gopkg.in/yaml.v3 v3.0.1

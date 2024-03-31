@@ -3,6 +3,7 @@ package rest
 import (
 	"fmt"
 	"net/url"
+	"slices"
 	"strings"
 
 	rest "github.com/hasura/ndc-rest-schema/schema"
@@ -106,9 +107,16 @@ func (rm RESTMetadata) applySecurity(req *rest.Request) (*rest.Request, error) {
 		return req, nil
 	}
 
-	security := req.Security.First()
-	securityScheme, ok := rm.settings.SecuritySchemes[security.Name()]
-	if !ok {
+	var securityScheme *rest.SecurityScheme
+	for _, security := range req.Security {
+		sc, ok := rm.settings.SecuritySchemes[security.Name()]
+		if !ok || (slices.Contains([]rest.SecuritySchemeType{rest.HTTPAuthScheme, rest.APIKeyScheme}, sc.Type) && sc.Value == "") {
+			continue
+		}
+		securityScheme = &sc
+	}
+
+	if securityScheme == nil {
 		return req, nil
 	}
 
