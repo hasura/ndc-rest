@@ -5,10 +5,19 @@ type StringSlicePairs []*StringSlicePair
 func (ssp *StringSlicePairs) Add(keys []string, values []string) {
 	index := ssp.FindIndex(keys)
 	if index == -1 {
-		ssp.Add(keys, values)
+		*ssp = append(*ssp, NewStringSlicePair(keys, values))
 		return
 	}
 	(*ssp)[index].AddValues(values)
+}
+
+func (ssp StringSlicePairs) FindDefault() *StringSlicePair {
+	item, _ := ssp.find([]string{})
+	if item != nil {
+		return item
+	}
+	item, _ = ssp.find([]string{""})
+	return item
 }
 
 func (ssp StringSlicePairs) Find(keys []string) *StringSlicePair {

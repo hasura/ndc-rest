@@ -5,6 +5,8 @@ import (
 	"testing"
 
 	rest "github.com/hasura/ndc-rest-schema/schema"
+	"github.com/hasura/ndc-rest/rest/internal"
+	"github.com/hasura/ndc-sdk-go/schema"
 	"github.com/hasura/ndc-sdk-go/utils"
 	"github.com/stretchr/testify/assert"
 )
@@ -33,7 +35,7 @@ func TestEvalQueryParameterURL(t *testing.T) {
 					Style:   rest.EncodingStyleForm,
 				},
 			},
-			keys:     []string{""},
+			keys:     []string{},
 			values:   []string{"3"},
 			expected: "id=3",
 		},
@@ -242,4 +244,33 @@ func TestEvalQueryParameterURL(t *testing.T) {
 			assert.Equal(t, tc.expected, encodeQueryValues(qValues, true))
 		})
 	}
+}
+
+func TestEncodeParameterValues(t *testing.T) {
+	testCases := []struct {
+		name         string
+		param        *rest.RequestParameter
+		argumentType schema.Type
+		value        any
+		expected     internal.StringSlicePairs
+		errorMsg     string
+	}{
+		// {
+		// 	name: "/accounts/6HnaGHbBVR/people?ending_before=HhiGxs4p8E&expand[]=yH6KUbPKiZ&limit=7262&relationship[director]=true&relationship[executive]=false&relationship[legal_guardian]=true&relationship[owner]=true&relationship[representative]=true&starting_after=1qRvRTbUNd",
+		// },
+	}
+
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			c := RESTConnector{}
+			result, err := c.encodeParameterValues(tc.param, tc.argumentType, tc.value)
+			if tc.errorMsg != "" {
+				assert.ErrorContains(t, err, tc.errorMsg)
+			} else {
+				assert.NoError(t, err)
+				assert.Equal(t, tc.expected, result)
+			}
+		})
+	}
+
 }

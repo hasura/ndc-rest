@@ -57,7 +57,7 @@ func (c *RESTConnector) evalURLAndHeaderParameterBySchema(endpoint *url.URL, hea
 	// https://swagger.io/docs/specification/serialization/
 	switch param.In {
 	case rest.InHeader:
-		defaultParam := queryParams.Find([]string{""})
+		defaultParam := queryParams.FindDefault()
 		// the param is an array
 		if defaultParam != nil {
 			header.Set(param.Name, strings.Join(defaultParam.Values(), ","))
@@ -85,8 +85,10 @@ func (c *RESTConnector) evalURLAndHeaderParameterBySchema(endpoint *url.URL, hea
 		}
 		endpoint.RawQuery = encodeQueryValues(q, param.AllowReserved)
 	case rest.InPath:
-		defaultParam := queryParams.Find([]string{""})
-		endpoint.Path = strings.ReplaceAll(endpoint.Path, fmt.Sprintf("{%s}", param.Name), strings.Join(defaultParam.Values(), ","))
+		defaultParam := queryParams.FindDefault()
+		if defaultParam != nil {
+			endpoint.Path = strings.ReplaceAll(endpoint.Path, fmt.Sprintf("{%s}", param.Name), strings.Join(defaultParam.Values(), ","))
+		}
 	}
 	return nil
 }
@@ -101,11 +103,11 @@ func (c *RESTConnector) encodeParameterValues(param *rest.RequestParameter, argu
 			switch ty := iScalar.Representation.Interface().(type) {
 			case *schema.TypeRepresentationBoolean:
 				return []*internal.StringSlicePair{
-					internal.NewStringSlicePair([]string{""}, []string{fmt.Sprintf("%t", value)}),
+					internal.NewStringSlicePair([]string{}, []string{fmt.Sprintf("%t", value)}),
 				}, nil
 			case *schema.TypeRepresentationNumber, *schema.TypeRepresentationInteger, *schema.TypeRepresentationString:
 				return []*internal.StringSlicePair{
-					internal.NewStringSlicePair([]string{""}, []string{fmt.Sprint(value)}),
+					internal.NewStringSlicePair([]string{}, []string{fmt.Sprint(value)}),
 				}, nil
 			case *schema.TypeRepresentationEnum:
 				val = fmt.Sprint(value)
@@ -113,7 +115,7 @@ func (c *RESTConnector) encodeParameterValues(param *rest.RequestParameter, argu
 					return nil, fmt.Errorf("%s: invalid enum value '%s'", param.Name, value)
 				}
 
-				return []*internal.StringSlicePair{internal.NewStringSlicePair([]string{""}, []string{fmt.Sprint(value)})}, nil
+				return []*internal.StringSlicePair{internal.NewStringSlicePair([]string{}, []string{fmt.Sprint(value)})}, nil
 			}
 		}
 
