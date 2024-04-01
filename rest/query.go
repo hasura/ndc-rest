@@ -52,7 +52,7 @@ func (c *RESTConnector) execQuery(ctx context.Context, request *schema.QueryRequ
 		})
 	}
 
-	endpoint, headers, err := evalURLAndHeaderParameters(function.Request, function.Arguments, rawArgs)
+	endpoint, headers, err := c.evalURLAndHeaderParameters(function.Request, function.Arguments, rawArgs)
 	if err != nil {
 		return nil, schema.UnprocessableContentError("failed to evaluate URL and Headers from parameters", map[string]any{
 			"cause": err.Error(),

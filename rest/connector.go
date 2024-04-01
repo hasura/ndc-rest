@@ -16,7 +16,8 @@ import (
 type RESTConnector struct {
 	metadata     RESTMetadataCollection
 	capabilities *schema.RawCapabilitiesResponse
-	schema       *schema.RawSchemaResponse
+	rawSchema    *schema.RawSchemaResponse
+	schema       *schema.SchemaResponse
 	client       *httpClient
 }
 

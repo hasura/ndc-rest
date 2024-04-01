@@ -19,7 +19,7 @@ import (
 
 // GetSchema gets the connector's schema.
 func (c *RESTConnector) GetSchema(ctx context.Context, configuration *Configuration, _ *State) (schema.SchemaResponseMarshaler, error) {
-	return c.schema, nil
+	return c.rawSchema, nil
 }
 
 // build NDC REST schema from file list
@@ -197,7 +197,11 @@ func (c *RESTConnector) applyNDCRestSchemas(schemas []ndcRestSchemaWithName) map
 		return errors
 	}
 
-	c.schema = schema.NewRawSchemaResponseUnsafe(schemaBytes)
+	c.schema = &schema.SchemaResponse{
+		ScalarTypes: ndcSchema.ScalarTypes,
+		ObjectTypes: ndcSchema.ObjectTypes,
+	}
+	c.rawSchema = schema.NewRawSchemaResponseUnsafe(schemaBytes)
 	return nil
 }
 
