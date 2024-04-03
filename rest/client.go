@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
 	"log/slog"
@@ -76,22 +77,30 @@ func (client *httpClient) Send(ctx context.Context, rawRequest *rest.Request, he
 }
 
 func createRequest(ctx context.Context, rawRequest *rest.Request, headers http.Header, data any) (*http.Request, error) {
-	contentType := headers.Get(contentTypeHeader)
-	if contentType == "" {
-		contentType = contentTypeJSON
-	}
 
 	var body io.Reader
-	if data != nil {
-		switch contentType {
-		case contentTypeJSON:
-			bodyBytes, err := json.Marshal(data)
-			if err != nil {
-				return nil, err
+	contentType := contentTypeJSON
+	if rawRequest.RequestBody != nil {
+		contentType = rawRequest.RequestBody.ContentType
+		// TODO: validate data with request body
+		if data != nil {
+			if strings.HasPrefix(contentType, "text/") {
+				body = bytes.NewBuffer([]byte(fmt.Sprintln(data)))
+			} else {
+				switch contentType {
+				case rest.ContentTypeFormURLEncoded:
+				case rest.ContentTypeJSON:
+					bodyBytes, err := json.Marshal(data)
+					if err != nil {
+						return nil, err
+					}
+					body = bytes.NewBuffer(bodyBytes)
+				default:
+					return nil, fmt.Errorf("unsupported content type %s", contentType)
+				}
 			}
-			body = bytes.NewBuffer(bodyBytes)
-		default:
-			return nil, fmt.Errorf("unsupported content type %s", contentType)
+		} else if rawRequest.RequestBody.Required {
+			return nil, errors.New("request body is required")
 		}
 	}
 
@@ -102,6 +111,7 @@ func createRequest(ctx context.Context, rawRequest *rest.Request, headers http.H
 	for key, header := range headers {
 		request.Header[key] = header
 	}
+	request.Header.Set(rest.ContentTypeHeader, contentType)
 
 	return request, nil
 }
