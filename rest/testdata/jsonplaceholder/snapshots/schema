@@ -1,20 +1,20 @@
 {
   "scalar_types": {
-    "Boolean": {
+    "BigInt": {
       "aggregate_functions": {},
-      "comparison_operators": {},
+      "comparison_operators": {}
+    },
+    "Boolean": {
       "representation": {
         "type": "boolean"
-      }
+      },
+      "aggregate_functions": {},
+      "comparison_operators": {}
     },
     "Int": {
-      "aggregate_functions": {},
-      "comparison_operators": {},
       "representation": {
         "type": "integer"
-      }
-    },
-    "JSON": {
+      },
       "aggregate_functions": {},
       "comparison_operators": {}
     },
@@ -23,11 +23,18 @@
       "comparison_operators": {}
     },
     "String": {
-      "aggregate_functions": {},
-      "comparison_operators": {},
       "representation": {
         "type": "string"
-      }
+      },
+      "aggregate_functions": {},
+      "comparison_operators": {}
+    },
+    "URI": {
+      "representation": {
+        "type": "string"
+      },
+      "aggregate_functions": {},
+      "comparison_operators": {}
     }
   },
   "object_types": {
@@ -38,7 +45,7 @@
             "type": "nullable",
             "underlying_type": {
               "type": "named",
-              "name": "Int"
+              "name": "BigInt"
             }
           }
         },
@@ -56,7 +63,7 @@
             "type": "nullable",
             "underlying_type": {
               "type": "named",
-              "name": "Int"
+              "name": "BigInt"
             }
           }
         }
@@ -87,7 +94,7 @@
             "type": "nullable",
             "underlying_type": {
               "type": "named",
-              "name": "Int"
+              "name": "BigInt"
             }
           }
         },
@@ -105,7 +112,7 @@
             "type": "nullable",
             "underlying_type": {
               "type": "named",
-              "name": "Int"
+              "name": "BigInt"
             }
           }
         }
@@ -118,7 +125,7 @@
             "type": "nullable",
             "underlying_type": {
               "type": "named",
-              "name": "Int"
+              "name": "BigInt"
             }
           }
         },
@@ -127,7 +134,7 @@
             "type": "nullable",
             "underlying_type": {
               "type": "named",
-              "name": "Int"
+              "name": "BigInt"
             }
           }
         },
@@ -136,7 +143,7 @@
             "type": "nullable",
             "underlying_type": {
               "type": "named",
-              "name": "String"
+              "name": "URI"
             }
           }
         },
@@ -154,7 +161,7 @@
             "type": "nullable",
             "underlying_type": {
               "type": "named",
-              "name": "String"
+              "name": "URI"
             }
           }
         }
@@ -176,7 +183,7 @@
             "type": "nullable",
             "underlying_type": {
               "type": "named",
-              "name": "Int"
+              "name": "BigInt"
             }
           }
         },
@@ -194,7 +201,7 @@
             "type": "nullable",
             "underlying_type": {
               "type": "named",
-              "name": "Int"
+              "name": "BigInt"
             }
           }
         }
@@ -216,7 +223,7 @@
             "type": "nullable",
             "underlying_type": {
               "type": "named",
-              "name": "Int"
+              "name": "BigInt"
             }
           }
         },
@@ -234,7 +241,7 @@
             "type": "nullable",
             "underlying_type": {
               "type": "named",
-              "name": "Int"
+              "name": "BigInt"
             }
           }
         }
@@ -274,7 +281,7 @@
             "type": "nullable",
             "underlying_type": {
               "type": "named",
-              "name": "Int"
+              "name": "BigInt"
             }
           }
         },

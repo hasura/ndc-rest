@@ -68,6 +68,16 @@ github.com/hasura/ndc-rest-schema v0.0.0-20240331093809-e65320e1560c h1:N98Gvv2A
 github.com/hasura/ndc-rest-schema v0.0.0-20240331093809-e65320e1560c/go.mod h1:jcUMvsv1DjSONUk713W+jDNRTE0UQDVqHg6bRHk+Dcc=
 github.com/hasura/ndc-rest-schema v0.0.0-20240331101658-8eabde102ac0 h1:SjAV1NDYMPrHUySypAuth2aou+xPPHXzLUgIO7LbKVk=
 github.com/hasura/ndc-rest-schema v0.0.0-20240331101658-8eabde102ac0/go.mod h1:jcUMvsv1DjSONUk713W+jDNRTE0UQDVqHg6bRHk+Dcc=
+github.com/hasura/ndc-rest-schema v0.0.0-20240402165434-1e3d39b6f654 h1:6ClwK4Gx9OKwt9FUMnVW/U+IDsfI2o3Hh4e3vPQ8hi0=
+github.com/hasura/ndc-rest-schema v0.0.0-20240402165434-1e3d39b6f654/go.mod h1:jcUMvsv1DjSONUk713W+jDNRTE0UQDVqHg6bRHk+Dcc=
+github.com/hasura/ndc-rest-schema v0.0.0-20240402171309-3ea200b34656 h1:qAvKBphCTLiDxQwpE8vplMHRUycWHlG8fLpk0XVtSY4=
+github.com/hasura/ndc-rest-schema v0.0.0-20240402171309-3ea200b34656/go.mod h1:jcUMvsv1DjSONUk713W+jDNRTE0UQDVqHg6bRHk+Dcc=
+github.com/hasura/ndc-rest-schema v0.0.0-20240402171700-1ce2ece45de2 h1:+GOMTQHFU8aQL5lOLNP3ZqfspKlbHaYudOiAWjHUEDw=
+github.com/hasura/ndc-rest-schema v0.0.0-20240402171700-1ce2ece45de2/go.mod h1:jcUMvsv1DjSONUk713W+jDNRTE0UQDVqHg6bRHk+Dcc=
+github.com/hasura/ndc-rest-schema v0.0.0-20240402180009-226aaac6dc39 h1:XViMqRUevkFpu+0fRnKsaKubPEZYZeiWBte/EssTg5k=
+github.com/hasura/ndc-rest-schema v0.0.0-20240402180009-226aaac6dc39/go.mod h1:jcUMvsv1DjSONUk713W+jDNRTE0UQDVqHg6bRHk+Dcc=
+github.com/hasura/ndc-rest-schema v0.0.0-20240403025915-a07cf4007901 h1:wr48uZbZTVCdiZUkR7hb9FswzO1XPV+HgkVI7bvNwM0=
+github.com/hasura/ndc-rest-schema v0.0.0-20240403025915-a07cf4007901/go.mod h1:jcUMvsv1DjSONUk713W+jDNRTE0UQDVqHg6bRHk+Dcc=
 github.com/hasura/ndc-sdk-go v1.0.0 h1:vLbv1k1UIkIXUUrNzi3B4QvAqT1/q2xxlrzff8+Z6+E=
 github.com/hasura/ndc-sdk-go v1.0.0/go.mod h1:EeM3hKbhCfBjDDva8mP4D2KeptTqAaxNqNw8rFQAnMs=
 github.com/hasura/ndc-sdk-go v1.0.1-0.20240331071727-9c3db01b3219 h1:1HniD4n41sKrKaQIBGO71tivLM3m435FCIJNUKJTX2k=
