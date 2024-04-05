@@ -105,10 +105,6 @@ func (c *RESTConnector) encodeParameterValues(param *rest.RequestParameter, argu
 				return []*internal.StringSlicePair{
 					internal.NewStringSlicePair([]string{}, []string{fmt.Sprintf("%t", value)}),
 				}, nil
-			case *schema.TypeRepresentationNumber, *schema.TypeRepresentationInteger, *schema.TypeRepresentationString:
-				return []*internal.StringSlicePair{
-					internal.NewStringSlicePair([]string{}, []string{fmt.Sprint(value)}),
-				}, nil
 			case *schema.TypeRepresentationEnum:
 				val = fmt.Sprint(value)
 				if !slices.Contains(ty.OneOf, val) {
@@ -116,6 +112,10 @@ func (c *RESTConnector) encodeParameterValues(param *rest.RequestParameter, argu
 				}
 
 				return []*internal.StringSlicePair{internal.NewStringSlicePair([]string{}, []string{fmt.Sprint(value)})}, nil
+			default:
+				return []*internal.StringSlicePair{
+					internal.NewStringSlicePair([]string{}, []string{fmt.Sprint(value)}),
+				}, nil
 			}
 		}
 
