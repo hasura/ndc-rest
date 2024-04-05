@@ -89,6 +89,7 @@ func createRequest(ctx context.Context, rawRequest *rest.Request, headers http.H
 			} else {
 				switch contentType {
 				case rest.ContentTypeFormURLEncoded:
+					// do nothing, body properties are moved to parameters
 				case rest.ContentTypeJSON:
 					bodyBytes, err := json.Marshal(data)
 					if err != nil {

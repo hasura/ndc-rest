@@ -1,9 +1,5 @@
 {
   "scalar_types": {
-    "BigInt": {
-      "aggregate_functions": {},
-      "comparison_operators": {}
-    },
     "Boolean": {
       "representation": {
         "type": "boolean"
@@ -11,9 +7,16 @@
       "aggregate_functions": {},
       "comparison_operators": {}
     },
-    "Int": {
+    "Int32": {
       "representation": {
-        "type": "integer"
+        "type": "int32"
+      },
+      "aggregate_functions": {},
+      "comparison_operators": {}
+    },
+    "Int64": {
+      "representation": {
+        "type": "int64"
       },
       "aggregate_functions": {},
       "comparison_operators": {}
@@ -45,7 +48,7 @@
             "type": "nullable",
             "underlying_type": {
               "type": "named",
-              "name": "BigInt"
+              "name": "Int64"
             }
           }
         },
@@ -63,7 +66,7 @@
             "type": "nullable",
             "underlying_type": {
               "type": "named",
-              "name": "BigInt"
+              "name": "Int64"
             }
           }
         }
@@ -94,7 +97,7 @@
             "type": "nullable",
             "underlying_type": {
               "type": "named",
-              "name": "BigInt"
+              "name": "Int64"
             }
           }
         },
@@ -112,7 +115,7 @@
             "type": "nullable",
             "underlying_type": {
               "type": "named",
-              "name": "BigInt"
+              "name": "Int64"
             }
           }
         }
@@ -125,7 +128,7 @@
             "type": "nullable",
             "underlying_type": {
               "type": "named",
-              "name": "BigInt"
+              "name": "Int64"
             }
           }
         },
@@ -134,7 +137,7 @@
             "type": "nullable",
             "underlying_type": {
               "type": "named",
-              "name": "BigInt"
+              "name": "Int64"
             }
           }
         },
@@ -183,7 +186,7 @@
             "type": "nullable",
             "underlying_type": {
               "type": "named",
-              "name": "BigInt"
+              "name": "Int64"
             }
           }
         },
@@ -201,7 +204,7 @@
             "type": "nullable",
             "underlying_type": {
               "type": "named",
-              "name": "BigInt"
+              "name": "Int64"
             }
           }
         }
@@ -223,7 +226,7 @@
             "type": "nullable",
             "underlying_type": {
               "type": "named",
-              "name": "BigInt"
+              "name": "Int64"
             }
           }
         },
@@ -241,7 +244,7 @@
             "type": "nullable",
             "underlying_type": {
               "type": "named",
-              "name": "BigInt"
+              "name": "Int64"
             }
           }
         }
@@ -281,7 +284,7 @@
             "type": "nullable",
             "underlying_type": {
               "type": "named",
-              "name": "BigInt"
+              "name": "Int64"
             }
           }
         },
@@ -438,7 +441,7 @@
             "type": "nullable",
             "underlying_type": {
               "type": "named",
-              "name": "Int"
+              "name": "Int32"
             }
           }
         },
@@ -448,7 +451,7 @@
             "type": "nullable",
             "underlying_type": {
               "type": "named",
-              "name": "Int"
+              "name": "Int32"
             }
           }
         }
@@ -469,7 +472,7 @@
           "description": "The ID of the post to retrieve",
           "type": {
             "type": "named",
-            "name": "Int"
+            "name": "Int32"
           }
         }
       },
@@ -486,7 +489,7 @@
           "description": "post id",
           "type": {
             "type": "named",
-            "name": "Int"
+            "name": "Int32"
           }
         }
       },
@@ -508,7 +511,7 @@
             "type": "nullable",
             "underlying_type": {
               "type": "named",
-              "name": "Int"
+              "name": "Int32"
             }
           }
         },
@@ -518,7 +521,7 @@
             "type": "nullable",
             "underlying_type": {
               "type": "named",
-              "name": "Int"
+              "name": "Int32"
             }
           }
         }
@@ -539,7 +542,7 @@
           "description": "The ID of the comment to retrieve",
           "type": {
             "type": "named",
-            "name": "Int"
+            "name": "Int32"
           }
         }
       },
@@ -558,7 +561,7 @@
             "type": "nullable",
             "underlying_type": {
               "type": "named",
-              "name": "Int"
+              "name": "Int32"
             }
           }
         },
@@ -568,7 +571,7 @@
             "type": "nullable",
             "underlying_type": {
               "type": "named",
-              "name": "Int"
+              "name": "Int32"
             }
           }
         }
@@ -589,7 +592,7 @@
           "description": "The ID of the album to retrieve",
           "type": {
             "type": "named",
-            "name": "Int"
+            "name": "Int32"
           }
         }
       },
@@ -606,7 +609,7 @@
           "description": "post id",
           "type": {
             "type": "named",
-            "name": "Int"
+            "name": "Int32"
           }
         }
       },
@@ -628,7 +631,7 @@
             "type": "nullable",
             "underlying_type": {
               "type": "named",
-              "name": "Int"
+              "name": "Int32"
             }
           }
         },
@@ -638,7 +641,7 @@
             "type": "nullable",
             "underlying_type": {
               "type": "named",
-              "name": "Int"
+              "name": "Int32"
             }
           }
         }
@@ -659,7 +662,7 @@
           "description": "The ID of the photo to retrieve",
           "type": {
             "type": "named",
-            "name": "Int"
+            "name": "Int32"
           }
         }
       },
@@ -678,7 +681,7 @@
             "type": "nullable",
             "underlying_type": {
               "type": "named",
-              "name": "Int"
+              "name": "Int32"
             }
           }
         },
@@ -688,7 +691,7 @@
             "type": "nullable",
             "underlying_type": {
               "type": "named",
-              "name": "Int"
+              "name": "Int32"
             }
           }
         }
@@ -709,7 +712,7 @@
           "description": "The ID of the todo to retrieve",
           "type": {
             "type": "named",
-            "name": "Int"
+            "name": "Int32"
           }
         }
       },
@@ -728,7 +731,7 @@
             "type": "nullable",
             "underlying_type": {
               "type": "named",
-              "name": "Int"
+              "name": "Int32"
             }
           }
         },
@@ -738,7 +741,7 @@
             "type": "nullable",
             "underlying_type": {
               "type": "named",
-              "name": "Int"
+              "name": "Int32"
             }
           }
         }
@@ -759,7 +762,7 @@
           "description": "The ID of the user to retrieve",
           "type": {
             "type": "named",
-            "name": "Int"
+            "name": "Int32"
           }
         }
       },
@@ -802,7 +805,7 @@
           "description": "The ID of the post to retrieve",
           "type": {
             "type": "named",
-            "name": "Int"
+            "name": "Int32"
           }
         }
       },
@@ -826,7 +829,7 @@
           "description": "The ID of the post to retrieve",
           "type": {
             "type": "named",
-            "name": "Int"
+            "name": "Int32"
           }
         }
       },
@@ -843,7 +846,7 @@
           "description": "The ID of the post to retrieve",
           "type": {
             "type": "named",
-            "name": "Int"
+            "name": "Int32"
           }
         }
       },
