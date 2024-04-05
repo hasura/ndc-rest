@@ -100,7 +100,8 @@ func createRequest(ctx context.Context, rawRequest *rest.Request, headers http.H
 					return nil, fmt.Errorf("unsupported content type %s", contentType)
 				}
 			}
-		} else if rawRequest.RequestBody.Required {
+		} else if contentType != rest.ContentTypeFormURLEncoded &&
+			(rawRequest.RequestBody.Schema != nil && !rawRequest.RequestBody.Schema.Nullable) {
 			return nil, errors.New("request body is required")
 		}
 	}

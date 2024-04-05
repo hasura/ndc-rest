@@ -84,12 +84,16 @@ github.com/hasura/ndc-rest-schema v0.0.0-20240403131929-71d91b71caf4 h1:eLMG3AEt
 github.com/hasura/ndc-rest-schema v0.0.0-20240403131929-71d91b71caf4/go.mod h1:jcUMvsv1DjSONUk713W+jDNRTE0UQDVqHg6bRHk+Dcc=
 github.com/hasura/ndc-rest-schema v0.0.0-20240405055634-a7a70f6f8e61 h1:qnoyA5bj31MQ/pfk5ZSXxvQYtIUl6OQ0ppf7Gp6Y5Qc=
 github.com/hasura/ndc-rest-schema v0.0.0-20240405055634-a7a70f6f8e61/go.mod h1:3n+C8F5KNwfsUTU/Rgh2RB69HqRrulPvugvrc8I/bHo=
+github.com/hasura/ndc-rest-schema v0.0.0-20240405144915-057c941ac65a h1:Vosaiuf7DORRdZNkre+0Jiz2PrklVdxJWc6JvAVwpxM=
+github.com/hasura/ndc-rest-schema v0.0.0-20240405144915-057c941ac65a/go.mod h1:2MFCORmA3RSe+ZfaX+dYrAWA6T1QZGbK0Y2Q/C/r/AE=
 github.com/hasura/ndc-sdk-go v1.0.0 h1:vLbv1k1UIkIXUUrNzi3B4QvAqT1/q2xxlrzff8+Z6+E=
 github.com/hasura/ndc-sdk-go v1.0.0/go.mod h1:EeM3hKbhCfBjDDva8mP4D2KeptTqAaxNqNw8rFQAnMs=
 github.com/hasura/ndc-sdk-go v1.0.1-0.20240331071727-9c3db01b3219 h1:1HniD4n41sKrKaQIBGO71tivLM3m435FCIJNUKJTX2k=
 github.com/hasura/ndc-sdk-go v1.0.1-0.20240331071727-9c3db01b3219/go.mod h1:fNEh1RbxSrZNDl9ejNsKEXuMPMHhmMk0gB4XAd1SAus=
 github.com/hasura/ndc-sdk-go v1.0.1-0.20240405043618-e5c75fc1de6f h1:vMzFaHlxc2UfnYL5/gipRF+wl2O+Warg8QvIOTPr+qM=
 github.com/hasura/ndc-sdk-go v1.0.1-0.20240405043618-e5c75fc1de6f/go.mod h1:fNEh1RbxSrZNDl9ejNsKEXuMPMHhmMk0gB4XAd1SAus=
+github.com/hasura/ndc-sdk-go v1.0.1-0.20240405073408-849aa9142b34 h1:WFSUbNxJJ0Tc08qDHbgyu/NoF70kCj2TSkmFJyZvDvI=
+github.com/hasura/ndc-sdk-go v1.0.1-0.20240405073408-849aa9142b34/go.mod h1:fNEh1RbxSrZNDl9ejNsKEXuMPMHhmMk0gB4XAd1SAus=
 github.com/hexops/gotextdiff v1.0.3 h1:gitA9+qJrrTCsiCl7+kh75nPqQt1cx4ZkudSTLoUqJM=
 github.com/hexops/gotextdiff v1.0.3/go.mod h1:pSWU5MAI3yDq+fZBTazCSJysOMbxWL1BSow5/V2vxeg=
 github.com/hpcloud/tail v1.0.0/go.mod h1:ab1qPbhIpdTxEkNHXyeSf5vhxWSCs/tWer42PpOxQnU=

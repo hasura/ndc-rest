@@ -30,7 +30,7 @@ func (c *RESTConnector) evalURLAndHeaderParameters(request *rest.Request, argume
 		value, ok := arguments[param.Name]
 
 		if !schemaOk || !ok || utils.IsNil(value) {
-			if param.Required {
+			if param.Schema != nil && !param.Schema.Nullable {
 				return "", nil, fmt.Errorf("parameter %s is required", param.Name)
 			}
 		} else if err := c.evalURLAndHeaderParameterBySchema(endpoint, &headers, &param, argSchema.Type, value); err != nil {

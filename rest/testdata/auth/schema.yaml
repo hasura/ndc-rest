@@ -44,9 +44,9 @@ functions:
       parameters:
         - name: status
           in: query
-          required: false
           schema:
             type: String
+            nullable: true
             enum:
               - available
               - pending
