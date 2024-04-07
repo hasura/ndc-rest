@@ -140,8 +140,9 @@ func (c *RESTConnector) encodeParameterValues(typeSchema *rest.TypeSchema, value
 			if err != nil {
 				return nil, err
 			}
+
 			for _, pair := range output {
-				results = append(results, internal.NewStringSlicePair(append([]string{k}, pair.Keys()...), pair.Values()))
+				results.Add(append([]string{k}, pair.Keys()...), pair.Values())
 			}
 		}
 
@@ -161,7 +162,7 @@ func (c *RESTConnector) encodeParameterValues(typeSchema *rest.TypeSchema, value
 			}
 
 			for _, output := range outputs {
-				results.Add(append([]string{""}, output.Keys()...), output.Values())
+				results.Add(append([]string{fmt.Sprint(i)}, output.Keys()...), output.Values())
 			}
 		}
 		return results, nil
@@ -191,13 +192,13 @@ func (c *RESTConnector) encodeParameterValues(typeSchema *rest.TypeSchema, value
 					return nil, fmt.Errorf("%s: invalid enum value '%s'", strings.Join(fieldPaths, ""), valueStr)
 				}
 
-				return []*internal.StringSlicePair{internal.NewStringSlicePair([]string{}, []string{valueStr})}, nil
+				return []internal.StringSlicePair{internal.NewStringSlicePair([]string{}, []string{valueStr})}, nil
 			case *schema.TypeRepresentationInt8, *schema.TypeRepresentationInt16, *schema.TypeRepresentationInt32, *schema.TypeRepresentationInt64, *schema.TypeRepresentationBigDecimal:
 				return encodeParameterInt(value, fieldPaths)
 			case *schema.TypeRepresentationFloat32, *schema.TypeRepresentationFloat64:
 				return encodeParameterFloat(value, fieldPaths)
 			default:
-				return []*internal.StringSlicePair{
+				return []internal.StringSlicePair{
 					internal.NewStringSlicePair([]string{}, []string{fmt.Sprint(value)}),
 				}, nil
 			}
@@ -209,7 +210,7 @@ func (c *RESTConnector) encodeParameterValues(typeSchema *rest.TypeSchema, value
 			return nil, fmt.Errorf("%s: %s", strings.Join(fieldPaths, ""), err)
 		}
 		values := []string{strings.Trim(string(b), `"`)}
-		return []*internal.StringSlicePair{internal.NewStringSlicePair([]string{}, values)}, nil
+		return []internal.StringSlicePair{internal.NewStringSlicePair([]string{}, values)}, nil
 	}
 }
 
@@ -294,7 +295,7 @@ func encodeParameterBool(value any, fieldPaths []string) (internal.StringSlicePa
 		return nil, fmt.Errorf("%s: %s", strings.Join(fieldPaths, ""), err)
 	}
 
-	return []*internal.StringSlicePair{
+	return []internal.StringSlicePair{
 		internal.NewStringSlicePair([]string{}, []string{strconv.FormatBool(result)}),
 	}, nil
 }
@@ -304,7 +305,7 @@ func encodeParameterString(value any, fieldPaths []string) (internal.StringSlice
 	if err != nil {
 		return nil, fmt.Errorf("%s: %s", strings.Join(fieldPaths, ""), err)
 	}
-	return []*internal.StringSlicePair{internal.NewStringSlicePair([]string{}, []string{result})}, nil
+	return []internal.StringSlicePair{internal.NewStringSlicePair([]string{}, []string{result})}, nil
 }
 
 func encodeParameterInt(value any, fieldPaths []string) (internal.StringSlicePairs, error) {
@@ -312,7 +313,7 @@ func encodeParameterInt(value any, fieldPaths []string) (internal.StringSlicePai
 	if err != nil {
 		return nil, fmt.Errorf("%s: %s", strings.Join(fieldPaths, ""), err)
 	}
-	return []*internal.StringSlicePair{internal.NewStringSlicePair([]string{}, []string{strconv.FormatInt(intValue, 10)})}, nil
+	return []internal.StringSlicePair{internal.NewStringSlicePair([]string{}, []string{strconv.FormatInt(intValue, 10)})}, nil
 }
 
 func encodeParameterFloat(value any, fieldPaths []string) (internal.StringSlicePairs, error) {
@@ -320,5 +321,5 @@ func encodeParameterFloat(value any, fieldPaths []string) (internal.StringSliceP
 	if err != nil {
 		return nil, fmt.Errorf("%s: %s", strings.Join(fieldPaths, ""), err)
 	}
-	return []*internal.StringSlicePair{internal.NewStringSlicePair([]string{}, []string{fmt.Sprintf("%f", floatValue)})}, nil
+	return []internal.StringSlicePair{internal.NewStringSlicePair([]string{}, []string{fmt.Sprintf("%f", floatValue)})}, nil
 }

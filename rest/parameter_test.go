@@ -466,6 +466,188 @@ func TestEncodeParameterValues(t *testing.T) {
 			}`,
 			expectedURL: "/v1/checkout/sessions?automatic_tax[enabled]=false&automatic_tax[liability][type]=self&subscription_data[description]=nyxWwjZ0JY&subscription_data[invoice_settings][issuer][type]=self&subscription_data[trial_period_days]=27623&subscription_data[trial_settings][end_behavior][missing_payment_method]=cancel",
 		},
+		{
+			name: "/v1/subscription_schedules",
+			rawProcedureSchema: `{
+				"request": {
+					"url": "/v1/subscription_schedules",
+					"method": "post",
+					"parameters": [
+						{
+							"style": "deepObject",
+							"explode": true,
+							"name": "phases",
+							"in": "query",
+							"schema": {
+								"type": "array",
+								"nullable": true,
+								"items": {
+									"type": "object",
+									"properties": {
+										"add_invoice_items": {
+											"type": "array",
+											"nullable": true,
+											"items": {
+												"type": "object",
+												"properties": {
+													"price": {
+														"type": "String",
+														"nullable": true,
+														"maxLength": 5000
+													},
+													"price_data": {
+														"type": "object",
+														"nullable": true,
+														"properties": {
+															"currency": {
+																"type": "String"
+															},
+															"product": {
+																"type": "String",
+																"maxLength": 5000
+															},
+															"tax_behavior": {
+																"type": "SubscriptionSchedulesTaxBehavior",
+																"nullable": true
+															},
+															"unit_amount": {
+																"type": "Int32",
+																"nullable": true
+															},
+															"unit_amount_decimal": {
+																"type": "String",
+																"nullable": true
+															}
+														}
+													},
+													"quantity": {
+														"type": "Int32",
+														"nullable": true
+													}
+												}
+											}
+										},
+										"items": {
+											"type": "array",
+											"items": {
+												"type": "object",
+												"properties": {
+													"price": {
+														"type": "String",
+														"nullable": true,
+														"maxLength": 5000
+													},
+													"price_data": {
+														"type": "object",
+														"nullable": true,
+														"properties": {
+															"currency": {
+																"type": "String"
+															},
+															"product": {
+																"type": "String",
+																"maxLength": 5000
+															},
+															"recurring": {
+																"type": "object",
+																"properties": {
+																	"interval": {
+																		"type": "SubscriptionSchedulesInterval"
+																	},
+																	"interval_count": {
+																		"type": "Int32",
+																		"nullable": true
+																	}
+																}
+															},
+															"tax_behavior": {
+																"type": "SubscriptionSchedulesTaxBehavior",
+																"nullable": true
+															},
+															"unit_amount": {
+																"type": "Int32",
+																"nullable": true
+															},
+															"unit_amount_decimal": {
+																"type": "String",
+																"nullable": true
+															}
+														}
+													},
+													"quantity": {
+														"type": "Int32",
+														"nullable": true
+													}
+												}
+											}
+										}
+									}
+								}
+							}
+						}
+					],
+					"requestBody": {
+						"contentType": "application/x-www-form-urlencoded"
+					}
+				},
+				"arguments": {
+					"phases": {
+						"type": {
+							"type": "nullable",
+							"underlying_type": {
+								"element_type": {
+									"name": "PostSubscriptionSchedulesScheduleBodyPhases",
+									"type": "named"
+								},
+								"type": "array"
+							}
+						}
+					}
+				},
+				"name": "PostSubscriptionSchedulesSchedule",
+				"result_type": {
+					"name": "SubscriptionSchedule",
+					"type": "named"
+				}
+			}`,
+			rawArguments: `{
+				"phases": [
+					{
+						"add_invoice_items": [
+							{
+								"price": "Brnx6F2SW3",
+								"price_data": {
+									"currency": "KutyN1a7f7",
+									"product": "TS7Fs9Hy8B",
+									"tax_behavior": "exclusive",
+									"unit_amount": 2120841752,
+									"unit_amount_decimal": "GxHaMm19uk"
+								},
+								"quantity": 1365407829
+							}
+						],
+						"items": [
+							{
+								"price": "wsJvXbiSV8",
+								"price_data": {
+									"currency": "Se3SC2fQcl",
+									"product": "W9pqDICERA",
+									"recurring": {
+										"interval": "month",
+										"interval_count": 97217333
+									},
+									"tax_behavior": "inclusive",
+									"unit_amount": 1972558655,
+									"unit_amount_decimal": "uu9JdD5mJ0"
+								},
+								"quantity": 1961565488
+							}
+						]
+					}
+				]
+			}`,
+			expectedURL: "/v1/subscription_schedules?phases[0][add_invoice_items][0][price]=Brnx6F2SW3&phases[0][add_invoice_items][0][price_data][currency]=KutyN1a7f7&phases[0][add_invoice_items][0][price_data][product]=TS7Fs9Hy8B&phases[0][add_invoice_items][0][price_data][tax_behavior]=exclusive&phases[0][add_invoice_items][0][price_data][unit_amount]=2120841752&phases[0][add_invoice_items][0][price_data][unit_amount_decimal]=GxHaMm19uk&phases[0][add_invoice_items][0][quantity]=1365407829&phases[0][items][0][price]=wsJvXbiSV8&phases[0][items][0][price_data][currency]=Se3SC2fQcl&phases[0][items][0][price_data][product]=W9pqDICERA&phases[0][items][0][price_data][recurring][interval]=month&phases[0][items][0][price_data][recurring][interval_count]=97217333&phases[0][items][0][price_data][tax_behavior]=inclusive&phases[0][items][0][price_data][unit_amount]=1972558655&phases[0][items][0][price_data][unit_amount_decimal]=uu9JdD5mJ0&phases[0][items][0][quantity]=1961565488",
+		},
 	}
 
 	connector := RESTConnector{
@@ -536,6 +718,93 @@ func TestEncodeParameterValues(t *testing.T) {
 					Fields: schema.ObjectTypeFields{
 						"issuer": schema.ObjectField{
 							Type: schema.NewNullableNamedType("Param").Encode(),
+						},
+					},
+				},
+				"PostSubscriptionSchedulesScheduleBodyPhases": schema.ObjectType{
+					Fields: schema.ObjectTypeFields{
+						"add_invoice_items": schema.ObjectField{
+							Type: schema.NewNullableType(schema.NewArrayType(schema.NewNamedType("PostSubscriptionSchedulesScheduleBodyPhasesAddInvoiceItems"))).Encode(),
+						},
+						"items": schema.ObjectField{
+							Type: schema.NewArrayType(schema.NewNamedType("PostSubscriptionSchedulesScheduleBodyPhasesItems")).Encode(),
+						},
+					},
+				},
+				"PostSubscriptionSchedulesScheduleBodyPhasesAddInvoiceItems": schema.ObjectType{
+					Fields: schema.ObjectTypeFields{
+						"price": schema.ObjectField{
+							Type: schema.NewNullableNamedType("String").Encode(),
+						},
+						"price_data": schema.ObjectField{
+							Type: schema.NewNullableNamedType("PostSubscriptionSchedulesScheduleBodyPhasesAddInvoiceItemsPriceData").Encode(),
+						},
+						"quantity": schema.ObjectField{
+							Type: schema.NewNullableNamedType("Int32").Encode(),
+						},
+					},
+				},
+				"PostSubscriptionSchedulesScheduleBodyPhasesAddInvoiceItemsPriceData": schema.ObjectType{
+					Fields: schema.ObjectTypeFields{
+						"currency": schema.ObjectField{
+							Type: schema.NewNamedType("String").Encode(),
+						},
+						"product": schema.ObjectField{
+							Type: schema.NewNamedType("String").Encode(),
+						},
+						"tax_behavior": schema.ObjectField{
+							Type: schema.NewNullableNamedType("SubscriptionSchedulesTaxBehavior").Encode(),
+						},
+						"unit_amount": schema.ObjectField{
+							Type: schema.NewNullableNamedType("Int32").Encode(),
+						},
+						"unit_amount_decimal": schema.ObjectField{
+							Type: schema.NewNullableNamedType("String").Encode(),
+						},
+					},
+				},
+				"PostSubscriptionSchedulesScheduleBodyPhasesItems": schema.ObjectType{
+					Fields: schema.ObjectTypeFields{
+						"price": schema.ObjectField{
+							Type: schema.NewNullableNamedType("String").Encode(),
+						},
+						"price_data": schema.ObjectField{
+							Type: schema.NewNullableNamedType("PostSubscriptionSchedulesScheduleBodyPhasesItemsPriceData").Encode(),
+						},
+						"quantity": schema.ObjectField{
+							Type: schema.NewNullableNamedType("Int32").Encode(),
+						},
+					},
+				},
+				"PostSubscriptionSchedulesScheduleBodyPhasesItemsPriceData": schema.ObjectType{
+					Fields: schema.ObjectTypeFields{
+						"currency": schema.ObjectField{
+							Type: schema.NewNamedType("String").Encode(),
+						},
+						"product": schema.ObjectField{
+							Type: schema.NewNamedType("String").Encode(),
+						},
+						"recurring": schema.ObjectField{
+							Type: schema.NewNamedType("PostSubscriptionSchedulesScheduleBodyPhasesItemsPriceDataRecurring").Encode(),
+						},
+						"tax_behavior": schema.ObjectField{
+							Type: schema.NewNullableNamedType("SubscriptionSchedulesTaxBehavior").Encode(),
+						},
+						"unit_amount": schema.ObjectField{
+							Type: schema.NewNullableNamedType("Int32").Encode(),
+						},
+						"unit_amount_decimal": schema.ObjectField{
+							Type: schema.NewNullableNamedType("String").Encode(),
+						},
+					},
+				},
+				"PostSubscriptionSchedulesScheduleBodyPhasesItemsPriceDataRecurring": schema.ObjectType{
+					Fields: schema.ObjectTypeFields{
+						"interval": schema.ObjectField{
+							Type: schema.NewNamedType("SubscriptionSchedulesInterval").Encode(),
+						},
+						"interval_count": schema.ObjectField{
+							Type: schema.NewNullableNamedType("Int32").Encode(),
 						},
 					},
 				},

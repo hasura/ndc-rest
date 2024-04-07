@@ -1,6 +1,20 @@
 package internal
 
-type StringSlicePairs []*StringSlicePair
+import (
+	"fmt"
+	"strings"
+)
+
+type StringSlicePairs []StringSlicePair
+
+// String implements fmt.Stringer interface
+func (ssp StringSlicePairs) String() string {
+	results := make([]string, len(ssp))
+	for _, item := range ssp {
+		results = append(results, item.String())
+	}
+	return strings.Join(results, "|")
+}
 
 func (ssp *StringSlicePairs) Add(keys []string, values []string) {
 	index := ssp.FindIndex(keys)
@@ -36,15 +50,14 @@ func (ssp StringSlicePairs) find(keys []string) (*StringSlicePair, int) {
 			continue
 		}
 		if len(keys) == 0 {
-			return item, i
+			return &item, i
 		}
 		isEqual := false
 		for j, value := range item.keys {
 			isEqual = value == keys[j]
-		}
-
-		if isEqual {
-			return item, i
+			if !isEqual {
+				return nil, -1
+			}
 		}
 	}
 	return nil, -1
@@ -55,11 +68,17 @@ type StringSlicePair struct {
 	values []string
 }
 
-func NewStringSlicePair(keys []string, values []string) *StringSlicePair {
-	return &StringSlicePair{
+// NewStringSlicePair creates a string slice pair
+func NewStringSlicePair(keys []string, values []string) StringSlicePair {
+	return StringSlicePair{
 		keys:   keys,
 		values: values,
 	}
+}
+
+// String implements fmt.Stringer interface
+func (ssp StringSlicePair) String() string {
+	return fmt.Sprintf("%s=%s", strings.Join(ssp.keys, ""), strings.Join(ssp.values, ","))
 }
 
 func (ssp StringSlicePair) Keys() []string {
