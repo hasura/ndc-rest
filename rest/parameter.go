@@ -7,12 +7,13 @@ import (
 	"net/url"
 	"reflect"
 	"slices"
+	"strconv"
 	"strings"
 
 	rest "github.com/hasura/ndc-rest-schema/schema"
 	"github.com/hasura/ndc-rest/rest/internal"
 	"github.com/hasura/ndc-sdk-go/schema"
-	"github.com/hasura/ndc-sdk-go/utils"
+	sdkUtils "github.com/hasura/ndc-sdk-go/utils"
 )
 
 func (c *RESTConnector) evalURLAndHeaderParameters(request *rest.Request, argumentsSchema map[string]schema.ArgumentInfo, arguments map[string]any) (string, http.Header, error) {
@@ -26,14 +27,17 @@ func (c *RESTConnector) evalURLAndHeaderParameters(request *rest.Request, argume
 	}
 
 	for _, param := range request.Parameters {
-		argSchema, schemaOk := argumentsSchema[param.Name]
+		_, schemaOk := argumentsSchema[param.Name]
+		if !schemaOk {
+			continue
+		}
 		value, ok := arguments[param.Name]
 
-		if !schemaOk || !ok || utils.IsNil(value) {
+		if !ok || value == nil {
 			if param.Schema != nil && !param.Schema.Nullable {
 				return "", nil, fmt.Errorf("parameter %s is required", param.Name)
 			}
-		} else if err := c.evalURLAndHeaderParameterBySchema(endpoint, &headers, &param, argSchema.Type, value); err != nil {
+		} else if err := c.evalURLAndHeaderParameterBySchema(endpoint, &headers, &param, value); err != nil {
 			return "", nil, err
 		}
 	}
@@ -43,14 +47,15 @@ func (c *RESTConnector) evalURLAndHeaderParameters(request *rest.Request, argume
 // the query parameters serialization follows [OAS 3.1 spec]
 //
 // [OAS 3.1 spec]: https://swagger.io/docs/specification/serialization/
-func (c *RESTConnector) evalURLAndHeaderParameterBySchema(endpoint *url.URL, header *http.Header, param *rest.RequestParameter, argumentType schema.Type, value any) error {
-	if utils.IsNil(value) {
-		return nil
+func (c *RESTConnector) evalURLAndHeaderParameterBySchema(endpoint *url.URL, header *http.Header, param *rest.RequestParameter, value any) error {
+
+	queryParams, err := c.encodeParameterValues(param.Schema, value, []string{param.Name})
+	if err != nil {
+		return err
 	}
 
-	queryParams, err := c.encodeParameterValues(param, argumentType, value)
-	if err != nil || len(queryParams) == 0 {
-		return err
+	if len(queryParams) == 0 {
+		return nil
 	}
 
 	// following the OAS spec to serialize parameters
@@ -93,80 +98,64 @@ func (c *RESTConnector) evalURLAndHeaderParameterBySchema(endpoint *url.URL, hea
 	return nil
 }
 
-func (c *RESTConnector) encodeParameterValues(param *rest.RequestParameter, argumentType schema.Type, value any) (internal.StringSlicePairs, error) {
+func (c *RESTConnector) encodeParameterValues(typeSchema *rest.TypeSchema, value any, fieldPaths []string) (internal.StringSlicePairs, error) {
 
-	switch arg := argumentType.Interface().(type) {
-	case *schema.NamedType:
-		var val string
-		iScalar, ok := c.schema.ScalarTypes[arg.Name]
-		if ok {
-			switch ty := iScalar.Representation.Interface().(type) {
-			case *schema.TypeRepresentationBoolean:
-				return []*internal.StringSlicePair{
-					internal.NewStringSlicePair([]string{}, []string{fmt.Sprintf("%t", value)}),
-				}, nil
-			case *schema.TypeRepresentationEnum:
-				val = fmt.Sprint(value)
-				if !slices.Contains(ty.OneOf, val) {
-					return nil, fmt.Errorf("%s: invalid enum value '%s'", param.Name, value)
-				}
+	results := internal.StringSlicePairs{}
+	reflectValue := reflect.ValueOf(value)
 
-				return []*internal.StringSlicePair{internal.NewStringSlicePair([]string{}, []string{fmt.Sprint(value)})}, nil
-			default:
-				return []*internal.StringSlicePair{
-					internal.NewStringSlicePair([]string{}, []string{fmt.Sprint(value)}),
-				}, nil
+	if reflectValue.Kind() == reflect.Invalid {
+		return results, nil
+	}
+	if reflectValue.Kind() == reflect.Ptr {
+		if reflectValue.IsNil() {
+			if typeSchema.Nullable {
+				return results, nil
+			} else {
+				return nil, fmt.Errorf("parameter %s is required", strings.Join(fieldPaths, ""))
 			}
 		}
-
-		results := []*internal.StringSlicePair{}
-		object, ok := c.schema.ObjectTypes[arg.Name]
-		if ok {
-			mapValue, ok := value.(map[string]any)
-			if !ok {
-				return nil, fmt.Errorf("cannot evaluate object parameter of %s, got: %+v", param.Name, reflect.TypeOf(value).Name())
-			}
-
-			for k, v := range object.Fields {
-				fieldVal, ok := mapValue[k]
-				if !ok || utils.IsNil(fieldVal) {
-					continue
-				}
-
-				output, err := c.encodeParameterValues(param, v.Type, fieldVal)
-				if err != nil {
-					return nil, err
-				}
-				for _, pair := range output {
-					results = append(results, internal.NewStringSlicePair(append([]string{k}, pair.Keys()...), pair.Values()))
-				}
-			}
+		value = reflectValue.Elem().Interface()
+	}
+	switch strings.ToLower(typeSchema.Type) {
+	case "object":
+		if len(typeSchema.Properties) == 0 {
 			return results, nil
 		}
+		mapValue, ok := value.(map[string]any)
+		if !ok {
+			return nil, fmt.Errorf("%s: expected object, got %v", strings.Join(fieldPaths, ""), value)
+		}
 
-		b, err := json.Marshal(value)
-		if err != nil {
-			return nil, err
+		for k, prop := range typeSchema.Properties {
+			propPaths := append(fieldPaths, fmt.Sprintf(".%s", k))
+			fieldVal, ok := mapValue[k]
+			if !ok {
+				if !prop.Nullable {
+					return nil, fmt.Errorf("parameter %s is required", strings.Join(propPaths, ""))
+				}
+				continue
+			}
+
+			output, err := c.encodeParameterValues(&prop, fieldVal, propPaths)
+			if err != nil {
+				return nil, err
+			}
+			for _, pair := range output {
+				results = append(results, internal.NewStringSlicePair(append([]string{k}, pair.Keys()...), pair.Values()))
+			}
 		}
-		values := []string{strings.Trim(string(b), `"`)}
-		return []*internal.StringSlicePair{internal.NewStringSlicePair([]string{}, values)}, nil
-	case *schema.NullableType:
-		return c.encodeParameterValues(param, arg.UnderlyingType, value)
-	case *schema.ArrayType:
-		if !slices.Contains([]rest.ParameterLocation{rest.InHeader, rest.InQuery}, param.In) {
-			return nil, fmt.Errorf("cannot evaluate array parameter to %s", param.In)
-		}
-		if utils.IsNil(value) {
-			return []*internal.StringSlicePair{}, nil
-		}
+
+		return results, nil
+	case "array":
 		arrayValue, ok := value.([]any)
 		if !ok {
-			return nil, fmt.Errorf("cannot evaluate array parameter, expected array, got: %+v", reflect.TypeOf(value).Name())
+			return nil, fmt.Errorf("%s: expected array, got %v", strings.Join(fieldPaths, ""), value)
 		}
 
-		var results internal.StringSlicePairs
-		for _, item := range arrayValue {
-			outputs, err := c.encodeParameterValues(param, arg.ElementType, item)
+		for i, itemValue := range arrayValue {
+			propPaths := append(fieldPaths, fmt.Sprintf("[%d]", i))
+
+			outputs, err := c.encodeParameterValues(typeSchema.Items, itemValue, propPaths)
 			if err != nil {
 				return nil, err
 			}
@@ -176,9 +165,52 @@ func (c *RESTConnector) encodeParameterValues(param *rest.RequestParameter, argu
 			}
 		}
 		return results, nil
-	}
+	case string(schema.TypeRepresentationTypeString), string(schema.TypeRepresentationTypeDate), string(schema.TypeRepresentationTypeTimestamp), string(schema.TypeRepresentationTypeTimestampTZ), string(schema.TypeRepresentationTypeBytes), string(schema.TypeRepresentationTypeUUID):
+		return encodeParameterString(value, fieldPaths)
+	case string(schema.TypeRepresentationTypeInt32), string(schema.TypeRepresentationTypeInt64), strings.ToLower(string(rest.ScalarUnixTime)), "integer", "long":
+		return encodeParameterInt(value, fieldPaths)
+	case string(schema.TypeRepresentationTypeFloat32), string(schema.TypeRepresentationTypeFloat64), "float":
+		return encodeParameterFloat(value, fieldPaths)
+	case string(schema.TypeRepresentationTypeBoolean), string(rest.ScalarBoolean):
+		return encodeParameterBool(value, fieldPaths)
+	default:
+		iScalar, ok := c.schema.ScalarTypes[typeSchema.Type]
+		if ok {
+			switch ty := iScalar.Representation.Interface().(type) {
+			case *schema.TypeRepresentationBoolean:
+				return encodeParameterBool(value, fieldPaths)
+			case *schema.TypeRepresentationString, *schema.TypeRepresentationDate, *schema.TypeRepresentationTimestamp, *schema.TypeRepresentationTimestampTZ, *schema.TypeRepresentationBytes, *schema.TypeRepresentationUUID:
+				return encodeParameterString(value, fieldPaths)
+			case *schema.TypeRepresentationEnum:
+				valueStr, err := sdkUtils.DecodeString(value)
+				if err != nil {
+					return nil, fmt.Errorf("%s: %s", strings.Join(fieldPaths, ""), err)
+				}
 
-	return nil, nil
+				if !slices.Contains(ty.OneOf, valueStr) {
+					return nil, fmt.Errorf("%s: invalid enum value '%s'", strings.Join(fieldPaths, ""), valueStr)
+				}
+
+				return []*internal.StringSlicePair{internal.NewStringSlicePair([]string{}, []string{valueStr})}, nil
+			case *schema.TypeRepresentationInt8, *schema.TypeRepresentationInt16, *schema.TypeRepresentationInt32, *schema.TypeRepresentationInt64, *schema.TypeRepresentationBigDecimal:
+				return encodeParameterInt(value, fieldPaths)
+			case *schema.TypeRepresentationFloat32, *schema.TypeRepresentationFloat64:
+				return encodeParameterFloat(value, fieldPaths)
+			default:
+				return []*internal.StringSlicePair{
+					internal.NewStringSlicePair([]string{}, []string{fmt.Sprint(value)}),
+				}, nil
+			}
+		}
+
+		// TODO: encode nested fields without type schema
+		b, err := json.Marshal(value)
+		if err != nil {
+			return nil, fmt.Errorf("%s: %s", strings.Join(fieldPaths, ""), err)
+		}
+		values := []string{strings.Trim(string(b), `"`)}
+		return []*internal.StringSlicePair{internal.NewStringSlicePair([]string{}, values)}, nil
+	}
 }
 
 func buildParamQueryKey(param *rest.RequestParameter, keys []string, values []string) string {
@@ -254,4 +286,39 @@ func encodeQueryValues(qValues url.Values, allowReserved bool) string {
 		index++
 	}
 	return builder.String()
+}
+
+func encodeParameterBool(value any, fieldPaths []string) (internal.StringSlicePairs, error) {
+	result, err := sdkUtils.DecodeBoolean(value)
+	if err != nil {
+		return nil, fmt.Errorf("%s: %s", strings.Join(fieldPaths, ""), err)
+	}
+
+	return []*internal.StringSlicePair{
+		internal.NewStringSlicePair([]string{}, []string{strconv.FormatBool(result)}),
+	}, nil
+}
+
+func encodeParameterString(value any, fieldPaths []string) (internal.StringSlicePairs, error) {
+	result, err := sdkUtils.DecodeString(value)
+	if err != nil {
+		return nil, fmt.Errorf("%s: %s", strings.Join(fieldPaths, ""), err)
+	}
+	return []*internal.StringSlicePair{internal.NewStringSlicePair([]string{}, []string{result})}, nil
+}
+
+func encodeParameterInt(value any, fieldPaths []string) (internal.StringSlicePairs, error) {
+	intValue, err := sdkUtils.DecodeInt[int64](value)
+	if err != nil {
+		return nil, fmt.Errorf("%s: %s", strings.Join(fieldPaths, ""), err)
+	}
+	return []*internal.StringSlicePair{internal.NewStringSlicePair([]string{}, []string{strconv.FormatInt(intValue, 10)})}, nil
+}
+
+func encodeParameterFloat(value any, fieldPaths []string) (internal.StringSlicePairs, error) {
+	floatValue, err := sdkUtils.DecodeFloat[float64](value)
+	if err != nil {
+		return nil, fmt.Errorf("%s: %s", strings.Join(fieldPaths, ""), err)
+	}
+	return []*internal.StringSlicePair{internal.NewStringSlicePair([]string{}, []string{fmt.Sprintf("%f", floatValue)})}, nil
 }
