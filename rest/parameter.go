@@ -27,15 +27,19 @@ func (c *RESTConnector) evalURLAndHeaderParameters(request *rest.Request, argume
 	}
 
 	for _, param := range request.Parameters {
-		_, schemaOk := argumentsSchema[param.Name]
+		argName := param.ArgumentName
+		if argName == "" {
+			argName = param.Name
+		}
+		_, schemaOk := argumentsSchema[argName]
 		if !schemaOk {
 			continue
 		}
-		value, ok := arguments[param.Name]
+		value, ok := arguments[argName]
 
 		if !ok || value == nil {
 			if param.Schema != nil && !param.Schema.Nullable {
-				return "", nil, fmt.Errorf("parameter %s is required", param.Name)
+				return "", nil, fmt.Errorf("argument %s is required", argName)
 			}
 		} else if err := c.evalURLAndHeaderParameterBySchema(endpoint, &headers, &param, value); err != nil {
 			return "", nil, err
@@ -60,6 +64,7 @@ func (c *RESTConnector) evalURLAndHeaderParameterBySchema(endpoint *url.URL, hea
 
 	// following the OAS spec to serialize parameters
 	// https://swagger.io/docs/specification/serialization/
+	// https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#parameter-object
 	switch param.In {
 	case rest.InHeader:
 		defaultParam := queryParams.FindDefault()
@@ -86,7 +91,7 @@ func (c *RESTConnector) evalURLAndHeaderParameterBySchema(endpoint *url.URL, hea
 	case rest.InQuery:
 		q := endpoint.Query()
 		for _, qp := range queryParams {
-			evalQueryParameterURL(&q, param, qp.Keys(), qp.Values())
+			evalQueryParameterURL(&q, param.Name, param.EncodingObject, qp.Keys(), qp.Values())
 		}
 		endpoint.RawQuery = encodeQueryValues(q, param.AllowReserved)
 	case rest.InPath:
@@ -214,17 +219,17 @@ func (c *RESTConnector) encodeParameterValues(typeSchema *rest.TypeSchema, value
 	}
 }
 
-func buildParamQueryKey(param *rest.RequestParameter, keys []string, values []string) string {
-	resultKeys := []string{param.Name}
+func buildParamQueryKey(name string, encObject rest.EncodingObject, keys []string, values []string) string {
+	resultKeys := []string{name}
 	// non-explode or explode form object does not require param name
 	// /users?role=admin&firstName=Alex
-	if (param.Explode != nil && !*param.Explode) ||
-		(len(values) == 1 && param.Style == rest.EncodingStyleForm && (len(keys) > 1 || (len(keys) == 1 && keys[0] != ""))) {
+	if (encObject.Explode != nil && !*encObject.Explode) ||
+		(len(values) == 1 && encObject.Style == rest.EncodingStyleForm && (len(keys) > 1 || (len(keys) == 1 && keys[0] != ""))) {
 		resultKeys = []string{}
 	}
 
 	if len(keys) > 0 {
-		if param.Style != rest.EncodingStyleDeepObject && keys[len(keys)-1] == "" {
+		if encObject.Style != rest.EncodingStyleDeepObject && keys[len(keys)-1] == "" {
 			keys = keys[:len(keys)-1]
 		}
 		for _, k := range keys {
@@ -239,32 +244,32 @@ func buildParamQueryKey(param *rest.RequestParameter, keys []string, values []st
 	return strings.Join(resultKeys, "")
 }
 
-func evalQueryParameterURL(q *url.Values, param *rest.RequestParameter, keys []string, values []string) {
+func evalQueryParameterURL(q *url.Values, name string, encObject rest.EncodingObject, keys []string, values []string) {
 	if len(values) == 0 {
 		return
 	}
-	paramKey := buildParamQueryKey(param, keys, values)
+	paramKey := buildParamQueryKey(name, encObject, keys, values)
 
 	// encode explode queries, e.g /users?id=3&id=4&id=5
-	if param.Explode == nil || *param.Explode {
+	if encObject.Explode == nil || *encObject.Explode {
 		for _, value := range values {
 			q.Add(paramKey, value)
 		}
 		return
 	}
 
-	switch param.Style {
+	switch encObject.Style {
 	case rest.EncodingStyleSpaceDelimited:
-		q.Add(param.Name, strings.Join(values, " "))
+		q.Add(name, strings.Join(values, " "))
 	case rest.EncodingStylePipeDelimited:
-		q.Add(param.Name, strings.Join(values, "|"))
+		q.Add(name, strings.Join(values, "|"))
 	// default style is form
 	default:
 		paramValues := values
 		if paramKey != "" {
 			paramValues = append([]string{paramKey}, paramValues...)
 		}
-		q.Add(param.Name, strings.Join(paramValues, ","))
+		q.Add(name, strings.Join(paramValues, ","))
 	}
 }
 

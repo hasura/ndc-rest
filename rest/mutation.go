@@ -55,7 +55,14 @@ func (c *RESTConnector) execProcedure(ctx context.Context, operation *schema.Mut
 	// 2. create and execute request
 	// 3. evaluate response selection
 	procedure.Request.URL = endpoint
-	result, err := c.client.Send(ctx, procedure.Request, headers, rawArgs["body"], operation.Fields)
+
+	httpRequest, cancel, err := c.createRequest(ctx, procedure.Request, headers, rawArgs["body"])
+	if err != nil {
+		return nil, err
+	}
+	defer cancel()
+
+	result, err := c.client.Send(ctx, httpRequest, operation.Fields)
 	if err != nil {
 		return nil, err
 	}

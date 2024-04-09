@@ -11,9 +11,13 @@ type StringSlicePairs []StringSlicePair
 func (ssp StringSlicePairs) String() string {
 	results := make([]string, len(ssp))
 	for _, item := range ssp {
-		results = append(results, item.String())
+		str := item.String()
+		if str == "" {
+			continue
+		}
+		results = append(results, str)
 	}
-	return strings.Join(results, "|")
+	return strings.Join(results, "&")
 }
 
 func (ssp *StringSlicePairs) Add(keys []string, values []string) {
@@ -78,7 +82,12 @@ func NewStringSlicePair(keys []string, values []string) StringSlicePair {
 
 // String implements fmt.Stringer interface
 func (ssp StringSlicePair) String() string {
-	return fmt.Sprintf("%s=%s", strings.Join(ssp.keys, ""), strings.Join(ssp.values, ","))
+	key := strings.Join(ssp.keys, "")
+	value := strings.Join(ssp.values, ",")
+	if key == "" {
+		return value
+	}
+	return fmt.Sprintf("%s=%s", key, value)
 }
 
 func (ssp StringSlicePair) Keys() []string {

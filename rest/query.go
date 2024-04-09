@@ -61,6 +61,11 @@ func (c *RESTConnector) execQuery(ctx context.Context, request *schema.QueryRequ
 	// 2. create and execute request
 	// 3. evaluate response selection
 	function.Request.URL = endpoint
+	httpRequest, cancel, err := c.createRequest(ctx, function.Request, headers, nil)
+	if err != nil {
+		return nil, err
+	}
+	defer cancel()
 
-	return c.client.Send(ctx, function.Request, headers, nil, queryFields)
+	return c.client.Send(ctx, httpRequest, queryFields)
 }

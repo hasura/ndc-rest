@@ -4,15 +4,12 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
-	"errors"
 	"fmt"
 	"io"
 	"log/slog"
 	"net/http"
 	"strings"
-	"time"
 
-	rest "github.com/hasura/ndc-rest-schema/schema"
 	"github.com/hasura/ndc-sdk-go/connector"
 	"github.com/hasura/ndc-sdk-go/schema"
 	"github.com/hasura/ndc-sdk-go/utils"
@@ -34,34 +31,19 @@ func createHTTPClient(client Doer) *httpClient {
 }
 
 // Send creates and executes the request and evaluate response selection
-func (client *httpClient) Send(ctx context.Context, rawRequest *rest.Request, headers http.Header, data any, selection schema.NestedField) (any, error) {
-	timeout := defaultTimeout
-	if rawRequest.Timeout > 0 {
-		timeout = rawRequest.Timeout
-	}
-
-	ctxR, cancel := context.WithTimeout(ctx, time.Duration(timeout)*time.Second)
-	defer cancel()
-
-	logger := connector.GetLogger(ctx)
-	request, err := createRequest(ctxR, rawRequest, headers, data)
-	if err != nil {
-		return nil, err
-	}
-
+func (client *httpClient) Send(ctx context.Context, request *http.Request, selection schema.NestedField) (any, error) {
 	resp, err := client.Client.Do(request)
 	if err != nil {
 		return nil, schema.NewConnectorError(http.StatusInternalServerError, err.Error(), nil)
 	}
+
+	logger := connector.GetLogger(ctx)
 	if logger.Enabled(ctx, slog.LevelDebug) {
 		logAttrs := []any{
-			slog.String("request_url", request.URL.String()),
-			slog.String("request_method", request.Method),
-			slog.Any("request_headers", request.Header),
-			slog.Any("request_body", data),
 			slog.Int("http_status", resp.StatusCode),
 			slog.Any("response_headers", resp.Header),
 		}
+
 		if resp.Body != nil {
 			respBody, err := io.ReadAll(resp.Body)
 			if err != nil {
@@ -70,52 +52,11 @@ func (client *httpClient) Send(ctx context.Context, rawRequest *rest.Request, he
 			logAttrs = append(logAttrs, slog.String("response_body", string(respBody)))
 			resp.Body = io.NopCloser(bytes.NewBuffer(respBody))
 		}
-		logger.Debug("sent request to remote server", logAttrs...)
+
+		logger.Debug("received response from remote server", logAttrs...)
 	}
 
 	return evalHTTPResponse(resp, selection)
-}
-
-func createRequest(ctx context.Context, rawRequest *rest.Request, headers http.Header, data any) (*http.Request, error) {
-
-	var body io.Reader
-	contentType := contentTypeJSON
-	if rawRequest.RequestBody != nil {
-		contentType = rawRequest.RequestBody.ContentType
-		// TODO: validate data with request body
-		if data != nil {
-			if strings.HasPrefix(contentType, "text/") {
-				body = bytes.NewBuffer([]byte(fmt.Sprintln(data)))
-			} else {
-				switch contentType {
-				case rest.ContentTypeFormURLEncoded:
-					// do nothing, body properties are moved to parameters
-				case rest.ContentTypeJSON:
-					bodyBytes, err := json.Marshal(data)
-					if err != nil {
-						return nil, err
-					}
-					body = bytes.NewBuffer(bodyBytes)
-				default:
-					return nil, fmt.Errorf("unsupported content type %s", contentType)
-				}
-			}
-		} else if contentType != rest.ContentTypeFormURLEncoded &&
-			(rawRequest.RequestBody.Schema != nil && !rawRequest.RequestBody.Schema.Nullable) {
-			return nil, errors.New("request body is required")
-		}
-	}
-
-	request, err := http.NewRequestWithContext(ctx, strings.ToUpper(rawRequest.Method), rawRequest.URL, body)
-	if err != nil {
-		return nil, err
-	}
-	for key, header := range headers {
-		request.Header[key] = header
-	}
-	request.Header.Set(rest.ContentTypeHeader, contentType)
-
-	return request, nil
 }
 
 func evalHTTPResponse(resp *http.Response, selection schema.NestedField) (any, error) {

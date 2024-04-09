@@ -240,7 +240,7 @@ func TestEvalQueryParameterURL(t *testing.T) {
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
 			qValues := make(url.Values)
-			evalQueryParameterURL(&qValues, tc.param, tc.keys, tc.values)
+			evalQueryParameterURL(&qValues, tc.param.Name, tc.param.EncodingObject, tc.keys, tc.values)
 			assert.Equal(t, tc.expected, encodeQueryValues(qValues, true))
 		})
 	}
