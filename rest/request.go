@@ -3,7 +3,6 @@ package rest
 import (
 	"bytes"
 	"context"
-	"encoding/base64"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -17,6 +16,7 @@ import (
 	"time"
 
 	rest "github.com/hasura/ndc-rest-schema/schema"
+	"github.com/hasura/ndc-rest/rest/internal"
 	"github.com/hasura/ndc-sdk-go/connector"
 	"github.com/hasura/ndc-sdk-go/utils"
 )
@@ -33,7 +33,6 @@ func (c *RESTConnector) createRequest(ctx context.Context, rawRequest *rest.Requ
 
 	if rawRequest.RequestBody != nil {
 		contentType = rawRequest.RequestBody.ContentType
-		// TODO: validate data with request body
 		if data != nil {
 			var buffer *bytes.Buffer
 			if strings.HasPrefix(contentType, "text/") {
@@ -140,20 +139,7 @@ func (c *RESTConnector) evalMultipartFieldValue(w *multipart.Writer, name string
 
 	switch typeSchema.Type {
 	case "file", string(rest.ScalarBinary):
-		b64, err := utils.DecodeString(value)
-		if err != nil {
-			return fmt.Errorf("%s: %s", name, err)
-		}
-		rawDecodedBytes, err := base64.StdEncoding.DecodeString(b64)
-		if err != nil {
-			return fmt.Errorf("%s: %s", name, err)
-		}
-		p, err := w.CreateFormFile(name, name)
-		if err != nil {
-			return fmt.Errorf("%s: %s", name, err)
-		}
-		_, err = p.Write(rawDecodedBytes)
-		return err
+		return writeMultipartFile(w, name, value)
 	default:
 		params, err := c.encodeParameterValues(typeSchema, value, fieldPaths)
 		if err != nil {
@@ -172,6 +158,36 @@ var quoteEscaper = strings.NewReplacer("\\", "\\\\", `"`, "\\\"")
 
 func escapeQuotes(s string) string {
 	return quoteEscaper.Replace(s)
+}
+
+func writeMultipartFile(w *multipart.Writer, name string, value any) error {
+	b64, err := utils.DecodeString(value)
+	if err != nil {
+		return fmt.Errorf("%s: %s", name, err)
+	}
+	dataURI, err := internal.DecodeDataURI(b64)
+	if err != nil {
+		return fmt.Errorf("%s: %s", name, err)
+	}
+
+	h := make(textproto.MIMEHeader)
+	h.Set("Content-Disposition",
+		fmt.Sprintf(`form-data; name="%s"; filename="%s"`,
+			escapeQuotes(name), escapeQuotes(name)))
+	if dataURI.MediaType == "" {
+		h.Set("Content-Type", "application/octet-stream")
+	} else {
+		h.Set("Content-Type", dataURI.MediaType)
+	}
+
+	p, err := w.CreatePart(h)
+	if err != nil {
+		return fmt.Errorf("%s: %s", name, err)
+	}
+
+	_, err = p.Write([]byte(dataURI.Data))
+
+	return err
 }
 
 func writeMultipartFieldJSON(w *multipart.Writer, fieldName string, value any) error {
