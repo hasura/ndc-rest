@@ -8,9 +8,7 @@ import (
 	"fmt"
 	"io"
 	"log/slog"
-	"mime/multipart"
 	"net/http"
-	"net/textproto"
 	"slices"
 	"strings"
 	"time"
@@ -39,7 +37,7 @@ func (c *RESTConnector) createRequest(ctx context.Context, rawRequest *rest.Requ
 				buffer = bytes.NewBuffer([]byte(fmt.Sprintln(data)))
 			} else if strings.HasPrefix(contentType, "multipart/") {
 				buffer = new(bytes.Buffer)
-				writer := multipart.NewWriter(buffer)
+				writer := internal.NewMultipartWriter(buffer)
 				dataMap, ok := data.(map[string]any)
 				if !ok {
 					return nil, nil, fmt.Errorf("failed to decode request body, expect object, got: %v", data)
@@ -48,7 +46,7 @@ func (c *RESTConnector) createRequest(ctx context.Context, rawRequest *rest.Requ
 					return nil, nil, errors.New("invalid object schema for multipart")
 				}
 
-				for key, value := range dataMap {
+				for key := range dataMap {
 					prop, ok := rawRequest.RequestBody.Schema.Properties[key]
 					if !ok {
 						continue
@@ -60,7 +58,7 @@ func (c *RESTConnector) createRequest(ctx context.Context, rawRequest *rest.Requ
 							enc = &en
 						}
 					}
-					err := c.evalMultipartFieldValue(writer, key, &prop, enc, value, []string{key})
+					err := c.evalMultipartFieldValue(writer, dataMap, key, &prop, enc, []string{key})
 					if err != nil {
 						return nil, nil, err
 					}
@@ -127,19 +125,30 @@ func (c *RESTConnector) createRequest(ctx context.Context, rawRequest *rest.Requ
 	return request, cancel, nil
 }
 
-func (c *RESTConnector) evalMultipartFieldValue(w *multipart.Writer, name string, typeSchema *rest.TypeSchema, encObject *rest.EncodingObject, value any, fieldPaths []string) error {
+func (c *RESTConnector) evalMultipartFieldValue(w *internal.MultipartWriter, arguments map[string]any, name string, typeSchema *rest.TypeSchema, encObject *rest.EncodingObject, fieldPaths []string) error {
 
-	if utils.IsNil(value) {
+	value, ok := arguments[name]
+	if !ok || utils.IsNil(value) {
 		return nil
 	}
 
-	if slices.Contains([]string{"object", "array"}, typeSchema.Type) && (encObject == nil || slices.Contains(encObject.ContentType, rest.ContentTypeJSON)) {
-		return writeMultipartFieldJSON(w, name, value)
+	var headers http.Header
+	var err error
+	if encObject != nil && len(encObject.Headers) > 0 {
+		headers, err = c.evalEncodingHeaders(encObject.Headers, arguments)
+		if err != nil {
+			return err
+		}
+	}
+
+	// if slices.Contains([]string{"object", "array"}, typeSchema.Type) && (encObject == nil || slices.Contains(encObject.ContentType, rest.ContentTypeJSON)) {
+	if slices.Contains([]string{"object", "array"}, typeSchema.Type) {
+		return w.WriteJSON(name, value, headers)
 	}
 
 	switch typeSchema.Type {
 	case "file", string(rest.ScalarBinary):
-		return writeMultipartFile(w, name, value)
+		return w.WriteDataURI(name, value, headers)
 	default:
 		params, err := c.encodeParameterValues(typeSchema, value, fieldPaths)
 		if err != nil {
@@ -150,61 +159,30 @@ func (c *RESTConnector) evalMultipartFieldValue(w *multipart.Writer, name string
 			return nil
 		}
 
-		return w.WriteField(name, params.String())
+		return w.WriteField(name, params.String(), headers)
 	}
 }
 
-var quoteEscaper = strings.NewReplacer("\\", "\\\\", `"`, "\\\"")
+func (c *RESTConnector) evalEncodingHeaders(encHeaders map[string]rest.RequestParameter, arguments map[string]any) (http.Header, error) {
+	results := http.Header{}
 
-func escapeQuotes(s string) string {
-	return quoteEscaper.Replace(s)
-}
+	for key, param := range encHeaders {
+		argumentName := param.ArgumentName
+		if argumentName == "" {
+			argumentName = key
+		}
+		rawHeaderValue, ok := arguments[argumentName]
+		if !ok {
+			continue
+		}
 
-func writeMultipartFile(w *multipart.Writer, name string, value any) error {
-	b64, err := utils.DecodeString(value)
-	if err != nil {
-		return fmt.Errorf("%s: %s", name, err)
-	}
-	dataURI, err := internal.DecodeDataURI(b64)
-	if err != nil {
-		return fmt.Errorf("%s: %s", name, err)
-	}
+		headerParams, err := c.encodeParameterValues(param.Schema, rawHeaderValue, []string{key})
+		if err != nil {
+			return nil, err
+		}
 
-	h := make(textproto.MIMEHeader)
-	h.Set("Content-Disposition",
-		fmt.Sprintf(`form-data; name="%s"; filename="%s"`,
-			escapeQuotes(name), escapeQuotes(name)))
-	if dataURI.MediaType == "" {
-		h.Set("Content-Type", "application/octet-stream")
-	} else {
-		h.Set("Content-Type", dataURI.MediaType)
+		setHeaderParameters(&results, &param, headerParams)
 	}
 
-	p, err := w.CreatePart(h)
-	if err != nil {
-		return fmt.Errorf("%s: %s", name, err)
-	}
-
-	_, err = p.Write([]byte(dataURI.Data))
-
-	return err
-}
-
-func writeMultipartFieldJSON(w *multipart.Writer, fieldName string, value any) error {
-	bs, err := json.Marshal(value)
-	if err != nil {
-		return err
-	}
-
-	h := make(textproto.MIMEHeader)
-	h.Set("Content-Disposition",
-		fmt.Sprintf(`form-data; name="%s"`, escapeQuotes(fieldName)))
-	h.Set(rest.ContentTypeHeader, rest.ContentTypeJSON)
-	p, err := w.CreatePart(h)
-	if err != nil {
-		return err
-	}
-
-	_, err = p.Write(bs)
-	return err
+	return results, nil
 }

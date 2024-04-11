@@ -67,27 +67,7 @@ func (c *RESTConnector) evalURLAndHeaderParameterBySchema(endpoint *url.URL, hea
 	// https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#parameter-object
 	switch param.In {
 	case rest.InHeader:
-		defaultParam := queryParams.FindDefault()
-		// the param is an array
-		if defaultParam != nil {
-			header.Set(param.Name, strings.Join(defaultParam.Values(), ","))
-			return nil
-		}
-
-		if param.Explode != nil && *param.Explode {
-			var headerValues []string
-			for _, pair := range queryParams {
-				headerValues = append(headerValues, fmt.Sprintf("%s=%s", strings.Join(pair.Keys(), ","), strings.Join(pair.Values(), ",")))
-			}
-			header.Set(param.Name, strings.Join(headerValues, ","))
-			return nil
-		}
-
-		var headerValues []string
-		for _, pair := range queryParams {
-			headerValues = append(headerValues, strings.Join(pair.Keys(), ","), strings.Join(pair.Values(), ","))
-		}
-		header.Set(param.Name, strings.Join(headerValues, ","))
+		setHeaderParameters(header, param, queryParams)
 	case rest.InQuery:
 		q := endpoint.Query()
 		for _, qp := range queryParams {
@@ -327,4 +307,28 @@ func encodeParameterFloat(value any, fieldPaths []string) (internal.StringSliceP
 		return nil, fmt.Errorf("%s: %s", strings.Join(fieldPaths, ""), err)
 	}
 	return []internal.StringSlicePair{internal.NewStringSlicePair([]string{}, []string{fmt.Sprintf("%f", floatValue)})}, nil
+}
+
+func setHeaderParameters(header *http.Header, param *rest.RequestParameter, queryParams internal.StringSlicePairs) {
+	defaultParam := queryParams.FindDefault()
+	// the param is an array
+	if defaultParam != nil {
+		header.Set(param.Name, strings.Join(defaultParam.Values(), ","))
+		return
+	}
+
+	if param.Explode != nil && *param.Explode {
+		var headerValues []string
+		for _, pair := range queryParams {
+			headerValues = append(headerValues, fmt.Sprintf("%s=%s", strings.Join(pair.Keys(), ","), strings.Join(pair.Values(), ",")))
+		}
+		header.Set(param.Name, strings.Join(headerValues, ","))
+		return
+	}
+
+	var headerValues []string
+	for _, pair := range queryParams {
+		headerValues = append(headerValues, strings.Join(pair.Keys(), ","), strings.Join(pair.Values(), ","))
+	}
+	header.Set(param.Name, strings.Join(headerValues, ","))
 }
