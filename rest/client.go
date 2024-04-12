@@ -46,6 +46,7 @@ func (client *httpClient) Send(ctx context.Context, request *http.Request, selec
 
 		if resp.Body != nil {
 			respBody, err := io.ReadAll(resp.Body)
+			_ = resp.Body.Close()
 			if err != nil {
 				return nil, schema.NewConnectorError(http.StatusInternalServerError, err.Error(), nil)
 			}
@@ -66,6 +67,7 @@ func evalHTTPResponse(resp *http.Response, selection schema.NestedField) (any, e
 		if resp.Body != nil {
 			var err error
 			respBody, err = io.ReadAll(resp.Body)
+			_ = resp.Body.Close()
 
 			if err != nil {
 				return nil, schema.NewConnectorError(http.StatusInternalServerError, resp.Status, map[string]any{
@@ -87,6 +89,10 @@ func evalHTTPResponse(resp *http.Response, selection schema.NestedField) (any, e
 		return nil, nil
 	}
 
+	defer func() {
+		_ = resp.Body.Close()
+	}()
+
 	switch contentType {
 	case "text/plain", "text/html":
 		respBody, err := io.ReadAll(resp.Body)
@@ -96,7 +102,9 @@ func evalHTTPResponse(resp *http.Response, selection schema.NestedField) (any, e
 		return string(respBody), nil
 	case contentTypeJSON:
 		var result any
-		if err := json.NewDecoder(resp.Body).Decode(&result); err != nil {
+		err := json.NewDecoder(resp.Body).Decode(&result)
+		_ = resp.Body.Close()
+		if err != nil {
 			return nil, schema.NewConnectorError(http.StatusInternalServerError, err.Error(), nil)
 		}
 		if selection == nil {
