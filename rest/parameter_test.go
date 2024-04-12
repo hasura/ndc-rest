@@ -255,6 +255,57 @@ func TestEncodeParameterValues(t *testing.T) {
 		expectedURL        string
 		errorMsg           string
 	}{
+
+		{
+			name: "/param-array",
+			rawProcedureSchema: `{
+				"request": {
+					"url": "/param-array",
+					"method": "post",
+					"parameters": [
+						{
+							"style": "deepObject",
+							"explode": true,
+							"name": "expand",
+							"in": "query",
+							"schema": {
+								"type": "array",
+								"nullable": true,
+								"items": {
+									"type": "string"
+								}
+							}
+						}
+					],
+					"requestBody": {
+						"contentType": "application/x-www-form-urlencoded"
+					}
+				},
+				"arguments": {
+					"expand": {
+						"type": {
+							"type": "nullable",
+							"underlying_type": {
+								"type": "array",
+								"element_type": {
+									"name": "String",
+									"type": "named"
+								}
+							} 
+						}
+					}
+				},
+				"name": "PostCheckoutSessions",
+				"result_type": {
+					"name": "Order",
+					"type": "named"
+				}
+			}`,
+			rawArguments: `{
+				"expand": ["foo"]
+			}`,
+			expectedURL: "/param-array?expand[]=foo",
+		},
 		{
 			name: "/v1/checkout/sessions",
 			rawProcedureSchema: `{

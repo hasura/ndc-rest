@@ -149,7 +149,7 @@ func (c *RESTConnector) encodeParameterValues(typeSchema *rest.TypeSchema, value
 			for _, output := range outputs {
 				keys := output.Keys()
 				if len(keys) == 0 {
-					results.Add([]internal.Key{}, output.Values())
+					results.Add([]internal.Key{internal.NewKey("")}, output.Values())
 				} else {
 					results.Add(append([]internal.Key{internal.NewIndexKey(i)}, output.Keys()...), output.Values())
 				}

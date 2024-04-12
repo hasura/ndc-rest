@@ -58,14 +58,15 @@ func (c *RESTConnector) createRequest(ctx context.Context, rawRequest *rest.Requ
 				}
 			}
 
-			if logger.Enabled(ctx, slog.LevelDebug) {
-				logAttrs = append(logAttrs,
-					slog.Int("content_length", buffer.Len()),
-					slog.String("body", string(buffer.String())),
-				)
+			if buffer != nil {
+				if logger.Enabled(ctx, slog.LevelDebug) {
+					logAttrs = append(logAttrs,
+						slog.Int("content_length", buffer.Len()),
+						slog.String("body", string(buffer.String())),
+					)
+				}
+				body = buffer
 			}
-
-			body = buffer
 		} else if contentType != rest.ContentTypeFormURLEncoded &&
 			(rawRequest.RequestBody.Schema != nil && !rawRequest.RequestBody.Schema.Nullable) {
 			return nil, nil, errors.New("request body is required")
