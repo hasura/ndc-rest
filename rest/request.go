@@ -178,11 +178,15 @@ func (c *RESTConnector) evalMultipartFieldValue(w *internal.MultipartWriter, arg
 				fieldName = keys.String()
 			}
 			if len(values) == 1 {
-				w.WriteField(fieldName, values[0], headers)
+				if err = w.WriteField(fieldName, values[0], headers); err != nil {
+					return err
+				}
 			} else if len(values) > 1 {
 				fieldName = fmt.Sprintf("%s[]", fieldName)
 				for _, v := range values {
-					w.WriteField(fieldName, v, headers)
+					if err = w.WriteField(fieldName, v, headers); err != nil {
+						return err
+					}
 				}
 			}
 		}

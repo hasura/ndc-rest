@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
-	"log"
 	"mime"
 	"mime/multipart"
 	"net/http"
@@ -140,7 +139,7 @@ func TestCreateMultipartForm(t *testing.T) {
 			buf, mediaType, err := rc.createMultipartForm(&reqBody, arguments)
 			assert.NoError(t, err)
 
-			log.Println("form data:", string(buf.String()))
+			// log.Println("form data:", string(buf.String()))
 			_, params, err := mime.ParseMediaType(mediaType)
 			assert.NoError(t, err)
 
