@@ -19,7 +19,7 @@ import (
 	"github.com/hasura/ndc-sdk-go/utils"
 )
 
-func (c *RESTConnector) createRequest(ctx context.Context, rawRequest *rest.Request, headers http.Header, data any) (*http.Request, context.CancelFunc, error) {
+func (c *RESTConnector) createRequest(ctx context.Context, rawRequest *rest.Request, headers http.Header, arguments map[string]any) (*http.Request, context.CancelFunc, error) {
 	var body io.Reader
 	logger := connector.GetLogger(ctx)
 	contentType := contentTypeJSON
@@ -29,50 +29,25 @@ func (c *RESTConnector) createRequest(ctx context.Context, rawRequest *rest.Requ
 		slog.String("request_method", rawRequest.Method),
 	}
 
+	bodyData, ok := arguments["body"]
 	if rawRequest.RequestBody != nil {
 		contentType = rawRequest.RequestBody.ContentType
-		if data != nil {
+		if ok && bodyData != nil {
 			var buffer *bytes.Buffer
 			if strings.HasPrefix(contentType, "text/") {
-				buffer = bytes.NewBuffer([]byte(fmt.Sprintln(data)))
+				buffer = bytes.NewBuffer([]byte(fmt.Sprintln(bodyData)))
 			} else if strings.HasPrefix(contentType, "multipart/") {
-				buffer = new(bytes.Buffer)
-				writer := internal.NewMultipartWriter(buffer)
-				dataMap, ok := data.(map[string]any)
-				if !ok {
-					return nil, nil, fmt.Errorf("failed to decode request body, expect object, got: %v", data)
-				}
-				if rawRequest.RequestBody.Schema.Type != "object" || len(rawRequest.RequestBody.Schema.Properties) == 0 {
-					return nil, nil, errors.New("invalid object schema for multipart")
-				}
-
-				for key := range dataMap {
-					prop, ok := rawRequest.RequestBody.Schema.Properties[key]
-					if !ok {
-						continue
-					}
-					var enc *rest.EncodingObject
-					if len(rawRequest.RequestBody.Encoding) > 0 {
-						en, ok := rawRequest.RequestBody.Encoding[key]
-						if ok {
-							enc = &en
-						}
-					}
-					err := c.evalMultipartFieldValue(writer, dataMap, key, &prop, enc, []string{key})
-					if err != nil {
-						return nil, nil, err
-					}
-				}
-				if err := writer.Close(); err != nil {
+				var err error
+				buffer, contentType, err = c.createMultipartForm(rawRequest.RequestBody, arguments)
+				if err != nil {
 					return nil, nil, err
 				}
-				contentType = writer.FormDataContentType()
 			} else {
 				switch contentType {
 				case rest.ContentTypeFormURLEncoded:
 					// do nothing, body properties are moved to parameters
 				case rest.ContentTypeJSON:
-					bodyBytes, err := json.Marshal(data)
+					bodyBytes, err := json.Marshal(bodyData)
 					if err != nil {
 						return nil, nil, err
 					}
@@ -117,7 +92,7 @@ func (c *RESTConnector) createRequest(ctx context.Context, rawRequest *rest.Requ
 	if logger.Enabled(ctx, slog.LevelDebug) {
 		logAttrs = append(logAttrs,
 			slog.Any("request_headers", request.Header),
-			slog.Any("raw_request_body", data),
+			slog.Any("raw_request_body", bodyData),
 		)
 		logger.Debug("sending request to remote server...", logAttrs...)
 	}
@@ -125,10 +100,45 @@ func (c *RESTConnector) createRequest(ctx context.Context, rawRequest *rest.Requ
 	return request, cancel, nil
 }
 
-func (c *RESTConnector) evalMultipartFieldValue(w *internal.MultipartWriter, arguments map[string]any, name string, typeSchema *rest.TypeSchema, encObject *rest.EncodingObject, fieldPaths []string) error {
+func (c *RESTConnector) createMultipartForm(reqBody *rest.RequestBody, arguments map[string]any) (*bytes.Buffer, string, error) {
+	bodyData := arguments["body"]
 
-	value, ok := arguments[name]
-	if !ok || utils.IsNil(value) {
+	buffer := new(bytes.Buffer)
+	writer := internal.NewMultipartWriter(buffer)
+	dataMap, ok := bodyData.(map[string]any)
+	if !ok {
+		return nil, "", fmt.Errorf("failed to decode request body, expect object, got: %v", bodyData)
+	}
+	if reqBody.Schema.Type != "object" || len(reqBody.Schema.Properties) == 0 {
+		return nil, "", errors.New("invalid object schema for multipart")
+	}
+
+	for key, value := range dataMap {
+		prop, ok := reqBody.Schema.Properties[key]
+		if !ok {
+			continue
+		}
+		var enc *rest.EncodingObject
+		if len(reqBody.Encoding) > 0 {
+			en, ok := reqBody.Encoding[key]
+			if ok {
+				enc = &en
+			}
+		}
+		err := c.evalMultipartFieldValue(writer, arguments, key, value, &prop, enc)
+		if err != nil {
+			return nil, "", fmt.Errorf("%s: %s", key, err)
+		}
+	}
+	if err := writer.Close(); err != nil {
+		return nil, "", err
+	}
+
+	return buffer, writer.FormDataContentType(), nil
+}
+
+func (c *RESTConnector) evalMultipartFieldValue(w *internal.MultipartWriter, arguments map[string]any, name string, value any, typeSchema *rest.TypeSchema, encObject *rest.EncodingObject) error {
+	if utils.IsNil(value) {
 		return nil
 	}
 
@@ -141,8 +151,7 @@ func (c *RESTConnector) evalMultipartFieldValue(w *internal.MultipartWriter, arg
 		}
 	}
 
-	// if slices.Contains([]string{"object", "array"}, typeSchema.Type) && (encObject == nil || slices.Contains(encObject.ContentType, rest.ContentTypeJSON)) {
-	if slices.Contains([]string{"object", "array"}, typeSchema.Type) {
+	if slices.Contains([]string{"object", "array"}, typeSchema.Type) && (encObject == nil || slices.Contains(encObject.ContentType, rest.ContentTypeJSON)) {
 		return w.WriteJSON(name, value, headers)
 	}
 
@@ -150,7 +159,7 @@ func (c *RESTConnector) evalMultipartFieldValue(w *internal.MultipartWriter, arg
 	case "file", string(rest.ScalarBinary):
 		return w.WriteDataURI(name, value, headers)
 	default:
-		params, err := c.encodeParameterValues(typeSchema, value, fieldPaths)
+		params, err := c.encodeParameterValues(typeSchema, value, []string{})
 		if err != nil {
 			return err
 		}
@@ -159,13 +168,31 @@ func (c *RESTConnector) evalMultipartFieldValue(w *internal.MultipartWriter, arg
 			return nil
 		}
 
-		return w.WriteField(name, params.String(), headers)
+		for _, p := range params {
+			keys := p.Keys()
+			values := p.Values()
+			fieldName := name
+
+			if len(keys) > 0 {
+				keys = append([]internal.Key{internal.NewKey(name)}, keys...)
+				fieldName = keys.String()
+			}
+			if len(values) == 1 {
+				w.WriteField(fieldName, values[0], headers)
+			} else if len(values) > 1 {
+				fieldName = fmt.Sprintf("%s[]", fieldName)
+				for _, v := range values {
+					w.WriteField(fieldName, v, headers)
+				}
+			}
+		}
 	}
+
+	return nil
 }
 
 func (c *RESTConnector) evalEncodingHeaders(encHeaders map[string]rest.RequestParameter, arguments map[string]any) (http.Header, error) {
 	results := http.Header{}
-
 	for key, param := range encHeaders {
 		argumentName := param.ArgumentName
 		if argumentName == "" {
@@ -176,11 +203,12 @@ func (c *RESTConnector) evalEncodingHeaders(encHeaders map[string]rest.RequestPa
 			continue
 		}
 
-		headerParams, err := c.encodeParameterValues(param.Schema, rawHeaderValue, []string{key})
+		headerParams, err := c.encodeParameterValues(param.Schema, rawHeaderValue, []string{})
 		if err != nil {
 			return nil, err
 		}
 
+		param.Name = key
 		setHeaderParameters(&results, &param, headerParams)
 	}
 

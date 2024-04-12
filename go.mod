@@ -3,7 +3,7 @@ module github.com/hasura/ndc-rest
 go 1.21
 
 require (
-	github.com/hasura/ndc-rest-schema v0.0.0-20240410040555-c7c3740e9c9e
+	github.com/hasura/ndc-rest-schema v0.0.0-20240412080013-d9a56710b5f6
 	github.com/hasura/ndc-sdk-go v1.1.0
 	github.com/lmittmann/tint v1.0.4
 	github.com/stretchr/testify v1.9.0

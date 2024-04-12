@@ -83,9 +83,9 @@ func (c *RESTConnector) evalURLAndHeaderParameterBySchema(endpoint *url.URL, hea
 	return nil
 }
 
-func (c *RESTConnector) encodeParameterValues(typeSchema *rest.TypeSchema, value any, fieldPaths []string) (internal.StringSlicePairs, error) {
+func (c *RESTConnector) encodeParameterValues(typeSchema *rest.TypeSchema, value any, fieldPaths []string) (internal.ParameterItems, error) {
 
-	results := internal.StringSlicePairs{}
+	results := internal.ParameterItems{}
 	reflectValue := reflect.ValueOf(value)
 
 	if reflectValue.Kind() == reflect.Invalid {
@@ -127,7 +127,7 @@ func (c *RESTConnector) encodeParameterValues(typeSchema *rest.TypeSchema, value
 			}
 
 			for _, pair := range output {
-				results.Add(append([]string{k}, pair.Keys()...), pair.Values())
+				results.Add(append([]internal.Key{internal.NewKey(k)}, pair.Keys()...), pair.Values())
 			}
 		}
 
@@ -147,7 +147,12 @@ func (c *RESTConnector) encodeParameterValues(typeSchema *rest.TypeSchema, value
 			}
 
 			for _, output := range outputs {
-				results.Add(append([]string{fmt.Sprint(i)}, output.Keys()...), output.Values())
+				keys := output.Keys()
+				if len(keys) == 0 {
+					results.Add([]internal.Key{}, output.Values())
+				} else {
+					results.Add(append([]internal.Key{internal.NewIndexKey(i)}, output.Keys()...), output.Values())
+				}
 			}
 		}
 		return results, nil
@@ -177,14 +182,14 @@ func (c *RESTConnector) encodeParameterValues(typeSchema *rest.TypeSchema, value
 					return nil, fmt.Errorf("%s: invalid enum value '%s'", strings.Join(fieldPaths, ""), valueStr)
 				}
 
-				return []internal.StringSlicePair{internal.NewStringSlicePair([]string{}, []string{valueStr})}, nil
+				return []internal.ParameterItem{internal.NewParameterItem([]internal.Key{}, []string{valueStr})}, nil
 			case *schema.TypeRepresentationInt8, *schema.TypeRepresentationInt16, *schema.TypeRepresentationInt32, *schema.TypeRepresentationInt64, *schema.TypeRepresentationBigDecimal:
 				return encodeParameterInt(value, fieldPaths)
 			case *schema.TypeRepresentationFloat32, *schema.TypeRepresentationFloat64:
 				return encodeParameterFloat(value, fieldPaths)
 			default:
-				return []internal.StringSlicePair{
-					internal.NewStringSlicePair([]string{}, []string{fmt.Sprint(value)}),
+				return []internal.ParameterItem{
+					internal.NewParameterItem([]internal.Key{}, []string{fmt.Sprint(value)}),
 				}, nil
 			}
 		}
@@ -195,26 +200,26 @@ func (c *RESTConnector) encodeParameterValues(typeSchema *rest.TypeSchema, value
 			return nil, fmt.Errorf("%s: %s", strings.Join(fieldPaths, ""), err)
 		}
 		values := []string{strings.Trim(string(b), `"`)}
-		return []internal.StringSlicePair{internal.NewStringSlicePair([]string{}, values)}, nil
+		return []internal.ParameterItem{internal.NewParameterItem([]internal.Key{}, values)}, nil
 	}
 }
 
-func buildParamQueryKey(name string, encObject rest.EncodingObject, keys []string, values []string) string {
+func buildParamQueryKey(name string, encObject rest.EncodingObject, keys internal.Keys, values []string) string {
 	resultKeys := []string{name}
 	// non-explode or explode form object does not require param name
 	// /users?role=admin&firstName=Alex
 	if (encObject.Explode != nil && !*encObject.Explode) ||
-		(len(values) == 1 && encObject.Style == rest.EncodingStyleForm && (len(keys) > 1 || (len(keys) == 1 && keys[0] != ""))) {
+		(len(values) == 1 && encObject.Style == rest.EncodingStyleForm && (len(keys) > 1 || (len(keys) == 1 && !keys[0].IsEmpty()))) {
 		resultKeys = []string{}
 	}
 
 	if len(keys) > 0 {
-		if encObject.Style != rest.EncodingStyleDeepObject && keys[len(keys)-1] == "" {
+		if encObject.Style != rest.EncodingStyleDeepObject && keys[len(keys)-1].IsEmpty() {
 			keys = keys[:len(keys)-1]
 		}
 		for _, k := range keys {
 			if len(resultKeys) == 0 {
-				resultKeys = append(resultKeys, k)
+				resultKeys = append(resultKeys, k.String())
 			} else {
 				resultKeys = append(resultKeys, fmt.Sprintf("[%s]", k))
 			}
@@ -224,7 +229,7 @@ func buildParamQueryKey(name string, encObject rest.EncodingObject, keys []strin
 	return strings.Join(resultKeys, "")
 }
 
-func evalQueryParameterURL(q *url.Values, name string, encObject rest.EncodingObject, keys []string, values []string) {
+func evalQueryParameterURL(q *url.Values, name string, encObject rest.EncodingObject, keys internal.Keys, values []string) {
 	if len(values) == 0 {
 		return
 	}
@@ -274,42 +279,42 @@ func encodeQueryValues(qValues url.Values, allowReserved bool) string {
 	return builder.String()
 }
 
-func encodeParameterBool(value any, fieldPaths []string) (internal.StringSlicePairs, error) {
+func encodeParameterBool(value any, fieldPaths []string) (internal.ParameterItems, error) {
 	result, err := sdkUtils.DecodeBoolean(value)
 	if err != nil {
 		return nil, fmt.Errorf("%s: %s", strings.Join(fieldPaths, ""), err)
 	}
 
-	return []internal.StringSlicePair{
-		internal.NewStringSlicePair([]string{}, []string{strconv.FormatBool(result)}),
+	return []internal.ParameterItem{
+		internal.NewParameterItem([]internal.Key{}, []string{strconv.FormatBool(result)}),
 	}, nil
 }
 
-func encodeParameterString(value any, fieldPaths []string) (internal.StringSlicePairs, error) {
+func encodeParameterString(value any, fieldPaths []string) (internal.ParameterItems, error) {
 	result, err := sdkUtils.DecodeString(value)
 	if err != nil {
 		return nil, fmt.Errorf("%s: %s", strings.Join(fieldPaths, ""), err)
 	}
-	return []internal.StringSlicePair{internal.NewStringSlicePair([]string{}, []string{result})}, nil
+	return []internal.ParameterItem{internal.NewParameterItem([]internal.Key{}, []string{result})}, nil
 }
 
-func encodeParameterInt(value any, fieldPaths []string) (internal.StringSlicePairs, error) {
+func encodeParameterInt(value any, fieldPaths []string) (internal.ParameterItems, error) {
 	intValue, err := sdkUtils.DecodeInt[int64](value)
 	if err != nil {
 		return nil, fmt.Errorf("%s: %s", strings.Join(fieldPaths, ""), err)
 	}
-	return []internal.StringSlicePair{internal.NewStringSlicePair([]string{}, []string{strconv.FormatInt(intValue, 10)})}, nil
+	return []internal.ParameterItem{internal.NewParameterItem([]internal.Key{}, []string{strconv.FormatInt(intValue, 10)})}, nil
 }
 
-func encodeParameterFloat(value any, fieldPaths []string) (internal.StringSlicePairs, error) {
+func encodeParameterFloat(value any, fieldPaths []string) (internal.ParameterItems, error) {
 	floatValue, err := sdkUtils.DecodeFloat[float64](value)
 	if err != nil {
 		return nil, fmt.Errorf("%s: %s", strings.Join(fieldPaths, ""), err)
 	}
-	return []internal.StringSlicePair{internal.NewStringSlicePair([]string{}, []string{fmt.Sprintf("%f", floatValue)})}, nil
+	return []internal.ParameterItem{internal.NewParameterItem([]internal.Key{}, []string{fmt.Sprintf("%f", floatValue)})}, nil
 }
 
-func setHeaderParameters(header *http.Header, param *rest.RequestParameter, queryParams internal.StringSlicePairs) {
+func setHeaderParameters(header *http.Header, param *rest.RequestParameter, queryParams internal.ParameterItems) {
 	defaultParam := queryParams.FindDefault()
 	// the param is an array
 	if defaultParam != nil {
@@ -320,7 +325,7 @@ func setHeaderParameters(header *http.Header, param *rest.RequestParameter, quer
 	if param.Explode != nil && *param.Explode {
 		var headerValues []string
 		for _, pair := range queryParams {
-			headerValues = append(headerValues, fmt.Sprintf("%s=%s", strings.Join(pair.Keys(), ","), strings.Join(pair.Values(), ",")))
+			headerValues = append(headerValues, fmt.Sprintf("%s=%s", pair.Keys().String(), strings.Join(pair.Values(), ",")))
 		}
 		header.Set(param.Name, strings.Join(headerValues, ","))
 		return
@@ -328,7 +333,10 @@ func setHeaderParameters(header *http.Header, param *rest.RequestParameter, quer
 
 	var headerValues []string
 	for _, pair := range queryParams {
-		headerValues = append(headerValues, strings.Join(pair.Keys(), ","), strings.Join(pair.Values(), ","))
+		pairKey := pair.Keys().String()
+		for _, v := range pair.Values() {
+			headerValues = append(headerValues, pairKey, v)
+		}
 	}
 	header.Set(param.Name, strings.Join(headerValues, ","))
 }

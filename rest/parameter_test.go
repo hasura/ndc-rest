@@ -6,6 +6,7 @@ import (
 	"testing"
 
 	rest "github.com/hasura/ndc-rest-schema/schema"
+	"github.com/hasura/ndc-rest/rest/internal"
 	"github.com/hasura/ndc-sdk-go/schema"
 	"github.com/hasura/ndc-sdk-go/utils"
 	"github.com/stretchr/testify/assert"
@@ -15,14 +16,14 @@ func TestEvalQueryParameterURL(t *testing.T) {
 	testCases := []struct {
 		name     string
 		param    *rest.RequestParameter
-		keys     []string
+		keys     []internal.Key
 		values   []string
 		expected string
 	}{
 		{
 			name:     "empty",
 			param:    &rest.RequestParameter{},
-			keys:     []string{""},
+			keys:     []internal.Key{internal.NewKey("")},
 			values:   []string{},
 			expected: "",
 		},
@@ -35,7 +36,7 @@ func TestEvalQueryParameterURL(t *testing.T) {
 					Style:   rest.EncodingStyleForm,
 				},
 			},
-			keys:     []string{},
+			keys:     []internal.Key{},
 			values:   []string{"3"},
 			expected: "id=3",
 		},
@@ -48,7 +49,7 @@ func TestEvalQueryParameterURL(t *testing.T) {
 					Style:   rest.EncodingStyleForm,
 				},
 			},
-			keys:     []string{""},
+			keys:     []internal.Key{internal.NewKey("")},
 			values:   []string{"3"},
 			expected: "id=3",
 		},
@@ -61,7 +62,7 @@ func TestEvalQueryParameterURL(t *testing.T) {
 					Style:   rest.EncodingStyleForm,
 				},
 			},
-			keys:     []string{""},
+			keys:     []internal.Key{internal.NewKey("")},
 			values:   []string{"3", "4", "5"},
 			expected: "id=3&id=4&id=5",
 		},
@@ -74,7 +75,7 @@ func TestEvalQueryParameterURL(t *testing.T) {
 					Style:   rest.EncodingStyleSpaceDelimited,
 				},
 			},
-			keys:     []string{""},
+			keys:     []internal.Key{internal.NewKey("")},
 			values:   []string{"3", "4", "5"},
 			expected: "id=3 4 5",
 		},
@@ -87,7 +88,7 @@ func TestEvalQueryParameterURL(t *testing.T) {
 					Style:   rest.EncodingStyleSpaceDelimited,
 				},
 			},
-			keys:     []string{""},
+			keys:     []internal.Key{internal.NewKey("")},
 			values:   []string{"3", "4", "5"},
 			expected: "id=3&id=4&id=5",
 		},
@@ -101,7 +102,7 @@ func TestEvalQueryParameterURL(t *testing.T) {
 					Style:   rest.EncodingStylePipeDelimited,
 				},
 			},
-			keys:     []string{""},
+			keys:     []internal.Key{internal.NewKey("")},
 			values:   []string{"3", "4", "5"},
 			expected: "id=3|4|5",
 		},
@@ -114,7 +115,7 @@ func TestEvalQueryParameterURL(t *testing.T) {
 					Style:   rest.EncodingStylePipeDelimited,
 				},
 			},
-			keys:     []string{""},
+			keys:     []internal.Key{internal.NewKey("")},
 			values:   []string{"3", "4", "5"},
 			expected: "id=3&id=4&id=5",
 		},
@@ -127,7 +128,7 @@ func TestEvalQueryParameterURL(t *testing.T) {
 					Style:   rest.EncodingStyleDeepObject,
 				},
 			},
-			keys:     []string{""},
+			keys:     []internal.Key{internal.NewKey("")},
 			values:   []string{"3", "4", "5"},
 			expected: "id[]=3&id[]=4&id[]=5",
 		},
@@ -140,7 +141,7 @@ func TestEvalQueryParameterURL(t *testing.T) {
 					Style:   rest.EncodingStyleForm,
 				},
 			},
-			keys:     []string{"role"},
+			keys:     []internal.Key{internal.NewKey("role")},
 			values:   []string{"admin"},
 			expected: "id=role,admin",
 		},
@@ -153,7 +154,7 @@ func TestEvalQueryParameterURL(t *testing.T) {
 					Style:   rest.EncodingStyleForm,
 				},
 			},
-			keys:     []string{"role"},
+			keys:     []internal.Key{internal.NewKey("role")},
 			values:   []string{"admin"},
 			expected: "role=admin",
 		},
@@ -166,7 +167,7 @@ func TestEvalQueryParameterURL(t *testing.T) {
 					Style:   rest.EncodingStyleDeepObject,
 				},
 			},
-			keys:     []string{"role"},
+			keys:     []internal.Key{internal.NewKey("role")},
 			values:   []string{"admin"},
 			expected: "id[role]=admin",
 		},
@@ -179,7 +180,7 @@ func TestEvalQueryParameterURL(t *testing.T) {
 					Style:   rest.EncodingStyleForm,
 				},
 			},
-			keys:     []string{"role", "", "user", ""},
+			keys:     []internal.Key{internal.NewKey("role"), internal.NewKey(""), internal.NewKey("user"), internal.NewKey("")},
 			values:   []string{"admin"},
 			expected: "id=role[][user],admin",
 		},
@@ -192,7 +193,7 @@ func TestEvalQueryParameterURL(t *testing.T) {
 					Style:   rest.EncodingStyleForm,
 				},
 			},
-			keys:     []string{"role", "", "user", ""},
+			keys:     []internal.Key{internal.NewKey("role"), internal.NewKey(""), internal.NewKey("user"), internal.NewKey("")},
 			values:   []string{"admin"},
 			expected: "role[][user]=admin",
 		},
@@ -205,7 +206,7 @@ func TestEvalQueryParameterURL(t *testing.T) {
 					Style:   rest.EncodingStyleForm,
 				},
 			},
-			keys:     []string{"role", "", "user", ""},
+			keys:     []internal.Key{internal.NewKey("role"), internal.NewKey(""), internal.NewKey("user"), internal.NewKey("")},
 			values:   []string{"admin", "anonymous"},
 			expected: "id[role][][user]=admin&id[role][][user]=anonymous",
 		},
@@ -218,7 +219,7 @@ func TestEvalQueryParameterURL(t *testing.T) {
 					Style:   rest.EncodingStyleDeepObject,
 				},
 			},
-			keys:     []string{"role", "", "user", ""},
+			keys:     []internal.Key{internal.NewKey("role"), internal.NewKey(""), internal.NewKey("user"), internal.NewKey("")},
 			values:   []string{"admin"},
 			expected: "id[role][][user][]=admin",
 		},
@@ -231,7 +232,7 @@ func TestEvalQueryParameterURL(t *testing.T) {
 					Style:   rest.EncodingStyleDeepObject,
 				},
 			},
-			keys:     []string{"role", "", "user", ""},
+			keys:     []internal.Key{internal.NewKey("role"), internal.NewKey(""), internal.NewKey("user"), internal.NewKey("")},
 			values:   []string{"admin", "anonymous"},
 			expected: "id[role][][user][]=admin&id[role][][user][]=anonymous",
 		},
