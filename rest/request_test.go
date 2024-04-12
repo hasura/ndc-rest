@@ -38,6 +38,14 @@ func TestCreateMultipartForm(t *testing.T) {
 								"maxLength": 5000
 							}
 						},
+						"expand_expose": {
+							"type": "array",
+							"nullable": true,
+							"items": {
+								"type": "String",
+								"maxLength": 5000
+							}
+						},
 						"file": {
 							"type": "Binary"
 						},
@@ -60,6 +68,10 @@ func TestCreateMultipartForm(t *testing.T) {
 					}
 				},
 				"encoding": {
+					"expand_expose": {
+						"style": "deepObject",
+						"explode": true
+					},
 					"file_link_data": {
 						"style": "deepObject",
 						"explode": true
@@ -79,6 +91,7 @@ func TestCreateMultipartForm(t *testing.T) {
 			RawArguments: `{
         "body": {
           "expand": ["foo", "bar"],
+          "expand_expose": ["foo"],
           "file": "aGVsbG8gd29ybGQ=",
           "file_link_data": {
             "create": true,
@@ -90,6 +103,7 @@ func TestCreateMultipartForm(t *testing.T) {
       }`,
 			Expected: map[string]string{
 				"expand":                    `["foo","bar"]`,
+				"expand_expose[]":           `foo`,
 				"file":                      "hello world",
 				"file_link_data.create":     "true",
 				"file_link_data.expires_at": "181320689",

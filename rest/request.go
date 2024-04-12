@@ -177,16 +177,17 @@ func (c *RESTConnector) evalMultipartFieldValue(w *internal.MultipartWriter, arg
 				keys = append([]internal.Key{internal.NewKey(name)}, keys...)
 				fieldName = keys.String()
 			}
-			if len(values) == 1 {
-				if err = w.WriteField(fieldName, values[0], headers); err != nil {
-					return err
-				}
-			} else if len(values) > 1 {
+
+			if typeSchema.Type == "array" || len(values) > 1 {
 				fieldName = fmt.Sprintf("%s[]", fieldName)
 				for _, v := range values {
 					if err = w.WriteField(fieldName, v, headers); err != nil {
 						return err
 					}
+				}
+			} else if len(values) == 1 {
+				if err = w.WriteField(fieldName, values[0], headers); err != nil {
+					return err
 				}
 			}
 		}
