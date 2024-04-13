@@ -1,8 +1,8 @@
 name: Release container definition
 on:
   push:
-    # tags:
-    #   - "*"
+    tags:
+      - "*"
 
 jobs:
   tests:
@@ -31,7 +31,7 @@ jobs:
       - name: Get version from tag
         id: get-version
         run: |
-          echo "tagged_version=${GITHUB_REF_NAME#refs/tags/}" >> $GITHUB_OUTPUT
+          echo "tagged_version=${GITHUB_REF#refs/tags/}" >> $GITHUB_OUTPUT
         shell: bash
 
       - name: Build and push
@@ -42,8 +42,9 @@ jobs:
 
       - name: Build connector definition
         run: |
-          export VERSION=$GITHUB_REF_NAME
           ./scripts/build-manifest.sh
+        env:
+          VERSION: ${{ steps.get-version.outputs.tagged_version }}
 
       - name: create a draft release
         uses: ncipollo/release-action@v1
