@@ -32,4 +32,4 @@ jobs:
         uses: docker/build-push-action@v5
         with:
           push: false
-          tags: ghcr.io/hasura/ndc-rest:${{ env.GITHUB_REF_NAME }}
+          tags: ghcr.io/hasura/ndc-rest:${{ github.ref_name }}
