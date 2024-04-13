@@ -1,0 +1,24 @@
+[
+  {
+    "rows": [
+      {
+        "__value": {
+          "category": {
+            "id": 1,
+            "name": "Dogs"
+          },
+          "id": 10,
+          "name": "doggie",
+          "photoUrls": ["string"],
+          "status": "available",
+          "tags": [
+            {
+              "id": 0,
+              "name": "string"
+            }
+          ]
+        }
+      }
+    ]
+  }
+]

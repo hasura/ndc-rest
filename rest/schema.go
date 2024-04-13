@@ -19,7 +19,7 @@ import (
 
 // GetSchema gets the connector's schema.
 func (c *RESTConnector) GetSchema(ctx context.Context, configuration *Configuration, _ *State) (schema.SchemaResponseMarshaler, error) {
-	return c.schema, nil
+	return c.rawSchema, nil
 }
 
 // build NDC REST schema from file list
@@ -81,7 +81,7 @@ func buildSchemaFile(configDir string, conf *SchemaFile, logger *slog.Logger) (*
 		}
 
 		return applyEnvVariablesToSchema(&result, logger), nil
-	case rest.OpenAPIv2Spec:
+	case rest.OpenAPIv2Spec, rest.OAS2Spec:
 		result, errs := openapi.OpenAPIv2ToNDCSchema(rawBytes, &openapi.ConvertOptions{
 			MethodAlias: conf.MethodAlias,
 			TrimPrefix:  conf.TrimPrefix,
@@ -93,7 +93,7 @@ func buildSchemaFile(configDir string, conf *SchemaFile, logger *slog.Logger) (*
 			return applyEnvVariablesToSchema(result, logger), nil
 		}
 		return nil, errors.Join(errs...)
-	case rest.OpenAPIv3Spec:
+	case rest.OpenAPIv3Spec, rest.OAS3Spec:
 		result, errs := openapi.OpenAPIv3ToNDCSchema(rawBytes, &openapi.ConvertOptions{
 			MethodAlias: conf.MethodAlias,
 			TrimPrefix:  conf.TrimPrefix,
@@ -197,7 +197,11 @@ func (c *RESTConnector) applyNDCRestSchemas(schemas []ndcRestSchemaWithName) map
 		return errors
 	}
 
-	c.schema = schema.NewRawSchemaResponseUnsafe(schemaBytes)
+	c.schema = &schema.SchemaResponse{
+		ScalarTypes: ndcSchema.ScalarTypes,
+		ObjectTypes: ndcSchema.ObjectTypes,
+	}
+	c.rawSchema = schema.NewRawSchemaResponseUnsafe(schemaBytes)
 	return nil
 }
 

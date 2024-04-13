@@ -9,7 +9,6 @@ import (
 	"log/slog"
 	"net/http"
 	"strings"
-	"time"
 
 	rest "github.com/hasura/ndc-rest-schema/schema"
 	"github.com/hasura/ndc-sdk-go/connector"
@@ -33,89 +32,43 @@ func createHTTPClient(client Doer) *httpClient {
 }
 
 // Send creates and executes the request and evaluate response selection
-func (client *httpClient) Send(ctx context.Context, rawRequest *rest.Request, headers http.Header, data any, selection schema.NestedField) (any, error) {
-	timeout := defaultTimeout
-	if rawRequest.Timeout > 0 {
-		timeout = rawRequest.Timeout
-	}
-
-	ctxR, cancel := context.WithTimeout(ctx, time.Duration(timeout)*time.Second)
-	defer cancel()
-
-	logger := connector.GetLogger(ctx)
-	request, err := createRequest(ctxR, rawRequest, headers, data)
-	if err != nil {
-		return nil, err
-	}
-
+func (client *httpClient) Send(ctx context.Context, request *http.Request, selection schema.NestedField, resultType schema.Type) (any, error) {
 	resp, err := client.Client.Do(request)
 	if err != nil {
 		return nil, schema.NewConnectorError(http.StatusInternalServerError, err.Error(), nil)
 	}
+
+	logger := connector.GetLogger(ctx)
 	if logger.Enabled(ctx, slog.LevelDebug) {
 		logAttrs := []any{
-			slog.String("request_url", request.URL.String()),
-			slog.String("request_method", request.Method),
-			slog.Any("request_headers", request.Header),
-			slog.Any("request_body", data),
 			slog.Int("http_status", resp.StatusCode),
 			slog.Any("response_headers", resp.Header),
 		}
+
 		if resp.Body != nil {
 			respBody, err := io.ReadAll(resp.Body)
+			_ = resp.Body.Close()
 			if err != nil {
 				return nil, schema.NewConnectorError(http.StatusInternalServerError, err.Error(), nil)
 			}
 			logAttrs = append(logAttrs, slog.String("response_body", string(respBody)))
 			resp.Body = io.NopCloser(bytes.NewBuffer(respBody))
 		}
-		logger.Debug("sent request to remote server", logAttrs...)
+
+		logger.Debug("received response from remote server", logAttrs...)
 	}
 
-	return evalHTTPResponse(resp, selection)
+	return evalHTTPResponse(resp, selection, resultType)
 }
 
-func createRequest(ctx context.Context, rawRequest *rest.Request, headers http.Header, data any) (*http.Request, error) {
-	contentType := headers.Get(contentTypeHeader)
-	if contentType == "" {
-		contentType = contentTypeJSON
-	}
-
-	var body io.Reader
-	if data != nil {
-		switch contentType {
-		case contentTypeJSON:
-			bodyBytes, err := json.Marshal(data)
-			if err != nil {
-				return nil, err
-			}
-			body = bytes.NewBuffer(bodyBytes)
-		default:
-			return nil, fmt.Errorf("unsupported content type %s", contentType)
-		}
-	}
-
-	request, err := http.NewRequestWithContext(ctx, strings.ToUpper(rawRequest.Method), rawRequest.URL, body)
-	if err != nil {
-		return nil, err
-	}
-	for key, header := range headers {
-		request.Header[key] = header
-	}
-	if request.Header.Get("accept") == "" {
-		request.Header.Set("Accept", contentTypeJSON)
-	}
-
-	return request, nil
-}
-
-func evalHTTPResponse(resp *http.Response, selection schema.NestedField) (any, error) {
+func evalHTTPResponse(resp *http.Response, selection schema.NestedField, resultType schema.Type) (any, error) {
 	contentType := parseContentType(resp.Header.Get(contentTypeHeader))
 	if resp.StatusCode >= 400 {
 		var respBody []byte
 		if resp.Body != nil {
 			var err error
 			respBody, err = io.ReadAll(resp.Body)
+			_ = resp.Body.Close()
 
 			if err != nil {
 				return nil, schema.NewConnectorError(http.StatusInternalServerError, resp.Status, map[string]any{
@@ -137,7 +90,20 @@ func evalHTTPResponse(resp *http.Response, selection schema.NestedField) (any, e
 		return nil, nil
 	}
 
+	defer func() {
+		_ = resp.Body.Close()
+	}()
+
 	switch contentType {
+	case "":
+		respBody, err := io.ReadAll(resp.Body)
+		if err != nil {
+			return nil, schema.NewConnectorError(http.StatusInternalServerError, err.Error(), nil)
+		}
+		if len(respBody) == 0 {
+			return nil, nil
+		}
+		return string(respBody), nil
 	case "text/plain", "text/html":
 		respBody, err := io.ReadAll(resp.Body)
 		if err != nil {
@@ -145,11 +111,34 @@ func evalHTTPResponse(resp *http.Response, selection schema.NestedField) (any, e
 		}
 		return string(respBody), nil
 	case contentTypeJSON:
+		if len(resultType) > 0 {
+			namedType, err := resultType.AsNamed()
+			if err == nil && namedType.Name == string(rest.ScalarString) {
+
+				respBytes, err := io.ReadAll(resp.Body)
+				_ = resp.Body.Close()
+				if err != nil {
+					return nil, schema.NewConnectorError(http.StatusInternalServerError, "failed to read response", map[string]any{
+						"reason": err.Error(),
+					})
+				}
+
+				var strResult string
+				if err := json.Unmarshal(respBytes, &strResult); err != nil {
+					// fallback to raw string response if the result type is String
+					return string(respBytes), nil
+				}
+				return strResult, nil
+			}
+		}
+
 		var result any
-		if err := json.NewDecoder(resp.Body).Decode(&result); err != nil {
+		err := json.NewDecoder(resp.Body).Decode(&result)
+		_ = resp.Body.Close()
+		if err != nil {
 			return nil, schema.NewConnectorError(http.StatusInternalServerError, err.Error(), nil)
 		}
-		if selection == nil {
+		if selection == nil || selection.IsNil() {
 			return result, nil
 		}
 

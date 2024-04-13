@@ -1,0 +1,14 @@
+{
+  "collection_relationships": {},
+  "operations": [
+    {
+      "type": "procedure",
+      "name": "updatePetWithForm",
+      "arguments": {
+        "name": "sOLLc948uM",
+        "petId": 10,
+        "status": "u4ju56bSJj"
+      }
+    }
+  ]
+}

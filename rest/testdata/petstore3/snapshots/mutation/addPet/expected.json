@@ -1,0 +1,15 @@
+{
+  "operation_results": [
+    {
+      "result": {
+        "category": { "id": 1259841338879610600, "name": "tRr2A6YnsI" },
+        "id": 2283790488136335400,
+        "name": "8TPpwZH0gc",
+        "photoUrls": ["CdJSVtii6f"],
+        "status": "sold",
+        "tags": [{ "id": 4460990514887578600, "name": "zmPbSenyyL" }]
+      },
+      "type": "procedure"
+    }
+  ]
+}

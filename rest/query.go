@@ -2,14 +2,7 @@ package rest
 
 import (
 	"context"
-	"encoding/json"
-	"fmt"
-	"net/http"
-	"net/url"
-	"slices"
-	"strings"
 
-	rest "github.com/hasura/ndc-rest-schema/schema"
 	"github.com/hasura/ndc-sdk-go/schema"
 	"github.com/hasura/ndc-sdk-go/utils"
 )
@@ -59,7 +52,7 @@ func (c *RESTConnector) execQuery(ctx context.Context, request *schema.QueryRequ
 		})
 	}
 
-	endpoint, headers, err := evalURLAndHeaderParameters(function.Request, function.Arguments, rawArgs)
+	endpoint, headers, err := c.evalURLAndHeaderParameters(function.Request, function.Arguments, rawArgs)
 	if err != nil {
 		return nil, schema.UnprocessableContentError("failed to evaluate URL and Headers from parameters", map[string]any{
 			"cause": err.Error(),
@@ -68,79 +61,11 @@ func (c *RESTConnector) execQuery(ctx context.Context, request *schema.QueryRequ
 	// 2. create and execute request
 	// 3. evaluate response selection
 	function.Request.URL = endpoint
-
-	return c.client.Send(ctx, function.Request, headers, nil, queryFields)
-}
-
-func evalURLAndHeaderParameters(request *rest.Request, argumentsSchema map[string]schema.ArgumentInfo, arguments map[string]any) (string, http.Header, error) {
-	endpoint, err := url.Parse(request.URL)
+	httpRequest, cancel, err := c.createRequest(ctx, function.Request, headers, nil)
 	if err != nil {
-		return "", nil, err
+		return nil, err
 	}
-	headers := http.Header{}
-	for k, h := range request.Headers {
-		headers.Add(k, h)
-	}
+	defer cancel()
 
-	for _, param := range request.Parameters {
-		argSchema, schemaOk := argumentsSchema[param.Name]
-		value, ok := arguments[param.Name]
-
-		if !schemaOk || !ok || utils.IsNil(value) {
-			if param.Required {
-				return "", nil, fmt.Errorf("parameter %s is required", param.Name)
-			}
-		} else if err := evalURLAndHeaderParameterBySchema(endpoint, &headers, &param, argSchema.Type, value); err != nil {
-			return "", nil, err
-		}
-	}
-	return endpoint.String(), headers, nil
-}
-
-func evalURLAndHeaderParameterBySchema(endpoint *url.URL, header *http.Header, param *rest.RequestParameter, argumentType schema.Type, value any) error {
-	if utils.IsNil(value) {
-		return nil
-	}
-
-	var valueStr string
-	switch arg := argumentType.Interface().(type) {
-	case *schema.NamedType:
-		switch arg.Name {
-		case "Boolean":
-			valueStr = fmt.Sprintf("%t", value)
-		case "Int", "Float", "String":
-			valueStr = fmt.Sprint(value)
-		default:
-			b, err := json.Marshal(value)
-			if err != nil {
-				return err
-			}
-			valueStr = string(b)
-		}
-	case *schema.NullableType:
-		return evalURLAndHeaderParameterBySchema(endpoint, header, param, arg.UnderlyingType, value)
-	case *schema.ArrayType:
-		if !slices.Contains([]rest.ParameterLocation{rest.InHeader, rest.InQuery}, param.In) {
-			return fmt.Errorf("cannot evaluate array parameter to %s", param.In)
-		}
-
-		// TODO: evaluate array with reflection
-		b, err := json.Marshal(value)
-		if err != nil {
-			return err
-		}
-		valueStr = string(b)
-	}
-
-	switch param.In {
-	case rest.InHeader:
-		header.Set(param.Name, valueStr)
-	case rest.InQuery:
-		q := endpoint.Query()
-		q.Add(param.Name, valueStr)
-		endpoint.RawQuery = q.Encode()
-	case rest.InPath:
-		endpoint.Path = strings.ReplaceAll(endpoint.Path, fmt.Sprintf("{%s}", param.Name), valueStr)
-	}
-	return nil
+	return c.client.Send(ctx, httpRequest, queryFields, function.ResultType)
 }

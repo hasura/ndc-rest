@@ -258,6 +258,8 @@ func test_createServer(t *testing.T, dir string) *connector.Server[Configuration
 }
 
 func assertHTTPResponse[B any](t *testing.T, res *http.Response, statusCode int, expectedBody B) {
+	defer res.Body.Close()
+
 	bodyBytes, err := io.ReadAll(res.Body)
 	if err != nil {
 		t.Error("failed to read response body")
