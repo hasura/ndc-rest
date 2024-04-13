@@ -1,0 +1,85 @@
+{
+  "collection_relationships": {},
+  "operations": [
+    {
+      "type": "procedure",
+      "name": "updatePet",
+      "arguments": {
+        "body": {
+          "id": 10,
+          "name": "doggie",
+          "category": {
+            "id": 1,
+            "name": "Dogs"
+          },
+          "photoUrls": ["string"],
+          "tags": [
+            {
+              "id": 0,
+              "name": "string"
+            }
+          ],
+          "status": "available"
+        }
+      },
+      "fields": {
+        "fields": {
+          "category": {
+            "column": "category",
+            "fields": {
+              "fields": {
+                "id": {
+                  "column": "id",
+                  "type": "column"
+                },
+                "name": {
+                  "column": "name",
+                  "type": "column"
+                }
+              },
+              "type": "object"
+            },
+            "type": "column"
+          },
+          "id": {
+            "column": "id",
+            "type": "column"
+          },
+          "name": {
+            "column": "name",
+            "type": "column"
+          },
+          "photoUrls": {
+            "column": "photoUrls",
+            "type": "column"
+          },
+          "status": {
+            "column": "status",
+            "type": "column"
+          },
+          "tags": {
+            "column": "tags",
+            "fields": {
+              "fields": {
+                "fields": {
+                  "id": {
+                    "column": "id",
+                    "type": "column"
+                  },
+                  "name": {
+                    "column": "name",
+                    "type": "column"
+                  }
+                },
+                "type": "object"
+              },
+              "type": "array"
+            },
+            "type": "column"
+          }
+        },
+        "type": "object"
+      }
+    }
+  ]
+}

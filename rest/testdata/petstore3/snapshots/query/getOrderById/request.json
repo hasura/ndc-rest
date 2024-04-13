@@ -1,0 +1,43 @@
+{
+  "arguments": {
+    "orderId": {
+      "type": "literal",
+      "value": "10"
+    }
+  },
+  "collection": "getOrderById",
+  "collection_relationships": {},
+  "query": {
+    "fields": {
+      "__value": {
+        "column": "__value",
+        "fields": {
+          "fields": {
+            "complete": {
+              "column": "complete",
+              "type": "column"
+            },
+            "id": {
+              "column": "id",
+              "type": "column"
+            },
+            "petId": {
+              "column": "petId",
+              "type": "column"
+            },
+            "quantity": {
+              "column": "quantity",
+              "type": "column"
+            },
+            "status": {
+              "column": "status",
+              "type": "column"
+            }
+          },
+          "type": "object"
+        },
+        "type": "column"
+      }
+    }
+  }
+}

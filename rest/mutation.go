@@ -62,7 +62,7 @@ func (c *RESTConnector) execProcedure(ctx context.Context, operation *schema.Mut
 	}
 	defer cancel()
 
-	result, err := c.client.Send(ctx, httpRequest, operation.Fields)
+	result, err := c.client.Send(ctx, httpRequest, operation.Fields, procedure.ResultType)
 	if err != nil {
 		return nil, err
 	}

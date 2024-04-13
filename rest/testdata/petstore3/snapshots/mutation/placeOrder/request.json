@@ -1,0 +1,48 @@
+{
+  "collection_relationships": {},
+  "operations": [
+    {
+      "type": "procedure",
+      "name": "placeOrder",
+      "arguments": {
+        "body": {
+          "complete": true,
+          "id": "9072293783602807288",
+          "petId": "5061281439199818722",
+          "quantity": 891714759,
+          "shipDate": "1970-01-01T00:00:00Z",
+          "status": "approved"
+        }
+      },
+      "fields": {
+        "fields": {
+          "complete": {
+            "column": "complete",
+            "type": "column"
+          },
+          "id": {
+            "column": "id",
+            "type": "column"
+          },
+          "petId": {
+            "column": "petId",
+            "type": "column"
+          },
+          "quantity": {
+            "column": "quantity",
+            "type": "column"
+          },
+          "shipDate": {
+            "column": "shipDate",
+            "type": "column"
+          },
+          "status": {
+            "column": "status",
+            "type": "column"
+          }
+        },
+        "type": "object"
+      }
+    }
+  ]
+}

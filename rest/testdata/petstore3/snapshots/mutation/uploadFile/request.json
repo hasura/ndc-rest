@@ -1,0 +1,31 @@
+{
+  "collection_relationships": {},
+  "operations": [
+    {
+      "type": "procedure",
+      "name": "uploadFile",
+      "arguments": {
+        "additionalMetadata": "XSELlubwUv",
+        "body": "dTFwMjBJdmdJWA==",
+        "petId": 10
+      },
+      "fields": {
+        "fields": {
+          "code": {
+            "column": "code",
+            "type": "column"
+          },
+          "message": {
+            "column": "message",
+            "type": "column"
+          },
+          "type": {
+            "column": "type",
+            "type": "column"
+          }
+        },
+        "type": "object"
+      }
+    }
+  ]
+}

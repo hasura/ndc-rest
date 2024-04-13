@@ -67,5 +67,5 @@ func (c *RESTConnector) execQuery(ctx context.Context, request *schema.QueryRequ
 	}
 	defer cancel()
 
-	return c.client.Send(ctx, httpRequest, queryFields)
+	return c.client.Send(ctx, httpRequest, queryFields, function.ResultType)
 }

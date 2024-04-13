@@ -34,8 +34,19 @@ func (c *RESTConnector) createRequest(ctx context.Context, rawRequest *rest.Requ
 		contentType = rawRequest.RequestBody.ContentType
 		if ok && bodyData != nil {
 			var buffer *bytes.Buffer
-			if strings.HasPrefix(contentType, "text/") {
-				buffer = bytes.NewBuffer([]byte(fmt.Sprintln(bodyData)))
+			binaryBody := getRequestUploadBody(rawRequest)
+			if binaryBody != nil {
+				b64, err := utils.DecodeString(bodyData)
+				if err != nil {
+					return nil, nil, err
+				}
+				dataURI, err := internal.DecodeDataURI(b64)
+				if err != nil {
+					return nil, nil, err
+				}
+				buffer = bytes.NewBuffer([]byte(dataURI.Data))
+			} else if strings.HasPrefix(contentType, "text/") {
+				buffer = bytes.NewBuffer([]byte(fmt.Sprint(bodyData)))
 			} else if strings.HasPrefix(contentType, "multipart/") {
 				var err error
 				buffer, contentType, err = c.createMultipartForm(rawRequest.RequestBody, arguments)
@@ -219,4 +230,17 @@ func (c *RESTConnector) evalEncodingHeaders(encHeaders map[string]rest.RequestPa
 	}
 
 	return results, nil
+}
+
+func getRequestUploadBody(rawRequest *rest.Request) *rest.RequestBody {
+	if rawRequest.RequestBody == nil {
+		return nil
+	}
+	if rawRequest.RequestBody.ContentType == "application/octet-stream" {
+		return rawRequest.RequestBody
+	}
+	if rawRequest.RequestBody.Schema != nil && rawRequest.RequestBody.Schema.Type == string(rest.ScalarBinary) {
+		return rawRequest.RequestBody
+	}
+	return nil
 }

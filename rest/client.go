@@ -10,6 +10,7 @@ import (
 	"net/http"
 	"strings"
 
+	rest "github.com/hasura/ndc-rest-schema/schema"
 	"github.com/hasura/ndc-sdk-go/connector"
 	"github.com/hasura/ndc-sdk-go/schema"
 	"github.com/hasura/ndc-sdk-go/utils"
@@ -31,7 +32,7 @@ func createHTTPClient(client Doer) *httpClient {
 }
 
 // Send creates and executes the request and evaluate response selection
-func (client *httpClient) Send(ctx context.Context, request *http.Request, selection schema.NestedField) (any, error) {
+func (client *httpClient) Send(ctx context.Context, request *http.Request, selection schema.NestedField, resultType schema.Type) (any, error) {
 	resp, err := client.Client.Do(request)
 	if err != nil {
 		return nil, schema.NewConnectorError(http.StatusInternalServerError, err.Error(), nil)
@@ -57,10 +58,10 @@ func (client *httpClient) Send(ctx context.Context, request *http.Request, selec
 		logger.Debug("received response from remote server", logAttrs...)
 	}
 
-	return evalHTTPResponse(resp, selection)
+	return evalHTTPResponse(resp, selection, resultType)
 }
 
-func evalHTTPResponse(resp *http.Response, selection schema.NestedField) (any, error) {
+func evalHTTPResponse(resp *http.Response, selection schema.NestedField, resultType schema.Type) (any, error) {
 	contentType := parseContentType(resp.Header.Get(contentTypeHeader))
 	if resp.StatusCode >= 400 {
 		var respBody []byte
@@ -94,6 +95,15 @@ func evalHTTPResponse(resp *http.Response, selection schema.NestedField) (any, e
 	}()
 
 	switch contentType {
+	case "":
+		respBody, err := io.ReadAll(resp.Body)
+		if err != nil {
+			return nil, schema.NewConnectorError(http.StatusInternalServerError, err.Error(), nil)
+		}
+		if len(respBody) == 0 {
+			return nil, nil
+		}
+		return string(respBody), nil
 	case "text/plain", "text/html":
 		respBody, err := io.ReadAll(resp.Body)
 		if err != nil {
@@ -101,13 +111,34 @@ func evalHTTPResponse(resp *http.Response, selection schema.NestedField) (any, e
 		}
 		return string(respBody), nil
 	case contentTypeJSON:
+		if len(resultType) > 0 {
+			namedType, err := resultType.AsNamed()
+			if err == nil && namedType.Name == string(rest.ScalarString) {
+
+				respBytes, err := io.ReadAll(resp.Body)
+				_ = resp.Body.Close()
+				if err != nil {
+					return nil, schema.NewConnectorError(http.StatusInternalServerError, "failed to read response", map[string]any{
+						"reason": err.Error(),
+					})
+				}
+
+				var strResult string
+				if err := json.Unmarshal(respBytes, &strResult); err != nil {
+					// fallback to raw string response if the result type is String
+					return string(respBytes), nil
+				}
+				return strResult, nil
+			}
+		}
+
 		var result any
 		err := json.NewDecoder(resp.Body).Decode(&result)
 		_ = resp.Body.Close()
 		if err != nil {
 			return nil, schema.NewConnectorError(http.StatusInternalServerError, err.Error(), nil)
 		}
-		if selection == nil {
+		if selection == nil || selection.IsNil() {
 			return result, nil
 		}
 

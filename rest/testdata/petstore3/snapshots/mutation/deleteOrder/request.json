@@ -1,0 +1,12 @@
+{
+  "collection_relationships": {},
+  "operations": [
+    {
+      "type": "procedure",
+      "name": "deleteOrder",
+      "arguments": {
+        "orderId": "1155397308811935225"
+      }
+    }
+  ]
+}

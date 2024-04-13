@@ -1,0 +1,55 @@
+{
+  "arguments": {
+    "username": {
+      "type": "literal",
+      "value": "user1"
+    }
+  },
+  "collection": "getUserByName",
+  "collection_relationships": {},
+  "query": {
+    "fields": {
+      "__value": {
+        "column": "__value",
+        "fields": {
+          "fields": {
+            "email": {
+              "column": "email",
+              "type": "column"
+            },
+            "firstName": {
+              "column": "firstName",
+              "type": "column"
+            },
+            "id": {
+              "column": "id",
+              "type": "column"
+            },
+            "lastName": {
+              "column": "lastName",
+              "type": "column"
+            },
+            "password": {
+              "column": "password",
+              "type": "column"
+            },
+            "phone": {
+              "column": "phone",
+              "type": "column"
+            },
+            "userStatus": {
+              "column": "userStatus",
+              "type": "column"
+            },
+            "username": {
+              "column": "username",
+              "type": "column"
+            }
+          },
+          "type": "object"
+        },
+        "type": "column"
+      }
+    }
+  }
+}

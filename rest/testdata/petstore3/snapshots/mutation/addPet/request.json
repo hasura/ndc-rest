@@ -1,0 +1,87 @@
+{
+  "collection_relationships": {},
+  "operations": [
+    {
+      "type": "procedure",
+      "name": "addPet",
+      "arguments": {
+        "body": {
+          "category": {
+            "id": "1259841338879610621",
+            "name": "tRr2A6YnsI"
+          },
+          "id": "2283790488136335305",
+          "name": "8TPpwZH0gc",
+          "photoUrls": [
+            "CdJSVtii6f"
+          ],
+          "status": "sold",
+          "tags": [
+            {
+              "id": "4460990514887578583",
+              "name": "zmPbSenyyL"
+            }
+          ]
+        }
+      },
+      "fields": {
+        "fields": {
+          "category": {
+            "column": "category",
+            "fields": {
+              "fields": {
+                "id": {
+                  "column": "id",
+                  "type": "column"
+                },
+                "name": {
+                  "column": "name",
+                  "type": "column"
+                }
+              },
+              "type": "object"
+            },
+            "type": "column"
+          },
+          "id": {
+            "column": "id",
+            "type": "column"
+          },
+          "name": {
+            "column": "name",
+            "type": "column"
+          },
+          "photoUrls": {
+            "column": "photoUrls",
+            "type": "column"
+          },
+          "status": {
+            "column": "status",
+            "type": "column"
+          },
+          "tags": {
+            "column": "tags",
+            "fields": {
+              "fields": {
+                "fields": {
+                  "id": {
+                    "column": "id",
+                    "type": "column"
+                  },
+                  "name": {
+                    "column": "name",
+                    "type": "column"
+                  }
+                },
+                "type": "object"
+              },
+              "type": "array"
+            },
+            "type": "column"
+          }
+        },
+        "type": "object"
+      }
+    }
+  ]
+}

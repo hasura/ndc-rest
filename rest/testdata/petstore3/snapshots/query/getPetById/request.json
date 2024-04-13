@@ -1,0 +1,76 @@
+{
+  "arguments": {
+    "petId": {
+      "type": "literal",
+      "value": 10
+    }
+  },
+  "collection": "getPetById",
+  "collection_relationships": {},
+  "query": {
+    "fields": {
+      "__value": {
+        "column": "__value",
+        "fields": {
+          "fields": {
+            "category": {
+              "column": "category",
+              "fields": {
+                "fields": {
+                  "id": {
+                    "column": "id",
+                    "type": "column"
+                  },
+                  "name": {
+                    "column": "name",
+                    "type": "column"
+                  }
+                },
+                "type": "object"
+              },
+              "type": "column"
+            },
+            "id": {
+              "column": "id",
+              "type": "column"
+            },
+            "name": {
+              "column": "name",
+              "type": "column"
+            },
+            "photoUrls": {
+              "column": "photoUrls",
+              "type": "column"
+            },
+            "status": {
+              "column": "status",
+              "type": "column"
+            },
+            "tags": {
+              "column": "tags",
+              "fields": {
+                "fields": {
+                  "fields": {
+                    "id": {
+                      "column": "id",
+                      "type": "column"
+                    },
+                    "name": {
+                      "column": "name",
+                      "type": "column"
+                    }
+                  },
+                  "type": "object"
+                },
+                "type": "array"
+              },
+              "type": "column"
+            }
+          },
+          "type": "object"
+        },
+        "type": "column"
+      }
+    }
+  }
+}

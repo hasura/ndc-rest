@@ -1,0 +1,18 @@
+[
+  {
+    "rows": [
+      {
+        "__value": {
+          "email": "email1@test.com",
+          "firstName": "first name 1",
+          "id": 1,
+          "lastName": "last name 1",
+          "password": "XXXXXXXXXXX",
+          "phone": "123-456-7890",
+          "userStatus": 1,
+          "username": "user1"
+        }
+      }
+    ]
+  }
+]

@@ -1,0 +1,15 @@
+{
+  "operation_results": [
+    {
+      "result": {
+        "category": { "id": 1, "name": "Dogs" },
+        "id": 10,
+        "name": "sOLLc948uM",
+        "photoUrls": ["string"],
+        "status": "u4ju56bSJj",
+        "tags": [{ "id": 0, "name": "string" }]
+      },
+      "type": "procedure"
+    }
+  ]
+}
