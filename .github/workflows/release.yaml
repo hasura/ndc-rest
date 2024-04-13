@@ -2,7 +2,7 @@ name: Release container definition
 on:
   push:
     # tags:
-    #   - "v*"
+    #   - "*"
 
 jobs:
   tests:
@@ -31,11 +31,23 @@ jobs:
       - name: Get version from tag
         id: get-version
         run: |
-          echo "tagged_version=${GITHUB_REF#refs/tags/v}" >> $GITHUB_OUTPUT
+          echo "tagged_version=${GITHUB_REF#refs/tags/}" >> $GITHUB_OUTPUT
         shell: bash
 
       - name: Build and push
         uses: docker/build-push-action@v5
         with:
           push: true
-          tags: ghcr.io/hasura/ndc-rest:${{ github.ref_name }}
+          tags: ghcr.io/hasura/ndc-rest:${{ steps.get-version.outputs.tagged_version }}
+
+      - name: Build connector definition
+        run: |
+          export VERSION=$GITHUB_REF_NAME
+          ./scripts/build-manifest.sh
+
+      - name: create a draft release
+        uses: ncipollo/release-action@v1
+        with:
+          draft: true
+          tag: ${{ steps.get-version.outputs.tagged_version }}
+          artifacts: release/*

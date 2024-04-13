@@ -1,5 +1,6 @@
 packagingDefinition:
-  type: ManagedDockerBuild
+  type: PrebuiltDockerImage
+  dockerImage: ghcr.io/hasura/ndc-rest:{{VERSION}}
 supportedEnvironmentVariables: []
 commands: {}
 dockerComposeWatch:
