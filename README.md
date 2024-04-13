@@ -60,7 +60,7 @@ ndc-rest convert -f ./rest/testdata/jsonplaceholder/swagger.json -o ./rest/testd
 - `application/octet-stream`
 - `multipart/form-data`
 - `text/*`
-- Upload file content types
+- Upload file content types, e.g.`image/*` from `base64` arguments.
 
 ### Environment variable template
 
