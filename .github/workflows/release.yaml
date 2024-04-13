@@ -28,8 +28,14 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
+      - name: Get version from tag
+        id: get-version
+        run: |
+          echo "tagged_version=${GITHUB_REF#refs/tags/v}" >> $GITHUB_OUTPUT
+        shell: bash
+
       - name: Build and push
         uses: docker/build-push-action@v5
         with:
-          push: false
-          tags: ghcr.io/hasura/ndc-rest:${{ github.ref }}
+          push: true
+          tags: ghcr.io/hasura/ndc-rest:${{ github.ref_name }}
