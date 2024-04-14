@@ -6,7 +6,6 @@ import (
 	"errors"
 	"fmt"
 	"log/slog"
-	"os"
 	"path"
 	"strings"
 
@@ -80,7 +79,7 @@ func buildSchemaFile(configDir string, conf *SchemaFile, logger *slog.Logger) (*
 			return nil, fmt.Errorf("invalid file format: %s", fileFormat)
 		}
 
-		return applyEnvVariablesToSchema(&result, logger), nil
+		return &result, nil
 	case rest.OpenAPIv2Spec, rest.OAS2Spec:
 		result, errs := openapi.OpenAPIv2ToNDCSchema(rawBytes, &openapi.ConvertOptions{
 			MethodAlias: conf.MethodAlias,
@@ -90,7 +89,7 @@ func buildSchemaFile(configDir string, conf *SchemaFile, logger *slog.Logger) (*
 			if len(errs) > 0 {
 				logger.Warn("some errors happened when parsing OpenAPI", slog.Any("errors", errs))
 			}
-			return applyEnvVariablesToSchema(result, logger), nil
+			return result, nil
 		}
 		return nil, errors.Join(errs...)
 	case rest.OpenAPIv3Spec, rest.OAS3Spec:
@@ -102,7 +101,7 @@ func buildSchemaFile(configDir string, conf *SchemaFile, logger *slog.Logger) (*
 			if len(errs) > 0 {
 				logger.Warn("some errors happened when parsing OpenAPI", slog.Any("errors", errs))
 			}
-			return applyEnvVariablesToSchema(result, logger), nil
+			return result, nil
 		}
 		return nil, errors.Join(errs...)
 	default:
@@ -124,9 +123,6 @@ func (c *RESTConnector) applyNDCRestSchemas(schemas []ndcRestSchemaWithName) map
 		settings := item.schema.Settings
 		if settings == nil {
 			settings = &rest.NDCRestSettings{}
-			if settings.Timeout == 0 {
-				settings.Timeout = defaultTimeout
-			}
 		}
 		meta := RESTMetadata{
 			settings: settings,
@@ -147,7 +143,7 @@ func (c *RESTConnector) applyNDCRestSchemas(schemas []ndcRestSchemaWithName) map
 			if fnItem.Request == nil || fnItem.Request.URL == "" {
 				continue
 			}
-			req, err := validateRequestSchema(fnItem.Request, "get", settings.Timeout)
+			req, err := validateRequestSchema(fnItem.Request, "get")
 			if err != nil {
 				errs = append(errs, fmt.Sprintf("function %s: %s", fnItem.Name, err))
 				continue
@@ -164,7 +160,7 @@ func (c *RESTConnector) applyNDCRestSchemas(schemas []ndcRestSchemaWithName) map
 			if procItem.Request == nil || procItem.Request.URL == "" {
 				continue
 			}
-			req, err := validateRequestSchema(procItem.Request, "", settings.Timeout)
+			req, err := validateRequestSchema(procItem.Request, "")
 			if err != nil {
 				errs = append(errs, fmt.Sprintf("procedure %s: %s", procItem.Name, err))
 				continue
@@ -205,7 +201,7 @@ func (c *RESTConnector) applyNDCRestSchemas(schemas []ndcRestSchemaWithName) map
 	return nil
 }
 
-func validateRequestSchema(req *rest.Request, defaultMethod string, defTimeout uint) (*rest.Request, error) {
+func validateRequestSchema(req *rest.Request, defaultMethod string) (*rest.Request, error) {
 	if req.Method == "" {
 		if defaultMethod == "" {
 			return nil, fmt.Errorf("the HTTP method is required")
@@ -216,73 +212,10 @@ func validateRequestSchema(req *rest.Request, defaultMethod string, defTimeout u
 	if req.Type == "" {
 		req.Type = rest.RequestTypeREST
 	}
-	if req.Timeout == 0 {
-		req.Timeout = defTimeout
-	}
 
 	return req, nil
 }
 
 func printSchemaValidationError(logger *slog.Logger, errors map[string][]string) {
 	logger.Error("errors happen when validating NDC REST schemas", slog.Any("errors", errors))
-}
-
-func replaceEnvTemplate(input string, logger *slog.Logger) string {
-	envTemplates := rest.FindAllEnvTemplates(input)
-	if len(envTemplates) == 0 {
-		return input
-	}
-
-	for _, env := range envTemplates {
-		value, ok := os.LookupEnv(env.Name)
-		if !ok {
-			if env.DefaultValue == nil {
-				logger.Warn(fmt.Sprintf("%s env does not exist", env.Name))
-				continue
-			}
-			value = *env.DefaultValue
-		}
-		input = strings.ReplaceAll(input, env.String(), value)
-	}
-
-	return input
-}
-
-func replaceEnvTemplateInHeader(input map[string]string, logger *slog.Logger) map[string]string {
-	result := map[string]string{}
-	for k, v := range input {
-		result[replaceEnvTemplate(k, logger)] = replaceEnvTemplate(v, logger)
-	}
-	return result
-}
-
-func applyEnvVariablesToSchema(input *rest.NDCRestSchema, logger *slog.Logger) *rest.NDCRestSchema {
-
-	if input.Settings != nil {
-		input.Settings.Headers = replaceEnvTemplateInHeader(input.Settings.Headers, logger)
-		for i, server := range input.Settings.Servers {
-			server.URL = strings.TrimRight(replaceEnvTemplate(server.URL, logger), "/")
-			input.Settings.Servers[i] = server
-		}
-		for key, ss := range input.Settings.SecuritySchemes {
-			ss.Value = replaceEnvTemplate(ss.Value, logger)
-			input.Settings.SecuritySchemes[key] = ss
-		}
-	}
-
-	for _, fn := range input.Functions {
-		if fn.Request == nil {
-			continue
-		}
-		fn.Request.Headers = replaceEnvTemplateInHeader(fn.Request.Headers, logger)
-	}
-
-	for _, proc := range input.Procedures {
-		if proc.Request == nil {
-			continue
-		}
-		proc.Request.Headers = replaceEnvTemplateInHeader(proc.Request.Headers, logger)
-	}
-
-	return input
 }

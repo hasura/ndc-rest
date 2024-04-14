@@ -7,7 +7,6 @@ import (
 	"errors"
 	"fmt"
 	"io"
-	"log/slog"
 	"net/http"
 	"slices"
 	"strings"
@@ -15,34 +14,54 @@ import (
 
 	rest "github.com/hasura/ndc-rest-schema/schema"
 	"github.com/hasura/ndc-rest/rest/internal"
-	"github.com/hasura/ndc-sdk-go/connector"
 	"github.com/hasura/ndc-sdk-go/utils"
 )
 
-func (c *RESTConnector) createRequest(ctx context.Context, rawRequest *rest.Request, headers http.Header, arguments map[string]any) (*http.Request, context.CancelFunc, error) {
-	var body io.Reader
-	logger := connector.GetLogger(ctx)
-	contentType := contentTypeJSON
+// RetryableRequest wraps the raw request with retryable
+type RetryableRequest struct {
+	rawRequest  *rest.Request
+	contentType string
+	headers     http.Header
+	body        *bytes.Buffer
+}
 
-	logAttrs := []any{
-		slog.String("request_url", rawRequest.URL),
-		slog.String("request_method", rawRequest.Method),
+// CreateRequest creates an HTTP request with body copied
+func (r *RetryableRequest) CreateRequest(ctx context.Context) (*http.Request, context.CancelFunc, error) {
+	var body io.Reader
+	if r.body != nil {
+		body = r.body
 	}
+	ctxR, cancel := context.WithTimeout(ctx, time.Duration(r.rawRequest.Timeout)*time.Second)
+	request, err := http.NewRequestWithContext(ctxR, strings.ToUpper(r.rawRequest.Method), r.rawRequest.URL, body)
+	if err != nil {
+		cancel()
+		return nil, nil, err
+	}
+	for key, header := range r.headers {
+		request.Header[key] = header
+	}
+	request.Header.Set(rest.ContentTypeHeader, r.contentType)
+
+	return request, cancel, nil
+}
+
+func (c *RESTConnector) createRequest(rawRequest *rest.Request, headers http.Header, arguments map[string]any) (*RetryableRequest, error) {
+	var buffer *bytes.Buffer
+	contentType := contentTypeJSON
 
 	bodyData, ok := arguments["body"]
 	if rawRequest.RequestBody != nil {
 		contentType = rawRequest.RequestBody.ContentType
 		if ok && bodyData != nil {
-			var buffer *bytes.Buffer
 			binaryBody := getRequestUploadBody(rawRequest)
 			if binaryBody != nil {
 				b64, err := utils.DecodeString(bodyData)
 				if err != nil {
-					return nil, nil, err
+					return nil, err
 				}
 				dataURI, err := internal.DecodeDataURI(b64)
 				if err != nil {
-					return nil, nil, err
+					return nil, err
 				}
 				buffer = bytes.NewBuffer([]byte(dataURI.Data))
 			} else if strings.HasPrefix(contentType, "text/") {
@@ -51,7 +70,7 @@ func (c *RESTConnector) createRequest(ctx context.Context, rawRequest *rest.Requ
 				var err error
 				buffer, contentType, err = c.createMultipartForm(rawRequest.RequestBody, arguments)
 				if err != nil {
-					return nil, nil, err
+					return nil, err
 				}
 			} else {
 				switch contentType {
@@ -60,56 +79,28 @@ func (c *RESTConnector) createRequest(ctx context.Context, rawRequest *rest.Requ
 				case rest.ContentTypeJSON:
 					bodyBytes, err := json.Marshal(bodyData)
 					if err != nil {
-						return nil, nil, err
+						return nil, err
 					}
 
 					buffer = bytes.NewBuffer(bodyBytes)
 				default:
-					return nil, nil, fmt.Errorf("unsupported content type %s", contentType)
+					return nil, fmt.Errorf("unsupported content type %s", contentType)
 				}
-			}
-
-			if buffer != nil {
-				if logger.Enabled(ctx, slog.LevelDebug) {
-					logAttrs = append(logAttrs,
-						slog.Int("content_length", buffer.Len()),
-						slog.String("body", string(buffer.String())),
-					)
-				}
-				body = buffer
 			}
 		} else if contentType != rest.ContentTypeFormURLEncoded &&
 			(rawRequest.RequestBody.Schema != nil && !rawRequest.RequestBody.Schema.Nullable) {
-			return nil, nil, errors.New("request body is required")
+			return nil, errors.New("request body is required")
 		}
 	}
 
-	timeout := defaultTimeout
-	if rawRequest.Timeout > 0 {
-		timeout = rawRequest.Timeout
+	request := &RetryableRequest{
+		rawRequest:  rawRequest,
+		contentType: contentType,
+		headers:     headers,
+		body:        buffer,
 	}
 
-	ctxR, cancel := context.WithTimeout(ctx, time.Duration(timeout)*time.Second)
-	request, err := http.NewRequestWithContext(ctxR, strings.ToUpper(rawRequest.Method), rawRequest.URL, body)
-	if err != nil {
-		cancel()
-		return nil, nil, err
-	}
-
-	for key, header := range headers {
-		request.Header[key] = header
-	}
-	request.Header.Set(rest.ContentTypeHeader, contentType)
-
-	if logger.Enabled(ctx, slog.LevelDebug) {
-		logAttrs = append(logAttrs,
-			slog.Any("request_headers", request.Header),
-			slog.Any("raw_request_body", bodyData),
-		)
-		logger.Debug("sending request to remote server...", logAttrs...)
-	}
-
-	return request, cancel, nil
+	return request, nil
 }
 
 func (c *RESTConnector) createMultipartForm(reqBody *rest.RequestBody, arguments map[string]any) (*bytes.Buffer, string, error) {
