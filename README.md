@@ -39,7 +39,7 @@ files:
 
 `trimPrefix`, `envPrefix` and `methodAlias` options are used to convert OpenAPI by [ndc-rest-schema](https://github.com/hasura/ndc-rest-schema#openapi).
 
-**Supported specs**
+#### Supported specs
 
 - `openapi3`: OpenAPI 3.0/3.1.
 - `openapi2`: OpenAPI 2.0.
@@ -52,6 +52,15 @@ ndc-rest convert -f ./rest/testdata/jsonplaceholder/swagger.json -o ./rest/testd
 ```
 
 > The `convert` command is imported from the [NDC REST Schema](https://github.com/hasura/ndc-rest-schema#quick-start) CLI tool.
+
+#### Supported content types
+
+- `application/json`
+- `application/x-www-form-urlencoded`
+- `application/octet-stream`
+- `multipart/form-data`
+- `text/*`
+- Upload file content types, e.g.`image/*` from `base64` arguments.
 
 ### Environment variable template
 
