@@ -1,7 +1,7 @@
 #!/bin/bash
 set -evo pipefail
 
-REF=$(git symbolic-ref --short HEAD)
+REF=$(git rev-parse --short HEAD)
 VERSION=${VERSION:-$REF}
 BUILD_DIR=/tmp/ndc-rest
 ROOT="$(pwd)"
