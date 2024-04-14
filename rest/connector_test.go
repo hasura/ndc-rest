@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"log/slog"
 	"net/http"
 	"net/http/httptest"
 	"os"
@@ -88,6 +89,7 @@ func TestRESTConnector_configurationFailure(t *testing.T) {
 func TestRESTConnector_authentication(t *testing.T) {
 	apiKey := "random_api_key"
 	bearerToken := "random_bearer_token"
+	slog.SetLogLoggerLevel(slog.LevelDebug)
 	server := createMockServer(t, apiKey, bearerToken)
 	defer server.Close()
 
@@ -173,6 +175,26 @@ func TestRESTConnector_authentication(t *testing.T) {
 			},
 		})
 	})
+
+	t.Run("retry", func(t *testing.T) {
+		reqBody := []byte(`{
+			"collection": "petRetry",
+			"query": {
+				"fields": {
+					"__value": {
+						"type": "column",
+						"column": "__value"
+					}
+				}
+			},
+			"arguments": {},
+			"collection_relationships": {}
+		}`)
+
+		res, err := http.Post(fmt.Sprintf("%s/query", testServer.URL), "application/json", bytes.NewBuffer(reqBody))
+		assert.NoError(t, err)
+		assert.Equal(t, http.StatusTooManyRequests, res.StatusCode)
+	})
 }
 
 func createMockServer(t *testing.T, apiKey string, bearerToken string) *httptest.Server {
@@ -211,6 +233,15 @@ func createMockServer(t *testing.T, apiKey string, bearerToken string) *httptest
 			w.WriteHeader(http.StatusMethodNotAllowed)
 			return
 		}
+	})
+
+	var requestCount int
+	mux.HandleFunc("/pet/retry", func(w http.ResponseWriter, r *http.Request) {
+		requestCount++
+		if requestCount > 3 {
+			panic("retry count must not be larger than 2")
+		}
+		w.WriteHeader(http.StatusTooManyRequests)
 	})
 
 	return httptest.NewServer(mux)
