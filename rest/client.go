@@ -9,6 +9,7 @@ import (
 	"log/slog"
 	"net/http"
 	"strings"
+	"time"
 
 	rest "github.com/hasura/ndc-rest-schema/schema"
 	"github.com/hasura/ndc-sdk-go/connector"
@@ -32,13 +33,68 @@ func createHTTPClient(client Doer) *httpClient {
 }
 
 // Send creates and executes the request and evaluate response selection
-func (client *httpClient) Send(ctx context.Context, request *http.Request, selection schema.NestedField, resultType schema.Type) (any, error) {
-	resp, err := client.Client.Do(request)
+func (client *httpClient) Send(ctx context.Context, request *RetryableRequest, selection schema.NestedField, resultType schema.Type) (any, error) {
+	var resp *http.Response
+	var err error
+	logger := connector.GetLogger(ctx)
+
+	if logger.Enabled(ctx, slog.LevelDebug) {
+		logAttrs := []any{
+			slog.String("request_url", request.rawRequest.URL),
+			slog.String("request_method", request.rawRequest.Method),
+			slog.Any("request_headers", request.headers),
+		}
+		if request.body != nil {
+			logAttrs = append(logAttrs, slog.String("request_body", request.body.String()))
+		}
+		logger.Debug("sending request to remote server...", logAttrs...)
+	}
+
+	times := int(request.rawRequest.Retry.Times)
+	for i := 0; i <= times; i++ {
+		req, cancel, reqError := request.CreateRequest(ctx)
+		if reqError != nil {
+			cancel()
+			return nil, schema.NewConnectorError(http.StatusInternalServerError, err.Error(), nil)
+		}
+		resp, err = client.Client.Do(req)
+		if (err == nil && resp.StatusCode >= 200 && resp.StatusCode < 299) || i >= times {
+			break
+		}
+		if logger.Enabled(ctx, slog.LevelDebug) {
+			logAttrs := []any{}
+			if err != nil {
+				logAttrs = append(logAttrs, slog.Any("error", err.Error()))
+			} else {
+				logAttrs = append(logAttrs,
+					slog.Int("http_status", resp.StatusCode),
+					slog.Any("response_headers", resp.Header),
+				)
+				if resp.Body != nil {
+					respBody, err := io.ReadAll(resp.Body)
+					_ = resp.Body.Close()
+
+					if err == nil {
+						logAttrs = append(logAttrs, slog.String("response_body", string(respBody)))
+					}
+				}
+			}
+
+			logger.Debug(
+				fmt.Sprintf("received error from remote server, retrying %d time ...", i+1),
+				logAttrs...,
+			)
+		} else if resp.Body != nil {
+			_ = resp.Body.Close()
+		}
+
+		time.Sleep(time.Duration(request.rawRequest.Retry.Delay) * time.Millisecond)
+	}
+
 	if err != nil {
 		return nil, schema.NewConnectorError(http.StatusInternalServerError, err.Error(), nil)
 	}
 
-	logger := connector.GetLogger(ctx)
 	if logger.Enabled(ctx, slog.LevelDebug) {
 		logAttrs := []any{
 			slog.Int("http_status", resp.StatusCode),

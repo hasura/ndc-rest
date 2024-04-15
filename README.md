@@ -66,6 +66,20 @@ ndc-rest convert -f ./rest/testdata/jsonplaceholder/swagger.json -o ./rest/testd
 
 The connector can replaces `{{xxx}}` templates with environment variables. The converter automatically renders variables for API keys and tokens when converting OpenAPI documents. However, you can add your custom variables as well.
 
+### Timeout and retry
+
+The global timeout and retry strategy can be configured in the `settings` object.
+
+```yaml
+settings:
+  timeout: 30
+  retry:
+    times: 2
+    # delay between each retry in milliseconds
+    delay: 1000
+    httpStatus: [429, 500, 502, 503]
+```
+
 ### Authentication
 
 The current version supports API key and Auth token authentication schemes. The configuration is inspired from `securitySchemes` [with env variables](https://github.com/hasura/ndc-rest-schema#authentication)

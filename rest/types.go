@@ -7,11 +7,14 @@ import (
 )
 
 const (
-	defaultTimeout uint = 30
+	defaultTimeoutSeconds uint = 30
+	defaultRetryDelays    uint = 1000
 
 	contentTypeHeader = "Content-Type"
 	contentTypeJSON   = "application/json"
 )
+
+var defaultRetryHTTPStatus = []int64{429, 500, 502, 503}
 
 // SchemaFile represents a schema file
 type SchemaFile struct {

@@ -20,6 +20,8 @@ settings:
           scopes:
             read:pets: read your pets
             write:pets: modify pets in your account
+  retry:
+    times: 2
   security:
     - api_key: []
   version: 1.0.18
@@ -63,6 +65,18 @@ functions:
             type: named
     description: Finds Pets by status
     name: findPetsByStatus
+    result_type:
+      element_type:
+        name: Pet
+        type: named
+      type: array
+  - request:
+      url: "/pet/retry"
+      method: get
+      parameters: []
+      security: []
+    arguments: {}
+    name: petRetry
     result_type:
       element_type:
         name: Pet

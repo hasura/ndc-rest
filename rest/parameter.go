@@ -23,7 +23,10 @@ func (c *RESTConnector) evalURLAndHeaderParameters(request *rest.Request, argume
 	}
 	headers := http.Header{}
 	for k, h := range request.Headers {
-		headers.Add(k, h)
+		v := h.Value()
+		if v != nil && *v != "" {
+			headers.Add(k, *v)
+		}
 	}
 
 	for _, param := range request.Parameters {

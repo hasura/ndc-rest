@@ -56,6 +56,14 @@ github.com/grpc-ecosystem/grpc-gateway/v2 v2.19.1 h1:/c3QmbOGMGTOumP2iT/rCwB7b0Q
 github.com/grpc-ecosystem/grpc-gateway/v2 v2.19.1/go.mod h1:5SN9VR2LTsRFsrEC6FHgRbTWrTHu6tqPeKxEQv15giM=
 github.com/hasura/ndc-rest-schema v0.1.0 h1:r50jA6iO9DOSMDmnZZMDxZTqSwjPaQ/cFhuMzG031tc=
 github.com/hasura/ndc-rest-schema v0.1.0/go.mod h1:xclFLdq8L6wVDP5WEk8ZAVl3bF/GDfOkz9xTIEJpEnU=
+github.com/hasura/ndc-rest-schema v0.1.1-0.20240414091334-fbd316819610 h1:+LC83kL+tpnmorplCQ9NLJAWomd5NY/YICO6TcMaAc8=
+github.com/hasura/ndc-rest-schema v0.1.1-0.20240414091334-fbd316819610/go.mod h1:xclFLdq8L6wVDP5WEk8ZAVl3bF/GDfOkz9xTIEJpEnU=
+github.com/hasura/ndc-rest-schema v0.1.1-0.20240414154942-4b90dc480d4d h1:jRXVnt9vDZPLfCrJyt6FQbnJjFH8oGYpsj7kP0zD7o4=
+github.com/hasura/ndc-rest-schema v0.1.1-0.20240414154942-4b90dc480d4d/go.mod h1:xclFLdq8L6wVDP5WEk8ZAVl3bF/GDfOkz9xTIEJpEnU=
+github.com/hasura/ndc-rest-schema v0.1.1-0.20240414172746-670b6140a7e4 h1:jLSUPMy5etYbLl9D8zCoTf2l7jbWN4KOcAc/4oUe3MU=
+github.com/hasura/ndc-rest-schema v0.1.1-0.20240414172746-670b6140a7e4/go.mod h1:xclFLdq8L6wVDP5WEk8ZAVl3bF/GDfOkz9xTIEJpEnU=
+github.com/hasura/ndc-rest-schema v0.1.1 h1:tPUM1QxtQndqFHE3C1laI5p0bRorC43eSVG3oFLJN9s=
+github.com/hasura/ndc-rest-schema v0.1.1/go.mod h1:xclFLdq8L6wVDP5WEk8ZAVl3bF/GDfOkz9xTIEJpEnU=
 github.com/hasura/ndc-sdk-go v1.1.2-0.20240413080840-731b7dda995a h1:AlPvdbjKISmSWRXO0PPSQfxbO5zwo+UQZ7CQBdYmxRg=
 github.com/hasura/ndc-sdk-go v1.1.2-0.20240413080840-731b7dda995a/go.mod h1:t3eCBiEClDG/vsHkONdwlCRcHfPy8uMDsFzrWsrpwoo=
 github.com/hexops/gotextdiff v1.0.3 h1:gitA9+qJrrTCsiCl7+kh75nPqQt1cx4ZkudSTLoUqJM=
