@@ -62,6 +62,8 @@ github.com/hasura/ndc-rest-schema v0.1.1-0.20240414154942-4b90dc480d4d h1:jRXVnt
 github.com/hasura/ndc-rest-schema v0.1.1-0.20240414154942-4b90dc480d4d/go.mod h1:xclFLdq8L6wVDP5WEk8ZAVl3bF/GDfOkz9xTIEJpEnU=
 github.com/hasura/ndc-rest-schema v0.1.1-0.20240414172746-670b6140a7e4 h1:jLSUPMy5etYbLl9D8zCoTf2l7jbWN4KOcAc/4oUe3MU=
 github.com/hasura/ndc-rest-schema v0.1.1-0.20240414172746-670b6140a7e4/go.mod h1:xclFLdq8L6wVDP5WEk8ZAVl3bF/GDfOkz9xTIEJpEnU=
+github.com/hasura/ndc-rest-schema v0.1.1 h1:tPUM1QxtQndqFHE3C1laI5p0bRorC43eSVG3oFLJN9s=
+github.com/hasura/ndc-rest-schema v0.1.1/go.mod h1:xclFLdq8L6wVDP5WEk8ZAVl3bF/GDfOkz9xTIEJpEnU=
 github.com/hasura/ndc-sdk-go v1.1.2-0.20240413080840-731b7dda995a h1:AlPvdbjKISmSWRXO0PPSQfxbO5zwo+UQZ7CQBdYmxRg=
 github.com/hasura/ndc-sdk-go v1.1.2-0.20240413080840-731b7dda995a/go.mod h1:t3eCBiEClDG/vsHkONdwlCRcHfPy8uMDsFzrWsrpwoo=
 github.com/hexops/gotextdiff v1.0.3 h1:gitA9+qJrrTCsiCl7+kh75nPqQt1cx4ZkudSTLoUqJM=
