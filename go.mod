@@ -3,8 +3,8 @@ module github.com/hasura/ndc-rest
 go 1.21
 
 require (
-	github.com/hasura/ndc-rest-schema v0.1.3
-	github.com/hasura/ndc-sdk-go v1.1.3
+	github.com/hasura/ndc-rest-schema v0.1.4-0.20240520163404-f5585e0017af
+	github.com/hasura/ndc-sdk-go v1.1.4
 	github.com/lmittmann/tint v1.0.4
 	github.com/stretchr/testify v1.9.0
 	gopkg.in/yaml.v3 v3.0.1
@@ -19,13 +19,15 @@ require (
 	github.com/cespare/xxhash/v2 v2.3.0 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/dprotaso/go-yit v0.0.0-20220510233725-9ba8df137936 // indirect
+	github.com/evanphx/json-patch v0.5.2 // indirect
 	github.com/go-logr/logr v1.4.1 // indirect
 	github.com/go-logr/stdr v1.2.2 // indirect
 	github.com/go-viper/mapstructure/v2 v2.0.0-alpha.1 // indirect
 	github.com/google/uuid v1.6.0 // indirect
 	github.com/grpc-ecosystem/grpc-gateway/v2 v2.19.1 // indirect
 	github.com/mailru/easyjson v0.7.7 // indirect
-	github.com/pb33f/libopenapi v0.16.5 // indirect
+	github.com/pb33f/libopenapi v0.16.7 // indirect
+	github.com/pkg/errors v0.9.1 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
 	github.com/prometheus/client_golang v1.19.1 // indirect
 	github.com/prometheus/client_model v0.6.1 // indirect

@@ -9,11 +9,9 @@ import (
 	"path"
 	"strings"
 
-	"github.com/hasura/ndc-rest-schema/openapi"
+	"github.com/hasura/ndc-rest-schema/command"
 	rest "github.com/hasura/ndc-rest-schema/schema"
-	"github.com/hasura/ndc-rest-schema/utils"
 	"github.com/hasura/ndc-sdk-go/schema"
-	"gopkg.in/yaml.v3"
 )
 
 // GetSchema gets the connector's schema.
@@ -22,7 +20,7 @@ func (c *RESTConnector) GetSchema(ctx context.Context, configuration *Configurat
 }
 
 // build NDC REST schema from file list
-func buildSchemaFiles(configDir string, files []SchemaFile, logger *slog.Logger) ([]ndcRestSchemaWithName, map[string][]string) {
+func buildSchemaFiles(configDir string, files []command.ConvertConfig, logger *slog.Logger) ([]ndcRestSchemaWithName, map[string][]string) {
 	schemas := make([]ndcRestSchemaWithName, len(files))
 	errors := make(map[string][]string)
 	for i, file := range files {
@@ -33,80 +31,49 @@ func buildSchemaFiles(configDir string, files []SchemaFile, logger *slog.Logger)
 		}
 		if schemaOutput != nil {
 			schemas[i] = ndcRestSchemaWithName{
-				name:   file.Path,
+				name:   file.File,
 				schema: schemaOutput,
 			}
 		}
 		if len(errs) > 0 {
-			errors[file.Path] = errs
+			errors[file.File] = errs
 		}
 	}
 
 	return schemas, errors
 }
 
-func buildSchemaFile(configDir string, conf *SchemaFile, logger *slog.Logger) (*rest.NDCRestSchema, error) {
-	if conf.Path == "" {
+func buildSchemaFile(configDir string, conf *command.ConvertConfig, logger *slog.Logger) (*rest.NDCRestSchema, error) {
+	if conf.File == "" {
 		return nil, errors.New("file path is empty")
 	}
 
-	filePath := conf.Path
-	if !strings.HasPrefix(conf.Path, "/") && !strings.HasPrefix(conf.Path, "http") {
-		filePath = path.Join(configDir, conf.Path)
+	if !strings.HasPrefix(conf.File, "/") && !strings.HasPrefix(conf.File, "http") {
+		conf.File = path.Join(configDir, conf.File)
 	}
-	rawBytes, err := utils.ReadFileFromPath(filePath)
+	ndcSchema, err := command.ConvertToNDCSchema(conf, logger)
 	if err != nil {
 		return nil, err
 	}
 
-	switch conf.Spec {
-	case rest.NDCSpec:
-		var result rest.NDCRestSchema
-		fileFormat, err := rest.ParseSchemaFileFormat(strings.Trim(path.Ext(conf.Path), "."))
-		if err != nil {
-			return nil, err
-		}
-		switch fileFormat {
-		case rest.SchemaFileJSON:
-			if err := json.Unmarshal(rawBytes, &result); err != nil {
-				return nil, err
-			}
-		case rest.SchemaFileYAML:
-			if err := yaml.Unmarshal(rawBytes, &result); err != nil {
-				return nil, err
-			}
-		default:
-			return nil, fmt.Errorf("invalid file format: %s", fileFormat)
-		}
-
-		return &result, nil
-	case rest.OpenAPIv2Spec, rest.OAS2Spec:
-		result, errs := openapi.OpenAPIv2ToNDCSchema(rawBytes, &openapi.ConvertOptions{
-			MethodAlias: conf.MethodAlias,
-			TrimPrefix:  conf.TrimPrefix,
-		})
-		if result != nil {
-			if len(errs) > 0 {
-				logger.Warn("some errors happened when parsing OpenAPI", slog.Any("errors", errs))
-			}
-			return result, nil
-		}
-		return nil, errors.Join(errs...)
-	case rest.OpenAPIv3Spec, rest.OAS3Spec:
-		result, errs := openapi.OpenAPIv3ToNDCSchema(rawBytes, &openapi.ConvertOptions{
-			MethodAlias: conf.MethodAlias,
-			TrimPrefix:  conf.TrimPrefix,
-		})
-		if result != nil {
-			if len(errs) > 0 {
-				logger.Warn("some errors happened when parsing OpenAPI", slog.Any("errors", errs))
-			}
-			return result, nil
-		}
-		return nil, errors.Join(errs...)
-	default:
-		return nil, fmt.Errorf("invalid configuration spec: %s", conf.Spec)
+	defaultArguments := buildRESTArguments(ndcSchema)
+	if len(defaultArguments) == 0 {
+		return ndcSchema, nil
 	}
+
+	for _, fn := range ndcSchema.Functions {
+		for key, arg := range defaultArguments {
+			fn.Arguments[key] = arg
+		}
+	}
+
+	for _, proc := range ndcSchema.Procedures {
+		for key, arg := range defaultArguments {
+			proc.Arguments[key] = arg
+		}
+	}
+
+	return ndcSchema, nil
 }
 
 func (c *RESTConnector) applyNDCRestSchemas(schemas []ndcRestSchemaWithName) map[string][]string {
@@ -214,6 +181,38 @@ func validateRequestSchema(req *rest.Request, defaultMethod string) (*rest.Reque
 	}
 
 	return req, nil
+}
+
+func buildRESTArguments(restSchema *rest.NDCRestSchema) map[string]schema.ArgumentInfo {
+	if restSchema.Settings == nil || len(restSchema.Settings.Servers) < 2 {
+		return nil
+	}
+
+	var serverIDs []string
+	for i, server := range restSchema.Settings.Servers {
+		if server.ID != "" {
+			serverIDs = append(serverIDs, server.ID)
+		} else {
+			serverIDs = append(serverIDs, fmt.Sprint(i))
+		}
+	}
+	serverScalar := schema.NewScalarType()
+	serverScalar.Representation = schema.NewTypeRepresentationEnum(serverIDs).Encode()
+	strategyScalar := RESTExecutionStrategy("")
+
+	restSchema.ScalarTypes[RESTServerIDScalarName] = *serverScalar
+	restSchema.ScalarTypes[strategyScalar.ScalarName()] = *strategyScalar.ScalarType()
+
+	restOptionsObject := RESTOptions{}
+	restOptionsObjectType := restOptionsObject.ObjectType()
+	restSchema.ObjectTypes[restOptionsObject.ObjectName()] = *restOptionsObjectType
+
+	return map[string]schema.ArgumentInfo{
+		RESTOptionsArgumentName: {
+			Description: restOptionsObjectType.Description,
+			Type:        schema.NewNullableNamedType(restOptionsObject.ObjectName()).Encode(),
+		},
+	}
 }
 
 func printSchemaValidationError(logger *slog.Logger, errors map[string][]string) {

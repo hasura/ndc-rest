@@ -1,3 +1,3 @@
 files:
-  - path: schema.yaml
+  - file: schema.yaml
     spec: ndc
