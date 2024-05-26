@@ -3,7 +3,7 @@ package internal
 import (
 	"testing"
 
-	"github.com/stretchr/testify/assert"
+	"gotest.tools/v3/assert"
 )
 
 func TestDecodeDataURI(t *testing.T) {
@@ -65,8 +65,8 @@ func TestDecodeDataURI(t *testing.T) {
 			if tc.errorMsg != "" {
 				assert.ErrorContains(t, err, tc.errorMsg)
 			} else {
-				assert.NoError(t, err)
-				assert.Equal(t, tc.expected, *data)
+				assert.NilError(t, err)
+				assert.DeepEqual(t, tc.expected, *data)
 			}
 		})
 	}

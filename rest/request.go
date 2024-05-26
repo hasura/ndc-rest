@@ -2,7 +2,6 @@ package rest
 
 import (
 	"bytes"
-	"context"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -10,45 +9,15 @@ import (
 	"net/http"
 	"slices"
 	"strings"
-	"time"
 
 	rest "github.com/hasura/ndc-rest-schema/schema"
 	"github.com/hasura/ndc-rest/rest/internal"
 	"github.com/hasura/ndc-sdk-go/utils"
 )
 
-// RetryableRequest wraps the raw request with retryable
-type RetryableRequest struct {
-	rawRequest  *rest.Request
-	contentType string
-	headers     http.Header
-	body        *bytes.Buffer
-}
-
-// CreateRequest creates an HTTP request with body copied
-func (r *RetryableRequest) CreateRequest(ctx context.Context) (*http.Request, context.CancelFunc, error) {
-	var body io.Reader
-	if r.body != nil {
-		body = r.body
-	}
-	ctxR, cancel := context.WithTimeout(ctx, time.Duration(r.rawRequest.Timeout)*time.Second)
-	request, err := http.NewRequestWithContext(ctxR, strings.ToUpper(r.rawRequest.Method), r.rawRequest.URL, body)
-	if err != nil {
-		cancel()
-		return nil, nil, err
-	}
-	for key, header := range r.headers {
-		request.Header[key] = header
-	}
-	request.Header.Set(rest.ContentTypeHeader, r.contentType)
-
-	return request, cancel, nil
-}
-
-func (c *RESTConnector) createRequest(rawRequest *rest.Request, headers http.Header, arguments map[string]any) (*RetryableRequest, error) {
-	var buffer *bytes.Buffer
+func (c *RESTConnector) createRequest(rawRequest *rest.Request, headers http.Header, arguments map[string]any) (*internal.RetryableRequest, error) {
+	var buffer io.ReadSeeker
 	contentType := contentTypeJSON
-
 	bodyData, ok := arguments["body"]
 	if rawRequest.RequestBody != nil {
 		contentType = rawRequest.RequestBody.ContentType
@@ -63,9 +32,9 @@ func (c *RESTConnector) createRequest(rawRequest *rest.Request, headers http.Hea
 				if err != nil {
 					return nil, err
 				}
-				buffer = bytes.NewBuffer([]byte(dataURI.Data))
+				buffer = bytes.NewReader([]byte(dataURI.Data))
 			} else if strings.HasPrefix(contentType, "text/") {
-				buffer = bytes.NewBuffer([]byte(fmt.Sprint(bodyData)))
+				buffer = bytes.NewReader([]byte(fmt.Sprint(bodyData)))
 			} else if strings.HasPrefix(contentType, "multipart/") {
 				var err error
 				buffer, contentType, err = c.createMultipartForm(rawRequest.RequestBody, arguments)
@@ -82,7 +51,7 @@ func (c *RESTConnector) createRequest(rawRequest *rest.Request, headers http.Hea
 						return nil, err
 					}
 
-					buffer = bytes.NewBuffer(bodyBytes)
+					buffer = bytes.NewReader(bodyBytes)
 				default:
 					return nil, fmt.Errorf("unsupported content type %s", contentType)
 				}
@@ -93,17 +62,17 @@ func (c *RESTConnector) createRequest(rawRequest *rest.Request, headers http.Hea
 		}
 	}
 
-	request := &RetryableRequest{
-		rawRequest:  rawRequest,
-		contentType: contentType,
-		headers:     headers,
-		body:        buffer,
+	request := &internal.RetryableRequest{
+		RawRequest:  rawRequest,
+		ContentType: contentType,
+		Headers:     headers,
+		Body:        buffer,
 	}
 
 	return request, nil
 }
 
-func (c *RESTConnector) createMultipartForm(reqBody *rest.RequestBody, arguments map[string]any) (*bytes.Buffer, string, error) {
+func (c *RESTConnector) createMultipartForm(reqBody *rest.RequestBody, arguments map[string]any) (io.ReadSeeker, string, error) {
 	bodyData := arguments["body"]
 
 	buffer := new(bytes.Buffer)
@@ -137,7 +106,10 @@ func (c *RESTConnector) createMultipartForm(reqBody *rest.RequestBody, arguments
 		return nil, "", err
 	}
 
-	return buffer, writer.FormDataContentType(), nil
+	reader := bytes.NewReader(buffer.Bytes())
+	buffer.Reset()
+
+	return reader, writer.FormDataContentType(), nil
 }
 
 func (c *RESTConnector) evalMultipartFieldValue(w *internal.MultipartWriter, arguments map[string]any, name string, value any, typeSchema *rest.TypeSchema, encObject *rest.EncodingObject) error {

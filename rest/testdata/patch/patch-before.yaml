@@ -1,0 +1,6 @@
+settings:
+  servers:
+    - id: dog
+      url: "{{PET_STORE_DOG_URL}}"
+    - id: cat
+      url: "{{PET_STORE_CAT_URL}}"

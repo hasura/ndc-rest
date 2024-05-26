@@ -11,11 +11,12 @@ import (
 	"net/http/httptest"
 	"os"
 	"path"
+	"sync/atomic"
 	"testing"
 
 	"github.com/hasura/ndc-sdk-go/connector"
 	"github.com/hasura/ndc-sdk-go/schema"
-	"github.com/stretchr/testify/assert"
+	"gotest.tools/v3/assert"
 )
 
 func TestRESTConnector(t *testing.T) {
@@ -50,9 +51,9 @@ func TestRESTConnector(t *testing.T) {
 				}
 
 				var capabilities schema.CapabilitiesResponse
-				assert.NoError(t, json.Unmarshal(rawBytes, &capabilities))
+				assert.NilError(t, json.Unmarshal(rawBytes, &capabilities))
 				resp, err := http.Get(fmt.Sprintf("%s/capabilities", testServer.URL))
-				assert.NoError(t, err)
+				assert.NilError(t, err)
 				assertHTTPResponse(t, resp, http.StatusOK, capabilities)
 			})
 
@@ -68,9 +69,9 @@ func TestRESTConnector(t *testing.T) {
 				}
 
 				var expected schema.SchemaResponse
-				assert.NoError(t, json.Unmarshal(rawBytes, &expected))
+				assert.NilError(t, json.Unmarshal(rawBytes, &expected))
 				resp, err := http.Get(fmt.Sprintf("%s/schema", testServer.URL))
-				assert.NoError(t, err)
+				assert.NilError(t, err)
 				assertHTTPResponse(t, resp, http.StatusOK, expected)
 			})
 
@@ -99,7 +100,7 @@ func TestRESTConnector_authentication(t *testing.T) {
 	connServer, err := connector.NewServer(NewRESTConnector(), &connector.ServerOptions{
 		Configuration: "testdata/auth",
 	}, connector.WithoutRecovery())
-	assert.NoError(t, err)
+	assert.NilError(t, err)
 	testServer := connServer.BuildTestServer()
 	defer testServer.Close()
 
@@ -119,7 +120,7 @@ func TestRESTConnector_authentication(t *testing.T) {
 		}`)
 
 		res, err := http.Post(fmt.Sprintf("%s/query", testServer.URL), "application/json", bytes.NewBuffer(reqBody))
-		assert.NoError(t, err)
+		assert.NilError(t, err)
 		assertHTTPResponse(t, res, http.StatusOK, schema.QueryResponse{
 			{
 				Rows: []map[string]any{
@@ -142,7 +143,7 @@ func TestRESTConnector_authentication(t *testing.T) {
 		}`)
 
 		res, err := http.Post(fmt.Sprintf("%s/mutation", testServer.URL), "application/json", bytes.NewBuffer(reqBody))
-		assert.NoError(t, err)
+		assert.NilError(t, err)
 		assertHTTPResponse(t, res, http.StatusOK, schema.MutationResponse{
 			OperationResults: []schema.MutationOperationResults{
 				schema.NewProcedureResult(map[string]any{}).Encode(),
@@ -166,7 +167,7 @@ func TestRESTConnector_authentication(t *testing.T) {
 		}`)
 
 		res, err := http.Post(fmt.Sprintf("%s/query", testServer.URL), "application/json", bytes.NewBuffer(reqBody))
-		assert.NoError(t, err)
+		assert.NilError(t, err)
 		assertHTTPResponse(t, res, http.StatusOK, schema.QueryResponse{
 			{
 				Rows: []map[string]any{
@@ -192,8 +193,128 @@ func TestRESTConnector_authentication(t *testing.T) {
 		}`)
 
 		res, err := http.Post(fmt.Sprintf("%s/query", testServer.URL), "application/json", bytes.NewBuffer(reqBody))
-		assert.NoError(t, err)
+		assert.NilError(t, err)
 		assert.Equal(t, http.StatusTooManyRequests, res.StatusCode)
+	})
+}
+
+func TestRESTConnector_distribution(t *testing.T) {
+	apiKey := "random_api_key"
+	bearerToken := "random_bearer_token"
+	slog.SetLogLoggerLevel(slog.LevelDebug)
+
+	t.Setenv("PET_STORE_API_KEY", apiKey)
+	t.Setenv("PET_STORE_BEARER_TOKEN", bearerToken)
+	connServer, err := connector.NewServer(NewRESTConnector(), &connector.ServerOptions{
+		Configuration: "testdata/patch",
+	}, connector.WithoutRecovery())
+	assert.NilError(t, err)
+	testServer := connServer.BuildTestServer()
+	defer testServer.Close()
+
+	t.Run("distributed_sequence", func(t *testing.T) {
+		mock := mockDistributedServer{}
+		server := mock.createServer(t, apiKey)
+		defer server.Close()
+
+		t.Setenv("PET_STORE_DOG_URL", fmt.Sprintf("%s/dog", server.URL))
+		t.Setenv("PET_STORE_CAT_URL", fmt.Sprintf("%s/cat", server.URL))
+
+		reqBody := []byte(`{
+			"collection": "findPetsDistributed",
+			"query": {
+				"fields": {
+					"__value": {
+						"type": "column",
+						"column": "__value"
+					}
+				}
+			},
+			"arguments": {},
+			"collection_relationships": {}
+		}`)
+
+		res, err := http.Post(fmt.Sprintf("%s/query", testServer.URL), "application/json", bytes.NewBuffer(reqBody))
+		assert.NilError(t, err)
+		assertHTTPResponse(t, res, http.StatusOK, schema.QueryResponse{
+			{
+				Rows: []map[string]any{
+
+					{"__value": map[string]any{
+						"errors": []any{},
+						"results": []any{
+							map[string]any{
+								"data": map[string]any{
+									"name": "dog",
+								},
+								"server": string("dog"),
+							},
+							map[string]any{
+								"data": map[string]any{
+									"name": "cat",
+								},
+								"server": string("cat"),
+							},
+						},
+					}},
+				},
+			},
+		})
+		assert.Equal(t, int32(1), mock.catCount)
+		assert.Equal(t, int32(1), mock.dogCount)
+	})
+
+	t.Run("distributed_parallel", func(t *testing.T) {
+		mock := mockDistributedServer{}
+		server := mock.createServer(t, apiKey)
+		defer server.Close()
+
+		t.Setenv("PET_STORE_DOG_URL", fmt.Sprintf("%s/dog", server.URL))
+		t.Setenv("PET_STORE_CAT_URL", fmt.Sprintf("%s/cat", server.URL))
+
+		reqBody := []byte(`{
+			"operations": [
+				{
+					"type": "procedure",
+					"name": "addPetDistributed",
+					"arguments": {
+						"body": {
+							"name": "pet"
+						},
+						"restOptions": {
+							"parallel": true
+						}
+					}
+				}
+			],
+			"collection_relationships": {}
+		}`)
+
+		res, err := http.Post(fmt.Sprintf("%s/mutation", testServer.URL), "application/json", bytes.NewBuffer(reqBody))
+		assert.NilError(t, err)
+		assertHTTPResponse(t, res, http.StatusOK, schema.MutationResponse{
+			OperationResults: []schema.MutationOperationResults{
+				schema.NewProcedureResult(map[string]any{
+					"errors": []any{},
+					"results": []any{
+						map[string]any{
+							"data": map[string]any{
+								"name": "dog",
+							},
+							"server": string("dog"),
+						},
+						map[string]any{
+							"data": map[string]any{
+								"name": "cat",
+							},
+							"server": string("cat"),
+						},
+					},
+				}).Encode(),
+			},
+		})
+		assert.Equal(t, int32(1), mock.catCount)
+		assert.Equal(t, int32(1), mock.dogCount)
 	})
 }
 
@@ -247,6 +368,59 @@ func createMockServer(t *testing.T, apiKey string, bearerToken string) *httptest
 	return httptest.NewServer(mux)
 }
 
+type mockDistributedServer struct {
+	dogCount int32
+	catCount int32
+}
+
+func (mds *mockDistributedServer) createServer(t *testing.T, apiKey string) *httptest.Server {
+	mux := http.NewServeMux()
+
+	writeResponse := func(w http.ResponseWriter, data []byte) {
+		w.Header().Add("Content-Type", "application/json")
+		w.WriteHeader(http.StatusOK)
+		_, _ = w.Write(data)
+	}
+	createHandler := func(name string) http.HandlerFunc {
+		return func(w http.ResponseWriter, r *http.Request) {
+			if r.Header.Get("api_key") != apiKey {
+				t.Errorf("invalid api key, expected %s, got %s", apiKey, r.Header.Get("api_key"))
+				t.FailNow()
+				return
+			}
+			switch r.Method {
+			case http.MethodGet:
+				writeResponse(w, []byte(fmt.Sprintf(`{"name": "%s"}`, name)))
+			case http.MethodPost:
+				rawBody, err := io.ReadAll(r.Body)
+				assert.NilError(t, err)
+
+				var body struct {
+					Name string `json:"name"`
+				}
+				// log.Printf("request body: %s", string(rawBody))
+				err = json.Unmarshal(rawBody, &body)
+				assert.NilError(t, err)
+				assert.Equal(t, "pet", body.Name)
+				writeResponse(w, []byte(fmt.Sprintf(`{"name": "%s"}`, name)))
+			default:
+				w.WriteHeader(http.StatusMethodNotAllowed)
+				return
+			}
+		}
+	}
+	mux.HandleFunc("/cat/pet", func(w http.ResponseWriter, r *http.Request) {
+		atomic.AddInt32(&mds.catCount, 1)
+		createHandler("cat")(w, r)
+	})
+	mux.HandleFunc("/dog/pet", func(w http.ResponseWriter, r *http.Request) {
+		atomic.AddInt32(&mds.dogCount, 1)
+		createHandler("dog")(w, r)
+	})
+
+	return httptest.NewServer(mux)
+}
+
 func assertNdcOperations(t *testing.T, dir string, targetURL string) {
 	queryFiles, err := os.ReadDir(dir)
 	if err != nil {
@@ -262,14 +436,14 @@ func assertNdcOperations(t *testing.T, dir string, targetURL string) {
 		}
 		t.Run(entry.Name(), func(t *testing.T) {
 			requestBytes, err := os.ReadFile(path.Join(dir, entry.Name(), "request.json"))
-			assert.NoError(t, err)
+			assert.NilError(t, err)
 			expectedBytes, err := os.ReadFile(path.Join(dir, entry.Name(), "expected.json"))
-			assert.NoError(t, err)
+			assert.NilError(t, err)
 
 			var expected any
-			assert.NoError(t, json.Unmarshal(expectedBytes, &expected))
+			assert.NilError(t, json.Unmarshal(expectedBytes, &expected))
 			resp, err := http.Post(targetURL, "application/json", bytes.NewBuffer(requestBytes))
-			assert.NoError(t, err)
+			assert.NilError(t, err)
 			assertHTTPResponse(t, resp, http.StatusOK, expected)
 		})
 	}
@@ -308,5 +482,5 @@ func assertHTTPResponse[B any](t *testing.T, res *http.Response, statusCode int,
 		t.FailNow()
 	}
 
-	assert.Equal(t, expectedBody, body)
+	assert.DeepEqual(t, expectedBody, body)
 }

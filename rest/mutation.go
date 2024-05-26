@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 
+	"github.com/hasura/ndc-rest/rest/internal"
 	"github.com/hasura/ndc-sdk-go/schema"
 )
 
@@ -32,7 +33,7 @@ func (c *RESTConnector) Mutation(ctx context.Context, configuration *Configurati
 
 func (c *RESTConnector) execProcedure(ctx context.Context, operation *schema.MutationOperation) (schema.MutationOperationResults, error) {
 
-	procedure, err := c.metadata.GetProcedure(operation.Name)
+	procedure, settings, err := c.metadata.GetProcedure(operation.Name)
 	if err != nil {
 		return nil, err
 	}
@@ -52,16 +53,23 @@ func (c *RESTConnector) execProcedure(ctx context.Context, operation *schema.Mut
 		})
 	}
 
+	restOptions, err := parseRESTOptionsFromArguments(procedure.Arguments, rawArgs[internal.RESTOptionsArgumentName])
+	if err != nil {
+		return nil, schema.UnprocessableContentError("invalid rest options", map[string]any{
+			"cause": err.Error(),
+		})
+	}
+
 	// 2. create and execute request
 	// 3. evaluate response selection
 	procedure.Request.URL = endpoint
-
+	restOptions.Settings = settings
 	httpRequest, err := c.createRequest(procedure.Request, headers, rawArgs)
 	if err != nil {
 		return nil, err
 	}
 
-	result, err := c.client.Send(ctx, httpRequest, operation.Fields, procedure.ResultType)
+	result, err := c.client.Send(ctx, httpRequest, operation.Fields, procedure.ResultType, restOptions)
 	if err != nil {
 		return nil, err
 	}

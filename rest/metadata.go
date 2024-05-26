@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"net/url"
 	"slices"
-	"strings"
 
 	rest "github.com/hasura/ndc-rest-schema/schema"
 	"github.com/hasura/ndc-rest-schema/utils"
@@ -15,31 +14,31 @@ import (
 type RESTMetadataCollection []RESTMetadata
 
 // GetFunction gets the NDC function by name
-func (rms RESTMetadataCollection) GetFunction(name string) (*rest.RESTFunctionInfo, error) {
+func (rms RESTMetadataCollection) GetFunction(name string) (*rest.RESTFunctionInfo, *rest.NDCRestSettings, error) {
 	for _, rm := range rms {
 		fn, err := rm.GetFunction(name)
 		if err != nil {
-			return nil, err
+			return nil, nil, err
 		}
 		if fn != nil {
-			return fn, nil
+			return fn, rm.settings, nil
 		}
 	}
-	return nil, schema.UnprocessableContentError(fmt.Sprintf("unsupported query: %s", name), nil)
+	return nil, nil, schema.UnprocessableContentError(fmt.Sprintf("unsupported query: %s", name), nil)
 }
 
 // GetProcedure gets the NDC procedure by name
-func (rms RESTMetadataCollection) GetProcedure(name string) (*rest.RESTProcedureInfo, error) {
+func (rms RESTMetadataCollection) GetProcedure(name string) (*rest.RESTProcedureInfo, *rest.NDCRestSettings, error) {
 	for _, rm := range rms {
 		fn, err := rm.GetProcedure(name)
 		if err != nil {
-			return nil, err
+			return nil, nil, err
 		}
 		if fn != nil {
-			return fn, nil
+			return fn, rm.settings, nil
 		}
 	}
-	return nil, schema.UnprocessableContentError(fmt.Sprintf("unsupported query: %s", name), nil)
+	return nil, nil, schema.UnprocessableContentError(fmt.Sprintf("unsupported query: %s", name), nil)
 }
 
 // RESTMetadata stores REST schema with handy methods to build requests
@@ -85,7 +84,6 @@ func (rm RESTMetadata) GetProcedure(name string) (*rest.RESTProcedureInfo, error
 
 func (rm RESTMetadata) buildRequest(rawReq *rest.Request) (*rest.Request, error) {
 	req := rawReq.Clone()
-	req.URL = rm.buildURL(req.URL)
 
 	if req.Timeout == 0 {
 		if rm.settings != nil && rm.settings.Timeout != nil {
@@ -133,22 +131,6 @@ func (rm RESTMetadata) buildRequest(rawReq *rest.Request) (*rest.Request, error)
 	}
 
 	return rm.applySecurity(req)
-}
-
-func (rm RESTMetadata) buildURL(endpoint string) string {
-	if strings.HasPrefix(endpoint, "http") {
-		return endpoint
-	}
-	var host string
-	for _, server := range rm.settings.Servers {
-		hostPtr := server.URL.Value()
-		if hostPtr != nil {
-			host = *hostPtr
-			break
-		}
-	}
-
-	return fmt.Sprintf("%s%s", host, endpoint)
 }
 
 func (rm RESTMetadata) applySecurity(req *rest.Request) (*rest.Request, error) {

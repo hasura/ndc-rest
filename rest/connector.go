@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/hasura/ndc-rest/rest/internal"
 	"github.com/hasura/ndc-sdk-go/connector"
 	"github.com/hasura/ndc-sdk-go/schema"
 	"gopkg.in/yaml.v3"
@@ -18,7 +19,7 @@ type RESTConnector struct {
 	capabilities *schema.RawCapabilitiesResponse
 	rawSchema    *schema.RawSchemaResponse
 	schema       *schema.SchemaResponse
-	client       *httpClient
+	client       *internal.HTTPClient
 }
 
 // NewRESTConnector creates a REST connector instance
@@ -28,7 +29,7 @@ func NewRESTConnector(opts ...Option) *RESTConnector {
 	}
 
 	return &RESTConnector{
-		client: createHTTPClient(defaultOptions.client),
+		client: internal.NewHTTPClient(defaultOptions.client),
 	}
 }
 
@@ -79,6 +80,7 @@ func (c *RESTConnector) ParseConfiguration(ctx context.Context, configurationDir
 // In addition, this function should register any
 // connector-specific metrics with the metrics registry.
 func (c *RESTConnector) TryInitState(ctx context.Context, configuration *Configuration, metrics *connector.TelemetryState) (*State, error) {
+	c.client.SetTracer(metrics.Tracer)
 	return &State{}, nil
 }
 

@@ -90,6 +90,10 @@ procedures:
         Content-Type: application/json
       security:
         - api_key: []
+      requestBody:
+        contentType: application/json
+        schema:
+          type": Pet
     arguments:
       body:
         description: Request body of /pet

@@ -12,7 +12,7 @@ import (
 
 	rest "github.com/hasura/ndc-rest-schema/schema"
 	"github.com/hasura/ndc-sdk-go/schema"
-	"github.com/stretchr/testify/assert"
+	"gotest.tools/v3/assert"
 )
 
 func TestCreateMultipartForm(t *testing.T) {
@@ -147,15 +147,15 @@ func TestCreateMultipartForm(t *testing.T) {
 		t.Run(tc.Name, func(t *testing.T) {
 			var reqBody rest.RequestBody
 			var arguments map[string]any
-			assert.NoError(t, json.Unmarshal([]byte(tc.RawBody), &reqBody))
-			assert.NoError(t, json.Unmarshal([]byte(tc.RawArguments), &arguments))
+			assert.NilError(t, json.Unmarshal([]byte(tc.RawBody), &reqBody))
+			assert.NilError(t, json.Unmarshal([]byte(tc.RawArguments), &arguments))
 
 			buf, mediaType, err := rc.createMultipartForm(&reqBody, arguments)
-			assert.NoError(t, err)
+			assert.NilError(t, err)
 
 			// log.Println("form data:", string(buf.String()))
 			_, params, err := mime.ParseMediaType(mediaType)
-			assert.NoError(t, err)
+			assert.NilError(t, err)
 
 			reader := multipart.NewReader(buf, params["boundary"])
 			var count int
@@ -165,15 +165,15 @@ func TestCreateMultipartForm(t *testing.T) {
 				if err != nil && strings.Contains(err.Error(), io.EOF.Error()) {
 					break
 				}
-				assert.NoError(t, err)
+				assert.NilError(t, err)
 				count++
 				name := form.FormName()
 				expected, ok := tc.Expected[name]
 				if !ok {
-					assert.Fail(t, fmt.Sprintf("field %s does not exist", name))
+					t.Fatalf(fmt.Sprintf("field %s does not exist", name))
 				} else {
 					result, err := io.ReadAll(form)
-					assert.NoError(t, err)
+					assert.NilError(t, err)
 					assert.Equal(t, expected, string(result))
 					results[name] = string(result)
 					expectedHeader := tc.ExpectedHeaders[name]
