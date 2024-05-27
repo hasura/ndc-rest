@@ -318,7 +318,7 @@ func printSchemaValidationError(logger *slog.Logger, errors map[string][]string)
 func parseRESTOptionsFromArguments(arguments map[string]schema.ArgumentInfo, rawRestOptions any) (*internal.RESTOptions, error) {
 	var result internal.RESTOptions
 	if err := result.FromValue(rawRestOptions); err != nil {
-		return nil, nil
+		return nil, err
 	}
 	argInfo, ok := arguments[internal.RESTOptionsArgumentName]
 	if !ok {

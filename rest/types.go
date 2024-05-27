@@ -6,7 +6,6 @@ import (
 	"github.com/hasura/ndc-rest-schema/command"
 	rest "github.com/hasura/ndc-rest-schema/schema"
 	"github.com/hasura/ndc-rest/rest/internal"
-	"github.com/hasura/ndc-sdk-go/utils"
 )
 
 const (
@@ -18,7 +17,6 @@ const (
 )
 
 var defaultRetryHTTPStatus = []int64{429, 500, 502, 503}
-var anyDecoder = utils.NewDecoder()
 
 // ConfigItem extends the ConvertConfig with advanced options
 type ConfigItem struct {

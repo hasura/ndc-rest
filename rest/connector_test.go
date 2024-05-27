@@ -13,6 +13,7 @@ import (
 	"path"
 	"sync/atomic"
 	"testing"
+	"time"
 
 	"github.com/hasura/ndc-sdk-go/connector"
 	"github.com/hasura/ndc-sdk-go/schema"
@@ -84,7 +85,7 @@ func TestRESTConnector(t *testing.T) {
 func TestRESTConnector_configurationFailure(t *testing.T) {
 	c := NewRESTConnector()
 	_, err := c.ParseConfiguration(context.Background(), "")
-	assert.Error(t, err, "the config.{json,yaml,yml} file does not exist at")
+	assert.ErrorContains(t, err, "the config.{json,yaml,yml} file does not exist at")
 }
 
 func TestRESTConnector_authentication(t *testing.T) {
@@ -136,7 +137,11 @@ func TestRESTConnector_authentication(t *testing.T) {
 				{
 					"type": "procedure",
 					"name": "addPet",
-					"arguments": {}
+					"arguments": {
+						"body": {
+							"name": "pet"
+						}
+					}
 				}
 			],
 			"collection_relationships": {}
@@ -316,6 +321,59 @@ func TestRESTConnector_distribution(t *testing.T) {
 		assert.Equal(t, int32(1), mock.catCount)
 		assert.Equal(t, int32(1), mock.dogCount)
 	})
+
+	t.Run("specify_server", func(t *testing.T) {
+		mock := mockDistributedServer{}
+		server := mock.createServer(t, apiKey)
+		defer server.Close()
+
+		t.Setenv("PET_STORE_DOG_URL", fmt.Sprintf("%s/dog", server.URL))
+		t.Setenv("PET_STORE_CAT_URL", fmt.Sprintf("%s/cat", server.URL))
+
+		reqBody := []byte(`{
+			"collection": "findPetsDistributed",
+			"query": {
+				"fields": {
+					"__value": {
+						"type": "column",
+						"column": "__value"
+					}
+				}
+			},
+			"arguments": {
+				"restOptions": {
+					"type": "literal",
+					"value": {
+						"servers": ["cat"]
+					}
+				}
+			},
+			"collection_relationships": {}
+		}`)
+
+		res, err := http.Post(fmt.Sprintf("%s/query", testServer.URL), "application/json", bytes.NewBuffer(reqBody))
+		assert.NilError(t, err)
+		assertHTTPResponse(t, res, http.StatusOK, schema.QueryResponse{
+			{
+				Rows: []map[string]any{
+
+					{"__value": map[string]any{
+						"errors": []any{},
+						"results": []any{
+							map[string]any{
+								"data": map[string]any{
+									"name": "cat",
+								},
+								"server": string("cat"),
+							},
+						},
+					}},
+				},
+			},
+		})
+		assert.Equal(t, int32(1), mock.catCount)
+		assert.Equal(t, int32(0), mock.dogCount)
+	})
 }
 
 func createMockServer(t *testing.T, apiKey string, bearerToken string) *httptest.Server {
@@ -411,6 +469,7 @@ func (mds *mockDistributedServer) createServer(t *testing.T, apiKey string) *htt
 	}
 	mux.HandleFunc("/cat/pet", func(w http.ResponseWriter, r *http.Request) {
 		atomic.AddInt32(&mds.catCount, 1)
+		time.Sleep(100 * time.Millisecond)
 		createHandler("cat")(w, r)
 	})
 	mux.HandleFunc("/dog/pet", func(w http.ResponseWriter, r *http.Request) {

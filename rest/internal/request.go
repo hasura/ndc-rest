@@ -76,7 +76,7 @@ func buildDistributedRequestsWithOptions(request *RetryableRequest, restOptions 
 		return []*RetryableRequest{request}, nil
 	}
 	if !restOptions.Distributed || len(restOptions.Settings.Servers) == 1 {
-		host, serverID := getHostFromServers(restOptions.Settings.Servers, restOptions.ServerIDs)
+		host, serverID := getHostFromServers(restOptions.Settings.Servers, restOptions.Servers)
 		request.RawRequest.URL = fmt.Sprintf("%s%s", host, request.RawRequest.URL)
 		request.ServerID = serverID
 		return []*RetryableRequest{request}, nil
@@ -92,7 +92,7 @@ func buildDistributedRequestsWithOptions(request *RetryableRequest, restOptions 
 			return nil, fmt.Errorf("failed to read request body: %s", err)
 		}
 	}
-	serverIDs := restOptions.ServerIDs
+	serverIDs := restOptions.Servers
 	if len(serverIDs) == 0 {
 		for _, server := range restOptions.Settings.Servers {
 			serverIDs = append(serverIDs, server.ID)

@@ -92,10 +92,12 @@ func (client *HTTPClient) sendParallel(ctx context.Context, requests []*Retryabl
 	results := NewDistributedResponse[any]()
 	var wg sync.WaitGroup
 	wg.Add(len(requests))
-
+	var lock sync.Mutex
 	sendFunc := func(req *RetryableRequest) {
 		defer wg.Done()
 		result, err := client.sendSingle(ctx, req, selection, resultType)
+		lock.Lock()
+		defer lock.Unlock()
 		if err != nil {
 			results.Errors = append(results.Errors, DistributedError{
 				Server:         req.ServerID,

@@ -179,12 +179,12 @@ func TestCreateMultipartForm(t *testing.T) {
 					expectedHeader := tc.ExpectedHeaders[name]
 
 					for key, value := range expectedHeader {
-						assert.Equal(t, value, form.Header[key])
+						assert.DeepEqual(t, value, form.Header[key])
 					}
 				}
 			}
 			if len(tc.Expected) != count {
-				assert.Equal(t, tc.Expected, results)
+				assert.DeepEqual(t, tc.Expected, results)
 			}
 		})
 	}
