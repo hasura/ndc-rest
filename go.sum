@@ -60,6 +60,8 @@ github.com/hasura/ndc-rest-schema v0.1.4-0.20240521030927-2b19f09a5f64 h1:kueTnc
 github.com/hasura/ndc-rest-schema v0.1.4-0.20240521030927-2b19f09a5f64/go.mod h1:l+h9TG6UboR66Xvojm7Pis71R+PRIlbYJfN1PZG8uUo=
 github.com/hasura/ndc-sdk-go v1.1.5-0.20240525054642-d66243e8c144 h1:8Fm7YWdkmKz1BoizhwE1/tvym+/exxqFN8cnIMNRLyw=
 github.com/hasura/ndc-sdk-go v1.1.5-0.20240525054642-d66243e8c144/go.mod h1:KIvlxe72E5+/yarmOzxk2FlFyAC6fHbEL6RdsgWhzj0=
+github.com/hasura/ndc-sdk-go v1.1.5-0.20240528164309-3e5ed5d94578 h1:H/lZvkIDG07ImXDyVplYXiAaLpQpEpLETJfJ79p6QFc=
+github.com/hasura/ndc-sdk-go v1.1.5-0.20240528164309-3e5ed5d94578/go.mod h1:KIvlxe72E5+/yarmOzxk2FlFyAC6fHbEL6RdsgWhzj0=
 github.com/hexops/gotextdiff v1.0.3 h1:gitA9+qJrrTCsiCl7+kh75nPqQt1cx4ZkudSTLoUqJM=
 github.com/hexops/gotextdiff v1.0.3/go.mod h1:pSWU5MAI3yDq+fZBTazCSJysOMbxWL1BSow5/V2vxeg=
 github.com/hpcloud/tail v1.0.0/go.mod h1:ab1qPbhIpdTxEkNHXyeSf5vhxWSCs/tWer42PpOxQnU=

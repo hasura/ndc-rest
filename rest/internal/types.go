@@ -3,7 +3,6 @@ package internal
 import (
 	"encoding/json"
 	"fmt"
-	"reflect"
 
 	rest "github.com/hasura/ndc-rest-schema/schema"
 	"github.com/hasura/ndc-sdk-go/schema"
@@ -71,18 +70,13 @@ func (ro *RESTOptions) FromValue(value any) error {
 	if !ok {
 		return fmt.Errorf("invalid rest options; expected object, got %v", value)
 	}
-	rawServerIds, ok := valueMap["servers"]
-	if ok && !utils.IsNil(rawServerIds) {
-		serverIDs, ok := rawServerIds.([]any)
-		if !ok {
-			return fmt.Errorf("invalid servers in rest options; expected []string, got %v", reflect.TypeOf(rawServerIds).Kind())
-		}
-		for _, v := range serverIDs {
-			ro.Servers = append(ro.Servers, fmt.Sprint(v))
-		}
+	rawServerIds, err := utils.GetStringSlice(valueMap, "servers")
+	if err != nil {
+		return fmt.Errorf("invalid rest options; %s", err)
 	}
+	ro.Servers = rawServerIds
 
-	parallel, err := utils.GetNullableBool(valueMap, "parallel")
+	parallel, err := utils.GetNullableBoolean(valueMap, "parallel")
 	if err != nil {
 		return fmt.Errorf("invalid parallel in rest options: %s", err)
 	}
