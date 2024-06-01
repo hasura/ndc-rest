@@ -206,7 +206,6 @@ func TestRESTConnector_authentication(t *testing.T) {
 func TestRESTConnector_distribution(t *testing.T) {
 	apiKey := "random_api_key"
 	bearerToken := "random_bearer_token"
-	slog.SetLogLoggerLevel(slog.LevelDebug)
 
 	t.Setenv("PET_STORE_API_KEY", apiKey)
 	t.Setenv("PET_STORE_BEARER_TOKEN", bearerToken)
@@ -376,6 +375,82 @@ func TestRESTConnector_distribution(t *testing.T) {
 	})
 }
 
+func TestRESTConnector_multiSchemas(t *testing.T) {
+	slog.SetLogLoggerLevel(slog.LevelDebug)
+
+	connServer, err := connector.NewServer(NewRESTConnector(), &connector.ServerOptions{
+		Configuration: "testdata/multi-schemas",
+	}, connector.WithoutRecovery())
+	assert.NilError(t, err)
+	testServer := connServer.BuildTestServer()
+	defer testServer.Close()
+
+	mock := mockMultiSchemaServer{}
+	server := mock.createServer()
+	defer server.Close()
+
+	t.Setenv("CAT_STORE_URL", fmt.Sprintf("%s/cat", server.URL))
+	t.Setenv("DOG_STORE_URL", fmt.Sprintf("%s/dog", server.URL))
+
+	reqBody := []byte(`{
+			"collection": "findCats",
+			"query": {
+				"fields": {
+					"__value": {
+						"type": "column",
+						"column": "__value"
+					}
+				}
+			},
+			"arguments": {},
+			"collection_relationships": {}
+		}`)
+
+	res, err := http.Post(fmt.Sprintf("%s/query", testServer.URL), "application/json", bytes.NewBuffer(reqBody))
+	assert.NilError(t, err)
+	assertHTTPResponse(t, res, http.StatusOK, schema.QueryResponse{
+		{
+			Rows: []map[string]any{
+				{"__value": map[string]any{
+					"name": "cat",
+				}},
+			},
+		},
+	})
+	assert.Equal(t, int32(1), mock.catCount)
+	assert.Equal(t, int32(0), mock.dogCount)
+
+	reqBody = []byte(`{
+		"collection": "findDogs",
+		"query": {
+			"fields": {
+				"__value": {
+					"type": "column",
+					"column": "__value"
+				}
+			}
+		},
+		"arguments": {},
+		"collection_relationships": {}
+	}`)
+
+	res, err = http.Post(fmt.Sprintf("%s/query", testServer.URL), "application/json", bytes.NewBuffer(reqBody))
+	assert.NilError(t, err)
+
+	assertHTTPResponse(t, res, http.StatusOK, schema.QueryResponse{
+		{
+			Rows: []map[string]any{
+				{"__value": map[string]any{
+					"name": "dog",
+				}},
+			},
+		},
+	})
+
+	assert.Equal(t, int32(1), mock.catCount)
+	assert.Equal(t, int32(1), mock.dogCount)
+}
+
 func createMockServer(t *testing.T, apiKey string, bearerToken string) *httptest.Server {
 	mux := http.NewServeMux()
 
@@ -473,6 +548,42 @@ func (mds *mockDistributedServer) createServer(t *testing.T, apiKey string) *htt
 		createHandler("cat")(w, r)
 	})
 	mux.HandleFunc("/dog/pet", func(w http.ResponseWriter, r *http.Request) {
+		atomic.AddInt32(&mds.dogCount, 1)
+		createHandler("dog")(w, r)
+	})
+
+	return httptest.NewServer(mux)
+}
+
+type mockMultiSchemaServer struct {
+	dogCount int32
+	catCount int32
+}
+
+func (mds *mockMultiSchemaServer) createServer() *httptest.Server {
+	mux := http.NewServeMux()
+
+	writeResponse := func(w http.ResponseWriter, data []byte) {
+		w.Header().Add("Content-Type", "application/json")
+		w.WriteHeader(http.StatusOK)
+		_, _ = w.Write(data)
+	}
+	createHandler := func(name string) http.HandlerFunc {
+		return func(w http.ResponseWriter, r *http.Request) {
+			switch r.Method {
+			case http.MethodGet:
+				writeResponse(w, []byte(fmt.Sprintf(`{"name": "%s"}`, name)))
+			default:
+				w.WriteHeader(http.StatusMethodNotAllowed)
+				return
+			}
+		}
+	}
+	mux.HandleFunc("/cat/cat", func(w http.ResponseWriter, r *http.Request) {
+		atomic.AddInt32(&mds.catCount, 1)
+		createHandler("cat")(w, r)
+	})
+	mux.HandleFunc("/dog/dog", func(w http.ResponseWriter, r *http.Request) {
 		atomic.AddInt32(&mds.dogCount, 1)
 		createHandler("dog")(w, r)
 	})

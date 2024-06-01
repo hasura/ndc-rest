@@ -65,8 +65,6 @@ func (c *RESTConnector) applyNDCRestSchemas(schemas []ndcRestSchemaWithName) map
 		ScalarTypes: make(schema.SchemaResponseScalarTypes),
 		ObjectTypes: make(schema.SchemaResponseObjectTypes),
 	}
-	functions := map[string]rest.RESTFunctionInfo{}
-	procedures := map[string]rest.RESTProcedureInfo{}
 	errors := make(map[string][]string)
 
 	for _, item := range schemas {
@@ -75,7 +73,9 @@ func (c *RESTConnector) applyNDCRestSchemas(schemas []ndcRestSchemaWithName) map
 			settings = &rest.NDCRestSettings{}
 		}
 		meta := RESTMetadata{
-			settings: settings,
+			settings:   settings,
+			functions:  map[string]rest.RESTFunctionInfo{},
+			procedures: map[string]rest.RESTProcedureInfo{},
 		}
 		var errs []string
 
@@ -102,7 +102,7 @@ func (c *RESTConnector) applyNDCRestSchemas(schemas []ndcRestSchemaWithName) map
 				Request:      req,
 				FunctionInfo: fnItem.FunctionInfo,
 			}
-			functions[fnItem.Name] = fn
+			meta.functions[fnItem.Name] = fn
 			functionSchemas = append(functionSchemas, fn.FunctionInfo)
 		}
 
@@ -115,7 +115,7 @@ func (c *RESTConnector) applyNDCRestSchemas(schemas []ndcRestSchemaWithName) map
 				errs = append(errs, fmt.Sprintf("procedure %s: %s", procItem.Name, err))
 				continue
 			}
-			procedures[procItem.Name] = rest.RESTProcedureInfo{
+			meta.procedures[procItem.Name] = rest.RESTProcedureInfo{
 				Request:       req,
 				ProcedureInfo: procItem.ProcedureInfo,
 			}
@@ -129,8 +129,6 @@ func (c *RESTConnector) applyNDCRestSchemas(schemas []ndcRestSchemaWithName) map
 		ndcSchema.Functions = append(ndcSchema.Functions, functionSchemas...)
 		ndcSchema.Procedures = append(ndcSchema.Procedures, procedureSchemas...)
 
-		meta.functions = functions
-		meta.procedures = procedures
 		c.metadata = append(c.metadata, meta)
 	}
 

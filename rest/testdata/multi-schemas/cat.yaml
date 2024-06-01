@@ -1,0 +1,36 @@
+settings:
+  servers:
+    - url: "{{CAT_STORE_URL}}"
+collections: []
+functions:
+  - request:
+      url: "/cat"
+      method: get
+    arguments: {}
+    description: Finds Cats
+    name: findCats
+    result_type:
+      element_type:
+        name: Pet
+        type: named
+      type: array
+object_types:
+  Pet:
+    fields:
+      id:
+        type:
+          type: nullable
+          underlying_type:
+            name: Int
+            type: named
+      name:
+        type:
+          name: String
+          type: named
+scalar_types:
+  Int:
+    aggregate_functions: {}
+    comparison_operators: {}
+  String:
+    aggregate_functions: {}
+    comparison_operators: {}
