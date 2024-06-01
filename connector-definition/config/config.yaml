@@ -1,3 +1,3 @@
 files:
-  - path: https://raw.githubusercontent.com/hasura/ndc-rest/main/rest/testdata/jsonplaceholder/swagger.json
+  - file: https://raw.githubusercontent.com/hasura/ndc-rest/main/rest/testdata/jsonplaceholder/swagger.json
     spec: openapi2

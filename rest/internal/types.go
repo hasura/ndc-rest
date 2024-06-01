@@ -70,11 +70,13 @@ func (ro *RESTOptions) FromValue(value any) error {
 	if !ok {
 		return fmt.Errorf("invalid rest options; expected object, got %v", value)
 	}
-	rawServerIds, err := utils.GetStringSlice(valueMap, "servers")
+	rawServerIds, err := utils.GetNullableStringSlice(valueMap, "servers")
 	if err != nil {
 		return fmt.Errorf("invalid rest options; %s", err)
 	}
-	ro.Servers = rawServerIds
+	if rawServerIds != nil {
+		ro.Servers = *rawServerIds
+	}
 
 	parallel, err := utils.GetNullableBoolean(valueMap, "parallel")
 	if err != nil {
