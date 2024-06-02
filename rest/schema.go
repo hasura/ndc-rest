@@ -80,10 +80,18 @@ func (c *RESTConnector) applyNDCRestSchemas(schemas []ndcRestSchemaWithName) map
 		var errs []string
 
 		for name, scalar := range item.schema.ScalarTypes {
-			ndcSchema.ScalarTypes[name] = scalar
+			if _, ok := ndcSchema.ScalarTypes[name]; !ok {
+				ndcSchema.ScalarTypes[name] = scalar
+			} else {
+				slog.Warn(fmt.Sprintf("Scalar type <%s> is conflicted", name))
+			}
 		}
 		for name, object := range item.schema.ObjectTypes {
-			ndcSchema.ObjectTypes[name] = object
+			if _, ok := ndcSchema.ObjectTypes[name]; !ok {
+				ndcSchema.ObjectTypes[name] = object
+			} else {
+				slog.Warn(fmt.Sprintf("Object type <%s> is conflicted", name))
+			}
 		}
 		ndcSchema.Collections = append(ndcSchema.Collections, item.schema.Collections...)
 

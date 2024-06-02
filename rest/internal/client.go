@@ -200,33 +200,45 @@ func (client *HTTPClient) sendSingle(ctx context.Context, request *RetryableRequ
 
 	span.SetAttributes(attribute.Int("http_status", resp.StatusCode))
 
-	logAttrs := []any{
-		slog.Int("http_status", resp.StatusCode),
-		slog.Any("response_headers", resp.Header),
-	}
+	return evalHTTPResponse(ctx, span, resp, selection, resultType)
+}
+
+func evalHTTPResponse(ctx context.Context, span trace.Span, resp *http.Response, selection schema.NestedField, resultType schema.Type) (any, *schema.ConnectorError) {
+
+	logger := connector.GetLogger(ctx)
+	contentType := parseContentType(resp.Header.Get(contentTypeHeader))
 	if resp.StatusCode >= 400 {
 		var respBody []byte
 		if resp.Body != nil {
-			body, readErr := io.ReadAll(resp.Body)
+			var err error
+			respBody, err = io.ReadAll(resp.Body)
 			_ = resp.Body.Close()
-			if readErr != nil {
+
+			if err != nil {
 				span.SetStatus(codes.Error, "error happened when reading response body")
-				span.RecordError(readErr)
-				return nil, schema.NewConnectorError(http.StatusInternalServerError, "error happened when reading response body", map[string]any{
-					"error": readErr.Error(),
+				span.RecordError(err)
+				return nil, schema.NewConnectorError(http.StatusInternalServerError, resp.Status, map[string]any{
+					"error": err,
 				})
 			}
-			respBody = body
+		}
+		details := make(map[string]any)
+		if contentType == rest.ContentTypeJSON && json.Valid(respBody) {
+			details["error"] = json.RawMessage(respBody)
+		} else {
+			details["error"] = string(respBody)
 		}
 
 		span.SetAttributes(attribute.String("response_error", string(respBody)))
 		span.SetStatus(codes.Error, "received error from remote server")
-		return nil, schema.NewConnectorError(resp.StatusCode, "received error from remote server", map[string]any{
-			"error": string(respBody),
-		})
+		return nil, schema.NewConnectorError(resp.StatusCode, resp.Status, details)
 	}
 
 	if logger.Enabled(ctx, slog.LevelDebug) {
+		logAttrs := []any{
+			slog.Int("http_status", resp.StatusCode),
+			slog.Any("response_headers", resp.Header),
+		}
 		if resp.Body != nil {
 			respBody, readErr := io.ReadAll(resp.Body)
 			_ = resp.Body.Close()
@@ -241,30 +253,6 @@ func (client *HTTPClient) sendSingle(ctx context.Context, request *RetryableRequ
 			logAttrs = append(logAttrs, slog.String("response_body", string(respBody)))
 		}
 		logger.Debug("received response from remote server", logAttrs...)
-	}
-
-	return evalHTTPResponse(resp, selection, resultType)
-}
-
-func evalHTTPResponse(resp *http.Response, selection schema.NestedField, resultType schema.Type) (any, *schema.ConnectorError) {
-	contentType := parseContentType(resp.Header.Get(contentTypeHeader))
-	if resp.StatusCode >= 400 {
-		var respBody []byte
-		if resp.Body != nil {
-			var err error
-			respBody, err = io.ReadAll(resp.Body)
-			_ = resp.Body.Close()
-
-			if err != nil {
-				return nil, schema.NewConnectorError(http.StatusInternalServerError, resp.Status, map[string]any{
-					"error": err,
-				})
-			}
-		}
-
-		return nil, schema.NewConnectorError(resp.StatusCode, resp.Status, map[string]any{
-			"error": string(respBody),
-		})
 	}
 
 	if resp.StatusCode == http.StatusNoContent {

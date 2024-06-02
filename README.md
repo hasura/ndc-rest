@@ -24,20 +24,23 @@ The connector reads `config.{json,yaml}` file in the configuration folder. The f
 
 ```yaml
 files:
-  - path: swagger.json
+  - file: swagger.json
     spec: openapi2
-  - path: openapi.yaml
+  - file: openapi.yaml
     spec: openapi3
     trimPrefix: /v1
     envPrefix: PET_STORE
     methodAlias:
       post: create
       put: update
-  - path: schema.json
+  - file: schema.json
     spec: ndc
 ```
 
-`trimPrefix`, `envPrefix` and `methodAlias` options are used to convert OpenAPI by [ndc-rest-schema](https://github.com/hasura/ndc-rest-schema#openapi).
+The config of each element follows the [config schema](https://github.com/hasura/ndc-rest-schema/blob/main/config.example.yaml) of `ndc-rest-schema`.
+
+> [!IMPORTANT]
+> Conflicted object and scalar types will be ignored. Only the type of the first file is kept in the schema.
 
 #### Supported specs
 
