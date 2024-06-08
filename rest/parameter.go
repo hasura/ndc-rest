@@ -94,16 +94,17 @@ func (c *RESTConnector) encodeParameterValues(typeSchema *rest.TypeSchema, value
 	if reflectValue.Kind() == reflect.Invalid {
 		return results, nil
 	}
-	if reflectValue.Kind() == reflect.Ptr {
-		if reflectValue.IsNil() {
-			if typeSchema.Nullable {
-				return results, nil
-			} else {
-				return nil, fmt.Errorf("parameter %s is required", strings.Join(fieldPaths, ""))
-			}
+	reflectValue, ok := sdkUtils.UnwrapPointerFromReflectValue(reflectValue)
+	if !ok {
+		if typeSchema.Nullable {
+			return results, nil
+		} else {
+			return nil, fmt.Errorf("parameter %s is required", strings.Join(fieldPaths, ""))
 		}
-		value = reflectValue.Elem().Interface()
 	}
+
+	value = reflectValue.Interface()
+
 	switch strings.ToLower(typeSchema.Type) {
 	case "object":
 		if len(typeSchema.Properties) == 0 {
@@ -159,7 +160,7 @@ func (c *RESTConnector) encodeParameterValues(typeSchema *rest.TypeSchema, value
 			}
 		}
 		return results, nil
-	case string(schema.TypeRepresentationTypeString), string(schema.TypeRepresentationTypeDate), string(schema.TypeRepresentationTypeTimestamp), string(schema.TypeRepresentationTypeTimestampTZ), string(schema.TypeRepresentationTypeBytes), string(schema.TypeRepresentationTypeUUID):
+	case string(schema.TypeRepresentationTypeString), string(schema.TypeRepresentationTypeDate), string(schema.TypeRepresentationTypeTimestamp), string(schema.TypeRepresentationTypeTimestampTZ), string(schema.TypeRepresentationTypeUUID), string(schema.TypeRepresentationTypeBytes), string(rest.ScalarBytes), string(rest.ScalarBinary):
 		return encodeParameterString(value, fieldPaths)
 	case string(schema.TypeRepresentationTypeInt32), string(schema.TypeRepresentationTypeInt64), strings.ToLower(string(rest.ScalarUnixTime)), "integer", "long":
 		return encodeParameterInt(value, fieldPaths)
@@ -190,25 +191,101 @@ func (c *RESTConnector) encodeParameterValues(typeSchema *rest.TypeSchema, value
 				return encodeParameterInt(value, fieldPaths)
 			case *schema.TypeRepresentationFloat32, *schema.TypeRepresentationFloat64:
 				return encodeParameterFloat(value, fieldPaths)
-			default:
-				return []internal.ParameterItem{
-					internal.NewParameterItem([]internal.Key{}, []string{fmt.Sprint(value)}),
-				}, nil
 			}
 		}
 
-		// TODO: encode nested fields without type schema
-		b, err := json.Marshal(value)
+		return encodeParameterReflectionValues(reflectValue, fieldPaths)
+	}
+}
+
+func encodeParameterReflectionValues(reflectValue reflect.Value, fieldPaths []string) (internal.ParameterItems, error) {
+
+	results := internal.ParameterItems{}
+	reflectValue, ok := sdkUtils.UnwrapPointerFromReflectValue(reflectValue)
+	if !ok {
+		return results, nil
+	}
+
+	kind := reflectValue.Kind()
+	switch kind {
+	case reflect.Bool:
+		return []internal.ParameterItem{
+			internal.NewParameterItem([]internal.Key{}, []string{strconv.FormatBool(reflectValue.Bool())}),
+		}, nil
+	case reflect.String:
+		return []internal.ParameterItem{internal.NewParameterItem([]internal.Key{}, []string{reflectValue.String()})}, nil
+	case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64:
+		return []internal.ParameterItem{
+			internal.NewParameterItem([]internal.Key{}, []string{strconv.FormatInt(reflectValue.Int(), 10)}),
+		}, nil
+	case reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64:
+		return []internal.ParameterItem{
+			internal.NewParameterItem([]internal.Key{}, []string{strconv.FormatUint(reflectValue.Uint(), 10)}),
+		}, nil
+	case reflect.Float32, reflect.Float64:
+		return []internal.ParameterItem{
+			internal.NewParameterItem([]internal.Key{}, []string{fmt.Sprintf("%f", reflectValue.Float())}),
+		}, nil
+	case reflect.Slice:
+		valueLen := reflectValue.Len()
+		for i := 0; i < valueLen; i++ {
+			propPaths := append(fieldPaths, fmt.Sprintf("[%d]", i))
+			elem := reflectValue.Index(i)
+
+			outputs, err := encodeParameterReflectionValues(elem, propPaths)
+			if err != nil {
+				return nil, err
+			}
+
+			for _, output := range outputs {
+				keys := output.Keys()
+				if len(keys) == 0 {
+					results.Add([]internal.Key{internal.NewKey("")}, output.Values())
+				} else {
+					results.Add(append([]internal.Key{internal.NewIndexKey(i)}, output.Keys()...), output.Values())
+				}
+			}
+		}
+		return results, nil
+	case reflect.Map:
+		keys := reflectValue.MapKeys()
+		if len(keys) == 0 {
+			return results, nil
+		}
+
+		for _, k := range keys {
+			key := fmt.Sprint(k.Interface())
+			propPaths := append(fieldPaths, fmt.Sprintf(".%s", key))
+			fieldVal := reflectValue.MapIndex(k)
+
+			output, err := encodeParameterReflectionValues(fieldVal, propPaths)
+			if err != nil {
+				return nil, err
+			}
+
+			for _, pair := range output {
+				results.Add(append([]internal.Key{internal.NewKey(key)}, pair.Keys()...), pair.Values())
+			}
+		}
+
+		return results, nil
+	case reflect.Struct, reflect.Interface:
+		b, err := json.Marshal(reflectValue.Interface())
 		if err != nil {
 			return nil, fmt.Errorf("%s: %s", strings.Join(fieldPaths, ""), err)
 		}
 		values := []string{strings.Trim(string(b), `"`)}
 		return []internal.ParameterItem{internal.NewParameterItem([]internal.Key{}, values)}, nil
+	default:
+		return nil, fmt.Errorf("%s: failed to encode parameter, got %s", strings.Join(fieldPaths, ""), kind)
 	}
 }
 
 func buildParamQueryKey(name string, encObject rest.EncodingObject, keys internal.Keys, values []string) string {
-	resultKeys := []string{name}
+	resultKeys := []string{}
+	if name != "" {
+		resultKeys = append(resultKeys, name)
+	}
 	// non-explode or explode form object does not require param name
 	// /users?role=admin&firstName=Alex
 	if (encObject.Explode != nil && !*encObject.Explode) ||

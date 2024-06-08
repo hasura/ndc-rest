@@ -3,6 +3,7 @@ package rest
 import (
 	"context"
 
+	"github.com/hasura/ndc-rest/rest/internal"
 	"github.com/hasura/ndc-sdk-go/schema"
 	"github.com/hasura/ndc-sdk-go/utils"
 )
@@ -39,7 +40,7 @@ func (c *RESTConnector) Query(ctx context.Context, configuration *Configuration,
 
 func (c *RESTConnector) execQuery(ctx context.Context, request *schema.QueryRequest, queryFields schema.NestedField, variables map[string]any) (any, error) {
 
-	function, err := c.metadata.GetFunction(request.Collection)
+	function, settings, err := c.metadata.GetFunction(request.Collection)
 	if err != nil {
 		return nil, err
 	}
@@ -58,13 +59,22 @@ func (c *RESTConnector) execQuery(ctx context.Context, request *schema.QueryRequ
 			"cause": err.Error(),
 		})
 	}
+
+	restOptions, err := parseRESTOptionsFromArguments(function.Arguments, rawArgs[internal.RESTOptionsArgumentName])
+	if err != nil {
+		return nil, schema.UnprocessableContentError("invalid rest options", map[string]any{
+			"cause": err.Error(),
+		})
+	}
+
 	// 2. create and execute request
 	// 3. evaluate response selection
 	function.Request.URL = endpoint
+	restOptions.Settings = settings
 	httpRequest, err := c.createRequest(function.Request, headers, nil)
 	if err != nil {
 		return nil, err
 	}
 
-	return c.client.Send(ctx, httpRequest, queryFields, function.ResultType)
+	return c.client.Send(ctx, httpRequest, queryFields, function.ResultType, restOptions)
 }

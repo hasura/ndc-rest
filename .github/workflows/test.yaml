@@ -13,7 +13,7 @@ on:
 jobs:
   test-go:
     name: Run Go lint and unit tests
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-latest
     permissions:
       pull-requests: write
     steps:
@@ -27,7 +27,7 @@ jobs:
       - name: Vet
         run: go vet ./...
       - name: Lint
-        uses: golangci/golangci-lint-action@v4
+        uses: golangci/golangci-lint-action@v6
         with:
           version: latest
           only-new-issues: true
@@ -36,6 +36,9 @@ jobs:
         run: |
           go test -v -coverpkg=./... -race -timeout 3m -coverprofile=coverage.out.tmp ./...
           cat coverage.out.tmp | grep -v "main.go" > coverage.out
+      - name: Run Go unit tests
+        run: |
+          ./scripts/test.sh
       - name: Go coverage format
         if: ${{ github.event_name == 'pull_request' }}
         run: |

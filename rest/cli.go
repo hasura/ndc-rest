@@ -31,7 +31,7 @@ func (c CLI) Execute(ctx context.Context, cmd string) error {
 			TimeFormat: "15:04",
 		}))
 
-		return command.ConvertToNDCSchema(&c.Convert, logger)
+		return command.CommandConvertToNDCSchema(&c.Convert, logger)
 	default:
 		return c.ServeCLI.Execute(ctx, cmd)
 	}

@@ -1,0 +1,23 @@
+settings:
+  servers:
+    - id: dog
+      url: "{{PET_STORE_DOG_URL}}"
+      timeout: 30
+      retry:
+        times: 2
+        delay: 1000
+        httpStatus: [429, 500]
+      securitySchemes:
+        api_key:
+          type: apiKey
+          value: "dog-secret"
+          in: header
+          name: api_key
+    - id: cat
+      url: "{{PET_STORE_CAT_URL}}"
+      securitySchemes:
+        api_key:
+          type: apiKey
+          value: "cat-secret"
+          in: header
+          name: api_key

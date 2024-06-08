@@ -24,20 +24,23 @@ The connector reads `config.{json,yaml}` file in the configuration folder. The f
 
 ```yaml
 files:
-  - path: swagger.json
+  - file: swagger.json
     spec: openapi2
-  - path: openapi.yaml
+  - file: openapi.yaml
     spec: openapi3
     trimPrefix: /v1
     envPrefix: PET_STORE
     methodAlias:
       post: create
       put: update
-  - path: schema.json
+  - file: schema.json
     spec: ndc
 ```
 
-`trimPrefix`, `envPrefix` and `methodAlias` options are used to convert OpenAPI by [ndc-rest-schema](https://github.com/hasura/ndc-rest-schema#openapi).
+The config of each element follows the [config schema](https://github.com/hasura/ndc-rest-schema/blob/main/config.example.yaml) of `ndc-rest-schema`.
+
+> [!IMPORTANT]
+> Conflicted object and scalar types will be ignored. Only the type of the first file is kept in the schema.
 
 #### Supported specs
 
@@ -85,3 +88,129 @@ settings:
 The current version supports API key and Auth token authentication schemes. The configuration is inspired from `securitySchemes` [with env variables](https://github.com/hasura/ndc-rest-schema#authentication)
 
 See [this example](rest/testdata/auth/schema.yaml) for more context.
+
+## Distributed execution
+
+Imagine that your backend have many server replications, or multiple applications with different credentials. You want to:
+
+- Specify the server where the request will be executed to.
+- Execute an operation to all servers.
+
+For example, with below server settings, the connector will replicate existing operations with `Distributed` suffixes:
+
+```yaml
+settings:
+  servers:
+    - id: dog
+      url: "http://localhost:3000"
+      securitySchemes:
+        api_key:
+          type: apiKey
+          value: "dog-secret"
+          in: header
+          name: api_key
+    - id: cat
+      url: "http://localhost:3001"
+      securitySchemes:
+        api_key:
+          type: apiKey
+          value: "cat-secret"
+          in: header
+          name: api_key
+```
+
+```json
+{
+  "functions": [
+    {
+      "arguments": {
+        "restOptions": {
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "RestSingleOptions",
+              "type": "named"
+            }
+          }
+        }
+      },
+      "name": "findPets",
+      "result_type": {
+        "element_type": {
+          "name": "Pet",
+          "type": "named"
+        },
+        "type": "array"
+      }
+    },
+    {
+      "arguments": {
+        "restOptions": {
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "RestDistributedOptions",
+              "type": "named"
+            }
+          }
+        }
+      },
+      "name": "findPetsDistributed",
+      "result_type": {
+        "name": "FindPetsDistributedResult",
+        "type": "named"
+      }
+    }
+  ],
+  "object_types": {
+    "RestDistributedOptions": {
+      "description": "Distributed execution options for REST requests to multiple servers",
+      "fields": {
+        "parallel": {
+          "description": "Execute requests to remote servers in parallel",
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "Boolean",
+              "type": "named"
+            }
+          }
+        },
+        "servers": {
+          "description": "Specify remote servers to receive the request",
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "element_type": {
+                "name": "RestServerId",
+                "type": "named"
+              },
+              "type": "array"
+            }
+          }
+        }
+      }
+    },
+    "RestSingleOptions": {
+      "description": "Execution options for REST requests to a single server",
+      "fields": {
+        "servers": {
+          "description": "Specify remote servers to receive the request. If there are many server IDs the server is selected randomly",
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "element_type": {
+                "name": "RestServerId",
+                "type": "named"
+              },
+              "type": "array"
+            }
+          }
+        }
+      }
+    }
+  }
+}
+```
+
+`RestSingleOptions` object type is added to existing operations (findPets). API consumers can specify the server to be executed. If you want to execute all remote servers in sequence or parallel, `findPetsDistributed` function should be used.

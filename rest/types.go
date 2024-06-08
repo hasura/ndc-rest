@@ -3,40 +3,35 @@ package rest
 import (
 	"net/http"
 
-	"github.com/hasura/ndc-rest-schema/schema"
+	"github.com/hasura/ndc-rest-schema/command"
+	rest "github.com/hasura/ndc-rest-schema/schema"
+	"github.com/hasura/ndc-rest/rest/internal"
 )
 
 const (
-	defaultTimeoutSeconds uint = 30
-	defaultRetryDelays    uint = 1000
-
-	contentTypeHeader = "Content-Type"
-	contentTypeJSON   = "application/json"
+	contentTypeJSON = "application/json"
 )
 
-var defaultRetryHTTPStatus = []int64{429, 500, 502, 503}
+// ConfigItem extends the ConvertConfig with advanced options
+type ConfigItem struct {
+	command.ConvertConfig `yaml:",inline"`
 
-// SchemaFile represents a schema file
-type SchemaFile struct {
-	Path        string                `json:"path" yaml:"path"`
-	Spec        schema.SchemaSpecType `json:"spec" yaml:"spec"`
-	MethodAlias map[string]string     `json:"methodAlias" yaml:"methodAlias"`
-	TrimPrefix  string                `json:"trimPrefix" yaml:"trimPrefix"`
-	EnvPrefix   string                `json:"envPrefix" yaml:"envPrefix"`
+	// Distributed enables distributed schema
+	Distributed bool `json:"distributed" yaml:"distributed"`
 }
 
 // Configuration contains required settings for the connector.
 type Configuration struct {
-	Files []SchemaFile `json:"files" yaml:"files"`
+	Files []ConfigItem `json:"files" yaml:"files"`
 }
 
 // State is the global state which is shared for every connector request.
 type State struct {
-	Schema *schema.NDCRestSchema
+	Schema *rest.NDCRestSchema
 }
 
 type options struct {
-	client Doer
+	client internal.Doer
 }
 
 var defaultOptions options = options{
@@ -49,13 +44,14 @@ var defaultOptions options = options{
 type Option (func(*options))
 
 // WithClient sets the custom HTTP client that satisfy the Doer interface
-func WithClient(client Doer) Option {
+func WithClient(client internal.Doer) Option {
 	return func(opts *options) {
 		opts.client = client
 	}
 }
 
-type ndcRestSchemaWithName struct {
+// NDCRestSchemaWithName wraps NDCRestSchema with identity name
+type NDCRestSchemaWithName struct {
 	name   string
-	schema *schema.NDCRestSchema
+	schema *rest.NDCRestSchema
 }

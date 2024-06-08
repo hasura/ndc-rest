@@ -1,0 +1,10 @@
+files:
+  - file: ../auth/schema.yaml
+    spec: ndc
+    distributed: true
+    patchBefore:
+      - path: patch-before.yaml
+        strategy: merge
+    patchAfter:
+      - path: patch-after.yaml
+        strategy: json6902

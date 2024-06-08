@@ -9,7 +9,7 @@ import (
 	"github.com/hasura/ndc-rest/rest/internal"
 	"github.com/hasura/ndc-sdk-go/schema"
 	"github.com/hasura/ndc-sdk-go/utils"
-	"github.com/stretchr/testify/assert"
+	"gotest.tools/v3/assert"
 )
 
 func TestEvalQueryParameterURL(t *testing.T) {
@@ -867,18 +867,18 @@ func TestEncodeParameterValues(t *testing.T) {
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
 			var info rest.RESTProcedureInfo
-			assert.NoError(t, json.Unmarshal([]byte(tc.rawProcedureSchema), &info))
+			assert.NilError(t, json.Unmarshal([]byte(tc.rawProcedureSchema), &info))
 
 			var arguments map[string]any
-			assert.NoError(t, json.Unmarshal([]byte(tc.rawArguments), &arguments))
+			assert.NilError(t, json.Unmarshal([]byte(tc.rawArguments), &arguments))
 
 			result, _, err := connector.evalURLAndHeaderParameters(info.Request, info.Arguments, arguments)
 			if tc.errorMsg != "" {
 				assert.ErrorContains(t, err, tc.errorMsg)
 			} else {
-				assert.NoError(t, err)
+				assert.NilError(t, err)
 				decodedValue, err := url.QueryUnescape(result)
-				assert.NoError(t, err)
+				assert.NilError(t, err)
 				assert.Equal(t, tc.expectedURL, decodedValue)
 			}
 		})

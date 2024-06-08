@@ -1,0 +1,5 @@
+files:
+  - file: dog.yaml
+    spec: ndc
+  - file: cat.yaml
+    spec: ndc
