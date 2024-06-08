@@ -6,6 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"log/slog"
+	"reflect"
 
 	"github.com/hasura/ndc-rest-schema/command"
 	rest "github.com/hasura/ndc-rest-schema/schema"
@@ -80,17 +81,17 @@ func (c *RESTConnector) applyNDCRestSchemas(schemas []ndcRestSchemaWithName) map
 		var errs []string
 
 		for name, scalar := range item.schema.ScalarTypes {
-			if _, ok := ndcSchema.ScalarTypes[name]; !ok {
+			if originScalar, ok := ndcSchema.ScalarTypes[name]; !ok {
 				ndcSchema.ScalarTypes[name] = scalar
-			} else {
-				slog.Warn(fmt.Sprintf("Scalar type <%s> is conflicted", name))
+			} else if !rest.IsDefaultScalar(name) && !reflect.DeepEqual(originScalar, scalar) {
+				slog.Warn(fmt.Sprintf("Scalar type %s is conflicted", name))
 			}
 		}
 		for name, object := range item.schema.ObjectTypes {
 			if _, ok := ndcSchema.ObjectTypes[name]; !ok {
 				ndcSchema.ObjectTypes[name] = object
 			} else {
-				slog.Warn(fmt.Sprintf("Object type <%s> is conflicted", name))
+				slog.Warn(fmt.Sprintf("Object type %s is conflicted", name))
 			}
 		}
 		ndcSchema.Collections = append(ndcSchema.Collections, item.schema.Collections...)

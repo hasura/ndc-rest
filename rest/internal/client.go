@@ -239,7 +239,7 @@ func evalHTTPResponse(ctx context.Context, span trace.Span, resp *http.Response,
 			slog.Int("http_status", resp.StatusCode),
 			slog.Any("response_headers", resp.Header),
 		}
-		if resp.Body != nil {
+		if resp.Body != nil && resp.StatusCode != http.StatusNoContent {
 			respBody, readErr := io.ReadAll(resp.Body)
 			_ = resp.Body.Close()
 			if readErr != nil {

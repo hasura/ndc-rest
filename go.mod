@@ -3,7 +3,7 @@ module github.com/hasura/ndc-rest
 go 1.21
 
 require (
-	github.com/hasura/ndc-rest-schema v0.1.4-0.20240602141719-9387645595e9
+	github.com/hasura/ndc-rest-schema v0.1.4-0.20240605020602-052811a172e6
 	github.com/hasura/ndc-sdk-go v1.2.0
 	github.com/lmittmann/tint v1.0.4
 	go.opentelemetry.io/otel v1.27.0

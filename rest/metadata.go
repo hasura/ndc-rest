@@ -144,11 +144,15 @@ func (rm RESTMetadata) applySecurity(req *rest.Request) (*rest.Request, error) {
 	var securityScheme *rest.SecurityScheme
 	for _, security := range req.Security {
 		sc, ok := rm.settings.SecuritySchemes[security.Name()]
-		if !ok || (slices.Contains([]rest.SecuritySchemeType{rest.HTTPAuthScheme, rest.APIKeyScheme}, sc.Type) &&
-			(sc.Value.Value() == nil || *sc.Value.Value() == "")) {
+		if !ok {
 			continue
 		}
+
 		securityScheme = &sc
+		if slices.Contains([]rest.SecuritySchemeType{rest.HTTPAuthScheme, rest.APIKeyScheme}, sc.Type) &&
+			sc.Value != nil && sc.Value.Value() != nil && *sc.Value.Value() != "" {
+			break
+		}
 	}
 
 	if securityScheme == nil {
