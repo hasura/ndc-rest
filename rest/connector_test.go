@@ -553,7 +553,7 @@ func (mds *mockDistributedServer) createServer(t *testing.T) *httptest.Server {
 		return func(w http.ResponseWriter, r *http.Request) {
 			if r.Header.Get("api_key") != apiKey {
 				w.WriteHeader(http.StatusUnauthorized)
-				w.Write([]byte(fmt.Sprintf(`{"message": "invalid api key, expected %s, got %s"}`, apiKey, r.Header.Get("api_key"))))
+				_, _ = w.Write([]byte(fmt.Sprintf(`{"message": "invalid api key, expected %s, got %s"}`, apiKey, r.Header.Get("api_key"))))
 				return
 			}
 			switch r.Method {
