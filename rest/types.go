@@ -9,14 +9,8 @@ import (
 )
 
 const (
-	defaultTimeoutSeconds uint = 30
-	defaultRetryDelays    uint = 1000
-
-	contentTypeHeader = "Content-Type"
-	contentTypeJSON   = "application/json"
+	contentTypeJSON = "application/json"
 )
-
-var defaultRetryHTTPStatus = []int64{429, 500, 502, 503}
 
 // ConfigItem extends the ConvertConfig with advanced options
 type ConfigItem struct {
@@ -56,7 +50,8 @@ func WithClient(client internal.Doer) Option {
 	}
 }
 
-type ndcRestSchemaWithName struct {
+// NDCRestSchemaWithName wraps NDCRestSchema with identity name
+type NDCRestSchemaWithName struct {
 	name   string
 	schema *rest.NDCRestSchema
 }

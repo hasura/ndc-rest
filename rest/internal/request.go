@@ -7,20 +7,25 @@ import (
 	"io"
 	"math/rand"
 	"net/http"
+	"net/url"
 	"slices"
 	"strings"
 	"time"
 
 	rest "github.com/hasura/ndc-rest-schema/schema"
+	"github.com/hasura/ndc-rest-schema/utils"
 )
 
 // RetryableRequest wraps the raw request with retryable
 type RetryableRequest struct {
 	RawRequest  *rest.Request
+	URL         string
 	ServerID    string
 	ContentType string
 	Headers     http.Header
 	Body        io.ReadSeeker
+	Timeout     uint
+	Retry       *rest.RetryPolicy
 }
 
 // CreateRequest creates an HTTP request with body copied
@@ -32,8 +37,12 @@ func (r *RetryableRequest) CreateRequest(ctx context.Context) (*http.Request, co
 		}
 	}
 
-	ctxR, cancel := context.WithTimeout(ctx, time.Duration(r.RawRequest.Timeout)*time.Second)
-	request, err := http.NewRequestWithContext(ctxR, strings.ToUpper(r.RawRequest.Method), r.RawRequest.URL, r.Body)
+	timeout := r.Timeout
+	if timeout == 0 {
+		timeout = defaultTimeoutSeconds
+	}
+	ctxR, cancel := context.WithTimeout(ctx, time.Duration(timeout)*time.Second)
+	request, err := http.NewRequestWithContext(ctxR, strings.ToUpper(r.RawRequest.Method), r.URL, r.Body)
 	if err != nil {
 		cancel()
 		return nil, nil, err
@@ -71,18 +80,22 @@ func getHostFromServers(servers []rest.ServerConfig, serverIDs []string) (string
 	}
 }
 
-func buildDistributedRequestsWithOptions(request *RetryableRequest, restOptions *RESTOptions) ([]*RetryableRequest, error) {
+func buildDistributedRequestsWithOptions(request *RetryableRequest, restOptions *RESTOptions) ([]RetryableRequest, error) {
 	if strings.HasPrefix(request.RawRequest.URL, "http") {
-		return []*RetryableRequest{request}, nil
-	}
-	if !restOptions.Distributed || len(restOptions.Settings.Servers) == 1 {
-		host, serverID := getHostFromServers(restOptions.Settings.Servers, restOptions.Servers)
-		request.RawRequest.URL = fmt.Sprintf("%s%s", host, request.RawRequest.URL)
-		request.ServerID = serverID
-		return []*RetryableRequest{request}, nil
+		return []RetryableRequest{*request}, nil
 	}
 
-	var requests []*RetryableRequest
+	if !restOptions.Distributed || len(restOptions.Settings.Servers) == 1 {
+		host, serverID := getHostFromServers(restOptions.Settings.Servers, restOptions.Servers)
+		request.URL = fmt.Sprintf("%s%s", host, request.RawRequest.URL)
+		request.ServerID = serverID
+		if err := request.applySettings(restOptions.Settings); err != nil {
+			return nil, err
+		}
+		return []RetryableRequest{*request}, nil
+	}
+
+	var requests []RetryableRequest
 	var buf []byte
 	var err error
 	if restOptions.Parallel && request.Body != nil {
@@ -103,18 +116,189 @@ func buildDistributedRequestsWithOptions(request *RetryableRequest, restOptions 
 		if host == "" {
 			continue
 		}
-		req := &RetryableRequest{
+
+		req := RetryableRequest{
+			URL:         fmt.Sprintf("%s%s", host, request.RawRequest.URL),
 			ServerID:    serverID,
-			RawRequest:  request.RawRequest.Clone(),
+			RawRequest:  request.RawRequest,
 			ContentType: request.ContentType,
-			Headers:     request.Headers,
+			Headers:     request.Headers.Clone(),
 			Body:        request.Body,
 		}
-		req.RawRequest.URL = fmt.Sprintf("%s%s", host, req.RawRequest.URL)
+		if err := req.applySettings(restOptions.Settings); err != nil {
+			return nil, err
+		}
 		if len(buf) > 0 {
 			req.Body = bytes.NewReader(buf)
 		}
 		requests = append(requests, req)
 	}
 	return requests, nil
+}
+
+func (req *RetryableRequest) getServerConfig(settings *rest.NDCRestSettings) *rest.ServerConfig {
+	if settings == nil {
+		return nil
+	}
+	if req.ServerID == "" {
+		return &settings.Servers[0]
+	}
+	for _, server := range settings.Servers {
+		if server.ID == req.ServerID {
+			return &server
+		}
+	}
+
+	return nil
+}
+
+func (req *RetryableRequest) applySecurity(serverConfig *rest.ServerConfig) error {
+	if serverConfig == nil {
+		return nil
+	}
+
+	securitySchemes := serverConfig.SecuritySchemes
+	securities := req.RawRequest.Security
+	if req.RawRequest.Security.IsEmpty() && serverConfig.Security != nil {
+		securities = serverConfig.Security
+	}
+
+	if securities.IsOptional() || len(securitySchemes) == 0 {
+		return nil
+	}
+
+	var securityScheme *rest.SecurityScheme
+	for _, security := range securities {
+		sc, ok := securitySchemes[security.Name()]
+		if !ok {
+			continue
+		}
+
+		securityScheme = &sc
+		if slices.Contains([]rest.SecuritySchemeType{rest.HTTPAuthScheme, rest.APIKeyScheme}, sc.Type) &&
+			sc.Value != nil && sc.Value.Value() != nil && *sc.Value.Value() != "" {
+			break
+		}
+	}
+
+	if securityScheme == nil {
+		return nil
+	}
+
+	if req.Headers == nil {
+		req.Headers = http.Header{}
+	}
+
+	switch securityScheme.Type {
+	case rest.HTTPAuthScheme:
+		headerName := securityScheme.Header
+		if headerName == "" {
+			headerName = "Authorization"
+		}
+		scheme := securityScheme.Scheme
+		if scheme == "bearer" || scheme == "basic" {
+			scheme = utils.ToPascalCase(securityScheme.Scheme)
+		}
+		if securityScheme.Value != nil {
+			v := securityScheme.Value.Value()
+			if v != nil {
+				req.Headers.Set(headerName, fmt.Sprintf("%s %s", scheme, *v))
+			}
+		}
+	case rest.APIKeyScheme:
+		switch securityScheme.In {
+		case rest.APIKeyInHeader:
+			if securityScheme.Value != nil {
+				value := securityScheme.Value.Value()
+				if value != nil {
+					req.Headers.Set(securityScheme.Name, *value)
+				}
+			}
+		case rest.APIKeyInQuery:
+			value := securityScheme.Value.Value()
+			if value != nil {
+				endpoint, err := url.Parse(req.RawRequest.URL)
+				if err != nil {
+					return err
+				}
+
+				q := endpoint.Query()
+				q.Add(securityScheme.Name, *securityScheme.Value.Value())
+				endpoint.RawQuery = q.Encode()
+				req.URL = endpoint.String()
+			} else {
+				req.URL = req.RawRequest.URL
+			}
+		case rest.APIKeyInCookie:
+			if securityScheme.Value != nil {
+				v := securityScheme.Value.Value()
+				if v != nil {
+					req.Headers.Set("Cookie", fmt.Sprintf("%s=%s", securityScheme.Name, *v))
+				}
+			}
+		default:
+			return fmt.Errorf("unsupported location for apiKey scheme: %s", securityScheme.In)
+		}
+	// TODO: support OAuth and OIDC
+	default:
+		return fmt.Errorf("unsupported security scheme: %s", securityScheme.Type)
+	}
+	return nil
+}
+
+func (req *RetryableRequest) applySettings(settings *rest.NDCRestSettings) error {
+	if req.Retry == nil {
+		req.Retry = &rest.RetryPolicy{}
+	}
+	if settings == nil {
+		return nil
+	}
+	serverConfig := req.getServerConfig(settings)
+	if serverConfig == nil {
+		return nil
+	}
+	if err := req.applySecurity(serverConfig); err != nil {
+		return err
+	}
+
+	if req.Timeout <= 0 && serverConfig.Timeout != nil {
+		timeout, err := serverConfig.Timeout.Value()
+		if err != nil {
+			return err
+		}
+		if timeout != nil && *timeout > 0 {
+			req.Timeout = uint(*timeout)
+		}
+	}
+	if req.Timeout == 0 {
+		req.Timeout = defaultTimeoutSeconds
+	}
+
+	if serverConfig.Retry != nil {
+		if req.Retry.Times <= 0 {
+			times, err := serverConfig.Retry.Times.Value()
+			if err == nil && times != nil && *times > 0 {
+				req.Retry.Times = uint(*times)
+			}
+		}
+		if req.Retry.Delay <= 0 {
+			delay, err := serverConfig.Retry.Delay.Value()
+			if err == nil && delay != nil && *delay > 0 {
+				req.Retry.Delay = uint(*delay)
+			} else {
+				req.Retry.Delay = defaultRetryDelays
+			}
+		}
+		if len(req.Retry.HTTPStatus) == 0 {
+			status, err := serverConfig.Retry.HTTPStatus.Value()
+			if err != nil || len(status) == 0 {
+				status = defaultRetryHTTPStatus
+			}
+			for _, st := range status {
+				req.Retry.HTTPStatus = append(req.Retry.HTTPStatus, int(st))
+			}
+		}
+	}
+
+	return nil
 }

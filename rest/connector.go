@@ -59,13 +59,13 @@ func (c *RESTConnector) ParseConfiguration(ctx context.Context, configurationDir
 	}
 
 	logger := connector.GetLogger(ctx)
-	schemas, errs := buildSchemaFiles(configurationDir, config.Files, logger)
+	schemas, errs := BuildSchemaFiles(configurationDir, config.Files, logger)
 	if len(errs) > 0 {
 		printSchemaValidationError(logger, errs)
 		return nil, errors.New("failed to build NDC REST schema")
 	}
 
-	if errs := c.applyNDCRestSchemas(schemas); len(errs) > 0 {
+	if errs := c.ApplyNDCRestSchemas(schemas); len(errs) > 0 {
 		printSchemaValidationError(logger, errs)
 		return nil, errors.New("failed to validate NDC REST schema")
 	}

@@ -51,7 +51,7 @@ func (client *HTTPClient) Send(ctx context.Context, request *RetryableRequest, s
 		return nil, err
 	}
 	if !restOptions.Distributed {
-		result, err := client.sendSingle(ctx, requests[0], selection, resultType)
+		result, err := client.sendSingle(ctx, &requests[0], selection, resultType)
 		if err != nil {
 			return nil, err
 		}
@@ -67,10 +67,10 @@ func (client *HTTPClient) Send(ctx context.Context, request *RetryableRequest, s
 }
 
 // execute a request to a list of remote servers in sequence
-func (client *HTTPClient) sendSequence(ctx context.Context, requests []*RetryableRequest, selection schema.NestedField, resultType schema.Type) *DistributedResponse[any] {
+func (client *HTTPClient) sendSequence(ctx context.Context, requests []RetryableRequest, selection schema.NestedField, resultType schema.Type) *DistributedResponse[any] {
 	results := NewDistributedResponse[any]()
 	for _, req := range requests {
-		result, err := client.sendSingle(ctx, req, selection, resultType)
+		result, err := client.sendSingle(ctx, &req, selection, resultType)
 		if err != nil {
 			results.Errors = append(results.Errors, DistributedError{
 				Server:         req.ServerID,
@@ -88,14 +88,14 @@ func (client *HTTPClient) sendSequence(ctx context.Context, requests []*Retryabl
 }
 
 // execute a request to a list of remote servers in parallel
-func (client *HTTPClient) sendParallel(ctx context.Context, requests []*RetryableRequest, selection schema.NestedField, resultType schema.Type) *DistributedResponse[any] {
+func (client *HTTPClient) sendParallel(ctx context.Context, requests []RetryableRequest, selection schema.NestedField, resultType schema.Type) *DistributedResponse[any] {
 	results := NewDistributedResponse[any]()
 	var wg sync.WaitGroup
 	wg.Add(len(requests))
 	var lock sync.Mutex
-	sendFunc := func(req *RetryableRequest) {
+	sendFunc := func(req RetryableRequest) {
 		defer wg.Done()
-		result, err := client.sendSingle(ctx, req, selection, resultType)
+		result, err := client.sendSingle(ctx, &req, selection, resultType)
 		lock.Lock()
 		defer lock.Unlock()
 		if err != nil {
@@ -123,7 +123,7 @@ func (client *HTTPClient) sendSingle(ctx context.Context, request *RetryableRequ
 	ctx, span := client.tracer.Start(ctx, "request_remote_server")
 	defer span.End()
 	span.SetAttributes(
-		attribute.String("request_url", request.RawRequest.URL),
+		attribute.String("request_url", request.URL),
 		attribute.String("method", request.RawRequest.Method),
 	)
 	var resp *http.Response
@@ -132,7 +132,7 @@ func (client *HTTPClient) sendSingle(ctx context.Context, request *RetryableRequ
 
 	if logger.Enabled(ctx, slog.LevelDebug) {
 		logAttrs := []any{
-			slog.String("request_url", request.RawRequest.URL),
+			slog.String("request_url", request.URL),
 			slog.String("request_method", request.RawRequest.Method),
 			slog.Any("request_headers", request.Headers),
 		}
@@ -143,7 +143,7 @@ func (client *HTTPClient) sendSingle(ctx context.Context, request *RetryableRequ
 		logger.Debug("sending request to remote server...", logAttrs...)
 	}
 
-	times := int(request.RawRequest.Retry.Times)
+	times := int(request.Retry.Times)
 	for i := 0; i <= times; i++ {
 		req, cancel, reqError := request.CreateRequest(ctx)
 		if reqError != nil {
@@ -189,7 +189,7 @@ func (client *HTTPClient) sendSingle(ctx context.Context, request *RetryableRequ
 			)
 		}
 
-		time.Sleep(time.Duration(request.RawRequest.Retry.Delay) * time.Millisecond)
+		time.Sleep(time.Duration(request.Retry.Delay) * time.Millisecond)
 	}
 
 	if err != nil {

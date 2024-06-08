@@ -20,8 +20,11 @@ settings:
           scopes:
             read:pets: read your pets
             write:pets: modify pets in your account
+  timeout: 10
   retry:
-    times: 2
+    times: 1
+    delay: 500
+    httpStatus: [429, 500, 501, 502]
   security:
     - api_key: []
   version: 1.0.18

@@ -66,10 +66,13 @@ func (c *RESTConnector) createRequest(rawRequest *rest.Request, headers http.Hea
 	}
 
 	request := &internal.RetryableRequest{
+		URL:         rawRequest.URL,
 		RawRequest:  rawRequest,
 		ContentType: contentType,
 		Headers:     headers,
 		Body:        buffer,
+		Timeout:     rawRequest.Timeout,
+		Retry:       rawRequest.Retry,
 	}
 
 	return request, nil

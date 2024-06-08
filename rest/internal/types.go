@@ -10,9 +10,13 @@ import (
 )
 
 const (
-	contentTypeHeader = "Content-Type"
-	contentTypeJSON   = "application/json"
+	contentTypeHeader          = "Content-Type"
+	contentTypeJSON            = "application/json"
+	defaultTimeoutSeconds uint = 30
+	defaultRetryDelays    uint = 1000
 )
+
+var defaultRetryHTTPStatus = []int64{429, 500, 502, 503}
 
 const (
 	RESTOptionsArgumentName          string = "restOptions"
@@ -22,6 +26,32 @@ const (
 	DistributedErrorObjectName       string = "DistributedError"
 )
 
+// SingleObjectType represents the object type of REST execution options for single server
+var SingleObjectType schema.ObjectType = schema.ObjectType{
+	Description: utils.ToPtr("Execution options for REST requests to a single server"),
+	Fields: schema.ObjectTypeFields{
+		"servers": schema.ObjectField{
+			Description: utils.ToPtr("Specify remote servers to receive the request. If there are many server IDs the server is selected randomly"),
+			Type:        schema.NewNullableType(schema.NewArrayType(schema.NewNamedType(RESTServerIDScalarName))).Encode(),
+		},
+	},
+}
+
+// DistributedObjectType represents the object type of REST execution options for distributed servers
+var DistributedObjectType schema.ObjectType = schema.ObjectType{
+	Description: utils.ToPtr("Distributed execution options for REST requests to multiple servers"),
+	Fields: schema.ObjectTypeFields{
+		"servers": schema.ObjectField{
+			Description: utils.ToPtr("Specify remote servers to receive the request"),
+			Type:        schema.NewNullableType(schema.NewArrayType(schema.NewNamedType(RESTServerIDScalarName))).Encode(),
+		},
+		"parallel": schema.ObjectField{
+			Description: utils.ToPtr("Execute requests to remote servers in parallel"),
+			Type:        schema.NewNullableNamedType(string(rest.ScalarBoolean)).Encode(),
+		},
+	},
+}
+
 // RESTOptions represent execution options for REST requests
 type RESTOptions struct {
 	Servers  []string `json:"servers" yaml:"serverIds"`
@@ -29,36 +59,6 @@ type RESTOptions struct {
 
 	Distributed bool                  `json:"-" yaml:"-"`
 	Settings    *rest.NDCRestSettings `json:"-" yaml:"-"`
-}
-
-// SingleObjectType returns the object type of REST execution options for single server
-func (ro RESTOptions) SingleObjectType() *schema.ObjectType {
-	return &schema.ObjectType{
-		Description: utils.ToPtr("Execution options for REST requests to a single server"),
-		Fields: schema.ObjectTypeFields{
-			"servers": schema.ObjectField{
-				Description: utils.ToPtr("Specify remote servers to receive the request. If there are many server IDs the server is selected randomly"),
-				Type:        schema.NewNullableType(schema.NewArrayType(schema.NewNamedType(RESTServerIDScalarName))).Encode(),
-			},
-		},
-	}
-}
-
-// DistributedObjectType returns the object type of REST execution options for distributed servers
-func (ro RESTOptions) DistributedObjectType() *schema.ObjectType {
-	return &schema.ObjectType{
-		Description: utils.ToPtr("Distributed execution options for REST requests to multiple servers"),
-		Fields: schema.ObjectTypeFields{
-			"servers": schema.ObjectField{
-				Description: utils.ToPtr("Specify remote servers to receive the request"),
-				Type:        schema.NewNullableType(schema.NewArrayType(schema.NewNamedType(RESTServerIDScalarName))).Encode(),
-			},
-			"parallel": schema.ObjectField{
-				Description: utils.ToPtr("Execute requests to remote servers in parallel"),
-				Type:        schema.NewNullableNamedType(string(rest.ScalarBoolean)).Encode(),
-			},
-		},
-	}
 }
 
 // FromValue parses rest execution options from any value

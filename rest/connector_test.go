@@ -91,7 +91,7 @@ func TestRESTConnector_configurationFailure(t *testing.T) {
 func TestRESTConnector_authentication(t *testing.T) {
 	apiKey := "random_api_key"
 	bearerToken := "random_bearer_token"
-	slog.SetLogLoggerLevel(slog.LevelDebug)
+	// slog.SetLogLoggerLevel(slog.LevelDebug)
 	server := createMockServer(t, apiKey, bearerToken)
 	defer server.Close()
 
@@ -207,18 +207,53 @@ func TestRESTConnector_distribution(t *testing.T) {
 	apiKey := "random_api_key"
 	bearerToken := "random_bearer_token"
 
+	slog.SetLogLoggerLevel(slog.LevelDebug)
 	t.Setenv("PET_STORE_API_KEY", apiKey)
 	t.Setenv("PET_STORE_BEARER_TOKEN", bearerToken)
-	connServer, err := connector.NewServer(NewRESTConnector(), &connector.ServerOptions{
+	rc := NewRESTConnector()
+	connServer, err := connector.NewServer(rc, &connector.ServerOptions{
 		Configuration: "testdata/patch",
 	}, connector.WithoutRecovery())
 	assert.NilError(t, err)
+
+	timeout, err := rc.metadata[0].settings.Servers[0].Timeout.Value()
+	assert.NilError(t, err)
+	assert.Equal(t, int64(30), *timeout)
+
+	retryTimes, err := rc.metadata[0].settings.Servers[0].Retry.Times.Value()
+	assert.NilError(t, err)
+	assert.Equal(t, int64(2), *retryTimes)
+
+	retryDelay, err := rc.metadata[0].settings.Servers[0].Retry.Delay.Value()
+	assert.NilError(t, err)
+	assert.Equal(t, int64(1000), *retryDelay)
+
+	retryStatus, err := rc.metadata[0].settings.Servers[0].Retry.HTTPStatus.Value()
+	assert.NilError(t, err)
+	assert.DeepEqual(t, []int64{429, 500}, retryStatus)
+
+	timeout1, err := rc.metadata[0].settings.Servers[1].Timeout.Value()
+	assert.NilError(t, err)
+	assert.Equal(t, int64(10), *timeout1)
+
+	retryTimes1, err := rc.metadata[0].settings.Servers[1].Retry.Times.Value()
+	assert.NilError(t, err)
+	assert.Equal(t, int64(1), *retryTimes1)
+
+	retryDelay1, err := rc.metadata[0].settings.Servers[1].Retry.Delay.Value()
+	assert.NilError(t, err)
+	assert.Equal(t, int64(500), *retryDelay1)
+
+	retryStatus1, err := rc.metadata[0].settings.Servers[1].Retry.HTTPStatus.Value()
+	assert.NilError(t, err)
+	assert.DeepEqual(t, []int64{429, 500, 501, 502}, retryStatus1)
+
 	testServer := connServer.BuildTestServer()
 	defer testServer.Close()
 
 	t.Run("distributed_sequence", func(t *testing.T) {
 		mock := mockDistributedServer{}
-		server := mock.createServer(t, apiKey)
+		server := mock.createServer(t)
 		defer server.Close()
 
 		t.Setenv("PET_STORE_DOG_URL", fmt.Sprintf("%s/dog", server.URL))
@@ -270,7 +305,7 @@ func TestRESTConnector_distribution(t *testing.T) {
 
 	t.Run("distributed_parallel", func(t *testing.T) {
 		mock := mockDistributedServer{}
-		server := mock.createServer(t, apiKey)
+		server := mock.createServer(t)
 		defer server.Close()
 
 		t.Setenv("PET_STORE_DOG_URL", fmt.Sprintf("%s/dog", server.URL))
@@ -323,7 +358,7 @@ func TestRESTConnector_distribution(t *testing.T) {
 
 	t.Run("specify_server", func(t *testing.T) {
 		mock := mockDistributedServer{}
-		server := mock.createServer(t, apiKey)
+		server := mock.createServer(t)
 		defer server.Close()
 
 		t.Setenv("PET_STORE_DOG_URL", fmt.Sprintf("%s/dog", server.URL))
@@ -506,7 +541,7 @@ type mockDistributedServer struct {
 	catCount int32
 }
 
-func (mds *mockDistributedServer) createServer(t *testing.T, apiKey string) *httptest.Server {
+func (mds *mockDistributedServer) createServer(t *testing.T) *httptest.Server {
 	mux := http.NewServeMux()
 
 	writeResponse := func(w http.ResponseWriter, data []byte) {
@@ -514,11 +549,11 @@ func (mds *mockDistributedServer) createServer(t *testing.T, apiKey string) *htt
 		w.WriteHeader(http.StatusOK)
 		_, _ = w.Write(data)
 	}
-	createHandler := func(name string) http.HandlerFunc {
+	createHandler := func(name string, apiKey string) http.HandlerFunc {
 		return func(w http.ResponseWriter, r *http.Request) {
 			if r.Header.Get("api_key") != apiKey {
-				t.Errorf("invalid api key, expected %s, got %s", apiKey, r.Header.Get("api_key"))
-				t.FailNow()
+				w.WriteHeader(http.StatusUnauthorized)
+				w.Write([]byte(fmt.Sprintf(`{"message": "invalid api key, expected %s, got %s"}`, apiKey, r.Header.Get("api_key"))))
 				return
 			}
 			switch r.Method {
@@ -545,11 +580,11 @@ func (mds *mockDistributedServer) createServer(t *testing.T, apiKey string) *htt
 	mux.HandleFunc("/cat/pet", func(w http.ResponseWriter, r *http.Request) {
 		atomic.AddInt32(&mds.catCount, 1)
 		time.Sleep(100 * time.Millisecond)
-		createHandler("cat")(w, r)
+		createHandler("cat", "cat-secret")(w, r)
 	})
 	mux.HandleFunc("/dog/pet", func(w http.ResponseWriter, r *http.Request) {
 		atomic.AddInt32(&mds.dogCount, 1)
-		createHandler("dog")(w, r)
+		createHandler("dog", "dog-secret")(w, r)
 	})
 
 	return httptest.NewServer(mux)
@@ -637,19 +672,16 @@ func assertHTTPResponse[B any](t *testing.T, res *http.Response, statusCode int,
 
 	bodyBytes, err := io.ReadAll(res.Body)
 	if err != nil {
-		t.Error("failed to read response body")
-		t.FailNow()
+		t.Fatal("failed to read response body")
 	}
 
 	if res.StatusCode != statusCode {
-		t.Errorf("expected status %d, got %d. Body: %s", statusCode, res.StatusCode, string(bodyBytes))
-		t.FailNow()
+		t.Fatalf("expected status %d, got %d. Body: %s", statusCode, res.StatusCode, string(bodyBytes))
 	}
 
 	var body B
 	if err = json.Unmarshal(bodyBytes, &body); err != nil {
 		t.Errorf("failed to decode json body, got error: %s; body: %s", err, string(bodyBytes))
-		t.FailNow()
 	}
 
 	assert.DeepEqual(t, expectedBody, body)
