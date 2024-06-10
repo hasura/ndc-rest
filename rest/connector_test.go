@@ -167,19 +167,26 @@ func TestRESTConnector_authentication(t *testing.T) {
 					}
 				}
 			},
-			"arguments": {},
+			"arguments": {
+				"status": {
+					"type": "literal",
+					"value": "available"
+				}
+			},
 			"collection_relationships": {}
 		}`)
 
-		res, err := http.Post(fmt.Sprintf("%s/query", testServer.URL), "application/json", bytes.NewBuffer(reqBody))
-		assert.NilError(t, err)
-		assertHTTPResponse(t, res, http.StatusOK, schema.QueryResponse{
-			{
-				Rows: []map[string]any{
-					{"__value": map[string]any{}},
+		for i := 0; i < 2; i++ {
+			res, err := http.Post(fmt.Sprintf("%s/query", testServer.URL), "application/json", bytes.NewBuffer(reqBody))
+			assert.NilError(t, err)
+			assertHTTPResponse(t, res, http.StatusOK, schema.QueryResponse{
+				{
+					Rows: []map[string]any{
+						{"__value": map[string]any{}},
+					},
 				},
-			},
-		})
+			})
+		}
 	})
 
 	t.Run("retry", func(t *testing.T) {
@@ -513,8 +520,11 @@ func createMockServer(t *testing.T, apiKey string, bearerToken string) *httptest
 		switch r.Method {
 		case http.MethodGet:
 			if r.Header.Get("Authorization") != fmt.Sprintf("Bearer %s", bearerToken) {
-				t.Errorf("invalid bearer token, expected %s, got %s", bearerToken, r.Header.Get("Authorization"))
-				t.FailNow()
+				t.Fatalf("invalid bearer token, expected %s, got %s", bearerToken, r.Header.Get("Authorization"))
+				return
+			}
+			if r.URL.Query().Encode() != "status=available" {
+				t.Fatalf("expected query param: status=available, got: %s", r.URL.Query().Encode())
 				return
 			}
 			writeResponse(w)

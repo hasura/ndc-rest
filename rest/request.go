@@ -16,7 +16,7 @@ import (
 	"github.com/hasura/ndc-sdk-go/utils"
 )
 
-func (c *RESTConnector) createRequest(rawRequest *rest.Request, headers http.Header, arguments map[string]any) (*internal.RetryableRequest, error) {
+func (c *RESTConnector) createRequest(rawRequest *rest.Request, endpoint string, headers http.Header, arguments map[string]any) (*internal.RetryableRequest, error) {
 	var buffer io.ReadSeeker
 	contentType := contentTypeJSON
 	bodyData, ok := arguments["body"]
@@ -66,7 +66,7 @@ func (c *RESTConnector) createRequest(rawRequest *rest.Request, headers http.Hea
 	}
 
 	request := &internal.RetryableRequest{
-		URL:         rawRequest.URL,
+		URL:         endpoint,
 		RawRequest:  rawRequest,
 		ContentType: contentType,
 		Headers:     headers,
