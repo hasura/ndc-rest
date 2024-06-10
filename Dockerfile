@@ -13,7 +13,7 @@ FROM gcr.io/distroless/static-debian12:nonroot
 # Copy the binary to the production image from the builder stage.
 COPY --from=builder /app/ndc-cli /ndc-cli
 
-ENV HASURA_CONFIGURATION_DIRECTORY /config
+ENV HASURA_CONFIGURATION_DIRECTORY /etc/connector
 
 ENTRYPOINT ["/ndc-cli"]
 
