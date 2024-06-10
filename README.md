@@ -48,13 +48,12 @@ The config of each element follows the [config schema](https://github.com/hasura
 - `openapi2`: OpenAPI 2.0.
 - `ndc`: NDC REST schema.
 
-The connector can convert OpenAPI to REST NDC schema in runtime. However, it's more flexible and performance-wise to pre-convert them, for example, change better function or procedure names. The connector supports a convert command to do it.
+The connector can convert OpenAPI to REST NDC schema in runtime. However, it's more flexible and performance-wise to pre-convert them, for example, change better function or procedure names.
 
 ```sh
-ndc-rest convert -f ./rest/testdata/jsonplaceholder/swagger.json -o ./rest/testdata/jsonplaceholder/schema.json --spec openapi2
+go install github.com/hasura/ndc-rest-schema@latest
+ndc-rest-schema convert -f ./rest/testdata/jsonplaceholder/swagger.json -o ./rest/testdata/jsonplaceholder/schema.json --spec openapi2
 ```
-
-> The `convert` command is imported from the [NDC REST Schema](https://github.com/hasura/ndc-rest-schema#quick-start) CLI tool.
 
 #### Supported content types
 
