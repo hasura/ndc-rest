@@ -69,9 +69,8 @@ func (c *RESTConnector) execQuery(ctx context.Context, request *schema.QueryRequ
 
 	// 2. create and execute request
 	// 3. evaluate response selection
-	function.Request.URL = endpoint
 	restOptions.Settings = settings
-	httpRequest, err := c.createRequest(function.Request, headers, nil)
+	httpRequest, err := c.createRequest(function.Request, endpoint, headers, nil)
 	if err != nil {
 		return nil, err
 	}

@@ -62,9 +62,8 @@ func (c *RESTConnector) execProcedure(ctx context.Context, operation *schema.Mut
 
 	// 2. create and execute request
 	// 3. evaluate response selection
-	procedure.Request.URL = endpoint
 	restOptions.Settings = settings
-	httpRequest, err := c.createRequest(procedure.Request, headers, rawArgs)
+	httpRequest, err := c.createRequest(procedure.Request, endpoint, headers, rawArgs)
 	if err != nil {
 		return nil, err
 	}

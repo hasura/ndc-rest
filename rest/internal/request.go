@@ -81,13 +81,13 @@ func getHostFromServers(servers []rest.ServerConfig, serverIDs []string) (string
 }
 
 func buildDistributedRequestsWithOptions(request *RetryableRequest, restOptions *RESTOptions) ([]RetryableRequest, error) {
-	if strings.HasPrefix(request.RawRequest.URL, "http") {
+	if strings.HasPrefix(request.URL, "http") {
 		return []RetryableRequest{*request}, nil
 	}
 
 	if !restOptions.Distributed || len(restOptions.Settings.Servers) == 1 {
 		host, serverID := getHostFromServers(restOptions.Settings.Servers, restOptions.Servers)
-		request.URL = fmt.Sprintf("%s%s", host, request.RawRequest.URL)
+		request.URL = fmt.Sprintf("%s%s", host, request.URL)
 		request.ServerID = serverID
 		if err := request.applySettings(restOptions.Settings); err != nil {
 			return nil, err
@@ -118,7 +118,7 @@ func buildDistributedRequestsWithOptions(request *RetryableRequest, restOptions 
 		}
 
 		req := RetryableRequest{
-			URL:         fmt.Sprintf("%s%s", host, request.RawRequest.URL),
+			URL:         fmt.Sprintf("%s%s", host, request.URL),
 			ServerID:    serverID,
 			RawRequest:  request.RawRequest,
 			ContentType: request.ContentType,
@@ -217,7 +217,7 @@ func (req *RetryableRequest) applySecurity(serverConfig *rest.ServerConfig) erro
 		case rest.APIKeyInQuery:
 			value := securityScheme.Value.Value()
 			if value != nil {
-				endpoint, err := url.Parse(req.RawRequest.URL)
+				endpoint, err := url.Parse(req.URL)
 				if err != nil {
 					return err
 				}
@@ -226,8 +226,6 @@ func (req *RetryableRequest) applySecurity(serverConfig *rest.ServerConfig) erro
 				q.Add(securityScheme.Name, *securityScheme.Value.Value())
 				endpoint.RawQuery = q.Encode()
 				req.URL = endpoint.String()
-			} else {
-				req.URL = req.RawRequest.URL
 			}
 		case rest.APIKeyInCookie:
 			if securityScheme.Value != nil {
