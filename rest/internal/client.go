@@ -16,8 +16,10 @@ import (
 	"github.com/hasura/ndc-sdk-go/connector"
 	"github.com/hasura/ndc-sdk-go/schema"
 	"github.com/hasura/ndc-sdk-go/utils"
+	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/attribute"
 	"go.opentelemetry.io/otel/codes"
+	"go.opentelemetry.io/otel/propagation"
 	"go.opentelemetry.io/otel/trace"
 )
 
@@ -28,14 +30,16 @@ type Doer interface {
 
 // HTTPClient represents a http client wrapper with advanced methods
 type HTTPClient struct {
-	client Doer
-	tracer *connector.Tracer
+	client     Doer
+	tracer     *connector.Tracer
+	propagator propagation.TextMapPropagator
 }
 
 // NewHTTPClient creates a http client wrapper
 func NewHTTPClient(client Doer) *HTTPClient {
 	return &HTTPClient{
-		client: client,
+		client:     client,
+		propagator: otel.GetTextMapPropagator(),
 	}
 }
 
@@ -126,6 +130,8 @@ func (client *HTTPClient) sendSingle(ctx context.Context, request *RetryableRequ
 		attribute.String("request_url", request.URL),
 		attribute.String("method", request.RawRequest.Method),
 	)
+	client.propagator.Inject(ctx, propagation.HeaderCarrier(request.Headers))
+
 	var resp *http.Response
 	var err error
 	logger := connector.GetLogger(ctx)

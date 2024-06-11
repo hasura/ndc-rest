@@ -118,6 +118,17 @@ settings:
           name: api_key
 ```
 
+Add `distributed: true` to the config file:
+
+```yaml
+files:
+  - file: schema.yaml
+    spec: oas3
+    distributed: true
+```
+
+The generated schema will be:
+
 ```json
 {
   "functions": [
