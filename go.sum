@@ -58,8 +58,8 @@ github.com/grpc-ecosystem/grpc-gateway/v2 v2.21.0 h1:CWyXh/jylQWp2dtiV33mY4iSSp6
 github.com/grpc-ecosystem/grpc-gateway/v2 v2.21.0/go.mod h1:nCLIt0w3Ept2NwF8ThLmrppXsfT07oC8k0XNDxd8sVU=
 github.com/hasura/ndc-rest-schema v0.2.1 h1:LZEDFz6sogxXtsRLsgNh3R+kXrynREJU0oJqmbWC7p0=
 github.com/hasura/ndc-rest-schema v0.2.1/go.mod h1:sFmHoxaIB1XdWb/vqGn22LXchdq21EarE3gkLByz7Ts=
-github.com/hasura/ndc-sdk-go v1.2.5 h1:nsbOcX5Gx5CIPT3X6moRVhTFPvARKGrjJZNq5tg9HMI=
-github.com/hasura/ndc-sdk-go v1.2.5/go.mod h1:e1t6tWlONuvrnM38QGRl1UfiM7CDskvXSdguu2IwNpE=
+github.com/hasura/ndc-sdk-go v1.2.6-0.20240715044222-95d2c93dc061 h1:wsRavEIVAHA4NHkNVob6YKE6hpnPTCAREdgxSG3GdGc=
+github.com/hasura/ndc-sdk-go v1.2.6-0.20240715044222-95d2c93dc061/go.mod h1:/HF5Bv2t3p3d9R8rZwYPGK93yAyttJ9xvZGuCVks9UQ=
 github.com/hexops/gotextdiff v1.0.3 h1:gitA9+qJrrTCsiCl7+kh75nPqQt1cx4ZkudSTLoUqJM=
 github.com/hexops/gotextdiff v1.0.3/go.mod h1:pSWU5MAI3yDq+fZBTazCSJysOMbxWL1BSow5/V2vxeg=
 github.com/hpcloud/tail v1.0.0/go.mod h1:ab1qPbhIpdTxEkNHXyeSf5vhxWSCs/tWer42PpOxQnU=

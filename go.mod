@@ -4,7 +4,7 @@ go 1.21
 
 require (
 	github.com/hasura/ndc-rest-schema v0.2.1
-	github.com/hasura/ndc-sdk-go v1.2.5
+	github.com/hasura/ndc-sdk-go v1.2.6-0.20240715044222-95d2c93dc061
 	github.com/lmittmann/tint v1.0.5
 	go.opentelemetry.io/otel v1.28.0
 	go.opentelemetry.io/otel/trace v1.28.0
