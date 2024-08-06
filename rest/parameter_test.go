@@ -2,6 +2,7 @@ package rest
 
 import (
 	"encoding/json"
+	"net/http"
 	"net/url"
 	"testing"
 
@@ -872,7 +873,7 @@ func TestEncodeParameterValues(t *testing.T) {
 			var arguments map[string]any
 			assert.NilError(t, json.Unmarshal([]byte(tc.rawArguments), &arguments))
 
-			result, _, err := connector.evalURLAndHeaderParameters(info.Request, info.Arguments, arguments)
+			result, _, err := connector.evalURLAndHeaderParameters(info.Request, info.Arguments, arguments, http.Header{})
 			if tc.errorMsg != "" {
 				assert.ErrorContains(t, err, tc.errorMsg)
 			} else {

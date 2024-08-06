@@ -240,3 +240,14 @@ func getRequestUploadBody(rawRequest *rest.Request) *rest.RequestBody {
 	}
 	return nil
 }
+
+func buildHeadersFromEnvMap(input map[string]rest.EnvString) http.Header {
+	results := http.Header{}
+	for k, envValue := range input {
+		value := envValue.Value()
+		if value != nil && *value != "" {
+			results.Set(k, *value)
+		}
+	}
+	return results
+}
