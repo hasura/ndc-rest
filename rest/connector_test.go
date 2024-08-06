@@ -6,7 +6,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
-	"log/slog"
 	"net/http"
 	"net/http/httptest"
 	"os"
@@ -214,7 +213,6 @@ func TestRESTConnector_distribution(t *testing.T) {
 	apiKey := "random_api_key"
 	bearerToken := "random_bearer_token"
 
-	slog.SetLogLoggerLevel(slog.LevelDebug)
 	t.Setenv("PET_STORE_API_KEY", apiKey)
 	t.Setenv("PET_STORE_BEARER_TOKEN", bearerToken)
 	rc := NewRESTConnector()
@@ -418,8 +416,6 @@ func TestRESTConnector_distribution(t *testing.T) {
 }
 
 func TestRESTConnector_multiSchemas(t *testing.T) {
-	slog.SetLogLoggerLevel(slog.LevelDebug)
-
 	connServer, err := connector.NewServer(NewRESTConnector(), &connector.ServerOptions{
 		Configuration: "testdata/multi-schemas",
 	}, connector.WithoutRecovery())
