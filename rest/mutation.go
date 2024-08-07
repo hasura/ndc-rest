@@ -46,7 +46,7 @@ func (c *RESTConnector) execProcedure(ctx context.Context, operation *schema.Mut
 		})
 	}
 
-	endpoint, headers, err := c.evalURLAndHeaderParameters(procedure.Request, procedure.Arguments, rawArgs, buildHeadersFromEnvMap(settings.Headers))
+	endpoint, headers, err := c.evalURLAndHeaderParameters(procedure.Request, procedure.Arguments, rawArgs)
 	if err != nil {
 		return nil, schema.BadRequestError("failed to evaluate URL and Headers from parameters", map[string]any{
 			"cause": err.Error(),

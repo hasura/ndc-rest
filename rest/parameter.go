@@ -16,11 +16,12 @@ import (
 	sdkUtils "github.com/hasura/ndc-sdk-go/utils"
 )
 
-func (c *RESTConnector) evalURLAndHeaderParameters(request *rest.Request, argumentsSchema map[string]schema.ArgumentInfo, arguments map[string]any, headers http.Header) (string, http.Header, error) {
+func (c *RESTConnector) evalURLAndHeaderParameters(request *rest.Request, argumentsSchema map[string]schema.ArgumentInfo, arguments map[string]any) (string, http.Header, error) {
 	endpoint, err := url.Parse(request.URL)
 	if err != nil {
 		return "", nil, err
 	}
+	headers := http.Header{}
 	for k, h := range request.Headers {
 		v := h.Value()
 		if v != nil && *v != "" {

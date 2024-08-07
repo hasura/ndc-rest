@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"log"
 	"net/http"
 	"net/http/httptest"
 	"os"
@@ -613,6 +614,11 @@ func (mds *mockMultiSchemaServer) createServer() *httptest.Server {
 		return func(w http.ResponseWriter, r *http.Request) {
 			switch r.Method {
 			case http.MethodGet:
+				log.Println("headers", r.Header)
+				if r.Header.Get("pet") != name {
+					w.WriteHeader(http.StatusBadRequest)
+					return
+				}
 				writeResponse(w, []byte(fmt.Sprintf(`{"name": "%s"}`, name)))
 			default:
 				w.WriteHeader(http.StatusMethodNotAllowed)

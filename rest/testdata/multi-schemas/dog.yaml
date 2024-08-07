@@ -1,6 +1,8 @@
 settings:
   servers:
     - url: "{{DOG_STORE_URL}}"
+      headers:
+        pet: dog
 collections: []
 functions:
   - request:
