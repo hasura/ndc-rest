@@ -3,7 +3,7 @@ module github.com/hasura/ndc-rest
 go 1.21
 
 require (
-	github.com/hasura/ndc-rest-schema v0.2.1
+	github.com/hasura/ndc-rest-schema v0.2.2
 	github.com/hasura/ndc-sdk-go v1.2.6-0.20240715044222-95d2c93dc061
 	github.com/lmittmann/tint v1.0.5
 	go.opentelemetry.io/otel v1.28.0
@@ -48,9 +48,9 @@ require (
 	go.opentelemetry.io/otel/sdk v1.28.0 // indirect
 	go.opentelemetry.io/otel/sdk/metric v1.28.0 // indirect
 	go.opentelemetry.io/proto/otlp v1.3.1 // indirect
-	golang.org/x/net v0.27.0 // indirect
+	golang.org/x/net v0.28.0 // indirect
 	golang.org/x/sys v0.23.0 // indirect
-	golang.org/x/text v0.16.0 // indirect
+	golang.org/x/text v0.17.0 // indirect
 	google.golang.org/genproto/googleapis/api v0.0.0-20240805194559-2c9e96a0b5d4 // indirect
 	google.golang.org/genproto/googleapis/rpc v0.0.0-20240805194559-2c9e96a0b5d4 // indirect
 	google.golang.org/grpc v1.65.0 // indirect
