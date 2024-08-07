@@ -298,5 +298,20 @@ func (req *RetryableRequest) applySettings(settings *rest.NDCRestSettings) error
 		}
 	}
 
+	req.applyDefaultHeaders(serverConfig.Headers)
+	req.applyDefaultHeaders(settings.Headers)
+
 	return nil
+}
+
+func (req *RetryableRequest) applyDefaultHeaders(defaultHeaders map[string]rest.EnvString) {
+	for k, envValue := range defaultHeaders {
+		if req.Headers.Get(k) != "" {
+			continue
+		}
+		value := envValue.Value()
+		if value != nil && *value != "" {
+			req.Headers.Set(k, *value)
+		}
+	}
 }

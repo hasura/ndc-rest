@@ -134,6 +134,9 @@ func (c *RESTConnector) ApplyNDCRestSchemas(schemas []NDCRestSchemaWithName) map
 					}
 				}
 
+				if server.Headers == nil {
+					server.Headers = make(map[string]rest.EnvString)
+				}
 				for key, value := range settings.Headers {
 					_, ok := server.Headers[key]
 					if !ok {
