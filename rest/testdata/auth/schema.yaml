@@ -108,6 +108,27 @@ procedures:
     result_type:
       name: Pet
       type: named
+  - request:
+      url: /model
+      method: post
+      requestBody:
+        contentType: application/json
+        schema:
+          type: CreateModelRequest
+      response:
+        contentType: application/x-ndjson
+    arguments:
+      body:
+        description: Request body of POST /api/create
+        type:
+          name: CreateModelRequest
+          type: named
+    name: createModel
+    result_type:
+      element_type:
+        name: ProgressResponse
+        type: named
+      type: array
 object_types:
   Pet:
     fields:
@@ -121,6 +142,31 @@ object_types:
         type:
           name: String
           type: named
+  CreateModelRequest:
+    fields:
+      model:
+        description: The name of the model to create
+        type:
+          type: nullable
+          underlying_type:
+            name: String
+            type: named
+  ProgressResponse:
+    fields:
+      completed:
+        description: The completed size of the task
+        type:
+          type: nullable
+          underlying_type:
+            name: Int32
+            type: named
+      status:
+        description: The status of the request
+        type:
+          type: nullable
+          underlying_type:
+            name: String
+            type: named
 scalar_types:
   Boolean:
     aggregate_functions: {}

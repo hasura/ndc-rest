@@ -11,7 +11,6 @@ import (
 
 const (
 	contentTypeHeader          = "Content-Type"
-	contentTypeJSON            = "application/json"
 	defaultTimeoutSeconds uint = 30
 	defaultRetryDelays    uint = 1000
 )

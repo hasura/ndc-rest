@@ -208,6 +208,51 @@ func TestRESTConnector_authentication(t *testing.T) {
 		assert.NilError(t, err)
 		assert.Equal(t, http.StatusTooManyRequests, res.StatusCode)
 	})
+
+	t.Run("encoding-ndjson", func(t *testing.T) {
+		reqBody := []byte(`{
+			"operations": [
+				{
+					"type": "procedure",
+					"name": "createModel",
+					"arguments": {
+						"body": {
+							"model": "gpt3.5"
+						}
+					},
+					"fields": {
+						"fields": {
+							"fields": {
+								"completed": {
+									"column": "completed",
+									"type": "column"
+								},
+								"status": {
+									"column": "status",
+									"type": "column"
+								}
+							},
+							"type": "object"
+						},
+						"type": "array"
+					}
+				}
+			],
+			"collection_relationships": {}
+		}`)
+
+		res, err := http.Post(fmt.Sprintf("%s/mutation", testServer.URL), "application/json", bytes.NewBuffer(reqBody))
+		assert.NilError(t, err)
+		assertHTTPResponse(t, res, http.StatusOK, schema.MutationResponse{
+			OperationResults: []schema.MutationOperationResults{
+				schema.NewProcedureResult([]any{
+					map[string]any{"completed": float64(1), "status": string("OK")},
+					map[string]any{"completed": float64(0), "status": string("FAILED")},
+				}).Encode(),
+			},
+		})
+	})
+
 }
 
 func TestRESTConnector_distribution(t *testing.T) {
@@ -493,10 +538,10 @@ func TestRESTConnector_multiSchemas(t *testing.T) {
 func createMockServer(t *testing.T, apiKey string, bearerToken string) *httptest.Server {
 	mux := http.NewServeMux()
 
-	writeResponse := func(w http.ResponseWriter) {
+	writeResponse := func(w http.ResponseWriter, body string) {
 		w.Header().Add("Content-Type", "application/json")
 		w.WriteHeader(http.StatusOK)
-		_, _ = w.Write([]byte(`{}`))
+		_, _ = w.Write([]byte(body))
 	}
 	mux.HandleFunc("/pet", func(w http.ResponseWriter, r *http.Request) {
 		switch r.Method {
@@ -506,7 +551,7 @@ func createMockServer(t *testing.T, apiKey string, bearerToken string) *httptest
 				t.FailNow()
 				return
 			}
-			writeResponse(w)
+			writeResponse(w, "{}")
 		default:
 			w.WriteHeader(http.StatusMethodNotAllowed)
 			return
@@ -524,7 +569,7 @@ func createMockServer(t *testing.T, apiKey string, bearerToken string) *httptest
 				t.Fatalf("expected query param: status=available, got: %s", r.URL.Query().Encode())
 				return
 			}
-			writeResponse(w)
+			writeResponse(w, "{}")
 		default:
 			w.WriteHeader(http.StatusMethodNotAllowed)
 			return
@@ -538,6 +583,24 @@ func createMockServer(t *testing.T, apiKey string, bearerToken string) *httptest
 			panic("retry count must not be larger than 2")
 		}
 		w.WriteHeader(http.StatusTooManyRequests)
+	})
+
+	mux.HandleFunc("/model", func(w http.ResponseWriter, r *http.Request) {
+		switch r.Method {
+		case http.MethodPost:
+			if r.Header.Get("api_key") != apiKey {
+				t.Errorf("invalid api key, expected %s, got %s", apiKey, r.Header.Get("api_key"))
+				t.FailNow()
+				return
+			}
+
+			w.Header().Add("Content-Type", "application/x-ndjson")
+			w.WriteHeader(http.StatusOK)
+			_, _ = w.Write([]byte(`{"completed": 1, "status": "OK"}
+{"completed": 0, "status": "FAILED"}`))
+		default:
+			w.WriteHeader(http.StatusMethodNotAllowed)
+		}
 	})
 
 	return httptest.NewServer(mux)
