@@ -289,7 +289,7 @@ func evalHTTPResponse(ctx context.Context, span trace.Span, resp *http.Response,
 			return nil, schema.NewConnectorError(http.StatusInternalServerError, err.Error(), nil)
 		}
 		return string(respBody), nil
-	case contentTypeJSON:
+	case rest.ContentTypeJSON:
 		if len(resultType) > 0 {
 			namedType, err := resultType.AsNamed()
 			if err == nil && namedType.Name == string(rest.ScalarString) {
@@ -322,6 +322,26 @@ func evalHTTPResponse(ctx context.Context, span trace.Span, resp *http.Response,
 		}
 
 		result, err = utils.EvalNestedColumnFields(selection, result)
+		if err != nil {
+			return nil, schema.InternalServerError(err.Error(), nil)
+		}
+		return result, nil
+	case rest.ContentTypeNdJSON:
+		var results []any
+		decoder := json.NewDecoder(resp.Body)
+		for decoder.More() {
+			var r any
+			err := decoder.Decode(&r)
+			if err != nil {
+				return nil, schema.NewConnectorError(http.StatusInternalServerError, err.Error(), nil)
+			}
+			results = append(results, r)
+		}
+		if selection == nil || selection.IsNil() {
+			return results, nil
+		}
+
+		result, err := utils.EvalNestedColumnFields(selection, any(results))
 		if err != nil {
 			return nil, schema.InternalServerError(err.Error(), nil)
 		}
