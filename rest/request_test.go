@@ -2,7 +2,6 @@ package rest
 
 import (
 	"encoding/json"
-	"fmt"
 	"io"
 	"mime"
 	"mime/multipart"
@@ -171,7 +170,7 @@ func TestCreateMultipartForm(t *testing.T) {
 				name := form.FormName()
 				expected, ok := tc.Expected[name]
 				if !ok {
-					t.Fatalf(fmt.Sprintf("field %s does not exist", name))
+					t.Fatalf("field %s does not exist", name)
 				} else {
 					result, err := io.ReadAll(form)
 					assert.NilError(t, err)
