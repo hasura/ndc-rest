@@ -88,6 +88,13 @@ func TestRESTConnector_configurationFailure(t *testing.T) {
 	assert.ErrorContains(t, err, "the config.{json,yaml,yml} file does not exist at")
 }
 
+func TestRESTConnector_emptyServer(t *testing.T) {
+	_, err := connector.NewServer(NewRESTConnector(), &connector.ServerOptions{
+		Configuration: "testdata/server-empty",
+	}, connector.WithoutRecovery())
+	assert.Error(t, err, "failed to build NDC REST schema")
+}
+
 func TestRESTConnector_authentication(t *testing.T) {
 	apiKey := "random_api_key"
 	bearerToken := "random_bearer_token"

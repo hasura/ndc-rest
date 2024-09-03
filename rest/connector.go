@@ -38,7 +38,7 @@ func NewRESTConnector(opts ...Option) *RESTConnector {
 func (c *RESTConnector) ParseConfiguration(ctx context.Context, configurationDir string) (*Configuration, error) {
 
 	restCapabilities := schema.CapabilitiesResponse{
-		Version: "0.1.5",
+		Version: "0.1.6",
 		Capabilities: schema.Capabilities{
 			Query: schema.QueryCapabilities{
 				Variables:    schema.LeafCapability{},
