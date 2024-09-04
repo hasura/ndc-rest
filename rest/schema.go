@@ -55,6 +55,10 @@ func buildSchemaFile(configDir string, conf *ConfigItem, logger *slog.Logger) (*
 		return nil, err
 	}
 
+	if ndcSchema.Settings == nil || len(ndcSchema.Settings.Servers) == 0 {
+		return nil, fmt.Errorf("the servers setting of schema %s is empty", conf.ConvertConfig.File)
+	}
+
 	buildRESTArguments(ndcSchema, conf)
 
 	return ndcSchema, nil
