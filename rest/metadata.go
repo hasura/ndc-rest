@@ -1,9 +1,7 @@
 package rest
 
 import (
-	"fmt"
-
-	rest "github.com/hasura/ndc-rest-schema/schema"
+	rest "github.com/hasura/ndc-rest/ndc-rest-schema/schema"
 	"github.com/hasura/ndc-sdk-go/schema"
 )
 
@@ -18,7 +16,7 @@ func (rms RESTMetadataCollection) GetFunction(name string) (*rest.RESTFunctionIn
 			return fn, rm.settings, nil
 		}
 	}
-	return nil, nil, schema.UnprocessableContentError(fmt.Sprintf("unsupported query: %s", name), nil)
+	return nil, nil, schema.UnprocessableContentError("unsupported query: "+name, nil)
 }
 
 // GetProcedure gets the NDC procedure by name
@@ -29,7 +27,7 @@ func (rms RESTMetadataCollection) GetProcedure(name string) (*rest.RESTProcedure
 			return fn, rm.settings, nil
 		}
 	}
-	return nil, nil, schema.UnprocessableContentError(fmt.Sprintf("unsupported query: %s", name), nil)
+	return nil, nil, schema.UnprocessableContentError("unsupported query: "+name, nil)
 }
 
 // RESTMetadata stores REST schema with handy methods to build requests

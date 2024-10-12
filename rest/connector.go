@@ -3,7 +3,6 @@ package rest
 import (
 	"context"
 	"encoding/json"
-	"errors"
 	"fmt"
 	"os"
 
@@ -36,7 +35,6 @@ func NewRESTConnector(opts ...Option) *RESTConnector {
 // ParseConfiguration validates the configuration files provided by the user, returning a validated 'Configuration',
 // or throwing an error to prevents Connector startup.
 func (c *RESTConnector) ParseConfiguration(ctx context.Context, configurationDir string) (*Configuration, error) {
-
 	restCapabilities := schema.CapabilitiesResponse{
 		Version: "0.1.6",
 		Capabilities: schema.Capabilities{
@@ -49,7 +47,7 @@ func (c *RESTConnector) ParseConfiguration(ctx context.Context, configurationDir
 	}
 	rawCapabilities, err := json.Marshal(restCapabilities)
 	if err != nil {
-		return nil, fmt.Errorf("failed to encode capabilities: %s", err)
+		return nil, fmt.Errorf("failed to encode capabilities: %w", err)
 	}
 	c.capabilities = schema.NewRawCapabilitiesResponseUnsafe(rawCapabilities)
 
@@ -62,12 +60,12 @@ func (c *RESTConnector) ParseConfiguration(ctx context.Context, configurationDir
 	schemas, errs := BuildSchemaFiles(configurationDir, config.Files, logger)
 	if len(errs) > 0 {
 		printSchemaValidationError(logger, errs)
-		return nil, errors.New("failed to build NDC REST schema")
+		return nil, errBuildSchemaFailed
 	}
 
 	if errs := c.ApplyNDCRestSchemas(schemas); len(errs) > 0 {
 		printSchemaValidationError(logger, errs)
-		return nil, errors.New("failed to validate NDC REST schema")
+		return nil, errInvalidSchema
 	}
 
 	return config, nil
@@ -112,7 +110,7 @@ func (c *RESTConnector) MutationExplain(ctx context.Context, configuration *Conf
 
 func parseConfiguration(configurationDir string) (*Configuration, error) {
 	var config Configuration
-	jsonBytes, err := os.ReadFile(fmt.Sprintf("%s/config.json", configurationDir))
+	jsonBytes, err := os.ReadFile(configurationDir + "/config.json")
 	if err == nil {
 		if err = json.Unmarshal(jsonBytes, &config); err != nil {
 			return nil, err
@@ -125,12 +123,12 @@ func parseConfiguration(configurationDir string) (*Configuration, error) {
 	}
 
 	// try to read and parse yaml file
-	yamlBytes, err := os.ReadFile(fmt.Sprintf("%s/config.yaml", configurationDir))
+	yamlBytes, err := os.ReadFile(configurationDir + "/config.yaml")
 	if err != nil {
 		if !os.IsNotExist(err) {
 			return nil, err
 		}
-		yamlBytes, err = os.ReadFile(fmt.Sprintf("%s/config.yml", configurationDir))
+		yamlBytes, err = os.ReadFile(configurationDir + "/config.yml")
 	}
 
 	if err != nil {

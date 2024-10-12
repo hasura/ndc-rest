@@ -12,7 +12,7 @@ import (
 	"sync"
 	"time"
 
-	rest "github.com/hasura/ndc-rest-schema/schema"
+	rest "github.com/hasura/ndc-rest/ndc-rest-schema/schema"
 	"github.com/hasura/ndc-sdk-go/connector"
 	"github.com/hasura/ndc-sdk-go/schema"
 	"github.com/hasura/ndc-sdk-go/utils"
@@ -210,7 +210,6 @@ func (client *HTTPClient) sendSingle(ctx context.Context, request *RetryableRequ
 }
 
 func evalHTTPResponse(ctx context.Context, span trace.Span, resp *http.Response, selection schema.NestedField, resultType schema.Type) (any, *schema.ConnectorError) {
-
 	logger := connector.GetLogger(ctx)
 	contentType := parseContentType(resp.Header.Get(contentTypeHeader))
 	if resp.StatusCode >= 400 {
@@ -293,7 +292,6 @@ func evalHTTPResponse(ctx context.Context, span trace.Span, resp *http.Response,
 		if len(resultType) > 0 {
 			namedType, err := resultType.AsNamed()
 			if err == nil && namedType.Name == string(rest.ScalarString) {
-
 				respBytes, err := io.ReadAll(resp.Body)
 				_ = resp.Body.Close()
 				if err != nil {
@@ -348,7 +346,7 @@ func evalHTTPResponse(ctx context.Context, span trace.Span, resp *http.Response,
 		return result, nil
 	default:
 		return nil, schema.NewConnectorError(http.StatusInternalServerError, "failed to evaluate response", map[string]any{
-			"cause": fmt.Sprintf("unsupported content type %s", contentType),
+			"cause": "unsupported content type " + contentType,
 		})
 	}
 }

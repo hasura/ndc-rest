@@ -5,15 +5,15 @@ import (
 	"context"
 	"fmt"
 	"io"
-	"math/rand"
+	"math/rand/v2"
 	"net/http"
 	"net/url"
 	"slices"
 	"strings"
 	"time"
 
-	rest "github.com/hasura/ndc-rest-schema/schema"
-	"github.com/hasura/ndc-rest-schema/utils"
+	rest "github.com/hasura/ndc-rest/ndc-rest-schema/schema"
+	"github.com/hasura/ndc-rest/ndc-rest-schema/utils"
 )
 
 // RetryableRequest wraps the raw request with retryable
@@ -75,7 +75,7 @@ func getHostFromServers(servers []rest.ServerConfig, serverIDs []string) (string
 	case 1:
 		return results[0], selectedServerIDs[0]
 	default:
-		index := rand.Intn(len(results) - 1)
+		index := rand.IntN(len(results) - 1)
 		return results[index], selectedServerIDs[index]
 	}
 }
@@ -102,7 +102,7 @@ func buildDistributedRequestsWithOptions(request *RetryableRequest, restOptions 
 		// copy new readers for each requests to avoid race condition
 		buf, err = io.ReadAll(request.Body)
 		if err != nil {
-			return nil, fmt.Errorf("failed to read request body: %s", err)
+			return nil, fmt.Errorf("failed to read request body: %w", err)
 		}
 	}
 	serverIDs := restOptions.Servers

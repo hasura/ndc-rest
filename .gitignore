@@ -22,8 +22,9 @@ tmp/
 # vendor/
 
 # Go workspace files
-go.work
+# go.work
 go.work.sum
 
 # Release directory
 release/
+_output/

@@ -1,11 +1,11 @@
 # build context at repo root: docker build -f Dockerfile .
-FROM golang:1.22 AS builder
+FROM golang:1.23 AS builder
 
 WORKDIR /app
 COPY go.mod go.sum ./
 RUN go mod download
 COPY . .
-RUN CGO_ENABLED=0 go build -v -o ndc-cli .
+RUN CGO_ENABLED=0 go build -v -o ndc-cli ./server
 
 # stage 2: production image
 FROM gcr.io/distroless/static-debian12:nonroot

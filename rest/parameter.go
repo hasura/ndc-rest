@@ -10,7 +10,7 @@ import (
 	"strconv"
 	"strings"
 
-	rest "github.com/hasura/ndc-rest-schema/schema"
+	rest "github.com/hasura/ndc-rest/ndc-rest-schema/schema"
 	"github.com/hasura/ndc-rest/rest/internal"
 	"github.com/hasura/ndc-sdk-go/schema"
 	sdkUtils "github.com/hasura/ndc-sdk-go/utils"
@@ -55,7 +55,6 @@ func (c *RESTConnector) evalURLAndHeaderParameters(request *rest.Request, argume
 //
 // [OAS 3.1 spec]: https://swagger.io/docs/specification/serialization/
 func (c *RESTConnector) evalURLAndHeaderParameterBySchema(endpoint *url.URL, header *http.Header, param *rest.RequestParameter, value any) error {
-
 	queryParams, err := c.encodeParameterValues(param.Schema, value, []string{param.Name})
 	if err != nil {
 		return err
@@ -87,7 +86,6 @@ func (c *RESTConnector) evalURLAndHeaderParameterBySchema(endpoint *url.URL, hea
 }
 
 func (c *RESTConnector) encodeParameterValues(typeSchema *rest.TypeSchema, value any, fieldPaths []string) (internal.ParameterItems, error) {
-
 	results := internal.ParameterItems{}
 	reflectValue := reflect.ValueOf(value)
 
@@ -116,7 +114,7 @@ func (c *RESTConnector) encodeParameterValues(typeSchema *rest.TypeSchema, value
 		}
 
 		for k, prop := range typeSchema.Properties {
-			propPaths := append(fieldPaths, fmt.Sprintf(".%s", k))
+			propPaths := append(fieldPaths, "."+k)
 			fieldVal, ok := mapValue[k]
 			if !ok {
 				if !prop.Nullable {
@@ -179,7 +177,7 @@ func (c *RESTConnector) encodeParameterValues(typeSchema *rest.TypeSchema, value
 			case *schema.TypeRepresentationEnum:
 				valueStr, err := sdkUtils.DecodeString(value)
 				if err != nil {
-					return nil, fmt.Errorf("%s: %s", strings.Join(fieldPaths, ""), err)
+					return nil, fmt.Errorf("%s: %w", strings.Join(fieldPaths, ""), err)
 				}
 
 				if !slices.Contains(ty.OneOf, valueStr) {
@@ -199,7 +197,6 @@ func (c *RESTConnector) encodeParameterValues(typeSchema *rest.TypeSchema, value
 }
 
 func encodeParameterReflectionValues(reflectValue reflect.Value, fieldPaths []string) (internal.ParameterItems, error) {
-
 	results := internal.ParameterItems{}
 	reflectValue, ok := sdkUtils.UnwrapPointerFromReflectValue(reflectValue)
 	if !ok {
@@ -228,7 +225,7 @@ func encodeParameterReflectionValues(reflectValue reflect.Value, fieldPaths []st
 		}, nil
 	case reflect.Slice:
 		valueLen := reflectValue.Len()
-		for i := 0; i < valueLen; i++ {
+		for i := range valueLen {
 			propPaths := append(fieldPaths, fmt.Sprintf("[%d]", i))
 			elem := reflectValue.Index(i)
 
@@ -255,7 +252,7 @@ func encodeParameterReflectionValues(reflectValue reflect.Value, fieldPaths []st
 
 		for _, k := range keys {
 			key := fmt.Sprint(k.Interface())
-			propPaths := append(fieldPaths, fmt.Sprintf(".%s", key))
+			propPaths := append(fieldPaths, "."+key)
 			fieldVal := reflectValue.MapIndex(k)
 
 			output, err := encodeParameterReflectionValues(fieldVal, propPaths)
@@ -272,7 +269,7 @@ func encodeParameterReflectionValues(reflectValue reflect.Value, fieldPaths []st
 	case reflect.Struct, reflect.Interface:
 		b, err := json.Marshal(reflectValue.Interface())
 		if err != nil {
-			return nil, fmt.Errorf("%s: %s", strings.Join(fieldPaths, ""), err)
+			return nil, fmt.Errorf("%s: %w", strings.Join(fieldPaths, ""), err)
 		}
 		values := []string{strings.Trim(string(b), `"`)}
 		return []internal.ParameterItem{internal.NewParameterItem([]internal.Key{}, values)}, nil
@@ -362,7 +359,7 @@ func encodeQueryValues(qValues url.Values, allowReserved bool) string {
 func encodeParameterBool(value any, fieldPaths []string) (internal.ParameterItems, error) {
 	result, err := sdkUtils.DecodeBoolean(value)
 	if err != nil {
-		return nil, fmt.Errorf("%s: %s", strings.Join(fieldPaths, ""), err)
+		return nil, fmt.Errorf("%s: %w", strings.Join(fieldPaths, ""), err)
 	}
 
 	return []internal.ParameterItem{
@@ -373,7 +370,7 @@ func encodeParameterBool(value any, fieldPaths []string) (internal.ParameterItem
 func encodeParameterString(value any, fieldPaths []string) (internal.ParameterItems, error) {
 	result, err := sdkUtils.DecodeString(value)
 	if err != nil {
-		return nil, fmt.Errorf("%s: %s", strings.Join(fieldPaths, ""), err)
+		return nil, fmt.Errorf("%s: %w", strings.Join(fieldPaths, ""), err)
 	}
 	return []internal.ParameterItem{internal.NewParameterItem([]internal.Key{}, []string{result})}, nil
 }
@@ -381,7 +378,7 @@ func encodeParameterString(value any, fieldPaths []string) (internal.ParameterIt
 func encodeParameterInt(value any, fieldPaths []string) (internal.ParameterItems, error) {
 	intValue, err := sdkUtils.DecodeInt[int64](value)
 	if err != nil {
-		return nil, fmt.Errorf("%s: %s", strings.Join(fieldPaths, ""), err)
+		return nil, fmt.Errorf("%s: %w", strings.Join(fieldPaths, ""), err)
 	}
 	return []internal.ParameterItem{internal.NewParameterItem([]internal.Key{}, []string{strconv.FormatInt(intValue, 10)})}, nil
 }
@@ -389,7 +386,7 @@ func encodeParameterInt(value any, fieldPaths []string) (internal.ParameterItems
 func encodeParameterFloat(value any, fieldPaths []string) (internal.ParameterItems, error) {
 	floatValue, err := sdkUtils.DecodeFloat[float64](value)
 	if err != nil {
-		return nil, fmt.Errorf("%s: %s", strings.Join(fieldPaths, ""), err)
+		return nil, fmt.Errorf("%s: %w", strings.Join(fieldPaths, ""), err)
 	}
 	return []internal.ParameterItem{internal.NewParameterItem([]internal.Key{}, []string{fmt.Sprintf("%f", floatValue)})}, nil
 }
