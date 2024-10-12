@@ -51,14 +51,6 @@ jobs:
           tags: ${{ steps.docker-metadata.outputs.tags }}
           labels: ${{ steps.docker-metadata.outputs.labels }}
 
-      - name: Build and push
-        uses: docker/build-push-action@v6
-        with:
-          push: true
-          file: Dockerfile.alpine
-          tags: ${{ steps.docker-metadata.outputs.tags }}-alpine
-          labels: ${{ steps.docker-metadata.outputs.labels }}
-
   build-cli-and-manifests:
     name: Build the CLI binaries and manifests
     runs-on: ubuntu-latest
