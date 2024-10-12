@@ -1,4 +1,4 @@
-name: ndc-rest-schema
+name: ndc-rest
 version: "${CLI_VERSION}"
 shortDescription: "CLI plugin for Hasura REST data connector"
 homepage: https://github.com/hasura/ndc-rest

@@ -15,7 +15,7 @@ This module includes libraries and tools to convert other API schemas to Native 
 
 **Prerequisites**
 
-- Go 1.21+
+- Go 1.23+
 
 **Install**
 

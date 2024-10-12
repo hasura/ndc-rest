@@ -40,12 +40,13 @@ jobs:
       - name: golangci-lint ${{ matrix.modules }}
         uses: golangci/golangci-lint-action@v6
         with:
-          version: ${{ env.GOLANGCI_LINT_VERSION }}
+          args: --timeout=5m
           working-directory: ${{ matrix.modules }}
 
   test-go:
     name: Run unit tests
     runs-on: ubuntu-latest
+    needs: golangci-lint
     permissions:
       pull-requests: write
     steps:
