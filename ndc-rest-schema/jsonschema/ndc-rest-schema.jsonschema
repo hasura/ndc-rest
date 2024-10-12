@@ -1,0 +1,914 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/hasura/ndc-rest/ndc-rest-schema/schema/ndc-rest-schema",
+  "$ref": "#/$defs/NDCRestSchema",
+  "$defs": {
+    "AggregateFunctionDefinition": {
+      "properties": {
+        "result_type": {
+          "$ref": "#/$defs/Type"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object",
+      "required": [
+        "result_type"
+      ]
+    },
+    "ArgumentInfo": {
+      "properties": {
+        "description": {
+          "type": "string"
+        },
+        "type": {
+          "$ref": "#/$defs/Type"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object",
+      "required": [
+        "type"
+      ]
+    },
+    "AuthSecurities": {
+      "items": {
+        "$ref": "#/$defs/AuthSecurity"
+      },
+      "type": "array",
+      "description": "AuthSecurities wraps list of security requirements with helpers"
+    },
+    "AuthSecurity": {
+      "additionalProperties": {
+        "items": {
+          "type": "string"
+        },
+        "type": "array"
+      },
+      "type": "object",
+      "description": "AuthSecurity wraps the raw security requirement with helpers"
+    },
+    "CollectionInfo": {
+      "properties": {
+        "arguments": {
+          "$ref": "#/$defs/CollectionInfoArguments"
+        },
+        "description": {
+          "type": "string"
+        },
+        "foreign_keys": {
+          "$ref": "#/$defs/CollectionInfoForeignKeys"
+        },
+        "name": {
+          "type": "string"
+        },
+        "type": {
+          "type": "string"
+        },
+        "uniqueness_constraints": {
+          "$ref": "#/$defs/CollectionInfoUniquenessConstraints"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object",
+      "required": [
+        "arguments",
+        "foreign_keys",
+        "name",
+        "type",
+        "uniqueness_constraints"
+      ]
+    },
+    "CollectionInfoArguments": {
+      "additionalProperties": {
+        "$ref": "#/$defs/ArgumentInfo"
+      },
+      "type": "object"
+    },
+    "CollectionInfoForeignKeys": {
+      "additionalProperties": {
+        "$ref": "#/$defs/ForeignKeyConstraint"
+      },
+      "type": "object"
+    },
+    "CollectionInfoUniquenessConstraints": {
+      "additionalProperties": {
+        "$ref": "#/$defs/UniquenessConstraint"
+      },
+      "type": "object"
+    },
+    "ComparisonOperatorDefinition": {
+      "type": "object"
+    },
+    "EncodingObject": {
+      "properties": {
+        "style": {
+          "$ref": "#/$defs/ParameterEncodingStyle",
+          "description": "Describes how a specific property value will be serialized depending on its type.\nSee Parameter Object for details on the style property.\nThe behavior follows the same values as query parameters, including default values.\nThis property SHALL be ignored if the request body media type is not application/x-www-form-urlencoded or multipart/form-data.\nIf a value is explicitly defined, then the value of contentType (implicit or explicit) SHALL be ignored"
+        },
+        "explode": {
+          "type": "boolean",
+          "description": "When this is true, property values of type array or object generate separate parameters for each value of the array, or key-value-pair of the map.\nFor other types of properties this property has no effect. When style is form, the default value is true. For all other styles, the default value is false.\nThis property SHALL be ignored if the request body media type is not application/x-www-form-urlencoded or multipart/form-data.\nIf a value is explicitly defined, then the value of contentType (implicit or explicit) SHALL be ignored"
+        },
+        "allowReserved": {
+          "type": "boolean",
+          "description": "By default, reserved characters :/?#[]@!$\u0026'()*+,;= in form field values within application/x-www-form-urlencoded bodies are percent-encoded when sent.\nAllowReserved allows these characters to be sent as is:"
+        },
+        "contentType": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array",
+          "description": "For more complex scenarios, such as nested arrays or JSON in form data, use the contentType keyword to specify the media type for encoding the value of a complex field."
+        },
+        "headers": {
+          "additionalProperties": {
+            "$ref": "#/$defs/RequestParameter"
+          },
+          "type": "object",
+          "description": "A map allowing additional information to be provided as headers, for example Content-Disposition.\nContent-Type is described separately and SHALL be ignored in this section.\nThis property SHALL be ignored if the request body media type is not a multipart."
+        }
+      },
+      "additionalProperties": false,
+      "type": "object",
+      "description": "EncodingObject represents the Encoding Object that contains serialization strategy for application/x-www-form-urlencoded\n\n[Encoding Object]: https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#encoding-object"
+    },
+    "EnvBoolean": {
+      "oneOf": [
+        {
+          "type": "boolean"
+        },
+        {
+          "type": "string"
+        }
+      ]
+    },
+    "EnvInt": {
+      "oneOf": [
+        {
+          "type": "integer"
+        },
+        {
+          "type": "string"
+        }
+      ]
+    },
+    "EnvInts": {
+      "oneOf": [
+        {
+          "type": "string"
+        },
+        {
+          "items": {
+            "type": "integer"
+          },
+          "type": "array"
+        }
+      ]
+    },
+    "EnvString": {
+      "type": "string"
+    },
+    "EnvStrings": {
+      "oneOf": [
+        {
+          "type": "string"
+        },
+        {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        }
+      ]
+    },
+    "ForeignKeyConstraint": {
+      "properties": {
+        "column_mapping": {
+          "$ref": "#/$defs/ForeignKeyConstraintColumnMapping"
+        },
+        "foreign_collection": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object",
+      "required": [
+        "column_mapping",
+        "foreign_collection"
+      ]
+    },
+    "ForeignKeyConstraintColumnMapping": {
+      "additionalProperties": {
+        "type": "string"
+      },
+      "type": "object"
+    },
+    "FunctionInfoArguments": {
+      "additionalProperties": {
+        "$ref": "#/$defs/ArgumentInfo"
+      },
+      "type": "object"
+    },
+    "NDCRestSchema": {
+      "properties": {
+        "$schema": {
+          "type": "string"
+        },
+        "settings": {
+          "$ref": "#/$defs/NDCRestSettings"
+        },
+        "collections": {
+          "items": {
+            "$ref": "#/$defs/CollectionInfo"
+          },
+          "type": "array",
+          "description": "Collections which are available for queries"
+        },
+        "functions": {
+          "items": {
+            "$ref": "#/$defs/RESTFunctionInfo"
+          },
+          "type": "array",
+          "description": "Functions (i.e. collections which return a single column and row)"
+        },
+        "object_types": {
+          "$ref": "#/$defs/SchemaResponseObjectTypes",
+          "description": "A list of object types which can be used as the types of arguments, or return\ntypes of procedures. Names should not overlap with scalar type names."
+        },
+        "procedures": {
+          "items": {
+            "$ref": "#/$defs/RESTProcedureInfo"
+          },
+          "type": "array",
+          "description": "Procedures which are available for execution as part of mutations"
+        },
+        "scalar_types": {
+          "$ref": "#/$defs/SchemaResponseScalarTypes",
+          "description": "A list of scalar types which will be used as the types of collection columns"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object",
+      "required": [
+        "collections",
+        "functions",
+        "object_types",
+        "procedures",
+        "scalar_types"
+      ],
+      "description": "NDCRestSchema extends the [NDC SchemaResponse] with OpenAPI REST information"
+    },
+    "NDCRestSettings": {
+      "properties": {
+        "servers": {
+          "items": {
+            "$ref": "#/$defs/ServerConfig"
+          },
+          "type": "array"
+        },
+        "headers": {
+          "additionalProperties": {
+            "$ref": "#/$defs/EnvString"
+          },
+          "type": "object"
+        },
+        "timeout": {
+          "$ref": "#/$defs/EnvInt",
+          "description": "configure the request timeout in seconds, default 30s"
+        },
+        "retry": {
+          "$ref": "#/$defs/RetryPolicySetting"
+        },
+        "securitySchemes": {
+          "additionalProperties": {
+            "$ref": "#/$defs/SecurityScheme"
+          },
+          "type": "object"
+        },
+        "security": {
+          "$ref": "#/$defs/AuthSecurities"
+        },
+        "version": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object",
+      "required": [
+        "servers"
+      ],
+      "description": "NDCRestSettings represent global settings of the REST API, including base URL, headers, etc..."
+    },
+    "ObjectField": {
+      "properties": {
+        "arguments": {
+          "$ref": "#/$defs/ObjectFieldArguments"
+        },
+        "description": {
+          "type": "string"
+        },
+        "type": {
+          "$ref": "#/$defs/Type"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object",
+      "required": [
+        "type"
+      ]
+    },
+    "ObjectFieldArguments": {
+      "additionalProperties": {
+        "$ref": "#/$defs/ArgumentInfo"
+      },
+      "type": "object"
+    },
+    "ObjectType": {
+      "properties": {
+        "description": {
+          "type": "string"
+        },
+        "fields": {
+          "$ref": "#/$defs/ObjectTypeFields"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object",
+      "required": [
+        "fields"
+      ]
+    },
+    "ObjectTypeFields": {
+      "additionalProperties": {
+        "$ref": "#/$defs/ObjectField"
+      },
+      "type": "object"
+    },
+    "ParameterEncodingStyle": {
+      "type": "string",
+      "enum": [
+        "simple",
+        "label",
+        "matrix",
+        "form",
+        "spaceDelimited",
+        "pipeDelimited",
+        "deepObject"
+      ]
+    },
+    "ParameterLocation": {
+      "type": "string",
+      "enum": [
+        "query",
+        "header",
+        "path",
+        "cookie",
+        "body",
+        "formData"
+      ]
+    },
+    "ProcedureInfoArguments": {
+      "additionalProperties": {
+        "$ref": "#/$defs/ArgumentInfo"
+      },
+      "type": "object"
+    },
+    "RESTFunctionInfo": {
+      "properties": {
+        "request": {
+          "$ref": "#/$defs/Request"
+        },
+        "arguments": {
+          "$ref": "#/$defs/FunctionInfoArguments"
+        },
+        "description": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "result_type": {
+          "$ref": "#/$defs/Type"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object",
+      "required": [
+        "request",
+        "arguments",
+        "name",
+        "result_type"
+      ],
+      "description": "RESTFunctionInfo extends NDC query function with OpenAPI REST information"
+    },
+    "RESTProcedureInfo": {
+      "properties": {
+        "request": {
+          "$ref": "#/$defs/Request"
+        },
+        "arguments": {
+          "$ref": "#/$defs/ProcedureInfoArguments"
+        },
+        "description": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "result_type": {
+          "$ref": "#/$defs/Type"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object",
+      "required": [
+        "request",
+        "arguments",
+        "name",
+        "result_type"
+      ],
+      "description": "RESTProcedureInfo extends NDC mutation procedure with OpenAPI REST information"
+    },
+    "Request": {
+      "properties": {
+        "url": {
+          "type": "string"
+        },
+        "method": {
+          "type": "string",
+          "enum": [
+            "get",
+            "post",
+            "put",
+            "patch",
+            "delete"
+          ]
+        },
+        "type": {
+          "type": "string"
+        },
+        "headers": {
+          "additionalProperties": {
+            "$ref": "#/$defs/EnvString"
+          },
+          "type": "object"
+        },
+        "parameters": {
+          "items": {
+            "$ref": "#/$defs/RequestParameter"
+          },
+          "type": "array"
+        },
+        "security": {
+          "$ref": "#/$defs/AuthSecurities"
+        },
+        "timeout": {
+          "type": "integer",
+          "description": "configure the request timeout in seconds, default 30s"
+        },
+        "servers": {
+          "items": {
+            "$ref": "#/$defs/ServerConfig"
+          },
+          "type": "array"
+        },
+        "requestBody": {
+          "$ref": "#/$defs/RequestBody"
+        },
+        "response": {
+          "$ref": "#/$defs/Response"
+        },
+        "retry": {
+          "$ref": "#/$defs/RetryPolicy"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object",
+      "required": [
+        "response"
+      ],
+      "description": "Request represents the HTTP request information of the webhook"
+    },
+    "RequestBody": {
+      "properties": {
+        "contentType": {
+          "type": "string"
+        },
+        "schema": {
+          "$ref": "#/$defs/TypeSchema"
+        },
+        "encoding": {
+          "additionalProperties": {
+            "$ref": "#/$defs/EncodingObject"
+          },
+          "type": "object"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object",
+      "description": "RequestBody defines flexible request body with content types"
+    },
+    "RequestParameter": {
+      "properties": {
+        "style": {
+          "$ref": "#/$defs/ParameterEncodingStyle",
+          "description": "Describes how a specific property value will be serialized depending on its type.\nSee Parameter Object for details on the style property.\nThe behavior follows the same values as query parameters, including default values.\nThis property SHALL be ignored if the request body media type is not application/x-www-form-urlencoded or multipart/form-data.\nIf a value is explicitly defined, then the value of contentType (implicit or explicit) SHALL be ignored"
+        },
+        "explode": {
+          "type": "boolean",
+          "description": "When this is true, property values of type array or object generate separate parameters for each value of the array, or key-value-pair of the map.\nFor other types of properties this property has no effect. When style is form, the default value is true. For all other styles, the default value is false.\nThis property SHALL be ignored if the request body media type is not application/x-www-form-urlencoded or multipart/form-data.\nIf a value is explicitly defined, then the value of contentType (implicit or explicit) SHALL be ignored"
+        },
+        "allowReserved": {
+          "type": "boolean",
+          "description": "By default, reserved characters :/?#[]@!$\u0026'()*+,;= in form field values within application/x-www-form-urlencoded bodies are percent-encoded when sent.\nAllowReserved allows these characters to be sent as is:"
+        },
+        "contentType": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array",
+          "description": "For more complex scenarios, such as nested arrays or JSON in form data, use the contentType keyword to specify the media type for encoding the value of a complex field."
+        },
+        "headers": {
+          "additionalProperties": {
+            "$ref": "#/$defs/RequestParameter"
+          },
+          "type": "object",
+          "description": "A map allowing additional information to be provided as headers, for example Content-Disposition.\nContent-Type is described separately and SHALL be ignored in this section.\nThis property SHALL be ignored if the request body media type is not a multipart."
+        },
+        "name": {
+          "type": "string"
+        },
+        "argumentName": {
+          "type": "string"
+        },
+        "in": {
+          "$ref": "#/$defs/ParameterLocation"
+        },
+        "schema": {
+          "$ref": "#/$defs/TypeSchema"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object",
+      "description": "RequestParameter represents an HTTP request parameter"
+    },
+    "Response": {
+      "properties": {
+        "contentType": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object",
+      "required": [
+        "contentType"
+      ]
+    },
+    "RetryPolicy": {
+      "properties": {
+        "times": {
+          "type": "integer",
+          "description": "Number of retry times"
+        },
+        "delay": {
+          "type": "integer",
+          "description": "Delay retry delay in milliseconds"
+        },
+        "httpStatus": {
+          "items": {
+            "type": "integer"
+          },
+          "type": "array",
+          "description": "HTTPStatus retries if the remote service returns one of these http status"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object",
+      "description": "RetryPolicy represents the retry policy of request"
+    },
+    "RetryPolicySetting": {
+      "properties": {
+        "times": {
+          "$ref": "#/$defs/EnvInt",
+          "description": "Number of retry times"
+        },
+        "delay": {
+          "$ref": "#/$defs/EnvInt",
+          "description": "Delay retry delay in milliseconds"
+        },
+        "httpStatus": {
+          "$ref": "#/$defs/EnvInts",
+          "description": "HTTPStatus retries if the remote service returns one of these http status"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object",
+      "description": "RetryPolicySetting represents retry policy settings"
+    },
+    "ScalarType": {
+      "properties": {
+        "aggregate_functions": {
+          "$ref": "#/$defs/ScalarTypeAggregateFunctions"
+        },
+        "comparison_operators": {
+          "additionalProperties": {
+            "$ref": "#/$defs/ComparisonOperatorDefinition"
+          },
+          "type": "object"
+        },
+        "representation": {
+          "$ref": "#/$defs/TypeRepresentation"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object",
+      "required": [
+        "aggregate_functions",
+        "comparison_operators"
+      ]
+    },
+    "ScalarTypeAggregateFunctions": {
+      "additionalProperties": {
+        "$ref": "#/$defs/AggregateFunctionDefinition"
+      },
+      "type": "object"
+    },
+    "SchemaResponseObjectTypes": {
+      "additionalProperties": {
+        "$ref": "#/$defs/ObjectType"
+      },
+      "type": "object"
+    },
+    "SchemaResponseScalarTypes": {
+      "additionalProperties": {
+        "$ref": "#/$defs/ScalarType"
+      },
+      "type": "object"
+    },
+    "SecurityScheme": {
+      "oneOf": [
+        {
+          "properties": {
+            "type": {
+              "type": "string",
+              "enum": [
+                "apiKey"
+              ]
+            },
+            "value": {
+              "type": "string"
+            },
+            "in": {
+              "type": "string",
+              "enum": [
+                "header",
+                "query",
+                "cookie"
+              ]
+            },
+            "name": {
+              "type": "string"
+            }
+          },
+          "type": "object",
+          "required": [
+            "type",
+            "value",
+            "in",
+            "name"
+          ]
+        },
+        {
+          "properties": {
+            "type": {
+              "type": "string",
+              "enum": [
+                "http"
+              ]
+            },
+            "value": {
+              "type": "string"
+            },
+            "header": {
+              "type": "string"
+            },
+            "scheme": {
+              "type": "string"
+            }
+          },
+          "type": "object",
+          "required": [
+            "type",
+            "value",
+            "header",
+            "scheme"
+          ]
+        },
+        {
+          "properties": {
+            "type": {
+              "type": "string",
+              "enum": [
+                "oauth2"
+              ]
+            },
+            "flows": {
+              "additionalProperties": true,
+              "type": "object"
+            }
+          },
+          "type": "object",
+          "required": [
+            "type",
+            "flows"
+          ]
+        },
+        {
+          "properties": {
+            "type": {
+              "type": "string",
+              "enum": [
+                "openIdConnect"
+              ]
+            },
+            "openIdConnectUrl": {
+              "type": "string"
+            }
+          },
+          "type": "object",
+          "required": [
+            "type",
+            "openIdConnectUrl"
+          ]
+        }
+      ]
+    },
+    "ServerConfig": {
+      "properties": {
+        "url": {
+          "$ref": "#/$defs/EnvString"
+        },
+        "id": {
+          "type": "string"
+        },
+        "headers": {
+          "additionalProperties": {
+            "$ref": "#/$defs/EnvString"
+          },
+          "type": "object"
+        },
+        "timeout": {
+          "$ref": "#/$defs/EnvInt",
+          "description": "configure the request timeout in seconds, default 30s"
+        },
+        "retry": {
+          "$ref": "#/$defs/RetryPolicySetting"
+        },
+        "securitySchemes": {
+          "additionalProperties": {
+            "$ref": "#/$defs/SecurityScheme"
+          },
+          "type": "object"
+        },
+        "security": {
+          "$ref": "#/$defs/AuthSecurities"
+        },
+        "tls": {
+          "$ref": "#/$defs/TLSConfig"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object",
+      "required": [
+        "url"
+      ],
+      "description": "ServerConfig contains server configurations"
+    },
+    "TLSConfig": {
+      "properties": {
+        "certFile": {
+          "$ref": "#/$defs/EnvString",
+          "description": "Path to the TLS cert to use for TLS required connections."
+        },
+        "certPem": {
+          "$ref": "#/$defs/EnvString",
+          "description": "Alternative to cert_file. Provide the certificate contents as a string instead of a filepath."
+        },
+        "keyFile": {
+          "$ref": "#/$defs/EnvString",
+          "description": "Path to the TLS key to use for TLS required connections."
+        },
+        "keyPem": {
+          "$ref": "#/$defs/EnvString",
+          "description": "Alternative to key_file. Provide the key contents as a string instead of a filepath."
+        },
+        "caFile": {
+          "$ref": "#/$defs/EnvString",
+          "description": "Path to the CA cert. For a client this verifies the server certificate. For a server this verifies client certificates.\nIf empty uses system root CA."
+        },
+        "caPem": {
+          "$ref": "#/$defs/EnvString",
+          "description": "Alternative to ca_file. Provide the CA cert contents as a string instead of a filepath."
+        },
+        "insecureSkipVerify": {
+          "$ref": "#/$defs/EnvBoolean",
+          "description": "Additionally you can configure TLS to be enabled but skip verifying the server's certificate chain."
+        },
+        "includeSystemCACertsPool": {
+          "$ref": "#/$defs/EnvBoolean",
+          "description": "Whether to load the system certificate authorities pool alongside the certificate authority."
+        },
+        "minVersion": {
+          "$ref": "#/$defs/EnvString",
+          "description": "Minimum acceptable TLS version."
+        },
+        "maxVersion": {
+          "$ref": "#/$defs/EnvString",
+          "description": "Maximum acceptable TLS version."
+        },
+        "cipherSuites": {
+          "$ref": "#/$defs/EnvStrings",
+          "description": "Explicit cipher suites can be set. If left blank, a safe default list is used.\nSee https://go.dev/src/crypto/tls/cipher_suites.go for a list of supported cipher suites."
+        },
+        "reloadInterval": {
+          "$ref": "#/$defs/EnvInt",
+          "description": "Specifies the duration after which the certificate will be reloaded. If not set, it will never be reloaded.\nThe interval unit is minute"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object",
+      "description": "TLSConfig represents the transport layer security (LTS) configuration for the mutualTLS authentication"
+    },
+    "Type": {
+      "type": "object"
+    },
+    "TypeRepresentation": {
+      "type": "object"
+    },
+    "TypeSchema": {
+      "properties": {
+        "type": {
+          "type": "string"
+        },
+        "format": {
+          "type": "string"
+        },
+        "pattern": {
+          "type": "string"
+        },
+        "nullable": {
+          "type": "boolean"
+        },
+        "maximum": {
+          "type": "number"
+        },
+        "minimum": {
+          "type": "number"
+        },
+        "maxLength": {
+          "type": "integer"
+        },
+        "minLength": {
+          "type": "integer"
+        },
+        "enum": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "items": {
+          "$ref": "#/$defs/TypeSchema"
+        },
+        "properties": {
+          "additionalProperties": {
+            "$ref": "#/$defs/TypeSchema"
+          },
+          "type": "object"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object",
+      "required": [
+        "type"
+      ],
+      "description": "TypeSchema represents a serializable object of OpenAPI schema that is used for validation"
+    },
+    "UniquenessConstraint": {
+      "properties": {
+        "unique_columns": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object",
+      "required": [
+        "unique_columns"
+      ]
+    }
+  }
+}

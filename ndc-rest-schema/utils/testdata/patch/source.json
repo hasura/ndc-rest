@@ -1,0 +1,118 @@
+{
+  "openapi": "3.0.0",
+  "servers": [
+    {
+      "url": "https://onesignal.com/api/v1"
+    }
+  ],
+  "components": {
+    "securitySchemes": {
+      "app_key": {
+        "type": "http",
+        "scheme": "bearer"
+      },
+      "user_key": {
+        "type": "http",
+        "scheme": "bearer"
+      }
+    },
+    "schemas": {
+      "Button": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "text": {
+            "type": "string"
+          },
+          "icon": {
+            "type": "string"
+          }
+        },
+        "required": ["id"]
+      }
+    }
+  },
+  "paths": {
+    "/notifications/{notification_id}/history": {
+      "post": {
+        "operationId": "get_notification_history",
+        "summary": "Notification History",
+        "description": "a description",
+        "parameters": [
+          {
+            "name": "notification_id",
+            "in": "path",
+            "required": true,
+            "description": "The \"id\" of the message found in the Notification object",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "title": "get_notification_request_body",
+                "type": "object",
+                "required": ["id"],
+                "properties": {
+                  "events": {
+                    "type": "string",
+                    "enum": ["sent", "clicked"]
+                  },
+                  "email": {
+                    "type": "string"
+                  },
+                  "app_id": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/NotificationHistorySuccessResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GenericError"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Rate Limit Exceeded",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RateLimiterError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "app_key": []
+          }
+        ]
+      }
+    }
+  }
+}

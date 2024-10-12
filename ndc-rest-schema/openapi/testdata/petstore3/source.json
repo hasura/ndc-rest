@@ -1,0 +1,3326 @@
+{
+  "openapi": "3.0.2",
+  "info": {
+    "title": "Swagger Petstore - OpenAPI 3.0",
+    "description": "This is a sample Pet Store Server based on the OpenAPI 3.0 specification.  You can find out more about\nSwagger at [http://swagger.io](http://swagger.io). In the third iteration of the pet store, we've switched to the design first approach!\nYou can now help us improve the API whether it's by making changes to the definition itself or to the code.\nThat way, with time, we can improve the API in general, and expose some of the new features in OAS3.\n\nSome useful links:\n- [The Pet Store repository](https://github.com/swagger-api/swagger-petstore)\n- [The source API definition for the Pet Store](https://github.com/swagger-api/swagger-petstore/blob/master/src/main/resources/openapi.yaml)",
+    "termsOfService": "http://swagger.io/terms/",
+    "contact": {
+      "email": "apiteam@swagger.io"
+    },
+    "license": {
+      "name": "Apache 2.0",
+      "url": "http://www.apache.org/licenses/LICENSE-2.0.html"
+    },
+    "version": "1.0.19"
+  },
+  "externalDocs": {
+    "description": "Find out more about Swagger",
+    "url": "http://swagger.io"
+  },
+  "servers": [
+    {
+      "url": "https://petstore3.swagger.io/api/v3"
+    },
+    {
+      "url": "https://petstore3.swagger.io/api/v3.1"
+    }
+  ],
+  "tags": [
+    {
+      "name": "pet",
+      "description": "Everything about your Pets",
+      "externalDocs": {
+        "description": "Find out more",
+        "url": "http://swagger.io"
+      }
+    },
+    {
+      "name": "store",
+      "description": "Access to Petstore orders",
+      "externalDocs": {
+        "description": "Find out more about our store",
+        "url": "http://swagger.io"
+      }
+    },
+    {
+      "name": "user",
+      "description": "Operations about user"
+    }
+  ],
+  "paths": {
+    "/pet": {
+      "put": {
+        "tags": ["pet"],
+        "summary": "Update an existing pet",
+        "description": "Update an existing pet by Id",
+        "operationId": "updatePet",
+        "requestBody": {
+          "description": "Update an existent pet in the store",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Pet"
+              }
+            },
+            "application/xml": {
+              "schema": {
+                "$ref": "#/components/schemas/Pet"
+              }
+            },
+            "application/x-www-form-urlencoded": {
+              "schema": {
+                "$ref": "#/components/schemas/Pet"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "content": {
+              "application/xml": {
+                "schema": {
+                  "$ref": "#/components/schemas/Pet"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Pet"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid ID supplied"
+          },
+          "404": {
+            "description": "Pet not found"
+          },
+          "405": {
+            "description": "Validation exception"
+          }
+        },
+        "security": [
+          {
+            "petstore_auth": ["write:pets", "read:pets"]
+          }
+        ]
+      },
+      "post": {
+        "tags": ["pet"],
+        "summary": "Add a new pet to the store",
+        "description": "Add a new pet to the store",
+        "operationId": "addPet",
+        "requestBody": {
+          "description": "Create a new pet in the store",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Pet"
+              }
+            },
+            "application/xml": {
+              "schema": {
+                "$ref": "#/components/schemas/Pet"
+              }
+            },
+            "application/x-www-form-urlencoded": {
+              "schema": {
+                "$ref": "#/components/schemas/Pet"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "content": {
+              "application/xml": {
+                "schema": {
+                  "$ref": "#/components/schemas/Pet"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Pet"
+                }
+              }
+            }
+          },
+          "405": {
+            "description": "Invalid input"
+          }
+        },
+        "security": [
+          {
+            "petstore_auth": ["write:pets", "read:pets"]
+          }
+        ]
+      }
+    },
+    "/pet/findByStatus": {
+      "get": {
+        "tags": ["pet"],
+        "summary": "Finds Pets by status",
+        "description": "Multiple status values can be provided with comma separated strings",
+        "operationId": "findPetsByStatus",
+        "parameters": [
+          {
+            "name": "status",
+            "in": "query",
+            "description": "Status values that need to be considered for filter",
+            "required": false,
+            "explode": true,
+            "schema": {
+              "type": "string",
+              "default": "available",
+              "enum": ["available", "pending", "sold"]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "content": {
+              "application/xml": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Pet"
+                  }
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Pet"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid status value"
+          }
+        },
+        "security": [
+          {
+            "petstore_auth": ["write:pets", "read:pets"]
+          }
+        ]
+      }
+    },
+    "/pet/findByTags": {
+      "get": {
+        "tags": ["pet"],
+        "summary": "Finds Pets by tags",
+        "description": "Multiple tags can be provided with comma separated strings. Use tag1, tag2, tag3 for testing.",
+        "operationId": "findPetsByTags",
+        "parameters": [
+          {
+            "name": "tags",
+            "in": "query",
+            "description": "Tags to filter by",
+            "required": false,
+            "explode": true,
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "content": {
+              "application/xml": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Pet"
+                  }
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Pet"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid tag value"
+          }
+        },
+        "security": [
+          {
+            "petstore_auth": ["write:pets", "read:pets"]
+          }
+        ]
+      }
+    },
+    "/pet/{petId}": {
+      "get": {
+        "tags": ["pet"],
+        "summary": "Find pet by ID",
+        "description": "Returns a single pet",
+        "operationId": "getPetById",
+        "parameters": [
+          {
+            "name": "petId",
+            "in": "path",
+            "description": "ID of pet to return",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "content": {
+              "application/xml": {
+                "schema": {
+                  "$ref": "#/components/schemas/Pet"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Pet"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid ID supplied"
+          },
+          "404": {
+            "description": "Pet not found"
+          }
+        },
+        "security": [
+          {
+            "api_key": []
+          },
+          {
+            "petstore_auth": ["write:pets", "read:pets"]
+          }
+        ]
+      },
+      "post": {
+        "tags": ["pet"],
+        "summary": "Updates a pet in the store with form data",
+        "description": "",
+        "operationId": "updatePetWithForm",
+        "parameters": [
+          {
+            "name": "petId",
+            "in": "path",
+            "description": "ID of pet that needs to be updated",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          },
+          {
+            "name": "name",
+            "in": "query",
+            "description": "Name of pet that needs to be updated",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "description": "Status of pet that needs to be updated",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "405": {
+            "description": "Invalid input"
+          }
+        },
+        "security": [
+          {
+            "petstore_auth": ["write:pets", "read:pets"]
+          }
+        ]
+      },
+      "delete": {
+        "tags": ["pet"],
+        "summary": "Deletes a pet",
+        "description": "",
+        "operationId": "deletePet",
+        "parameters": [
+          {
+            "name": "api_key",
+            "in": "header",
+            "description": "",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "petId",
+            "in": "path",
+            "description": "Pet id to delete",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "400": {
+            "description": "Invalid pet value"
+          }
+        },
+        "security": [
+          {
+            "petstore_auth": ["write:pets", "read:pets"]
+          }
+        ]
+      }
+    },
+    "/pet/{petId}/uploadImage": {
+      "post": {
+        "tags": ["pet"],
+        "summary": "uploads an image",
+        "description": "",
+        "operationId": "uploadFile",
+        "parameters": [
+          {
+            "name": "petId",
+            "in": "path",
+            "description": "ID of pet to update",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          },
+          {
+            "name": "additionalMetadata",
+            "in": "query",
+            "description": "Additional Metadata",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/octet-stream": {
+              "schema": {
+                "type": "string",
+                "format": "binary"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "petstore_auth": ["write:pets", "read:pets"]
+          }
+        ]
+      }
+    },
+    "/pet/multipart": {
+      "post": {
+        "operationId": "uploadPetMultipart",
+        "requestBody": {
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "string",
+                    "format": "uuid"
+                  },
+                  "address": {
+                    "type": "object",
+                    "properties": {}
+                  },
+                  "profileImage": {
+                    "type": "string",
+                    "format": "binary"
+                  },
+                  "children": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  },
+                  "addresses": {
+                    "type": "array",
+                    "items": {
+                      "$ref": "#/components/schemas/Address"
+                    }
+                  }
+                }
+              },
+              "encoding": {
+                "profileImage": {
+                  "contentType": "image/png, image/jpeg",
+                  "headers": {
+                    "X-Rate-Limit-Limit": {
+                      "description": "The number of allowed requests in the current period",
+                      "schema": {
+                        "type": "integer"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/store/inventory": {
+      "get": {
+        "tags": ["store"],
+        "summary": "Returns pet inventories by status",
+        "description": "Returns a map of status codes to quantities",
+        "operationId": "getInventory",
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": {
+                    "type": "integer",
+                    "format": "int32"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "api_key": []
+          }
+        ]
+      }
+    },
+    "/store/order": {
+      "post": {
+        "tags": ["store"],
+        "summary": "Place an order for a pet",
+        "description": "Place a new order in the store",
+        "operationId": "placeOrder",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Order"
+              }
+            },
+            "application/xml": {
+              "schema": {
+                "$ref": "#/components/schemas/Order"
+              }
+            },
+            "application/x-www-form-urlencoded": {
+              "schema": {
+                "$ref": "#/components/schemas/Order"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Order"
+                }
+              }
+            }
+          },
+          "405": {
+            "description": "Invalid input"
+          }
+        }
+      }
+    },
+    "/store/order/{orderId}": {
+      "get": {
+        "tags": ["store"],
+        "summary": "Find purchase order by ID",
+        "description": "For valid response try integer IDs with value \u003C= 5 or \u003E 10. Other values will generate exceptions.",
+        "operationId": "getOrderById",
+        "parameters": [
+          {
+            "name": "orderId",
+            "in": "path",
+            "description": "ID of order that needs to be fetched",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "content": {
+              "application/xml": {
+                "schema": {
+                  "$ref": "#/components/schemas/Order"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Order"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid ID supplied"
+          },
+          "404": {
+            "description": "Order not found"
+          }
+        }
+      },
+      "delete": {
+        "tags": ["store"],
+        "summary": "Delete purchase order by ID",
+        "description": "For valid response try integer IDs with value \u003C 1000. Anything above 1000 or nonintegers will generate API errors",
+        "operationId": "deleteOrder",
+        "parameters": [
+          {
+            "name": "orderId",
+            "in": "path",
+            "description": "ID of the order that needs to be deleted",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "400": {
+            "description": "Invalid ID supplied"
+          },
+          "404": {
+            "description": "Order not found"
+          }
+        }
+      }
+    },
+    "/user": {
+      "post": {
+        "tags": ["user"],
+        "summary": "Create user",
+        "description": "This can only be done by the logged in user.",
+        "operationId": "createUser",
+        "requestBody": {
+          "description": "Created user object",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/User"
+              }
+            },
+            "application/xml": {
+              "schema": {
+                "$ref": "#/components/schemas/User"
+              }
+            },
+            "application/x-www-form-urlencoded": {
+              "schema": {
+                "$ref": "#/components/schemas/User"
+              }
+            }
+          }
+        },
+        "responses": {
+          "default": {
+            "description": "successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/User"
+                }
+              },
+              "application/xml": {
+                "schema": {
+                  "$ref": "#/components/schemas/User"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/user/createWithList": {
+      "post": {
+        "tags": ["user"],
+        "summary": "Creates list of users with given input array",
+        "description": "Creates list of users with given input array",
+        "operationId": "createUsersWithListInput",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/User"
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "content": {
+              "application/xml": {
+                "schema": {
+                  "$ref": "#/components/schemas/User"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/User"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "successful operation"
+          }
+        }
+      }
+    },
+    "/user/login": {
+      "get": {
+        "tags": ["user"],
+        "summary": "Logs user into the system",
+        "description": "",
+        "operationId": "loginUser",
+        "parameters": [
+          {
+            "name": "username",
+            "in": "query",
+            "description": "The user name for login",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "password",
+            "in": "query",
+            "description": "The password for login in clear text",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "headers": {
+              "X-Rate-Limit": {
+                "description": "calls per hour allowed by the user",
+                "schema": {
+                  "type": "integer",
+                  "format": "int32"
+                }
+              },
+              "X-Expires-After": {
+                "description": "date in UTC when token expires",
+                "schema": {
+                  "type": "string",
+                  "format": "date-time"
+                }
+              }
+            },
+            "content": {
+              "application/xml": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid username/password supplied"
+          }
+        }
+      }
+    },
+    "/user/logout": {
+      "get": {
+        "tags": ["user"],
+        "summary": "Logs out current logged in user session",
+        "description": "",
+        "operationId": "logoutUser",
+        "parameters": [],
+        "responses": {
+          "default": {
+            "description": "successful operation"
+          }
+        }
+      }
+    },
+    "/user/{username}": {
+      "get": {
+        "tags": ["user"],
+        "summary": "Get user by user name",
+        "description": "",
+        "operationId": "getUserByName",
+        "parameters": [
+          {
+            "name": "username",
+            "in": "path",
+            "description": "The name that needs to be fetched. Use user1 for testing. ",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "content": {
+              "application/xml": {
+                "schema": {
+                  "$ref": "#/components/schemas/User"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/User"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid username supplied"
+          },
+          "404": {
+            "description": "User not found"
+          }
+        }
+      },
+      "put": {
+        "tags": ["user"],
+        "summary": "Update user",
+        "description": "This can only be done by the logged in user.",
+        "operationId": "updateUser",
+        "parameters": [
+          {
+            "name": "username",
+            "in": "path",
+            "description": "name that needs to be updated",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "description": "Update an existent user in the store",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/User"
+              }
+            },
+            "application/xml": {
+              "schema": {
+                "$ref": "#/components/schemas/User"
+              }
+            },
+            "application/x-www-form-urlencoded": {
+              "schema": {
+                "$ref": "#/components/schemas/User"
+              }
+            }
+          }
+        },
+        "responses": {
+          "default": {
+            "description": "successful operation"
+          }
+        }
+      },
+      "delete": {
+        "tags": ["user"],
+        "summary": "Delete user",
+        "description": "This can only be done by the logged in user.",
+        "operationId": "deleteUser",
+        "parameters": [
+          {
+            "name": "username",
+            "in": "path",
+            "description": "The name that needs to be deleted",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "400": {
+            "description": "Invalid username supplied"
+          },
+          "404": {
+            "description": "User not found"
+          }
+        }
+      }
+    },
+    "/snake": {
+      "get": {
+        "tags": ["snake"],
+        "summary": "Get snake object",
+        "description": "",
+        "operationId": "getSnake",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/snake_object" }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": ["snake"],
+        "summary": "Add snake object",
+        "description": "",
+        "operationId": "addSnake",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/snake_object" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/test_helpers/treasury/inbound_transfers/{id}/fail": {
+      "post": {
+        "description": "<p>Transitions a test mode created InboundTransfer to the <code>failed</code> status. The InboundTransfer must already be in the <code>processing</code> state.</p>",
+        "operationId": "PostTestHelpersTreasuryInboundTransfersIdFail",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "maxLength": 5000,
+              "type": "string"
+            },
+            "style": "simple"
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/x-www-form-urlencoded": {
+              "encoding": {
+                "expand": {
+                  "explode": true,
+                  "style": "deepObject"
+                },
+                "failure_details": {
+                  "explode": true,
+                  "style": "deepObject"
+                }
+              },
+              "schema": {
+                "additionalProperties": false,
+                "properties": {
+                  "expand": {
+                    "description": "Specifies which fields in the response should be expanded.",
+                    "items": {
+                      "maxLength": 5000,
+                      "type": "string"
+                    },
+                    "type": "array"
+                  },
+                  "failure_details": {
+                    "description": "Details about a failed InboundTransfer.",
+                    "properties": {
+                      "code": {
+                        "enum": [
+                          "account_closed",
+                          "account_frozen",
+                          "bank_account_restricted",
+                          "bank_ownership_changed",
+                          "debit_not_authorized",
+                          "incorrect_account_holder_address",
+                          "incorrect_account_holder_name",
+                          "incorrect_account_holder_tax_id",
+                          "insufficient_funds",
+                          "invalid_account_number",
+                          "invalid_currency",
+                          "no_account",
+                          "other"
+                        ],
+                        "type": "string"
+                      }
+                    },
+                    "title": "failure_details_params",
+                    "type": "object"
+                  }
+                },
+                "type": "object"
+              }
+            }
+          },
+          "required": false
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/treasury.inbound_transfer"
+                }
+              }
+            },
+            "description": "Successful response."
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/error"
+                }
+              }
+            },
+            "description": "Error response."
+          }
+        }
+      }
+    },
+    "/v1/accounts/{account}": {
+      "delete": {
+        "operationId": "DeleteAccountsAccount",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "account",
+            "required": true,
+            "schema": {
+              "maxLength": 5000,
+              "type": "string"
+            },
+            "style": "simple"
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/x-www-form-urlencoded": {
+              "encoding": {},
+              "schema": {
+                "additionalProperties": false,
+                "properties": {},
+                "type": "object"
+              }
+            }
+          },
+          "required": false
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/treasury.inbound_transfer"
+                }
+              }
+            },
+            "description": "Successful response."
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/error"
+                }
+              }
+            },
+            "description": "Error response."
+          }
+        }
+      }
+    },
+    "/v1/checkout/sessions": {
+      "post": {
+        "description": "<p>Creates a Session object.</p>",
+        "operationId": "PostCheckoutSessions",
+        "requestBody": {
+          "content": {
+            "application/x-www-form-urlencoded": {
+              "encoding": {
+                "after_expiration": {
+                  "explode": true,
+                  "style": "deepObject"
+                },
+                "automatic_tax": {
+                  "explode": true,
+                  "style": "deepObject"
+                },
+                "consent_collection": {
+                  "explode": true,
+                  "style": "deepObject"
+                },
+                "custom_fields": {
+                  "explode": true,
+                  "style": "deepObject"
+                },
+                "custom_text": {
+                  "explode": true,
+                  "style": "deepObject"
+                },
+                "customer_update": {
+                  "explode": true,
+                  "style": "deepObject"
+                },
+                "discounts": {
+                  "explode": true,
+                  "style": "deepObject"
+                },
+                "expand": {
+                  "explode": true,
+                  "style": "deepObject"
+                },
+                "invoice_creation": {
+                  "explode": true,
+                  "style": "deepObject"
+                },
+                "line_items": {
+                  "explode": true,
+                  "style": "deepObject"
+                },
+                "metadata": {
+                  "explode": true,
+                  "style": "deepObject"
+                },
+                "payment_intent_data": {
+                  "explode": true,
+                  "style": "deepObject"
+                },
+                "payment_method_options": {
+                  "explode": true,
+                  "style": "deepObject"
+                },
+                "payment_method_types": {
+                  "explode": true,
+                  "style": "deepObject"
+                },
+                "phone_number_collection": {
+                  "explode": true,
+                  "style": "deepObject"
+                },
+                "setup_intent_data": {
+                  "explode": true,
+                  "style": "deepObject"
+                },
+                "shipping_address_collection": {
+                  "explode": true,
+                  "style": "deepObject"
+                },
+                "shipping_options": {
+                  "explode": true,
+                  "style": "deepObject"
+                },
+                "subscription_data": {
+                  "explode": true,
+                  "style": "deepObject"
+                },
+                "tax_id_collection": {
+                  "explode": true,
+                  "style": "deepObject"
+                }
+              },
+              "schema": {
+                "additionalProperties": false,
+                "properties": {
+                  "after_expiration": {
+                    "description": "Configure actions after a Checkout Session has expired.",
+                    "properties": {
+                      "recovery": {
+                        "properties": {
+                          "allow_promotion_codes": {
+                            "type": "boolean"
+                          },
+                          "enabled": {
+                            "type": "boolean"
+                          }
+                        },
+                        "required": ["enabled"],
+                        "title": "recovery_params",
+                        "type": "object"
+                      }
+                    },
+                    "title": "after_expiration_params",
+                    "type": "object"
+                  },
+                  "allow_promotion_codes": {
+                    "description": "Enables user redeemable promotion codes.",
+                    "type": "boolean"
+                  },
+                  "automatic_tax": {
+                    "description": "Settings for automatic tax lookup for this session and resulting payments, invoices, and subscriptions.",
+                    "properties": {
+                      "enabled": {
+                        "type": "boolean"
+                      },
+                      "liability": {
+                        "properties": {
+                          "account": {
+                            "type": "string"
+                          },
+                          "type": {
+                            "enum": ["account", "self"],
+                            "type": "string"
+                          }
+                        },
+                        "required": ["type"],
+                        "title": "param",
+                        "type": "object"
+                      }
+                    },
+                    "required": ["enabled"],
+                    "title": "automatic_tax_params",
+                    "type": "object"
+                  },
+                  "billing_address_collection": {
+                    "description": "Specify whether Checkout should collect the customer's billing address. Defaults to `auto`.",
+                    "enum": ["auto", "required"],
+                    "type": "string"
+                  },
+                  "cancel_url": {
+                    "description": "If set, Checkout displays a back button and customers will be directed to this URL if they decide to cancel payment and return to your website.",
+                    "maxLength": 5000,
+                    "type": "string"
+                  },
+                  "client_reference_id": {
+                    "description": "A unique string to reference the Checkout Session. This can be a\ncustomer ID, a cart ID, or similar, and can be used to reconcile the\nsession with your internal systems.",
+                    "maxLength": 200,
+                    "type": "string"
+                  },
+                  "consent_collection": {
+                    "description": "Configure fields for the Checkout Session to gather active consent from customers.",
+                    "properties": {
+                      "payment_method_reuse_agreement": {
+                        "properties": {
+                          "position": {
+                            "enum": ["auto", "hidden"],
+                            "type": "string"
+                          }
+                        },
+                        "required": ["position"],
+                        "title": "payment_method_reuse_agreement_params",
+                        "type": "object"
+                      },
+                      "promotions": {
+                        "enum": ["auto", "none"],
+                        "type": "string"
+                      },
+                      "terms_of_service": {
+                        "enum": ["none", "required"],
+                        "type": "string"
+                      }
+                    },
+                    "title": "consent_collection_params",
+                    "type": "object"
+                  },
+                  "currency": {
+                    "description": "Three-letter [ISO currency code](https://www.iso.org/iso-4217-currency-codes.html), in lowercase. Must be a [supported currency](https://stripe.com/docs/currencies). Required in `setup` mode when `payment_method_types` is not set.",
+                    "type": "string"
+                  },
+                  "custom_fields": {
+                    "description": "Collect additional information from your customer using custom fields. Up to 3 fields are supported.",
+                    "items": {
+                      "properties": {
+                        "dropdown": {
+                          "properties": {
+                            "options": {
+                              "items": {
+                                "properties": {
+                                  "label": {
+                                    "maxLength": 100,
+                                    "type": "string"
+                                  },
+                                  "value": {
+                                    "maxLength": 100,
+                                    "type": "string"
+                                  }
+                                },
+                                "required": ["label", "value"],
+                                "title": "custom_field_option_param",
+                                "type": "object"
+                              },
+                              "type": "array"
+                            }
+                          },
+                          "required": ["options"],
+                          "title": "custom_field_dropdown_param",
+                          "type": "object"
+                        },
+                        "key": {
+                          "maxLength": 200,
+                          "type": "string"
+                        },
+                        "label": {
+                          "properties": {
+                            "custom": {
+                              "maxLength": 50,
+                              "type": "string"
+                            },
+                            "type": {
+                              "enum": ["custom"],
+                              "type": "string"
+                            }
+                          },
+                          "required": ["custom", "type"],
+                          "title": "custom_field_label_param",
+                          "type": "object"
+                        },
+                        "numeric": {
+                          "properties": {
+                            "maximum_length": {
+                              "type": "integer"
+                            },
+                            "minimum_length": {
+                              "type": "integer"
+                            }
+                          },
+                          "title": "custom_field_numeric_param",
+                          "type": "object"
+                        },
+                        "optional": {
+                          "type": "boolean"
+                        },
+                        "text": {
+                          "properties": {
+                            "maximum_length": {
+                              "type": "integer"
+                            },
+                            "minimum_length": {
+                              "type": "integer"
+                            }
+                          },
+                          "title": "custom_field_text_param",
+                          "type": "object"
+                        },
+                        "type": {
+                          "enum": ["dropdown", "numeric", "text"],
+                          "type": "string"
+                        }
+                      },
+                      "required": ["key", "label", "type"],
+                      "title": "custom_field_param",
+                      "type": "object"
+                    },
+                    "type": "array"
+                  },
+                  "custom_text": {
+                    "description": "Display additional text for your customers using custom text.",
+                    "properties": {
+                      "after_submit": {
+                        "anyOf": [
+                          {
+                            "properties": {
+                              "message": {
+                                "maxLength": 1200,
+                                "type": "string"
+                              }
+                            },
+                            "required": ["message"],
+                            "title": "custom_text_position_param",
+                            "type": "object"
+                          },
+                          {
+                            "enum": [""],
+                            "type": "string"
+                          }
+                        ]
+                      },
+                      "shipping_address": {
+                        "anyOf": [
+                          {
+                            "properties": {
+                              "message": {
+                                "maxLength": 1200,
+                                "type": "string"
+                              }
+                            },
+                            "required": ["message"],
+                            "title": "custom_text_position_param",
+                            "type": "object"
+                          },
+                          {
+                            "enum": [""],
+                            "type": "string"
+                          }
+                        ]
+                      },
+                      "submit": {
+                        "anyOf": [
+                          {
+                            "properties": {
+                              "message": {
+                                "maxLength": 1200,
+                                "type": "string"
+                              }
+                            },
+                            "required": ["message"],
+                            "title": "custom_text_position_param",
+                            "type": "object"
+                          },
+                          {
+                            "enum": [""],
+                            "type": "string"
+                          }
+                        ]
+                      },
+                      "terms_of_service_acceptance": {
+                        "anyOf": [
+                          {
+                            "properties": {
+                              "message": {
+                                "maxLength": 1200,
+                                "type": "string"
+                              }
+                            },
+                            "required": ["message"],
+                            "title": "custom_text_position_param",
+                            "type": "object"
+                          },
+                          {
+                            "enum": [""],
+                            "type": "string"
+                          }
+                        ]
+                      }
+                    },
+                    "title": "custom_text_param",
+                    "type": "object"
+                  },
+                  "customer": {
+                    "description": "ID of an existing Customer, if one exists. In `payment` mode, the customer’s most recently saved card\npayment method will be used to prefill the email, name, card details, and billing address\non the Checkout page. In `subscription` mode, the customer’s [default payment method](https://stripe.com/docs/api/customers/update#update_customer-invoice_settings-default_payment_method)\nwill be used if it’s a card, otherwise the most recently saved card will be used. A valid billing address, billing name and billing email are required on the payment method for Checkout to prefill the customer's card details.\n\nIf the Customer already has a valid [email](https://stripe.com/docs/api/customers/object#customer_object-email) set, the email will be prefilled and not editable in Checkout.\nIf the Customer does not have a valid `email`, Checkout will set the email entered during the session on the Customer.\n\nIf blank for Checkout Sessions in `subscription` mode or with `customer_creation` set as `always` in `payment` mode, Checkout will create a new Customer object based on information provided during the payment flow.\n\nYou can set [`payment_intent_data.setup_future_usage`](https://stripe.com/docs/api/checkout/sessions/create#create_checkout_session-payment_intent_data-setup_future_usage) to have Checkout automatically attach the payment method to the Customer you pass in for future reuse.",
+                    "maxLength": 5000,
+                    "type": "string"
+                  },
+                  "customer_creation": {
+                    "description": "Configure whether a Checkout Session creates a [Customer](https://stripe.com/docs/api/customers) during Session confirmation.\n\nWhen a Customer is not created, you can still retrieve email, address, and other customer data entered in Checkout\nwith [customer_details](https://stripe.com/docs/api/checkout/sessions/object#checkout_session_object-customer_details).\n\nSessions that don't create Customers instead are grouped by [guest customers](https://stripe.com/docs/payments/checkout/guest-customers)\nin the Dashboard. Promotion codes limited to first time customers will return invalid for these Sessions.\n\nCan only be set in `payment` and `setup` mode.",
+                    "enum": ["always", "if_required"],
+                    "type": "string"
+                  },
+                  "customer_email": {
+                    "description": "If provided, this value will be used when the Customer object is created.\nIf not provided, customers will be asked to enter their email address.\nUse this parameter to prefill customer data if you already have an email\non file. To access information about the customer once a session is\ncomplete, use the `customer` field.",
+                    "type": "string"
+                  },
+                  "customer_update": {
+                    "description": "Controls what fields on Customer can be updated by the Checkout Session. Can only be provided when `customer` is provided.",
+                    "properties": {
+                      "address": {
+                        "enum": ["auto", "never"],
+                        "type": "string",
+                        "x-stripeBypassValidation": true
+                      },
+                      "name": {
+                        "enum": ["auto", "never"],
+                        "type": "string",
+                        "x-stripeBypassValidation": true
+                      },
+                      "shipping": {
+                        "enum": ["auto", "never"],
+                        "type": "string",
+                        "x-stripeBypassValidation": true
+                      }
+                    },
+                    "title": "customer_update_params",
+                    "type": "object"
+                  },
+                  "discounts": {
+                    "description": "The coupon or promotion code to apply to this Session. Currently, only up to one may be specified.",
+                    "items": {
+                      "properties": {
+                        "coupon": {
+                          "maxLength": 5000,
+                          "type": "string"
+                        },
+                        "promotion_code": {
+                          "maxLength": 5000,
+                          "type": "string"
+                        }
+                      },
+                      "title": "discount_params",
+                      "type": "object"
+                    },
+                    "type": "array"
+                  },
+                  "expand": {
+                    "description": "Specifies which fields in the response should be expanded.",
+                    "items": {
+                      "maxLength": 5000,
+                      "type": "string"
+                    },
+                    "type": "array"
+                  },
+                  "expires_at": {
+                    "description": "The Epoch time in seconds at which the Checkout Session will expire. It can be anywhere from 30 minutes to 24 hours after Checkout Session creation. By default, this value is 24 hours from creation.",
+                    "format": "unix-time",
+                    "type": "integer"
+                  },
+                  "invoice_creation": {
+                    "description": "Generate a post-purchase Invoice for one-time payments.",
+                    "properties": {
+                      "enabled": {
+                        "type": "boolean"
+                      },
+                      "invoice_data": {
+                        "properties": {
+                          "account_tax_ids": {
+                            "anyOf": [
+                              {
+                                "items": {
+                                  "maxLength": 5000,
+                                  "type": "string"
+                                },
+                                "type": "array"
+                              },
+                              {
+                                "enum": [""],
+                                "type": "string"
+                              }
+                            ]
+                          },
+                          "custom_fields": {
+                            "anyOf": [
+                              {
+                                "items": {
+                                  "properties": {
+                                    "name": {
+                                      "maxLength": 40,
+                                      "type": "string"
+                                    },
+                                    "value": {
+                                      "maxLength": 140,
+                                      "type": "string"
+                                    }
+                                  },
+                                  "required": ["name", "value"],
+                                  "title": "custom_field_params",
+                                  "type": "object"
+                                },
+                                "type": "array"
+                              },
+                              {
+                                "enum": [""],
+                                "type": "string"
+                              }
+                            ]
+                          },
+                          "description": {
+                            "maxLength": 1500,
+                            "type": "string"
+                          },
+                          "footer": {
+                            "maxLength": 5000,
+                            "type": "string"
+                          },
+                          "issuer": {
+                            "properties": {
+                              "account": {
+                                "type": "string"
+                              },
+                              "type": {
+                                "enum": ["account", "self"],
+                                "type": "string"
+                              }
+                            },
+                            "required": ["type"],
+                            "title": "param",
+                            "type": "object"
+                          },
+                          "metadata": {
+                            "additionalProperties": {
+                              "type": "string"
+                            },
+                            "type": "object"
+                          },
+                          "rendering_options": {
+                            "anyOf": [
+                              {
+                                "properties": {
+                                  "amount_tax_display": {
+                                    "enum": [
+                                      "",
+                                      "exclude_tax",
+                                      "include_inclusive_tax"
+                                    ],
+                                    "type": "string"
+                                  }
+                                },
+                                "title": "rendering_options_param",
+                                "type": "object"
+                              },
+                              {
+                                "enum": [""],
+                                "type": "string"
+                              }
+                            ]
+                          }
+                        },
+                        "title": "invoice_data_params",
+                        "type": "object"
+                      }
+                    },
+                    "required": ["enabled"],
+                    "title": "invoice_creation_params",
+                    "type": "object"
+                  },
+                  "line_items": {
+                    "description": "A list of items the customer is purchasing. Use this parameter to pass one-time or recurring [Prices](https://stripe.com/docs/api/prices).\n\nFor `payment` mode, there is a maximum of 100 line items, however it is recommended to consolidate line items if there are more than a few dozen.\n\nFor `subscription` mode, there is a maximum of 20 line items with recurring Prices and 20 line items with one-time Prices. Line items with one-time Prices will be on the initial invoice only.",
+                    "items": {
+                      "properties": {
+                        "adjustable_quantity": {
+                          "properties": {
+                            "enabled": {
+                              "type": "boolean"
+                            },
+                            "maximum": {
+                              "type": "integer"
+                            },
+                            "minimum": {
+                              "type": "integer"
+                            }
+                          },
+                          "required": ["enabled"],
+                          "title": "adjustable_quantity_params",
+                          "type": "object"
+                        },
+                        "dynamic_tax_rates": {
+                          "items": {
+                            "maxLength": 5000,
+                            "type": "string"
+                          },
+                          "type": "array"
+                        },
+                        "price": {
+                          "maxLength": 5000,
+                          "type": "string"
+                        },
+                        "price_data": {
+                          "properties": {
+                            "currency": {
+                              "type": "string"
+                            },
+                            "product": {
+                              "maxLength": 5000,
+                              "type": "string"
+                            },
+                            "product_data": {
+                              "properties": {
+                                "description": {
+                                  "maxLength": 40000,
+                                  "type": "string"
+                                },
+                                "images": {
+                                  "items": {
+                                    "type": "string"
+                                  },
+                                  "type": "array"
+                                },
+                                "metadata": {
+                                  "additionalProperties": {
+                                    "type": "string"
+                                  },
+                                  "type": "object"
+                                },
+                                "name": {
+                                  "maxLength": 5000,
+                                  "type": "string"
+                                },
+                                "tax_code": {
+                                  "maxLength": 5000,
+                                  "type": "string"
+                                }
+                              },
+                              "required": ["name"],
+                              "title": "product_data",
+                              "type": "object"
+                            },
+                            "recurring": {
+                              "properties": {
+                                "interval": {
+                                  "enum": ["day", "month", "week", "year"],
+                                  "type": "string"
+                                },
+                                "interval_count": {
+                                  "type": "integer"
+                                }
+                              },
+                              "required": ["interval"],
+                              "title": "recurring_adhoc",
+                              "type": "object"
+                            },
+                            "tax_behavior": {
+                              "enum": ["exclusive", "inclusive", "unspecified"],
+                              "type": "string"
+                            },
+                            "unit_amount": {
+                              "type": "integer"
+                            },
+                            "unit_amount_decimal": {
+                              "format": "decimal",
+                              "type": "string"
+                            }
+                          },
+                          "required": ["currency"],
+                          "title": "price_data_with_product_data",
+                          "type": "object"
+                        },
+                        "quantity": {
+                          "type": "integer"
+                        },
+                        "tax_rates": {
+                          "items": {
+                            "maxLength": 5000,
+                            "type": "string"
+                          },
+                          "type": "array"
+                        }
+                      },
+                      "title": "line_item_params",
+                      "type": "object"
+                    },
+                    "type": "array"
+                  },
+                  "locale": {
+                    "description": "The IETF language tag of the locale Checkout is displayed in. If blank or `auto`, the browser's locale is used.",
+                    "enum": ["auto", "bg", "cs"],
+                    "type": "string",
+                    "x-stripeBypassValidation": true
+                  },
+                  "metadata": {
+                    "additionalProperties": {
+                      "type": "string"
+                    },
+                    "description": "Set of [key-value pairs](https://stripe.com/docs/api/metadata) that you can attach to an object. This can be useful for storing additional information about the object in a structured format. Individual keys can be unset by posting an empty value to them. All keys can be unset by posting an empty value to `metadata`.",
+                    "type": "object"
+                  },
+                  "mode": {
+                    "description": "The mode of the Checkout Session. Pass `subscription` if the Checkout Session includes at least one recurring item.",
+                    "enum": ["payment", "setup", "subscription"],
+                    "type": "string"
+                  },
+                  "payment_intent_data": {
+                    "description": "A subset of parameters to be passed to PaymentIntent creation for Checkout Sessions in `payment` mode.",
+                    "properties": {
+                      "application_fee_amount": {
+                        "type": "integer"
+                      },
+                      "capture_method": {
+                        "enum": ["automatic", "automatic_async", "manual"],
+                        "type": "string"
+                      },
+                      "description": {
+                        "maxLength": 1000,
+                        "type": "string"
+                      },
+                      "metadata": {
+                        "additionalProperties": {
+                          "type": "string"
+                        },
+                        "type": "object"
+                      },
+                      "on_behalf_of": {
+                        "type": "string"
+                      },
+                      "receipt_email": {
+                        "type": "string"
+                      },
+                      "setup_future_usage": {
+                        "enum": ["off_session", "on_session"],
+                        "type": "string"
+                      },
+                      "shipping": {
+                        "properties": {
+                          "address": {
+                            "properties": {
+                              "city": {
+                                "maxLength": 5000,
+                                "type": "string"
+                              },
+                              "country": {
+                                "maxLength": 5000,
+                                "type": "string"
+                              },
+                              "line1": {
+                                "maxLength": 5000,
+                                "type": "string"
+                              },
+                              "line2": {
+                                "maxLength": 5000,
+                                "type": "string"
+                              },
+                              "postal_code": {
+                                "maxLength": 5000,
+                                "type": "string"
+                              },
+                              "state": {
+                                "maxLength": 5000,
+                                "type": "string"
+                              }
+                            },
+                            "required": ["line1"],
+                            "title": "address",
+                            "type": "object"
+                          },
+                          "carrier": {
+                            "maxLength": 5000,
+                            "type": "string"
+                          },
+                          "name": {
+                            "maxLength": 5000,
+                            "type": "string"
+                          },
+                          "phone": {
+                            "maxLength": 5000,
+                            "type": "string"
+                          },
+                          "tracking_number": {
+                            "maxLength": 5000,
+                            "type": "string"
+                          }
+                        },
+                        "required": ["address", "name"],
+                        "title": "shipping",
+                        "type": "object"
+                      },
+                      "statement_descriptor": {
+                        "maxLength": 22,
+                        "type": "string"
+                      },
+                      "statement_descriptor_suffix": {
+                        "maxLength": 22,
+                        "type": "string"
+                      },
+                      "transfer_data": {
+                        "properties": {
+                          "amount": {
+                            "type": "integer"
+                          },
+                          "destination": {
+                            "type": "string"
+                          }
+                        },
+                        "required": ["destination"],
+                        "title": "transfer_data_params",
+                        "type": "object"
+                      },
+                      "transfer_group": {
+                        "type": "string"
+                      }
+                    },
+                    "title": "payment_intent_data_params",
+                    "type": "object"
+                  },
+                  "payment_method_collection": {
+                    "description": "Specify whether Checkout should collect a payment method. When set to `if_required`, Checkout will not collect a payment method when the total due for the session is 0.\nThis may occur if the Checkout Session includes a free trial or a discount.\n\nCan only be set in `subscription` mode. Defaults to `always`.\n\nIf you'd like information on how to collect a payment method outside of Checkout, read the guide on configuring [subscriptions with a free trial](https://stripe.com/docs/payments/checkout/free-trials).",
+                    "enum": ["always", "if_required"],
+                    "type": "string"
+                  },
+                  "payment_method_configuration": {
+                    "description": "The ID of the payment method configuration to use with this Checkout session.",
+                    "maxLength": 100,
+                    "type": "string"
+                  },
+                  "payment_method_options": {
+                    "description": "Payment-method-specific configuration.",
+                    "properties": {
+                      "acss_debit": {
+                        "properties": {
+                          "affirm": {
+                            "$ref": "#/components/schemas/payment_method_affirm"
+                          },
+                          "currency": {
+                            "enum": ["cad", "usd"],
+                            "type": "string"
+                          },
+                          "mandate_options": {
+                            "properties": {
+                              "custom_mandate_url": {
+                                "anyOf": [
+                                  {
+                                    "type": "string"
+                                  },
+                                  {
+                                    "enum": [""],
+                                    "type": "string"
+                                  }
+                                ]
+                              },
+                              "default_for": {
+                                "items": {
+                                  "enum": ["invoice", "subscription"],
+                                  "type": "string"
+                                },
+                                "type": "array"
+                              },
+                              "interval_description": {
+                                "maxLength": 500,
+                                "type": "string"
+                              },
+                              "payment_schedule": {
+                                "enum": ["combined", "interval", "sporadic"],
+                                "type": "string"
+                              },
+                              "transaction_type": {
+                                "enum": ["business", "personal"],
+                                "type": "string"
+                              }
+                            },
+                            "title": "mandate_options_param",
+                            "type": "object"
+                          },
+                          "setup_future_usage": {
+                            "enum": ["none", "off_session", "on_session"],
+                            "type": "string"
+                          },
+                          "verification_method": {
+                            "enum": ["automatic", "instant", "microdeposits"],
+                            "type": "string",
+                            "x-stripeBypassValidation": true
+                          }
+                        },
+                        "title": "payment_method_options_param",
+                        "type": "object"
+                      },
+                      "affirm": {
+                        "properties": {
+                          "setup_future_usage": {
+                            "enum": ["none"],
+                            "type": "string"
+                          }
+                        },
+                        "title": "payment_method_options_param",
+                        "type": "object"
+                      },
+                      "afterpay_clearpay": {
+                        "properties": {
+                          "setup_future_usage": {
+                            "enum": ["none"],
+                            "type": "string"
+                          }
+                        },
+                        "title": "payment_method_options_param",
+                        "type": "object"
+                      },
+                      "alipay": {
+                        "properties": {
+                          "setup_future_usage": {
+                            "enum": ["none"],
+                            "type": "string"
+                          }
+                        },
+                        "title": "payment_method_options_param",
+                        "type": "object"
+                      },
+                      "au_becs_debit": {
+                        "properties": {
+                          "setup_future_usage": {
+                            "enum": ["none"],
+                            "type": "string"
+                          }
+                        },
+                        "title": "payment_method_options_param",
+                        "type": "object"
+                      },
+                      "bacs_debit": {
+                        "properties": {
+                          "setup_future_usage": {
+                            "enum": ["none", "off_session", "on_session"],
+                            "type": "string"
+                          }
+                        },
+                        "title": "payment_method_options_param",
+                        "type": "object"
+                      },
+                      "bancontact": {
+                        "properties": {
+                          "setup_future_usage": {
+                            "enum": ["none"],
+                            "type": "string"
+                          }
+                        },
+                        "title": "payment_method_options_param",
+                        "type": "object"
+                      },
+                      "boleto": {
+                        "properties": {
+                          "expires_after_days": {
+                            "type": "integer"
+                          },
+                          "setup_future_usage": {
+                            "enum": ["none", "off_session", "on_session"],
+                            "type": "string"
+                          }
+                        },
+                        "title": "payment_method_options_param",
+                        "type": "object"
+                      },
+                      "card": {
+                        "properties": {
+                          "installments": {
+                            "properties": {
+                              "enabled": {
+                                "type": "boolean"
+                              }
+                            },
+                            "title": "installments_param",
+                            "type": "object"
+                          },
+                          "request_three_d_secure": {
+                            "enum": ["any", "automatic", "challenge"],
+                            "type": "string",
+                            "x-stripeBypassValidation": true
+                          },
+                          "setup_future_usage": {
+                            "enum": ["off_session", "on_session"],
+                            "type": "string"
+                          },
+                          "statement_descriptor_suffix_kana": {
+                            "maxLength": 22,
+                            "type": "string"
+                          },
+                          "statement_descriptor_suffix_kanji": {
+                            "maxLength": 17,
+                            "type": "string"
+                          }
+                        },
+                        "title": "payment_method_options_param",
+                        "type": "object"
+                      },
+                      "cashapp": {
+                        "properties": {
+                          "setup_future_usage": {
+                            "enum": ["none", "off_session", "on_session"],
+                            "type": "string"
+                          }
+                        },
+                        "title": "payment_method_options_param",
+                        "type": "object"
+                      },
+                      "customer_balance": {
+                        "properties": {
+                          "bank_transfer": {
+                            "properties": {
+                              "eu_bank_transfer": {
+                                "properties": {
+                                  "country": {
+                                    "maxLength": 5000,
+                                    "type": "string"
+                                  }
+                                },
+                                "required": ["country"],
+                                "title": "eu_bank_transfer_params",
+                                "type": "object"
+                              },
+                              "requested_address_types": {
+                                "items": {
+                                  "enum": ["aba", "iban"],
+                                  "type": "string",
+                                  "x-stripeBypassValidation": true
+                                },
+                                "type": "array"
+                              },
+                              "type": {
+                                "enum": [
+                                  "eu_bank_transfer",
+                                  "gb_bank_transfer"
+                                ],
+                                "type": "string",
+                                "x-stripeBypassValidation": true
+                              }
+                            },
+                            "required": ["type"],
+                            "title": "bank_transfer_param",
+                            "type": "object"
+                          },
+                          "funding_type": {
+                            "enum": ["bank_transfer"],
+                            "type": "string"
+                          },
+                          "setup_future_usage": {
+                            "enum": ["none"],
+                            "type": "string"
+                          }
+                        },
+                        "title": "payment_method_options_param",
+                        "type": "object"
+                      },
+                      "eps": {
+                        "properties": {
+                          "setup_future_usage": {
+                            "enum": ["none"],
+                            "type": "string"
+                          }
+                        },
+                        "title": "payment_method_options_param",
+                        "type": "object"
+                      },
+                      "fpx": {
+                        "properties": {
+                          "setup_future_usage": {
+                            "enum": ["none"],
+                            "type": "string"
+                          }
+                        },
+                        "title": "payment_method_options_param",
+                        "type": "object"
+                      },
+                      "giropay": {
+                        "properties": {
+                          "setup_future_usage": {
+                            "enum": ["none"],
+                            "type": "string"
+                          }
+                        },
+                        "title": "payment_method_options_param",
+                        "type": "object"
+                      },
+                      "grabpay": {
+                        "properties": {
+                          "setup_future_usage": {
+                            "enum": ["none"],
+                            "type": "string"
+                          }
+                        },
+                        "title": "payment_method_options_param",
+                        "type": "object"
+                      },
+                      "ideal": {
+                        "properties": {
+                          "setup_future_usage": {
+                            "enum": ["none"],
+                            "type": "string"
+                          }
+                        },
+                        "title": "payment_method_options_param",
+                        "type": "object"
+                      },
+                      "klarna": {
+                        "properties": {
+                          "setup_future_usage": {
+                            "enum": ["none"],
+                            "type": "string"
+                          }
+                        },
+                        "title": "payment_method_options_param",
+                        "type": "object"
+                      },
+                      "konbini": {
+                        "properties": {
+                          "expires_after_days": {
+                            "type": "integer"
+                          },
+                          "setup_future_usage": {
+                            "enum": ["none"],
+                            "type": "string"
+                          }
+                        },
+                        "title": "payment_method_options_param",
+                        "type": "object"
+                      },
+                      "link": {
+                        "properties": {
+                          "setup_future_usage": {
+                            "enum": ["none", "off_session"],
+                            "type": "string"
+                          }
+                        },
+                        "title": "payment_method_options_param",
+                        "type": "object"
+                      },
+                      "oxxo": {
+                        "properties": {
+                          "expires_after_days": {
+                            "type": "integer"
+                          },
+                          "setup_future_usage": {
+                            "enum": ["none"],
+                            "type": "string"
+                          }
+                        },
+                        "title": "payment_method_options_param",
+                        "type": "object"
+                      },
+                      "p24": {
+                        "properties": {
+                          "setup_future_usage": {
+                            "enum": ["none"],
+                            "type": "string"
+                          },
+                          "tos_shown_and_accepted": {
+                            "type": "boolean"
+                          }
+                        },
+                        "title": "payment_method_options_param",
+                        "type": "object"
+                      },
+                      "paynow": {
+                        "properties": {
+                          "setup_future_usage": {
+                            "enum": ["none"],
+                            "type": "string"
+                          }
+                        },
+                        "title": "payment_method_options_param",
+                        "type": "object"
+                      },
+                      "paypal": {
+                        "properties": {
+                          "capture_method": {
+                            "enum": ["", "manual"],
+                            "type": "string"
+                          },
+                          "preferred_locale": {
+                            "enum": ["cs-CZ", "da-DK"],
+                            "type": "string",
+                            "x-stripeBypassValidation": true
+                          },
+                          "reference": {
+                            "maxLength": 127,
+                            "type": "string"
+                          },
+                          "risk_correlation_id": {
+                            "maxLength": 32,
+                            "type": "string"
+                          },
+                          "setup_future_usage": {
+                            "enum": ["", "none", "off_session"],
+                            "type": "string"
+                          }
+                        },
+                        "title": "payment_method_options_param",
+                        "type": "object"
+                      },
+                      "pix": {
+                        "properties": {
+                          "expires_after_seconds": {
+                            "type": "integer"
+                          }
+                        },
+                        "title": "payment_method_options_param",
+                        "type": "object"
+                      },
+                      "revolut_pay": {
+                        "properties": {
+                          "setup_future_usage": {
+                            "enum": ["none", "off_session"],
+                            "type": "string"
+                          }
+                        },
+                        "title": "payment_method_options_param",
+                        "type": "object"
+                      },
+                      "sepa_debit": {
+                        "properties": {
+                          "setup_future_usage": {
+                            "enum": ["none", "off_session", "on_session"],
+                            "type": "string"
+                          }
+                        },
+                        "title": "payment_method_options_param",
+                        "type": "object"
+                      },
+                      "sofort": {
+                        "properties": {
+                          "setup_future_usage": {
+                            "enum": ["none"],
+                            "type": "string"
+                          }
+                        },
+                        "title": "payment_method_options_param",
+                        "type": "object"
+                      },
+                      "swish": {
+                        "properties": {
+                          "reference": {
+                            "maxLength": 5000,
+                            "type": "string"
+                          }
+                        },
+                        "title": "payment_method_options_param",
+                        "type": "object"
+                      },
+                      "us_bank_account": {
+                        "properties": {
+                          "financial_connections": {
+                            "properties": {
+                              "permissions": {
+                                "items": {
+                                  "enum": [
+                                    "balances",
+                                    "ownership",
+                                    "payment_method",
+                                    "transactions"
+                                  ],
+                                  "maxLength": 5000,
+                                  "type": "string",
+                                  "x-stripeBypassValidation": true
+                                },
+                                "type": "array"
+                              },
+                              "prefetch": {
+                                "items": {
+                                  "enum": ["balances", "transactions"],
+                                  "type": "string",
+                                  "x-stripeBypassValidation": true
+                                },
+                                "type": "array"
+                              }
+                            },
+                            "title": "linked_account_options_param",
+                            "type": "object"
+                          },
+                          "setup_future_usage": {
+                            "enum": ["none", "off_session", "on_session"],
+                            "type": "string"
+                          },
+                          "verification_method": {
+                            "enum": ["automatic", "instant"],
+                            "type": "string",
+                            "x-stripeBypassValidation": true
+                          }
+                        },
+                        "title": "payment_method_options_param",
+                        "type": "object"
+                      },
+                      "wechat_pay": {
+                        "properties": {
+                          "app_id": {
+                            "maxLength": 5000,
+                            "type": "string"
+                          },
+                          "client": {
+                            "enum": ["android", "ios", "web"],
+                            "type": "string",
+                            "x-stripeBypassValidation": true
+                          },
+                          "setup_future_usage": {
+                            "enum": ["none"],
+                            "type": "string"
+                          }
+                        },
+                        "required": ["client"],
+                        "title": "payment_method_options_param",
+                        "type": "object"
+                      }
+                    },
+                    "title": "payment_method_options_param",
+                    "type": "object"
+                  },
+                  "payment_method_types": {
+                    "description": "A list of the types of payment methods (e.g., `card`) this Checkout Session can accept.\n\nYou can omit this attribute to manage your payment methods from the [Stripe Dashboard](https://dashboard.stripe.com/settings/payment_methods).\nSee [Dynamic Payment Methods](https://stripe.com/docs/payments/payment-methods/integration-options#using-dynamic-payment-methods) for more details.\n\nRead more about the supported payment methods and their requirements in our [payment\nmethod details guide](/docs/payments/checkout/payment-methods).\n\nIf multiple payment methods are passed, Checkout will dynamically reorder them to\nprioritize the most relevant payment methods based on the customer's location and\nother characteristics.",
+                    "items": {
+                      "enum": ["acss_debit", "affirm"],
+                      "type": "string",
+                      "x-stripeBypassValidation": true
+                    },
+                    "type": "array"
+                  },
+                  "phone_number_collection": {
+                    "description": "Controls phone number collection settings for the session.\n\nWe recommend that you review your privacy policy and check with your legal contacts\nbefore using this feature. Learn more about [collecting phone numbers with Checkout](https://stripe.com/docs/payments/checkout/phone-numbers).",
+                    "properties": {
+                      "enabled": {
+                        "type": "boolean"
+                      }
+                    },
+                    "required": ["enabled"],
+                    "title": "phone_number_collection_params",
+                    "type": "object"
+                  },
+                  "redirect_on_completion": {
+                    "description": "This parameter applies to `ui_mode: embedded`. Learn more about the [redirect behavior](https://stripe.com/docs/payments/checkout/custom-redirect-behavior) of embedded sessions. Defaults to `always`.",
+                    "enum": ["always", "if_required", "never"],
+                    "type": "string"
+                  },
+                  "return_url": {
+                    "description": "The URL to redirect your customer back to after they authenticate or cancel their payment on the\npayment method's app or site. This parameter is required if ui_mode is `embedded`\nand redirect-based payment methods are enabled on the session.",
+                    "maxLength": 5000,
+                    "type": "string"
+                  },
+                  "setup_intent_data": {
+                    "description": "A subset of parameters to be passed to SetupIntent creation for Checkout Sessions in `setup` mode.",
+                    "properties": {
+                      "description": {
+                        "maxLength": 1000,
+                        "type": "string"
+                      },
+                      "metadata": {
+                        "additionalProperties": {
+                          "type": "string"
+                        },
+                        "type": "object"
+                      },
+                      "on_behalf_of": {
+                        "type": "string"
+                      }
+                    },
+                    "title": "setup_intent_data_param",
+                    "type": "object"
+                  },
+                  "shipping_address_collection": {
+                    "description": "When set, provides configuration for Checkout to collect a shipping address from a customer.",
+                    "properties": {
+                      "allowed_countries": {
+                        "items": {
+                          "enum": ["AC", "AD"],
+                          "type": "string"
+                        },
+                        "type": "array"
+                      }
+                    },
+                    "required": ["allowed_countries"],
+                    "title": "shipping_address_collection_params",
+                    "type": "object"
+                  },
+                  "shipping_options": {
+                    "description": "The shipping rate options to apply to this Session. Up to a maximum of 5.",
+                    "items": {
+                      "properties": {
+                        "shipping_rate": {
+                          "maxLength": 5000,
+                          "type": "string"
+                        },
+                        "shipping_rate_data": {
+                          "properties": {
+                            "delivery_estimate": {
+                              "properties": {
+                                "maximum": {
+                                  "properties": {
+                                    "unit": {
+                                      "enum": [
+                                        "business_day",
+                                        "day",
+                                        "hour",
+                                        "month",
+                                        "week"
+                                      ],
+                                      "type": "string"
+                                    },
+                                    "value": {
+                                      "type": "integer"
+                                    }
+                                  },
+                                  "required": ["unit", "value"],
+                                  "title": "delivery_estimate_bound",
+                                  "type": "object"
+                                },
+                                "minimum": {
+                                  "properties": {
+                                    "unit": {
+                                      "enum": [
+                                        "business_day",
+                                        "day",
+                                        "hour",
+                                        "month",
+                                        "week"
+                                      ],
+                                      "type": "string"
+                                    },
+                                    "value": {
+                                      "type": "integer"
+                                    }
+                                  },
+                                  "required": ["unit", "value"],
+                                  "title": "delivery_estimate_bound",
+                                  "type": "object"
+                                }
+                              },
+                              "title": "delivery_estimate",
+                              "type": "object"
+                            },
+                            "display_name": {
+                              "maxLength": 100,
+                              "type": "string"
+                            },
+                            "fixed_amount": {
+                              "properties": {
+                                "amount": {
+                                  "type": "integer"
+                                },
+                                "currency": {
+                                  "type": "string"
+                                },
+                                "currency_options": {
+                                  "additionalProperties": {
+                                    "properties": {
+                                      "amount": {
+                                        "type": "integer"
+                                      },
+                                      "tax_behavior": {
+                                        "enum": [
+                                          "exclusive",
+                                          "inclusive",
+                                          "unspecified"
+                                        ],
+                                        "type": "string"
+                                      }
+                                    },
+                                    "required": ["amount"],
+                                    "title": "currency_option",
+                                    "type": "object"
+                                  },
+                                  "type": "object"
+                                }
+                              },
+                              "required": ["amount", "currency"],
+                              "title": "fixed_amount",
+                              "type": "object"
+                            },
+                            "metadata": {
+                              "additionalProperties": {
+                                "type": "string"
+                              },
+                              "type": "object"
+                            },
+                            "tax_behavior": {
+                              "enum": ["exclusive", "inclusive", "unspecified"],
+                              "type": "string"
+                            },
+                            "tax_code": {
+                              "type": "string"
+                            },
+                            "type": {
+                              "enum": ["fixed_amount"],
+                              "type": "string"
+                            }
+                          },
+                          "required": ["display_name"],
+                          "title": "method_params",
+                          "type": "object"
+                        }
+                      },
+                      "title": "shipping_option_params",
+                      "type": "object"
+                    },
+                    "type": "array"
+                  },
+                  "submit_type": {
+                    "description": "Describes the type of transaction being performed by Checkout in order to customize\nrelevant text on the page, such as the submit button. `submit_type` can only be\nspecified on Checkout Sessions in `payment` mode. If blank or `auto`, `pay` is used.",
+                    "enum": ["auto", "book", "donate", "pay"],
+                    "type": "string"
+                  },
+                  "subscription_data": {
+                    "description": "A subset of parameters to be passed to subscription creation for Checkout Sessions in `subscription` mode.",
+                    "properties": {
+                      "application_fee_percent": {
+                        "type": "number"
+                      },
+                      "billing_cycle_anchor": {
+                        "format": "unix-time",
+                        "type": "integer"
+                      },
+                      "default_tax_rates": {
+                        "items": {
+                          "maxLength": 5000,
+                          "type": "string"
+                        },
+                        "type": "array"
+                      },
+                      "description": {
+                        "maxLength": 500,
+                        "type": "string"
+                      },
+                      "invoice_settings": {
+                        "properties": {
+                          "issuer": {
+                            "properties": {
+                              "account": {
+                                "type": "string"
+                              },
+                              "type": {
+                                "enum": ["account", "self"],
+                                "type": "string"
+                              }
+                            },
+                            "required": ["type"],
+                            "title": "param",
+                            "type": "object"
+                          }
+                        },
+                        "title": "invoice_settings_params",
+                        "type": "object"
+                      },
+                      "metadata": {
+                        "additionalProperties": {
+                          "type": "string"
+                        },
+                        "type": "object"
+                      },
+                      "on_behalf_of": {
+                        "type": "string"
+                      },
+                      "proration_behavior": {
+                        "enum": ["create_prorations", "none"],
+                        "type": "string"
+                      },
+                      "transfer_data": {
+                        "properties": {
+                          "amount_percent": {
+                            "type": "number"
+                          },
+                          "destination": {
+                            "type": "string"
+                          }
+                        },
+                        "required": ["destination"],
+                        "title": "transfer_data_specs",
+                        "type": "object"
+                      },
+                      "trial_end": {
+                        "format": "unix-time",
+                        "type": "integer"
+                      },
+                      "trial_period_days": {
+                        "type": "integer"
+                      },
+                      "trial_settings": {
+                        "properties": {
+                          "end_behavior": {
+                            "properties": {
+                              "missing_payment_method": {
+                                "enum": ["cancel", "create_invoice", "pause"],
+                                "type": "string"
+                              }
+                            },
+                            "required": ["missing_payment_method"],
+                            "title": "end_behavior",
+                            "type": "object"
+                          }
+                        },
+                        "required": ["end_behavior"],
+                        "title": "trial_settings_config",
+                        "type": "object"
+                      }
+                    },
+                    "title": "subscription_data_params",
+                    "type": "object"
+                  },
+                  "success_url": {
+                    "description": "The URL to which Stripe should send customers when payment or setup\nis complete.\nThis parameter is not allowed if ui_mode is `embedded`. If you’d like to use\ninformation from the successful Checkout Session on your page, read the\nguide on [customizing your success page](https://stripe.com/docs/payments/checkout/custom-success-page).",
+                    "maxLength": 5000,
+                    "type": "string"
+                  },
+                  "tax_id_collection": {
+                    "description": "Controls tax ID collection settings for the session.",
+                    "properties": {
+                      "enabled": {
+                        "type": "boolean"
+                      }
+                    },
+                    "required": ["enabled"],
+                    "title": "tax_id_collection_params",
+                    "type": "object"
+                  },
+                  "ui_mode": {
+                    "description": "The UI mode of the Session. Defaults to `hosted`.",
+                    "enum": ["embedded", "hosted"],
+                    "type": "string",
+                    "x-stripeBypassValidation": true
+                  }
+                },
+                "type": "object"
+              }
+            }
+          },
+          "required": false
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Order"
+                }
+              }
+            },
+            "description": "Successful response."
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/error"
+                }
+              }
+            },
+            "description": "Error response."
+          }
+        }
+      }
+    },
+    "/fine_tuning/jobs": {
+      "post": {
+        "operationId": "createFineTuningJob",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateFineTuningJobRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CreateFineTuningJobRequest"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/self-service/browser/flows/logout": {
+      "get": {
+        "description": "This endpoint initializes a logout flow.\n\n\u003e This endpoint is NOT INTENDED for API clients and only works\nwith browsers (Chrome, Firefox, ...).\n\nOn successful logout, the browser will be redirected (HTTP 302 Found) to the `return_to` parameter of the initial request\nor fall back to `urls.default_return_to`.\n\nMore information can be found at [Ory Kratos User Logout Documentation](https://www.ory.sh/docs/next/kratos/self-service/flows/user-logout).",
+        "operationId": "initializeSelfServiceBrowserLogoutFlow",
+        "responses": {
+          "302": {
+            "$ref": "#/components/responses/emptyResponse"
+          }
+        },
+        "summary": "Initialize Browser-Based Logout User Flow",
+        "tags": ["public"]
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "Order": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int64",
+            "example": 10
+          },
+          "petId": {
+            "type": "integer",
+            "format": "int64",
+            "example": 198772
+          },
+          "quantity": {
+            "type": "integer",
+            "format": "int32",
+            "example": 7
+          },
+          "shipDate": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "status": {
+            "type": "string",
+            "description": "Order Status",
+            "example": "approved",
+            "enum": ["placed", "approved", "delivered"]
+          },
+          "complete": {
+            "type": "boolean"
+          }
+        },
+        "xml": {
+          "name": "order"
+        }
+      },
+      "Customer": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int64",
+            "example": 100000
+          },
+          "username": {
+            "type": "string",
+            "example": "fehguy"
+          },
+          "address": {
+            "type": "array",
+            "xml": {
+              "name": "addresses",
+              "wrapped": true
+            },
+            "items": {
+              "$ref": "#/components/schemas/Address"
+            }
+          }
+        },
+        "xml": {
+          "name": "customer"
+        }
+      },
+      "Address": {
+        "type": "object",
+        "properties": {
+          "street": {
+            "type": "string",
+            "example": "437 Lytton"
+          },
+          "city": {
+            "type": "string",
+            "example": "Palo Alto"
+          },
+          "state": {
+            "type": "string",
+            "example": "CA"
+          },
+          "zip": {
+            "type": "string",
+            "example": "94301"
+          }
+        },
+        "xml": {
+          "name": "address"
+        }
+      },
+      "Category": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int64",
+            "example": 1
+          },
+          "name": {
+            "type": "string",
+            "example": "Dogs"
+          }
+        },
+        "xml": {
+          "name": "category"
+        }
+      },
+      "User": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int64",
+            "example": 10
+          },
+          "username": {
+            "type": "string",
+            "example": "theUser"
+          },
+          "firstName": {
+            "type": "string",
+            "example": "John"
+          },
+          "lastName": {
+            "type": "string",
+            "example": "James"
+          },
+          "email": {
+            "type": "string",
+            "example": "john@email.com"
+          },
+          "password": {
+            "type": "string",
+            "example": "12345"
+          },
+          "phone": {
+            "type": "string",
+            "example": "12345"
+          },
+          "userStatus": {
+            "type": "integer",
+            "description": "User Status",
+            "format": "int32",
+            "example": 1
+          }
+        },
+        "xml": {
+          "name": "user"
+        }
+      },
+      "tag": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "name": {
+            "type": "string"
+          }
+        },
+        "xml": {
+          "name": "tag"
+        }
+      },
+      "Pet": {
+        "required": ["name", "photoUrls"],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int64",
+            "example": 10
+          },
+          "name": {
+            "type": "string",
+            "example": "doggie"
+          },
+          "category": {
+            "$ref": "#/components/schemas/Category"
+          },
+          "photoUrls": {
+            "type": "array",
+            "xml": {
+              "wrapped": true
+            },
+            "items": {
+              "type": "string",
+              "xml": {
+                "name": "photoUrl"
+              }
+            }
+          },
+          "tags": {
+            "type": "array",
+            "xml": {
+              "wrapped": true
+            },
+            "items": {
+              "$ref": "#/components/schemas/tag"
+            }
+          },
+          "status": {
+            "type": "string",
+            "description": "pet status in the store",
+            "enum": ["available", "pending", "sold"]
+          }
+        },
+        "xml": {
+          "name": "pet"
+        }
+      },
+      "ApiResponse": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "type": {
+            "type": "string"
+          },
+          "message": {
+            "type": "string"
+          }
+        },
+        "xml": {
+          "name": "##default"
+        }
+      },
+
+      "snake_object": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "object",
+            "properties": {
+              "id": { "type": "integer", "format": "int64", "example": 10 },
+              "petId": {
+                "type": "integer",
+                "format": "int64",
+                "example": 198772
+              },
+              "quantity": {
+                "type": "integer",
+                "format": "int32",
+                "example": 7
+              },
+              "shipDate": { "type": "string", "format": "date-time" },
+              "status": {
+                "type": "string",
+                "description": "Order Status",
+                "example": "approved",
+                "enum": ["placed", "approved", "delivered"]
+              },
+              "complete": { "type": "boolean" }
+            },
+            "xml": { "name": "order" }
+          },
+          "features": {
+            "$ref": "#/components/schemas/connect_embedded_account_features"
+          }
+        }
+      },
+      "treasury.inbound_transfer": {
+        "description": "Use [InboundTransfers](https://stripe.com/docs/treasury/moving-money/financial-accounts/into/inbound-transfers) to add funds to your [FinancialAccount](https://stripe.com/docs/api#financial_accounts) via a PaymentMethod that is owned by you. The funds will be transferred via an ACH debit.",
+        "properties": {
+          "context": {},
+          "amount": {
+            "description": "Amount (in cents) transferred.",
+            "type": "integer"
+          },
+          "cancelable": {
+            "description": "Returns `true` if the InboundTransfer is able to be canceled.",
+            "type": "boolean"
+          },
+          "created": {
+            "description": "Time at which the object was created. Measured in seconds since the Unix epoch.",
+            "format": "unix-time",
+            "type": "integer"
+          },
+          "currency": {
+            "description": "Three-letter [ISO currency code](https://www.iso.org/iso-4217-currency-codes.html), in lowercase. Must be a [supported currency](https://stripe.com/docs/currencies).",
+            "type": "string"
+          },
+          "description": {
+            "description": "An arbitrary string attached to the object. Often useful for displaying to users.",
+            "maxLength": 5000,
+            "nullable": true,
+            "type": "string"
+          },
+          "failure_details": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/treasury_inbound_transfers_resource_failure_details"
+              }
+            ],
+            "description": "Details about this InboundTransfer's failure. Only set when status is `failed`.",
+            "nullable": true
+          },
+          "financial_account": {
+            "description": "The FinancialAccount that received the funds.",
+            "maxLength": 5000,
+            "type": "string"
+          },
+          "hosted_regulatory_receipt_url": {
+            "description": "A [hosted transaction receipt](https://stripe.com/docs/treasury/moving-money/regulatory-receipts) URL that is provided when money movement is considered regulated under Stripe's money transmission licenses.",
+            "maxLength": 5000,
+            "nullable": true,
+            "type": "string"
+          },
+          "id": {
+            "description": "Unique identifier for the object.",
+            "maxLength": 5000,
+            "type": "string"
+          },
+          "livemode": {
+            "description": "Has the value `true` if the object exists in live mode or the value `false` if the object exists in test mode.",
+            "type": "boolean"
+          },
+          "metadata": {
+            "additionalProperties": {
+              "maxLength": 500,
+              "type": "string"
+            },
+            "description": "Set of [key-value pairs](https://stripe.com/docs/api/metadata) that you can attach to an object. This can be useful for storing additional information about the object in a structured format.",
+            "type": "object"
+          },
+          "object": {
+            "description": "String representing the object's type. Objects of the same type share the same value.",
+            "enum": ["treasury.inbound_transfer"],
+            "type": "string"
+          },
+          "origin_payment_method": {
+            "description": "The origin payment method to be debited for an InboundTransfer.",
+            "maxLength": 5000,
+            "type": "string"
+          },
+          "returned": {
+            "description": "Returns `true` if the funds for an InboundTransfer were returned after the InboundTransfer went to the `succeeded` state.",
+            "nullable": true,
+            "type": "boolean"
+          },
+          "statement_descriptor": {
+            "description": "Statement descriptor shown when funds are debited from the source. Not all payment networks support `statement_descriptor`.",
+            "maxLength": 5000,
+            "type": "string"
+          },
+          "status": {
+            "description": "Status of the InboundTransfer: `processing`, `succeeded`, `failed`, and `canceled`. An InboundTransfer is `processing` if it is created and pending. The status changes to `succeeded` once the funds have been \"confirmed\" and a `transaction` is created and posted. The status changes to `failed` if the transfer fails.",
+            "enum": ["canceled", "failed", "processing", "succeeded"],
+            "type": "string"
+          },
+          "status_transitions": {
+            "$ref": "#/components/schemas/treasury_inbound_transfers_resource_inbound_transfer_resource_status_transitions"
+          },
+          "transaction": {
+            "anyOf": [
+              {
+                "maxLength": 5000,
+                "type": "string"
+              },
+              {
+                "type": "integer"
+              }
+            ],
+            "description": "The Transaction associated with this object.",
+            "nullable": true
+          }
+        },
+        "required": [
+          "amount",
+          "cancelable",
+          "created",
+          "currency",
+          "financial_account",
+          "id",
+          "linked_flows",
+          "livemode",
+          "metadata",
+          "object",
+          "origin_payment_method",
+          "statement_descriptor",
+          "status",
+          "status_transitions"
+        ],
+        "title": "TreasuryInboundTransfersResourceInboundTransfer",
+        "type": "object",
+        "x-expandableFields": [
+          "failure_details",
+          "linked_flows",
+          "origin_payment_method_details",
+          "status_transitions",
+          "transaction"
+        ],
+        "x-resourceId": "treasury.inbound_transfer"
+      },
+      "treasury_inbound_transfers_resource_inbound_transfer_resource_status_transitions": {
+        "description": "",
+        "properties": {
+          "canceled_at": {
+            "description": "Timestamp describing when an InboundTransfer changed status to `canceled`.",
+            "format": "unix-time",
+            "nullable": true,
+            "type": "integer"
+          },
+          "failed_at": {
+            "description": "Timestamp describing when an InboundTransfer changed status to `failed`.",
+            "format": "unix-time",
+            "nullable": true,
+            "type": "integer"
+          },
+          "succeeded_at": {
+            "description": "Timestamp describing when an InboundTransfer changed status to `succeeded`.",
+            "format": "unix-time",
+            "nullable": true,
+            "type": "integer"
+          }
+        },
+        "title": "TreasuryInboundTransfersResourceInboundTransferResourceStatusTransitions",
+        "type": "object",
+        "x-expandableFields": []
+      },
+      "treasury_inbound_transfers_resource_failure_details": {
+        "description": "",
+        "properties": {
+          "code": {
+            "description": "Reason for the failure.",
+            "enum": [
+              "account_closed",
+              "account_frozen",
+              "bank_account_restricted",
+              "bank_ownership_changed",
+              "debit_not_authorized",
+              "incorrect_account_holder_address",
+              "incorrect_account_holder_name",
+              "incorrect_account_holder_tax_id",
+              "insufficient_funds",
+              "invalid_account_number",
+              "invalid_currency",
+              "no_account",
+              "other"
+            ],
+            "type": "string"
+          }
+        },
+        "required": ["code"],
+        "title": "TreasuryInboundTransfersResourceFailureDetails",
+        "type": "object",
+        "x-expandableFields": []
+      },
+      "error": {
+        "description": "An error response from the Stripe API",
+        "properties": {
+          "error": {
+            "type": "string"
+          }
+        },
+        "required": ["error"],
+        "type": "object"
+      },
+      "connect_embedded_account_features": {
+        "description": "",
+        "properties": {},
+        "title": "ConnectEmbeddedAccountFeatures",
+        "type": "object",
+        "x-expandableFields": []
+      },
+      "payment_method_affirm": {
+        "description": "",
+        "properties": {},
+        "title": "payment_method_affirm",
+        "type": "object",
+        "x-expandableFields": []
+      },
+      "DefaultError": {},
+      "CreateFineTuningJobRequest": {
+        "type": "object",
+        "properties": {
+          "model": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "string",
+                "enum": ["babbage-002", "davinci-002", "gpt-3.5-turbo"]
+              }
+            ]
+          }
+        }
+      }
+    },
+    "requestBodies": {
+      "Pet": {
+        "description": "Pet object that needs to be added to the store",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Pet"
+            }
+          },
+          "application/xml": {
+            "schema": {
+              "$ref": "#/components/schemas/Pet"
+            }
+          }
+        }
+      },
+      "UserArray": {
+        "description": "List of user object",
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/components/schemas/User"
+              }
+            }
+          }
+        }
+      }
+    },
+    "responses": {
+      "emptyResponse": {
+        "description": "Empty responses are sent when, for example, resources are deleted. The HTTP status code for empty responses is\ntypically 201."
+      }
+    },
+    "securitySchemes": {
+      "basic": {
+        "type": "http",
+        "scheme": "basic"
+      },
+      "petstore_auth": {
+        "type": "oauth2",
+        "flows": {
+          "implicit": {
+            "authorizationUrl": "https://petstore3.swagger.io/oauth/authorize",
+            "scopes": {
+              "write:pets": "modify pets in your account",
+              "read:pets": "read your pets"
+            }
+          }
+        }
+      },
+      "api_key": {
+        "type": "apiKey",
+        "name": "api_key",
+        "in": "header"
+      }
+    }
+  },
+  "security": [{}, { "petstore_auth": ["write:pets", "read:pets"] }]
+}

@@ -1,0 +1,787 @@
+{
+  "$schema": "https://raw.githubusercontent.com/hasura/ndc-rest-schema/main/jsonschema/ndc-rest-schema.jsonschema",
+  "settings": {
+    "servers": [
+      {
+        "url": "{{SERVER_URL:-https://onesignal.com/api/v1}}"
+      }
+    ],
+    "timeout": "{{TIMEOUT}}",
+    "retry": {
+      "times": "{{RETRY_TIMES}}",
+      "delay": "{{RETRY_DELAY}}",
+      "httpStatus": "{{RETRY_HTTP_STATUS}}"
+    },
+    "securitySchemes": {
+      "app_key": {
+        "type": "http",
+        "value": "{{APP_KEY_TOKEN}}",
+        "header": "Authorization",
+        "scheme": "bearer"
+      },
+      "user_key": {
+        "type": "http",
+        "value": "{{USER_KEY_TOKEN}}",
+        "header": "Authorization",
+        "scheme": "bearer"
+      }
+    },
+    "version": "1.2.2"
+  },
+  "collections": [],
+  "functions": [
+    {
+      "request": {
+        "url": "/notifications",
+        "method": "get",
+        "parameters": [
+          {
+            "name": "app_id",
+            "in": "query",
+            "schema": {
+              "type": "String"
+            }
+          },
+          {
+            "name": "kind",
+            "in": "query",
+            "schema": {
+              "type": "Int32",
+              "nullable": true
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "schema": {
+              "type": "Int32",
+              "nullable": true
+            }
+          },
+          {
+            "name": "offset",
+            "in": "query",
+            "schema": {
+              "type": "Int32",
+              "nullable": true
+            }
+          }
+        ],
+        "security": [
+          {
+            "app_key": []
+          }
+        ],
+        "response": {
+          "contentType": "application/json"
+        }
+      },
+      "arguments": {
+        "app_id": {
+          "description": "The app ID that you want to view notifications from",
+          "type": {
+            "name": "String",
+            "type": "named"
+          }
+        },
+        "kind": {
+          "description": "Kind of notifications returned:\n  * unset - All notification types (default)\n  * `0` - Dashboard only\n  * `1` - API only\n  * `3` - Automated only\n",
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "Int32",
+              "type": "named"
+            }
+          }
+        },
+        "limit": {
+          "description": "How many notifications to return.  Max is 50.  Default is 50.",
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "Int32",
+              "type": "named"
+            }
+          }
+        },
+        "offset": {
+          "description": "Page offset.  Default is 0.  Results are sorted by queued_at in descending order.  queued_at is a representation of the time that the notification was queued at.",
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "Int32",
+              "type": "named"
+            }
+          }
+        }
+      },
+      "description": "View notifications",
+      "name": "hasuraGetNotifications",
+      "result_type": {
+        "name": "NotificationSlice",
+        "type": "named"
+      }
+    }
+  ],
+  "object_types": {
+    "CreateNotificationSuccessResponse": {
+      "fields": {
+        "errors": {
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "Notification200Errors",
+              "type": "named"
+            }
+          }
+        },
+        "external_id": {
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "String",
+              "type": "named"
+            }
+          }
+        },
+        "id": {
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "String",
+              "type": "named"
+            }
+          }
+        },
+        "recipients": {
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "Int32",
+              "type": "named"
+            }
+          }
+        }
+      }
+    },
+    "DeliveryData": {
+      "fields": {
+        "converted": {
+          "description": "Number of messages that were clicked.",
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "Int32",
+              "type": "named"
+            }
+          }
+        },
+        "errored": {
+          "description": "Number of errors reported.",
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "Int32",
+              "type": "named"
+            }
+          }
+        },
+        "failed": {
+          "description": "Number of messages sent to unsubscribed devices.",
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "Int32",
+              "type": "named"
+            }
+          }
+        },
+        "received": {
+          "description": "Number of devices that received the message.",
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "Int32",
+              "type": "named"
+            }
+          }
+        },
+        "successful": {
+          "description": "Number of messages delivered to push servers, mobile carriers, or email service providers.",
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "Int32",
+              "type": "named"
+            }
+          }
+        }
+      }
+    },
+    "Filter": {
+      "fields": {
+        "field": {
+          "description": "Name of the field to use as the first operand in the filter expression.",
+          "type": {
+            "name": "String",
+            "type": "named"
+          }
+        },
+        "key": {
+          "description": "If `field` is `tag`, this field is *required* to specify `key` inside the tags.",
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "String",
+              "type": "named"
+            }
+          }
+        },
+        "relation": {
+          "description": "Operator of a filter expression.",
+          "type": {
+            "name": "FilterRelation",
+            "type": "named"
+          }
+        },
+        "value": {
+          "description": "Constant value to use as the second operand in the filter expression. This value is *required* when the relation operator is a binary operator.",
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "String",
+              "type": "named"
+            }
+          }
+        }
+      }
+    },
+    "NotificationInput": {
+      "fields": {
+        "send_after": {
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "TimestampTZ",
+              "type": "named"
+            }
+          }
+        }
+      }
+    },
+    "NotificationSlice": {
+      "fields": {
+        "limit": {
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "Int32",
+              "type": "named"
+            }
+          }
+        },
+        "notifications": {
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "element_type": {
+                "name": "NotificationWithMeta",
+                "type": "named"
+              },
+              "type": "array"
+            }
+          }
+        },
+        "offset": {
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "Int32",
+              "type": "named"
+            }
+          }
+        },
+        "total_count": {
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "Int32",
+              "type": "named"
+            }
+          }
+        }
+      }
+    },
+    "NotificationWithMeta": {
+      "fields": {
+        "completed_at": {
+          "description": "Unix timestamp indicating when notification delivery completed. The delivery duration from start to finish can be calculated with completed_at - send_after.",
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "Int64",
+              "type": "named"
+            }
+          }
+        },
+        "contents": {
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "StringMap",
+              "type": "named"
+            }
+          }
+        },
+        "converted": {
+          "description": "Number of messages that were clicked.",
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "Int32",
+              "type": "named"
+            }
+          }
+        },
+        "custom_data": {
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "JSON",
+              "type": "named"
+            }
+          }
+        },
+        "data": {
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "JSON",
+              "type": "named"
+            }
+          }
+        },
+        "errored": {
+          "description": "Number of errors reported.",
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "Int32",
+              "type": "named"
+            }
+          }
+        },
+        "excluded_segments": {
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "element_type": {
+                "name": "String",
+                "type": "named"
+              },
+              "type": "array"
+            }
+          }
+        },
+        "failed": {
+          "description": "Number of messages sent to unsubscribed devices.",
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "Int32",
+              "type": "named"
+            }
+          }
+        },
+        "filters": {
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "element_type": {
+                "name": "Filter",
+                "type": "named"
+              },
+              "type": "array"
+            }
+          }
+        },
+        "headings": {
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "StringMap",
+              "type": "named"
+            }
+          }
+        },
+        "id": {
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "String",
+              "type": "named"
+            }
+          }
+        },
+        "include_player_ids": {
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "element_type": {
+                "name": "String",
+                "type": "named"
+              },
+              "type": "array"
+            }
+          }
+        },
+        "included_segments": {
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "element_type": {
+                "name": "String",
+                "type": "named"
+              },
+              "type": "array"
+            }
+          }
+        },
+        "outcomes": {
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "element_type": {
+                "name": "OutcomeData",
+                "type": "named"
+              },
+              "type": "array"
+            }
+          }
+        },
+        "platform_delivery_stats": {
+          "description": "Hash of delivery statistics broken out by target device platform.",
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "PlatformDeliveryData",
+              "type": "named"
+            }
+          }
+        },
+        "queued_at": {
+          "description": "Unix timestamp indicating when the notification was created.",
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "Int64",
+              "type": "named"
+            }
+          }
+        },
+        "received": {
+          "description": "Number of devices that received the message.",
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "Int32",
+              "type": "named"
+            }
+          }
+        },
+        "remaining": {
+          "description": "Number of notifications that have not been sent out yet. This can mean either our system is still processing the notification or you have delayed options set.",
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "Int32",
+              "type": "named"
+            }
+          }
+        },
+        "send_after": {
+          "description": "Unix timestamp indicating when notification delivery should begin.",
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "Int64",
+              "type": "named"
+            }
+          }
+        },
+        "subtitle": {
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "StringMap",
+              "type": "named"
+            }
+          }
+        },
+        "successful": {
+          "description": "Number of messages delivered to push servers, mobile carriers, or email service providers.",
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "Int32",
+              "type": "named"
+            }
+          }
+        },
+        "target_channel": {
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "PlayerNotificationTargetTargetChannel",
+              "type": "named"
+            }
+          }
+        },
+        "throttle_rate_per_minute": {
+          "description": "number of push notifications sent per minute. Paid Feature Only. If throttling is not enabled for the app or the notification, and for free accounts, null is returned. Refer to Throttling for more details.",
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "Int32",
+              "type": "named"
+            }
+          }
+        }
+      }
+    },
+    "OutcomeData": {
+      "fields": {
+        "aggregation": {
+          "type": {
+            "name": "OutcomeDataAggregation",
+            "type": "named"
+          }
+        },
+        "id": {
+          "type": {
+            "name": "String",
+            "type": "named"
+          }
+        },
+        "value": {
+          "type": {
+            "name": "Int32",
+            "type": "named"
+          }
+        }
+      }
+    },
+    "PlatformDeliveryData": {
+      "description": "Hash of delivery statistics broken out by target device platform.",
+      "fields": {
+        "android": {
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "DeliveryData",
+              "type": "named"
+            }
+          }
+        },
+        "chrome_web_push": {
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "DeliveryData",
+              "type": "named"
+            }
+          }
+        },
+        "edge_web_push": {
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "DeliveryData",
+              "type": "named"
+            }
+          }
+        },
+        "email": {
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "DeliveryData",
+              "type": "named"
+            }
+          }
+        },
+        "firefox_web_push": {
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "DeliveryData",
+              "type": "named"
+            }
+          }
+        },
+        "ios": {
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "DeliveryData",
+              "type": "named"
+            }
+          }
+        },
+        "safari_web_push": {
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "DeliveryData",
+              "type": "named"
+            }
+          }
+        },
+        "sms": {
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "DeliveryData",
+              "type": "named"
+            }
+          }
+        }
+      }
+    },
+    "StringMap": {
+      "fields": {
+        "en": {
+          "description": "Text in English.  Will be used as a fallback",
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "String",
+              "type": "named"
+            }
+          }
+        }
+      }
+    }
+  },
+  "procedures": [
+    {
+      "request": {
+        "url": "/notifications",
+        "method": "post",
+        "security": [
+          {
+            "app_key": []
+          }
+        ],
+        "requestBody": {
+          "contentType": "application/json",
+          "schema": {
+            "type": "NotificationInput"
+          }
+        },
+        "response": {
+          "contentType": "application/json"
+        }
+      },
+      "arguments": {
+        "body": {
+          "description": "Request body of POST /notifications",
+          "type": {
+            "name": "NotificationInput",
+            "type": "named"
+          }
+        }
+      },
+      "description": "Create notification",
+      "name": "hasuraCreateNotification",
+      "result_type": {
+        "name": "CreateNotificationSuccessResponse",
+        "type": "named"
+      }
+    }
+  ],
+  "scalar_types": {
+    "FilterRelation": {
+      "aggregate_functions": {},
+      "comparison_operators": {},
+      "representation": {
+        "one_of": [
+          "\u003e",
+          "\u003c",
+          "=",
+          "!=",
+          "exists",
+          "not_exists",
+          "time_elapsed_gt",
+          "time_elapsed_lt"
+        ],
+        "type": "enum"
+      }
+    },
+    "Int32": {
+      "aggregate_functions": {},
+      "comparison_operators": {},
+      "representation": {
+        "type": "int32"
+      }
+    },
+    "Int64": {
+      "aggregate_functions": {},
+      "comparison_operators": {},
+      "representation": {
+        "type": "int64"
+      }
+    },
+    "JSON": {
+      "aggregate_functions": {},
+      "comparison_operators": {},
+      "representation": {
+        "type": "json"
+      }
+    },
+    "Notification200Errors": {
+      "aggregate_functions": {},
+      "comparison_operators": {},
+      "representation": {
+        "type": "json"
+      }
+    },
+    "OutcomeDataAggregation": {
+      "aggregate_functions": {},
+      "comparison_operators": {},
+      "representation": {
+        "one_of": [
+          "sum",
+          "count"
+        ],
+        "type": "enum"
+      }
+    },
+    "PlayerNotificationTargetTargetChannel": {
+      "aggregate_functions": {},
+      "comparison_operators": {},
+      "representation": {
+        "one_of": [
+          "push",
+          "email",
+          "sms"
+        ],
+        "type": "enum"
+      }
+    },
+    "String": {
+      "aggregate_functions": {},
+      "comparison_operators": {},
+      "representation": {
+        "type": "string"
+      }
+    },
+    "TimestampTZ": {
+      "aggregate_functions": {},
+      "comparison_operators": {},
+      "representation": {
+        "type": "timestamptz"
+      }
+    }
+  }
+}

@@ -1,0 +1,6 @@
+- op: remove
+  path: /openapi
+- op: add
+  path: /paths/~1notifications~1{notification_id}~1history/get
+  value:
+    foo: bar

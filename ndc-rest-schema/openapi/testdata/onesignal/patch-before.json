@@ -1,0 +1,46 @@
+[
+  {
+    "op": "remove",
+    "path": "/paths/~1notifications~1{notification_id}~1history"
+  },
+  {
+    "op": "add",
+    "path": "/servers/0/x-server-id",
+    "value": "foo"
+  },
+  {
+    "op": "add",
+    "path": "/paths/~1notifications-ndjson",
+    "value": {
+      "post": {
+        "operationId": "create_notification_ndjson",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Notification"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/x-ndjson": {
+                "schema": {
+                  "$ref": "#/components/schemas/CreateNotificationSuccessResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "app_key": []
+          }
+        ]
+      }
+    }
+  }
+]
