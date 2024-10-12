@@ -3,7 +3,7 @@ set -eo pipefail
 
 trap 'printf "\nkilling process..." && kill $serverPID' EXIT
 
-CONFIG_PATH="./connector-definition/config"
+CONFIG_PATH="./connector-definition"
 if [ -n "$1" ]; then
   CONFIG_PATH="$1"
 fi
@@ -32,7 +32,7 @@ http_wait() {
   exit 1
 }
 
-go build -o ./tmp/ndc-rest .
+go build -o ./tmp/ndc-rest ./server
 ./tmp/ndc-rest serve --configuration $CONFIG_PATH > /dev/null 2>&1 &
 serverPID=$!
 
