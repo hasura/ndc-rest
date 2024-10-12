@@ -1,0 +1,46 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/hasura/ndc-rest-schema/main/jsonschema/convert-config.jsonschema
+# -- File path needs to be converted.
+file: ""
+
+# -- The location where the ndc schema file will be generated.
+# Print to stdout if empty
+output: ""
+
+# -- The API specification of the file, is one of oas3 (openapi3), oas2 (openapi2)
+# @enum: oas2, oas3
+spec: oas3
+
+# -- Add a prefix to the function and procedure names
+# prefix: ""
+
+# -- Trim the prefix in URL, e.g. /v1
+# trimPrefix: ""
+
+# -- The environment variable prefix for security values, e.g. PET_STORE
+# envPrefix: ""
+
+# -- Patch files to be applied into the input file
+# patchBefore:
+#   - path: ""
+#     strategy: merge # @enum: merge, json6902
+#
+# patchAfter:
+#   - path: ""
+#     strategy: merge # @enum: merge, json6902
+
+# -- Return the pure NDC schema only
+pure: false
+
+# -- Require strict validation on empty types
+strict: false
+# -- Alias names for HTTP method. Used for prefix renaming, e.g. getUsers, postUser
+# methodAlias:
+#   get: get
+#   post: post
+#   put: put
+#   patch: patch
+#   delete: delete
+
+# -- Allowed content types. All content types are allowed by default
+# allowedContentTypes:
+#   - application/json

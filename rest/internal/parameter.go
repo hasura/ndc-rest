@@ -3,6 +3,7 @@ package internal
 import (
 	"fmt"
 	"slices"
+	"strconv"
 	"strings"
 )
 
@@ -68,6 +69,9 @@ func (ssp ParameterItems) find(keys []Key) (*ParameterItem, int) {
 				return nil, -1
 			}
 		}
+		if isEqual {
+			return &item, i
+		}
 	}
 	return nil, -1
 }
@@ -131,7 +135,7 @@ func (k Key) Index() *int {
 // String implements fmt.Stringer interface
 func (k Key) String() string {
 	if k.index != nil {
-		return fmt.Sprint(*k.index)
+		return strconv.Itoa(*k.index)
 	}
 	return k.key
 }

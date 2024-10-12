@@ -14,7 +14,7 @@ jobs:
 
   release-image:
     name: Release ndc-rest image
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-latest
     needs: [tests]
     steps:
       - uses: actions/checkout@v4
@@ -51,19 +51,38 @@ jobs:
           tags: ${{ steps.docker-metadata.outputs.tags }}
           labels: ${{ steps.docker-metadata.outputs.labels }}
 
-      - name: Build and push
-        uses: docker/build-push-action@v6
+  build-cli-and-manifests:
+    name: Build the CLI binaries and manifests
+    runs-on: ubuntu-latest
+    needs: [release-image]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
         with:
-          push: true
-          file: Dockerfile.alpine
-          tags: ${{ steps.docker-metadata.outputs.tags }}-alpine
-          labels: ${{ steps.docker-metadata.outputs.labels }}
+          go-version: "1.23"
+      - name: Build the CLI
+        run: |
+          VERSION="$GITHUB_REF_NAME" make ci-build-cli
+          mkdir release
+          mv _output/* release
+
+      - name: Get version from tag
+        id: get-version
+        run: |
+          echo "tagged_version=${GITHUB_REF#refs/tags/v}" >> $GITHUB_OUTPUT
+        shell: bash
 
       - name: Build connector definition
         run: |
           ./scripts/build-manifest.sh
         env:
           VERSION: ${{ steps.get-version.outputs.tagged_version }}
+
+      - uses: actions/upload-artifact@v4
+        with:
+          path: release/*
+          if-no-files-found: error
 
       - name: create a draft release
         uses: ncipollo/release-action@v1

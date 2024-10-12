@@ -6,7 +6,7 @@ import (
 	"os"
 	"strings"
 
-	"github.com/hasura/ndc-rest-schema/command"
+	"github.com/hasura/ndc-rest/ndc-rest-schema/command"
 	"github.com/hasura/ndc-sdk-go/connector"
 	"github.com/lmittmann/tint"
 )

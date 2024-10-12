@@ -7,10 +7,11 @@ import (
 	"fmt"
 	"log/slog"
 	"reflect"
+	"strconv"
 
-	"github.com/hasura/ndc-rest-schema/command"
-	rest "github.com/hasura/ndc-rest-schema/schema"
-	restUtils "github.com/hasura/ndc-rest-schema/utils"
+	"github.com/hasura/ndc-rest/ndc-rest-schema/command"
+	rest "github.com/hasura/ndc-rest/ndc-rest-schema/schema"
+	restUtils "github.com/hasura/ndc-rest/ndc-rest-schema/utils"
 	"github.com/hasura/ndc-rest/rest/internal"
 	"github.com/hasura/ndc-sdk-go/schema"
 	"github.com/hasura/ndc-sdk-go/utils"
@@ -238,7 +239,7 @@ func (c *RESTConnector) ApplyNDCRestSchemas(schemas []NDCRestSchemaWithName) map
 func validateRequestSchema(req *rest.Request, defaultMethod string) (*rest.Request, error) {
 	if req.Method == "" {
 		if defaultMethod == "" {
-			return nil, fmt.Errorf("the HTTP method is required")
+			return nil, errHTTPMethodRequired
 		}
 		req.Method = defaultMethod
 	}
@@ -260,7 +261,7 @@ func buildRESTArguments(restSchema *rest.NDCRestSchema, conf *ConfigItem) {
 		if server.ID != "" {
 			serverIDs = append(serverIDs, server.ID)
 		} else {
-			server.ID = fmt.Sprint(i)
+			server.ID = strconv.Itoa(i)
 			restSchema.Settings.Servers[i] = server
 			serverIDs = append(serverIDs, server.ID)
 		}
@@ -310,7 +311,7 @@ func buildRESTArguments(restSchema *rest.NDCRestSchema, conf *ConfigItem) {
 	}
 
 	functionsLen := len(restSchema.Functions)
-	for i := 0; i < functionsLen; i++ {
+	for i := range functionsLen {
 		fn := restSchema.Functions[i]
 		funcName := buildDistributedName(fn.Name)
 		info := schema.FunctionInfo{
@@ -327,7 +328,7 @@ func buildRESTArguments(restSchema *rest.NDCRestSchema, conf *ConfigItem) {
 	}
 
 	proceduresLen := len(restSchema.Procedures)
-	for i := 0; i < proceduresLen; i++ {
+	for i := range proceduresLen {
 		proc := restSchema.Procedures[i]
 		procName := buildDistributedName(proc.Name)
 		info := schema.ProcedureInfo{
@@ -361,31 +362,31 @@ func cloneDistributedArguments(arguments map[string]schema.ArgumentInfo) map[str
 
 func buildDistributedResultObjectType(restSchema *rest.NDCRestSchema, operationName string, underlyingType schema.Type) string {
 	distResultType := restUtils.StringSliceToPascalCase([]string{operationName, "Result"})
-	distResultDataType := fmt.Sprintf("%sData", distResultType)
+	distResultDataType := distResultType + "Data"
 
 	restSchema.ObjectTypes[distResultDataType] = schema.ObjectType{
-		Description: utils.ToPtr(fmt.Sprintf("Distributed response data of %s", operationName)),
+		Description: utils.ToPtr("Distributed response data of " + operationName),
 		Fields: schema.ObjectTypeFields{
 			"server": schema.ObjectField{
 				Description: utils.ToPtr("Identity of the remote server"),
 				Type:        schema.NewNamedType(internal.RESTServerIDScalarName).Encode(),
 			},
 			"data": schema.ObjectField{
-				Description: utils.ToPtr(fmt.Sprintf("A result of %s", operationName)),
+				Description: utils.ToPtr("A result of " + operationName),
 				Type:        underlyingType,
 			},
 		},
 	}
 
 	restSchema.ObjectTypes[distResultType] = schema.ObjectType{
-		Description: utils.ToPtr(fmt.Sprintf("Distributed responses of %s", operationName)),
+		Description: utils.ToPtr("Distributed responses of " + operationName),
 		Fields: schema.ObjectTypeFields{
 			"results": schema.ObjectField{
-				Description: utils.ToPtr(fmt.Sprintf("Results of %s", operationName)),
+				Description: utils.ToPtr("Results of " + operationName),
 				Type:        schema.NewArrayType(schema.NewNamedType(distResultDataType)).Encode(),
 			},
 			"errors": schema.ObjectField{
-				Description: utils.ToPtr(fmt.Sprintf("Error responses of %s", operationName)),
+				Description: utils.ToPtr("Error responses of " + operationName),
 				Type:        schema.NewArrayType(schema.NewNamedType(internal.DistributedErrorObjectName)).Encode(),
 			},
 		},
@@ -395,7 +396,7 @@ func buildDistributedResultObjectType(restSchema *rest.NDCRestSchema, operationN
 }
 
 func buildDistributedName(name string) string {
-	return fmt.Sprintf("%sDistributed", name)
+	return name + "Distributed"
 }
 
 func printSchemaValidationError(logger *slog.Logger, errors map[string][]string) {

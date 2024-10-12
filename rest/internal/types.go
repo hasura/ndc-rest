@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 
-	rest "github.com/hasura/ndc-rest-schema/schema"
+	rest "github.com/hasura/ndc-rest/ndc-rest-schema/schema"
 	"github.com/hasura/ndc-sdk-go/schema"
 	"github.com/hasura/ndc-sdk-go/utils"
 )
@@ -53,7 +53,7 @@ var DistributedObjectType schema.ObjectType = schema.ObjectType{
 
 // RESTOptions represent execution options for REST requests
 type RESTOptions struct {
-	Servers  []string `json:"servers" yaml:"serverIds"`
+	Servers  []string `json:"servers"  yaml:"serverIds"`
 	Parallel bool     `json:"parallel" yaml:"parallel"`
 
 	Distributed bool                  `json:"-" yaml:"-"`
@@ -71,7 +71,7 @@ func (ro *RESTOptions) FromValue(value any) error {
 	}
 	rawServerIds, err := utils.GetNullableStringSlice(valueMap, "servers")
 	if err != nil {
-		return fmt.Errorf("invalid rest options; %s", err)
+		return fmt.Errorf("invalid rest options; %w", err)
 	}
 	if rawServerIds != nil {
 		ro.Servers = *rawServerIds
@@ -79,7 +79,7 @@ func (ro *RESTOptions) FromValue(value any) error {
 
 	parallel, err := utils.GetNullableBoolean(valueMap, "parallel")
 	if err != nil {
-		return fmt.Errorf("invalid parallel in rest options: %s", err)
+		return fmt.Errorf("invalid parallel in rest options: %w", err)
 	}
 	ro.Parallel = parallel != nil && *parallel
 
@@ -99,20 +99,23 @@ func (de DistributedError) Error() string {
 	if de.Message != "" {
 		return fmt.Sprintf("%s: %s", de.Server, de.Message)
 	}
-	bs, _ := json.Marshal(de.Details)
+	bs, err := json.Marshal(de.Details)
+	if err != nil {
+		bs = []byte("")
+	}
 	return fmt.Sprintf("%s: %s", de.Server, string(bs))
 }
 
 // DistributedResult contains the success response of remote requests with a server identity
 type DistributedResult[T any] struct {
 	Server string `json:"server" yaml:"server"`
-	Data   T      `json:"data" yaml:"data"`
+	Data   T      `json:"data"   yaml:"data"`
 }
 
 // DistributedResponse represents the response object of distributed operations
 type DistributedResponse[T any] struct {
 	Results []DistributedResult[T] `json:"results" yaml:"results"`
-	Errors  []DistributedError     `json:"errors" yaml:"errors"`
+	Errors  []DistributedError     `json:"errors"  yaml:"errors"`
 }
 
 // NewDistributedResponse creates an empty DistributedResponse instance

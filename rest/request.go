@@ -11,7 +11,7 @@ import (
 	"slices"
 	"strings"
 
-	rest "github.com/hasura/ndc-rest-schema/schema"
+	rest "github.com/hasura/ndc-rest/ndc-rest-schema/schema"
 	"github.com/hasura/ndc-rest/rest/internal"
 	"github.com/hasura/ndc-sdk-go/utils"
 )
@@ -79,7 +79,6 @@ func (c *RESTConnector) createRequest(rawRequest *rest.Request, endpoint string,
 }
 
 func (c *RESTConnector) createFormURLEncoded(reqBody *rest.RequestBody, bodyData any) (io.ReadSeeker, error) {
-
 	queryParams, err := c.encodeParameterValues(reqBody.Schema, bodyData, []string{"body"})
 	if err != nil {
 		return nil, err
@@ -132,7 +131,7 @@ func (c *RESTConnector) createMultipartForm(reqBody *rest.RequestBody, arguments
 		}
 		err := c.evalMultipartFieldValue(writer, arguments, key, value, &prop, enc)
 		if err != nil {
-			return nil, "", fmt.Errorf("%s: %s", key, err)
+			return nil, "", fmt.Errorf("%s: %w", key, err)
 		}
 	}
 	if err := writer.Close(); err != nil {
@@ -187,7 +186,7 @@ func (c *RESTConnector) evalMultipartFieldValue(w *internal.MultipartWriter, arg
 			}
 
 			if typeSchema.Type == "array" || len(values) > 1 {
-				fieldName = fmt.Sprintf("%s[]", fieldName)
+				fieldName += "[]"
 				for _, v := range values {
 					if err = w.WriteField(fieldName, v, headers); err != nil {
 						return err

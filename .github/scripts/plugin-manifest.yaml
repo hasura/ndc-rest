@@ -1,0 +1,41 @@
+name: ndc-rest
+version: "${CLI_VERSION}"
+shortDescription: "CLI plugin for Hasura REST data connector"
+homepage: https://github.com/hasura/ndc-rest
+hidden: true
+platforms:
+  - selector: darwin-arm64
+    uri: "https://github.com/hasura/ndc-rest/releases/download/${CLI_VERSION}/ndc-rest-schema-darwin-arm64"
+    sha256: "${MACOS_ARM64_SHA256}"
+    bin: "ndc-rest-schema"
+    files:
+      - from: "./ndc-rest-schema-darwin-arm64"
+        to: "ndc-rest-schema"
+  - selector: linux-arm64
+    uri: "https://github.com/hasura/ndc-rest/releases/download/${CLI_VERSION}/ndc-rest-schema-linux-arm64"
+    sha256: "${LINUX_ARM64_SHA256}"
+    bin: "ndc-rest-schema"
+    files:
+      - from: "./ndc-rest-schema-linux-arm64"
+        to: "ndc-rest-schema"
+  - selector: darwin-amd64
+    uri: "https://github.com/hasura/ndc-rest/releases/download/${CLI_VERSION}/ndc-rest-schema-darwin-amd64"
+    sha256: "${MACOS_AMD64_SHA256}"
+    bin: "ndc-rest-schema"
+    files:
+      - from: "./ndc-rest-schema-darwin-amd64"
+        to: "ndc-rest-schema"
+  - selector: windows-amd64
+    uri: "https://github.com/hasura/ndc-rest/releases/download/${CLI_VERSION}/ndc-rest-schema-windows-amd64.exe"
+    sha256: "${WINDOWS_AMD64_SHA256}"
+    bin: "ndc-rest-schema.exe"
+    files:
+      - from: "./ndc-rest-schema-windows-amd64.exe"
+        to: "ndc-rest-schema.exe"
+  - selector: linux-amd64
+    uri: "https://github.com/hasura/ndc-rest/releases/download/${CLI_VERSION}/ndc-rest-schema-linux-amd64"
+    sha256: "${LINUX_AMD64_SHA256}"
+    bin: "ndc-rest-schema"
+    files:
+      - from: "./ndc-rest-schema-linux-amd64"
+        to: "ndc-rest-schema"

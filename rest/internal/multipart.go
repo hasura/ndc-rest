@@ -9,7 +9,7 @@ import (
 	"net/textproto"
 	"strings"
 
-	"github.com/hasura/ndc-rest-schema/schema"
+	"github.com/hasura/ndc-rest/ndc-rest-schema/schema"
 	"github.com/hasura/ndc-sdk-go/utils"
 )
 
@@ -33,11 +33,11 @@ func NewMultipartWriter(w io.Writer) *MultipartWriter {
 func (w *MultipartWriter) WriteDataURI(name string, value any, headers http.Header) error {
 	b64, err := utils.DecodeString(value)
 	if err != nil {
-		return fmt.Errorf("%s: %s", name, err)
+		return fmt.Errorf("%s: %w", name, err)
 	}
 	dataURI, err := DecodeDataURI(b64)
 	if err != nil {
-		return fmt.Errorf("%s: %s", name, err)
+		return fmt.Errorf("%s: %w", name, err)
 	}
 
 	h := make(textproto.MIMEHeader)
@@ -56,7 +56,7 @@ func (w *MultipartWriter) WriteDataURI(name string, value any, headers http.Head
 
 	p, err := w.CreatePart(h)
 	if err != nil {
-		return fmt.Errorf("%s: %s", name, err)
+		return fmt.Errorf("%s: %w", name, err)
 	}
 
 	_, err = p.Write([]byte(dataURI.Data))

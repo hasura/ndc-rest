@@ -32,7 +32,6 @@ func (c *RESTConnector) Mutation(ctx context.Context, configuration *Configurati
 }
 
 func (c *RESTConnector) execProcedure(ctx context.Context, operation *schema.MutationOperation) (schema.MutationOperationResults, error) {
-
 	procedure, settings, err := c.metadata.GetProcedure(operation.Name)
 	if err != nil {
 		return nil, err

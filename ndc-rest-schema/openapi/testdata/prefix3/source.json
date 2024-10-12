@@ -1,0 +1,746 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "version": "1.2.2",
+    "title": "OneSignal",
+    "description": "A powerful way to send personalized messages at scale and build effective customer engagement strategies. Learn more at onesignal.com",
+    "contact": {
+      "name": "OneSignal DevRel",
+      "email": "devrel@onesignal.com",
+      "url": "https://onesignal.com"
+    },
+    "termsOfService": "https://onesignal.com/tos"
+  },
+  "servers": [
+    {
+      "url": "https://onesignal.com/api/v1"
+    }
+  ],
+  "components": {
+    "securitySchemes": {
+      "app_key": {
+        "type": "http",
+        "scheme": "bearer"
+      },
+      "user_key": {
+        "type": "http",
+        "scheme": "bearer"
+      }
+    },
+    "schemas": {
+      "Button": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "text": {
+            "type": "string"
+          },
+          "icon": {
+            "type": "string"
+          }
+        },
+        "required": ["id"]
+      },
+
+      "Operator": {
+        "type": "object",
+        "properties": {
+          "operator": {
+            "type": "string",
+            "enum": ["OR", "AND"],
+            "description": "Strictly, this must be either `\"OR\"`, or `\"AND\"`.  It can be used to compose Filters as part of a Filters object."
+          }
+        }
+      },
+      "Purchase": {
+        "type": "object",
+        "properties": {
+          "sku": {
+            "type": "string",
+            "description": "The unique identifier of the purchased item."
+          },
+          "amount": {
+            "type": "string",
+            "description": "The amount, in USD, spent purchasing the item."
+          },
+          "iso": {
+            "type": "string",
+            "description": "The 3-letter ISO 4217 currency code. Required for correct storage and conversion of amount."
+          },
+          "count": {
+            "type": "number"
+          }
+        },
+        "required": ["sku", "amount", "iso"]
+      },
+      "SegmentNotificationTarget": {
+        "type": "object",
+        "properties": {
+          "included_segments": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "excluded_segments": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "PlayerNotificationTarget": {
+        "type": "object",
+        "properties": {
+          "include_player_ids": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "nullable": true,
+            "deprecated": true
+          },
+          "target_channel": {
+            "type": "string",
+            "enum": ["push", "email", "sms"]
+          }
+        }
+      },
+      "NotificationTarget": {
+        "anyOf": [
+          {
+            "$ref": "#/components/schemas/SegmentNotificationTarget"
+          },
+          {
+            "$ref": "#/components/schemas/PlayerNotificationTarget"
+          }
+        ]
+      },
+      "BasicNotification": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/NotificationTarget"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string"
+              },
+              "contents": {
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/StringMap"
+                  },
+                  {
+                    "description": "Required unless content_available=true or template_id is set.\nThe message's content (excluding the title), a map of language codes to text for each language.\nEach hash must have a language code string for a key, mapped to the localized text you would like users to receive for that language.\nThis field supports inline substitutions.\nEnglish must be included in the hash.\nExample: {\"en\": \"English Message\", \"es\": \"Spanish Message\"}\n",
+                    "writeOnly": true
+                  }
+                ]
+              },
+              "headings": {
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/StringMap"
+                  },
+                  {
+                    "description": "The message's title, a map of language codes to text for each language. Each hash must have a language code string for a key, mapped to the localized text you would like users to receive for that language.\nThis field supports inline substitutions.\nExample: {\"en\": \"English Title\", \"es\": \"Spanish Title\"}\n",
+                    "writeOnly": true
+                  }
+                ]
+              },
+              "subtitle": {
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/StringMap"
+                  },
+                  {
+                    "description": "The message's subtitle, a map of language codes to text for each language. Each hash must have a language code string for a key, mapped to the localized text you would like users to receive for that language.\nThis field supports inline substitutions.\nExample: {\"en\": \"English Subtitle\", \"es\": \"Spanish Subtitle\"}\n",
+                    "writeOnly": true
+                  }
+                ]
+              },
+              "data": {
+                "type": "object",
+                "description": "Channel: Push Notifications\nPlatform: Huawei\nA custom map of data that is passed back to your app. Same as using Additional Data within the dashboard. Can use up to 2048 bytes of data.\nExample: {\"abc\": 123, \"foo\": \"bar\", \"event_performed\": true, \"amount\": 12.1}\n",
+                "writeOnly": true,
+                "nullable": true
+              },
+              "filters": {
+                "type": "array",
+                "nullable": true,
+                "items": {
+                  "$ref": "#/components/schemas/Filter"
+                }
+              },
+              "custom_data": {
+                "type": "object",
+                "writeOnly": true,
+                "nullable": true
+              }
+            }
+          },
+          {
+            "required": ["app_id"]
+          }
+        ]
+      },
+      "Notification": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/BasicNotification"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "send_after": {
+                "type": "string",
+                "format": "date-time",
+                "writeOnly": true,
+                "nullable": true
+              }
+            }
+          }
+        ]
+      },
+      "NotificationWithMeta": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/BasicNotification"
+          },
+          {
+            "$ref": "#/components/schemas/DeliveryData"
+          },
+          {
+            "$ref": "#/components/schemas/OutcomesData"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "remaining": {
+                "type": "integer",
+                "description": "Number of notifications that have not been sent out yet. This can mean either our system is still processing the notification or you have delayed options set."
+              },
+              "successful": {
+                "type": "integer",
+                "description": "Number of notifications that were successfully delivered."
+              },
+              "failed": {
+                "type": "integer",
+                "description": "Number of notifications that could not be delivered due to those devices being unsubscribed."
+              },
+              "errored": {
+                "type": "integer",
+                "description": "Number of notifications that could not be delivered due to an error. You can find more information by viewing the notification in the dashboard."
+              },
+              "converted": {
+                "type": "integer",
+                "description": "Number of users who have clicked / tapped on your notification."
+              },
+              "queued_at": {
+                "type": "integer",
+                "format": "int64",
+                "description": "Unix timestamp indicating when the notification was created."
+              },
+              "send_after": {
+                "type": "integer",
+                "format": "int64",
+                "description": "Unix timestamp indicating when notification delivery should begin.",
+                "nullable": true
+              },
+              "completed_at": {
+                "type": "integer",
+                "format": "int64",
+                "nullable": true,
+                "description": "Unix timestamp indicating when notification delivery completed. The delivery duration from start to finish can be calculated with completed_at - send_after."
+              },
+              "platform_delivery_stats": {
+                "$ref": "#/components/schemas/PlatformDeliveryData"
+              },
+              "received": {
+                "type": "integer",
+                "nullable": true,
+                "description": "Confirmed Deliveries number of devices that received the push notification. Paid Feature Only. Free accounts will see 0."
+              },
+              "throttle_rate_per_minute": {
+                "type": "integer",
+                "nullable": true,
+                "description": "number of push notifications sent per minute. Paid Feature Only. If throttling is not enabled for the app or the notification, and for free accounts, null is returned. Refer to Throttling for more details."
+              }
+            }
+          }
+        ]
+      },
+      "StringMap": {
+        "type": "object",
+        "properties": {
+          "en": {
+            "type": "string",
+            "description": "Text in English.  Will be used as a fallback"
+          }
+        }
+      },
+      "NotificationSlice": {
+        "type": "object",
+        "properties": {
+          "total_count": {
+            "type": "integer"
+          },
+          "offset": {
+            "type": "integer"
+          },
+          "limit": {
+            "type": "integer"
+          },
+          "notifications": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/NotificationWithMeta"
+            }
+          }
+        }
+      },
+      "PlatformDeliveryData": {
+        "type": "object",
+        "description": "Hash of delivery statistics broken out by target device platform.",
+        "properties": {
+          "edge_web_push": {
+            "$ref": "#/components/schemas/DeliveryData"
+          },
+          "chrome_web_push": {
+            "$ref": "#/components/schemas/DeliveryData"
+          },
+          "firefox_web_push": {
+            "$ref": "#/components/schemas/DeliveryData"
+          },
+          "safari_web_push": {
+            "$ref": "#/components/schemas/DeliveryData"
+          },
+          "android": {
+            "$ref": "#/components/schemas/DeliveryData"
+          },
+          "ios": {
+            "$ref": "#/components/schemas/DeliveryData"
+          },
+          "sms": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/DeliveryData"
+              },
+              {
+                "properties": {
+                  "provider_successful": {
+                    "type": "integer",
+                    "description": "Number of messages reported as delivered successfully by the SMS service provider.",
+                    "nullable": true
+                  },
+                  "provider_failed": {
+                    "type": "integer",
+                    "description": "Number of recipients who didn't receive your message as reported by the SMS service provider.",
+                    "nullable": true
+                  },
+                  "provider_errored": {
+                    "type": "integer",
+                    "description": "Number of errors reported by the SMS service provider.",
+                    "nullable": true
+                  }
+                }
+              }
+            ]
+          },
+          "email": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/DeliveryData"
+              },
+              {
+                "properties": {
+                  "opened": {
+                    "type": "integer",
+                    "description": "Number of times an email has been opened.",
+                    "nullable": true
+                  },
+                  "unique_opens": {
+                    "type": "integer",
+                    "description": "Number of unique recipients who have opened your email.",
+                    "nullable": true
+                  },
+                  "clicks": {
+                    "type": "integer",
+                    "description": "Number of clicked links from your email. This can include the recipient clicking email links multiple times.",
+                    "nullable": true
+                  },
+                  "unique_clicks": {
+                    "type": "integer",
+                    "description": "Number of unique clicks that your recipients have made on links from your email.",
+                    "nullable": true
+                  },
+                  "bounced": {
+                    "type": "integer",
+                    "description": "Number of recipients who registered as a hard or soft bounce and didn't receive your email.",
+                    "nullable": true
+                  },
+                  "reported_spam": {
+                    "type": "integer",
+                    "description": "Number of recipients who reported this email as spam.",
+                    "nullable": true
+                  },
+                  "unsubscribed": {
+                    "type": "integer",
+                    "description": "Number of recipients who opted out of your emails using the unsubscribe link in this email.",
+                    "nullable": true
+                  }
+                }
+              }
+            ]
+          }
+        }
+      },
+      "DeliveryData": {
+        "type": "object",
+        "properties": {
+          "successful": {
+            "type": "integer",
+            "description": "Number of messages delivered to push servers, mobile carriers, or email service providers.",
+            "nullable": true
+          },
+          "failed": {
+            "type": "integer",
+            "description": "Number of messages sent to unsubscribed devices.",
+            "nullable": true
+          },
+          "errored": {
+            "type": "integer",
+            "description": "Number of errors reported.",
+            "nullable": true
+          },
+          "converted": {
+            "type": "integer",
+            "description": "Number of messages that were clicked.",
+            "nullable": true
+          },
+          "received": {
+            "type": "integer",
+            "description": "Number of devices that received the message.",
+            "nullable": true
+          }
+        }
+      },
+      "OutcomeData": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "value": {
+            "type": "integer"
+          },
+          "aggregation": {
+            "type": "string",
+            "enum": ["sum", "count"]
+          }
+        },
+        "required": ["id", "value", "aggregation"]
+      },
+      "OutcomesData": {
+        "type": "object",
+        "properties": {
+          "outcomes": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/OutcomeData"
+            }
+          }
+        }
+      },
+      "Filter": {
+        "type": "object",
+        "properties": {
+          "field": {
+            "type": "string",
+            "description": "Name of the field to use as the first operand in the filter expression."
+          },
+          "key": {
+            "type": "string",
+            "description": "If `field` is `tag`, this field is *required* to specify `key` inside the tags."
+          },
+          "value": {
+            "type": "string",
+            "description": "Constant value to use as the second operand in the filter expression. This value is *required* when the relation operator is a binary operator."
+          },
+          "relation": {
+            "type": "string",
+            "description": "Operator of a filter expression.",
+            "enum": [
+              ">",
+              "<",
+              "=",
+              "!=",
+              "exists",
+              "not_exists",
+              "time_elapsed_gt",
+              "time_elapsed_lt"
+            ]
+          }
+        },
+        "required": ["field", "relation"]
+      },
+      "InvalidIdentifierError": {
+        "type": "object",
+        "properties": {
+          "invalid_external_user_ids": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Returned if using include_external_user_ids"
+          },
+          "invalid_player_ids": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Returned if using include_player_ids and some were valid and others were not."
+          }
+        }
+      },
+      "NoSubscribersError": {
+        "type": "array",
+        "items": {
+          "type": "string",
+          "format": "string"
+        },
+        "description": "Returned if no subscribed players.\n"
+      },
+      "Notification200Errors": {
+        "oneOf": [
+          {
+            "$ref": "#/components/schemas/InvalidIdentifierError"
+          },
+          {
+            "$ref": "#/components/schemas/NoSubscribersError"
+          }
+        ]
+      },
+      "IdentityObject": {
+        "type": "object",
+        "additionalProperties": true
+      },
+      "CreateNotificationSuccessResponse": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "recipients": {
+            "type": "integer"
+          },
+          "external_id": {
+            "type": "string",
+            "nullable": true
+          },
+          "errors": {
+            "$ref": "#/components/schemas/Notification200Errors"
+          }
+        }
+      },
+      "CancelNotificationSuccessResponse": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean"
+          }
+        }
+      },
+      "NotificationHistorySuccessResponse": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean"
+          },
+          "destination_url": {
+            "type": "string"
+          }
+        }
+      },
+      "GenericError": {
+        "type": "object",
+        "properties": {
+          "errors": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "code": {
+                  "type": "string"
+                },
+                "title": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      },
+      "RateLimiterError": {
+        "type": "object",
+        "properties": {
+          "errors": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "code": {
+                  "type": "string"
+                },
+                "title": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "paths": {
+    "/notifications": {
+      "get": {
+        "operationId": "get_notifications",
+        "summary": "View notifications",
+        "description": "View the details of multiple notifications",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "app_id",
+            "schema": {
+              "type": "string"
+            },
+            "required": true,
+            "description": "The app ID that you want to view notifications from"
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "schema": {
+              "type": "integer"
+            },
+            "required": false,
+            "description": "How many notifications to return.  Max is 50.  Default is 50."
+          },
+          {
+            "in": "query",
+            "name": "offset",
+            "schema": {
+              "type": "integer"
+            },
+            "required": false,
+            "description": "Page offset.  Default is 0.  Results are sorted by queued_at in descending order.  queued_at is a representation of the time that the notification was queued at."
+          },
+          {
+            "in": "query",
+            "name": "kind",
+            "schema": {
+              "type": "integer",
+              "enum": [0, 1, 3]
+            },
+            "description": "Kind of notifications returned:\n  * unset - All notification types (default)\n  * `0` - Dashboard only\n  * `1` - API only\n  * `3` - Automated only\n",
+            "required": false
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/NotificationSlice"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GenericError"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Rate Limit Exceeded",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RateLimiterError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "app_key": []
+          }
+        ]
+      },
+      "post": {
+        "operationId": "create_notification",
+        "summary": "Create notification",
+        "description": "Sends notifications to your users\n",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Notification"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK, invalid_player_ids, invalid_external_user_ids or No Subscribed Players\nIf a message was successfully created, you will get a 200 response and an id for the notification.\nIf the 200 response contains \"invalid_player_ids\" or \"invalid_external_user_ids\" this will mark devices that exist in the provided app_id but are no longer subscribed.\nIf no id is returned, then a message was not created and the targeted User IDs do not exist under the provided app_id.\nAny User IDs sent in the request that do not exist under the specified app_id will be ignored.\n",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CreateNotificationSuccessResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GenericError"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Rate Limit Exceeded",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RateLimiterError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "app_key": []
+          }
+        ]
+      }
+    }
+  }
+}

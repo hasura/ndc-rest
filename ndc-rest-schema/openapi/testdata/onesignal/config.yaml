@@ -1,0 +1,19 @@
+# -- File path needs to be converted.
+file: source.json
+output: ""
+spec: oas3
+patchBefore:
+  - path: "patch-before.json"
+    strategy: json6902
+patchAfter:
+  - path: "patch-after.json"
+    strategy: json6902
+pure: false
+methodAlias:
+  get: get
+  post: post
+  put: put
+  patch: patch
+  delete: delete
+allowedContentTypes:
+  - application/json

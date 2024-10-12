@@ -10,7 +10,7 @@ import (
 	"strings"
 	"testing"
 
-	rest "github.com/hasura/ndc-rest-schema/schema"
+	rest "github.com/hasura/ndc-rest/ndc-rest-schema/schema"
 	"github.com/hasura/ndc-sdk-go/schema"
 	"gotest.tools/v3/assert"
 )

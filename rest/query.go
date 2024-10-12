@@ -39,7 +39,6 @@ func (c *RESTConnector) Query(ctx context.Context, configuration *Configuration,
 }
 
 func (c *RESTConnector) execQuery(ctx context.Context, request *schema.QueryRequest, queryFields schema.NestedField, variables map[string]any) (any, error) {
-
 	function, settings, err := c.metadata.GetFunction(request.Collection)
 	if err != nil {
 		return nil, err

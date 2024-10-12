@@ -15,7 +15,7 @@ go run . serve --configuration ./rest/testdata/jsonplaceholder
 
 ![REST connector](./assets/rest_connector.png)
 
-REST connector uses the [NDC REST extension](https://github.com/hasura/ndc-rest-schema#ndc-rest-schema-extension) that includes request information.
+REST connector uses the [NDC REST extension](https://github.com/hasura/ndc-rest/ndc-rest-schema#ndc-rest-schema-extension) that includes request information.
 The connector has request context to transform the NDC request body to REST request and versa.
 
 ### Configuration
@@ -37,7 +37,7 @@ files:
     spec: ndc
 ```
 
-The config of each element follows the [config schema](https://github.com/hasura/ndc-rest-schema/blob/main/config.example.yaml) of `ndc-rest-schema`.
+The config of each element follows the [config schema](https://github.com/hasura/ndc-rest/ndc-rest-schema/blob/main/config.example.yaml) of `ndc-rest-schema`.
 
 > [!IMPORTANT]
 > Conflicted object and scalar types will be ignored. Only the type of the first file is kept in the schema.
@@ -51,7 +51,7 @@ The config of each element follows the [config schema](https://github.com/hasura
 The connector can convert OpenAPI to REST NDC schema in runtime. However, it's more flexible and performance-wise to pre-convert them, for example, change better function or procedure names.
 
 ```sh
-go install github.com/hasura/ndc-rest-schema@latest
+go install github.com/hasura/ndc-rest/ndc-rest-schema@latest
 ndc-rest-schema convert -f ./rest/testdata/jsonplaceholder/swagger.json -o ./rest/testdata/jsonplaceholder/schema.json --spec openapi2
 ```
 
@@ -84,7 +84,7 @@ settings:
 
 ### Authentication
 
-The current version supports API key and Auth token authentication schemes. The configuration is inspired from `securitySchemes` [with env variables](https://github.com/hasura/ndc-rest-schema#authentication)
+The current version supports API key and Auth token authentication schemes. The configuration is inspired from `securitySchemes` [with env variables](https://github.com/hasura/ndc-rest/ndc-rest-schema#authentication)
 
 See [this example](rest/testdata/auth/schema.yaml) for more context.
 

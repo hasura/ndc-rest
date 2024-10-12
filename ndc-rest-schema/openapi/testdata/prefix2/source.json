@@ -1,0 +1,90 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "description": "Fake Online REST API for Testing and Prototyping",
+    "version": "1.0.0",
+    "title": "JSON Placeholder"
+  },
+  "host": "jsonplaceholder.typicode.com",
+  "schemes": ["https"],
+  "paths": {
+    "/posts": {
+      "get": {
+        "tags": ["posts"],
+        "operationId": "getPosts",
+        "summary": "Get all available posts",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "query",
+            "type": "integer",
+            "description": "Filter by post ID",
+            "required": false
+          },
+          {
+            "name": "userId",
+            "in": "query",
+            "type": "integer",
+            "description": "Filter by user ID",
+            "required": false
+          }
+        ],
+        "produces": ["application/json"],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/Post"
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": ["posts"],
+        "operationId": "createPost",
+        "summary": "Create a post",
+        "parameters": [
+          {
+            "in": "body",
+            "name": "body",
+            "description": "Post object that needs to be added",
+            "required": true,
+            "schema": { "$ref": "#/definitions/Post" }
+          }
+        ],
+        "consumes": ["application/json"],
+        "produces": ["application/json"],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "schema": { "$ref": "#/definitions/Post" }
+          }
+        }
+      }
+    }
+  },
+  "definitions": {
+    "Post": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "userId": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "title": {
+          "type": "string"
+        },
+        "body": {
+          "type": "string"
+        }
+      }
+    }
+  }
+}

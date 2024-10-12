@@ -65,7 +65,7 @@ func DecodeDataURI(input string) (*DataURI, error) {
 	rawMediaType := strings.Join(mediaTypes, ";")
 	mediaType, params, err := mime.ParseMediaType(rawMediaType)
 	if err != nil {
-		return nil, fmt.Errorf("%s %s", err, rawMediaType)
+		return nil, fmt.Errorf("%w %s", err, rawMediaType)
 	}
 	dataURI.MediaType = mediaType
 	dataURI.Parameters = params

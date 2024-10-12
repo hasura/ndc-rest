@@ -1,0 +1,10 @@
+[
+  {
+    "op": "remove",
+    "path": "/object_types"
+  },
+  {
+    "op": "remove",
+    "path": "/functions"
+  }
+]
