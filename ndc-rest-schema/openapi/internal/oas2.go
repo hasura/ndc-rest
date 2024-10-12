@@ -321,8 +321,8 @@ func (oc *OAS2Builder) getSchemaType(typeSchema *base.Schema, apiPath string, fi
 					// treat no-property objects as a JSON scalar
 					oc.schema.ScalarTypes[refName] = *defaultScalarTypes[rest.ScalarJSON]
 				} else {
-					object := schema.ObjectType{
-						Fields: make(schema.ObjectTypeFields),
+					object := rest.ObjectType{
+						Fields: make(map[string]rest.ObjectField),
 					}
 					if typeSchema.Description != "" {
 						object.Description = &typeSchema.Description
@@ -336,7 +336,7 @@ func (oc *OAS2Builder) getSchemaType(typeSchema *base.Schema, apiPath string, fi
 						if err != nil {
 							return nil, nil, err
 						}
-						objField := schema.ObjectField{
+						objField := rest.ObjectField{
 							Type: propType.Encode(),
 						}
 						if propApiSchema.Description != "" {

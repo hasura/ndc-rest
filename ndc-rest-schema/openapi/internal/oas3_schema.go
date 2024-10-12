@@ -175,14 +175,14 @@ func (oc *oas3SchemaBuilder) getSchemaType(typeSchema *base.Schema, fieldPaths [
 				return oc.builder.buildScalarJSON(), &rest.TypeSchema{Type: string(rest.ScalarJSON)}, false, nil
 			}
 
-			object := schema.ObjectType{
-				Fields: make(schema.ObjectTypeFields),
+			object := rest.ObjectType{
+				Fields: make(map[string]rest.ObjectField),
 			}
-			readObject := schema.ObjectType{
-				Fields: make(schema.ObjectTypeFields),
+			readObject := rest.ObjectType{
+				Fields: make(map[string]rest.ObjectField),
 			}
-			writeObject := schema.ObjectType{
-				Fields: make(schema.ObjectTypeFields),
+			writeObject := rest.ObjectType{
+				Fields: make(map[string]rest.ObjectField),
 			}
 			if typeSchema.Description != "" {
 				object.Description = &typeSchema.Description
@@ -206,7 +206,7 @@ func (oc *oas3SchemaBuilder) getSchemaType(typeSchema *base.Schema, fieldPaths [
 					continue
 				}
 				oc.builder.typeUsageCounter.Add(getNamedType(propType, true, ""), 1)
-				objField := schema.ObjectField{
+				objField := rest.ObjectField{
 					Type: propType.Encode(),
 				}
 				if propApiSchema.Description != "" {
@@ -290,11 +290,11 @@ func (oc *oas3SchemaBuilder) buildAllOfAnyOfSchemaType(schemaProxies []*base.Sch
 	if len(proxies) == 1 {
 		return oc.getSchemaTypeFromProxy(proxies[0], nullable, fieldPaths)
 	}
-	readObject := schema.ObjectType{
-		Fields: schema.ObjectTypeFields{},
+	readObject := rest.ObjectType{
+		Fields: map[string]rest.ObjectField{},
 	}
-	writeObject := schema.ObjectType{
-		Fields: schema.ObjectTypeFields{},
+	writeObject := rest.ObjectType{
+		Fields: map[string]rest.ObjectField{},
 	}
 	typeSchema := &rest.TypeSchema{
 		Type:       "object",

@@ -26,10 +26,10 @@ const (
 )
 
 // SingleObjectType represents the object type of REST execution options for single server
-var SingleObjectType schema.ObjectType = schema.ObjectType{
+var SingleObjectType rest.ObjectType = rest.ObjectType{
 	Description: utils.ToPtr("Execution options for REST requests to a single server"),
-	Fields: schema.ObjectTypeFields{
-		"servers": schema.ObjectField{
+	Fields: map[string]rest.ObjectField{
+		"servers": {
 			Description: utils.ToPtr("Specify remote servers to receive the request. If there are many server IDs the server is selected randomly"),
 			Type:        schema.NewNullableType(schema.NewArrayType(schema.NewNamedType(RESTServerIDScalarName))).Encode(),
 		},
@@ -37,14 +37,14 @@ var SingleObjectType schema.ObjectType = schema.ObjectType{
 }
 
 // DistributedObjectType represents the object type of REST execution options for distributed servers
-var DistributedObjectType schema.ObjectType = schema.ObjectType{
+var DistributedObjectType rest.ObjectType = rest.ObjectType{
 	Description: utils.ToPtr("Distributed execution options for REST requests to multiple servers"),
-	Fields: schema.ObjectTypeFields{
-		"servers": schema.ObjectField{
+	Fields: map[string]rest.ObjectField{
+		"servers": {
 			Description: utils.ToPtr("Specify remote servers to receive the request"),
 			Type:        schema.NewNullableType(schema.NewArrayType(schema.NewNamedType(RESTServerIDScalarName))).Encode(),
 		},
-		"parallel": schema.ObjectField{
+		"parallel": {
 			Description: utils.ToPtr("Execute requests to remote servers in parallel"),
 			Type:        schema.NewNullableNamedType(string(rest.ScalarBoolean)).Encode(),
 		},

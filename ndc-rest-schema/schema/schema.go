@@ -13,15 +13,12 @@ type NDCRestSchema struct {
 	SchemaRef string           `json:"$schema,omitempty"  mapstructure:"$schema"  yaml:"$schema,omitempty"`
 	Settings  *NDCRestSettings `json:"settings,omitempty" mapstructure:"settings" yaml:"settings,omitempty"`
 
-	// Collections which are available for queries
-	Collections []schema.CollectionInfo `json:"collections" mapstructure:"collections" yaml:"collections"`
-
 	// Functions (i.e. collections which return a single column and row)
 	Functions []*RESTFunctionInfo `json:"functions" mapstructure:"functions" yaml:"functions"`
 
 	// A list of object types which can be used as the types of arguments, or return
 	// types of procedures. Names should not overlap with scalar type names.
-	ObjectTypes schema.SchemaResponseObjectTypes `json:"object_types" mapstructure:"object_types" yaml:"object_types"`
+	ObjectTypes map[string]ObjectType `json:"object_types" mapstructure:"object_types" yaml:"object_types"`
 
 	// Procedures which are available for execution as part of mutations
 	Procedures []*RESTProcedureInfo `json:"procedures" mapstructure:"procedures" yaml:"procedures"`
@@ -35,10 +32,9 @@ func NewNDCRestSchema() *NDCRestSchema {
 	return &NDCRestSchema{
 		SchemaRef:   "https://raw.githubusercontent.com/hasura/ndc-rest-schema/main/jsonschema/ndc-rest-schema.jsonschema",
 		Settings:    &NDCRestSettings{},
-		Collections: []schema.CollectionInfo{},
 		Functions:   []*RESTFunctionInfo{},
 		Procedures:  []*RESTProcedureInfo{},
-		ObjectTypes: make(schema.SchemaResponseObjectTypes),
+		ObjectTypes: make(map[string]ObjectType),
 		ScalarTypes: make(schema.SchemaResponseScalarTypes),
 	}
 }
@@ -47,17 +43,20 @@ func NewNDCRestSchema() *NDCRestSchema {
 func (ndc NDCRestSchema) ToSchemaResponse() *schema.SchemaResponse {
 	functions := make([]schema.FunctionInfo, len(ndc.Functions))
 	for i, fn := range ndc.Functions {
-		functions[i] = fn.FunctionInfo
+		functions[i] = fn.Schema()
 	}
 	procedures := make([]schema.ProcedureInfo, len(ndc.Procedures))
 	for i, proc := range ndc.Procedures {
-		procedures[i] = proc.ProcedureInfo
+		procedures[i] = proc.Schema()
 	}
-
+	objectTypes := make(schema.SchemaResponseObjectTypes)
+	for key, object := range ndc.ObjectTypes {
+		objectTypes[key] = object.Schema()
+	}
 	return &schema.SchemaResponse{
-		Collections: ndc.Collections,
-		ObjectTypes: ndc.ObjectTypes,
+		Collections: []schema.CollectionInfo{},
 		ScalarTypes: ndc.ScalarTypes,
+		ObjectTypes: objectTypes,
 		Functions:   functions,
 		Procedures:  procedures,
 	}
@@ -174,8 +173,18 @@ type RequestBody struct {
 
 // RESTFunctionInfo extends NDC query function with OpenAPI REST information
 type RESTFunctionInfo struct {
-	Request             *Request `json:"request" mapstructure:"request" yaml:"request"`
-	schema.FunctionInfo `yaml:",inline"`
+	Request *Request `json:"request" mapstructure:"request" yaml:"request"`
+	// Any arguments that this collection requires
+	Arguments schema.FunctionInfoArguments `json:"arguments" yaml:"arguments" mapstructure:"arguments"`
+
+	// Description of the function
+	Description *string `json:"description,omitempty" yaml:"description,omitempty" mapstructure:"description,omitempty"`
+
+	// The name of the function
+	Name string `json:"name" yaml:"name" mapstructure:"name"`
+
+	// The name of the function's result type
+	ResultType schema.Type `json:"result_type" yaml:"result_type" mapstructure:"result_type"`
 }
 
 // UnmarshalJSON implements json.Unmarshaler.
@@ -199,14 +208,35 @@ func (j *RESTFunctionInfo) UnmarshalJSON(b []byte) error {
 		return err
 	}
 
-	j.FunctionInfo = function
+	j.Arguments = function.Arguments
+	j.Description = function.Description
+	j.Name = function.Name
+	j.ResultType = function.ResultType
+
 	return nil
+}
+
+// Schema returns the connector schema of the function
+func (j RESTFunctionInfo) Schema() schema.FunctionInfo {
+	return schema.FunctionInfo{
+		Name:        j.Name,
+		Arguments:   j.Arguments,
+		Description: j.Description,
+		ResultType:  j.ResultType,
+	}
 }
 
 // RESTProcedureInfo extends NDC mutation procedure with OpenAPI REST information
 type RESTProcedureInfo struct {
-	Request              *Request `json:"request" mapstructure:"request" yaml:"request"`
-	schema.ProcedureInfo `yaml:",inline"`
+	Request *Request `json:"request" mapstructure:"request" yaml:"request"`
+	// Any arguments that this collection requires
+	Arguments schema.ProcedureInfoArguments `json:"arguments" yaml:"arguments" mapstructure:"arguments"`
+	// Column description
+	Description *string `json:"description,omitempty" yaml:"description,omitempty" mapstructure:"description,omitempty"`
+	// The name of the procedure
+	Name string `json:"name" yaml:"name" mapstructure:"name"`
+	// The name of the result type
+	ResultType schema.Type `json:"result_type" yaml:"result_type" mapstructure:"result_type"`
 }
 
 // UnmarshalJSON implements json.Unmarshaler.
@@ -230,8 +260,61 @@ func (j *RESTProcedureInfo) UnmarshalJSON(b []byte) error {
 		return err
 	}
 
-	j.ProcedureInfo = procedure
+	j.Arguments = procedure.Arguments
+	j.Description = procedure.Description
+	j.Name = procedure.Name
+	j.ResultType = procedure.ResultType
 	return nil
+}
+
+// Schema returns the connector schema of the function
+func (j RESTProcedureInfo) Schema() schema.ProcedureInfo {
+	return schema.ProcedureInfo{
+		Name:        j.Name,
+		Arguments:   j.Arguments,
+		Description: j.Description,
+		ResultType:  j.ResultType,
+	}
+}
+
+// ObjectType represents the object type of rest schema
+type ObjectType struct {
+	// Description of this type
+	Description *string `json:"description,omitempty" yaml:"description,omitempty" mapstructure:"description,omitempty"`
+	// Fields defined on this object type
+	Fields map[string]ObjectField `json:"fields" yaml:"fields" mapstructure:"fields"`
+}
+
+// Schema returns schema the object field
+func (of ObjectType) Schema() schema.ObjectType {
+	result := schema.ObjectType{
+		Description: of.Description,
+		Fields:      schema.ObjectTypeFields{},
+	}
+
+	for key, field := range of.Fields {
+		result.Fields[key] = field.Schema()
+	}
+	return result
+}
+
+// ObjectField defined on this object type
+type ObjectField struct {
+	// The arguments available to the field - Matches implementation from CollectionInfo
+	Arguments schema.ObjectFieldArguments `json:"arguments,omitempty" yaml:"arguments,omitempty" mapstructure:"arguments,omitempty"`
+	// Description of this field
+	Description *string `json:"description,omitempty" yaml:"description,omitempty" mapstructure:"description,omitempty"`
+	// The type of this field
+	Type schema.Type `json:"type" yaml:"type" mapstructure:"type"`
+}
+
+// Schema returns schema the object field
+func (of ObjectField) Schema() schema.ObjectField {
+	return schema.ObjectField{
+		Arguments:   of.Arguments,
+		Description: of.Description,
+		Type:        of.Type,
+	}
 }
 
 func toPtr[V any](value V) *V {

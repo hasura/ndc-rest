@@ -125,7 +125,6 @@ func assertDeepEqual(t *testing.T, expected any, reality any, msgs ...string) {
 }
 
 func assertRESTSchemaEqual(t *testing.T, expected *schema.NDCRestSchema, output *schema.NDCRestSchema) {
-	assertDeepEqual(t, expected.Collections, output.Collections, "Collections")
 	assertDeepEqual(t, expected.Settings, output.Settings, "Settings")
 	assertDeepEqual(t, len(expected.ScalarTypes), len(output.ScalarTypes), "ScalarTypes")
 	for key, item := range expected.ScalarTypes {
@@ -140,7 +139,6 @@ func assertRESTSchemaEqual(t *testing.T, expected *schema.NDCRestSchema, output 
 		assertDeepEqual(t, item.Arguments, output.Procedures[i].Arguments, fmt.Sprintf("Procedures[%d].Arguments", i))
 		assertDeepEqual(t, item.Description, output.Procedures[i].Description, fmt.Sprintf("Procedures[%d].Description", i))
 		assertDeepEqual(t, item.Name, output.Procedures[i].Name, fmt.Sprintf("Procedures[%d].Name", i))
-		assertDeepEqual(t, item.ProcedureInfo, output.Procedures[i].ProcedureInfo, fmt.Sprintf("Procedures[%d].ProcedureInfo", i))
 		assertDeepEqual(t, item.Request, output.Procedures[i].Request, fmt.Sprintf("Procedures[%d].Request", i))
 		assertDeepEqual(t, item.ResultType, output.Procedures[i].ResultType, fmt.Sprintf("Procedures[%d].ResultType", i))
 	}
@@ -149,7 +147,6 @@ func assertRESTSchemaEqual(t *testing.T, expected *schema.NDCRestSchema, output 
 		assertDeepEqual(t, item.Arguments, output.Functions[i].Arguments, fmt.Sprintf("Functions[%d].Arguments", i))
 		assertDeepEqual(t, item.Description, output.Functions[i].Description, fmt.Sprintf("Functions[%d].Description", i))
 		assertDeepEqual(t, item.Name, output.Functions[i].Name, fmt.Sprintf("Functions[%d].Name", i))
-		assertDeepEqual(t, item.FunctionInfo, output.Functions[i].FunctionInfo, fmt.Sprintf("Functions[%d].ProcedureInfo", i))
 		assertDeepEqual(t, item.Request, output.Functions[i].Request, fmt.Sprintf("Functions[%d].Request", i))
 		assertDeepEqual(t, item.ResultType, output.Functions[i].ResultType, fmt.Sprintf("Functions[%d].ResultType", i))
 	}

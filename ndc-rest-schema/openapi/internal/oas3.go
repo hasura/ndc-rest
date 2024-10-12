@@ -353,9 +353,9 @@ func (oc *OAS3Builder) populateWriteSchemaType(schemaType schema.Type) (schema.T
 		if !ok {
 			return schemaType, ty.Name, false
 		}
-		writeObject := schema.ObjectType{
+		writeObject := rest.ObjectType{
 			Description: objectType.Description,
-			Fields:      make(schema.ObjectTypeFields),
+			Fields:      make(map[string]rest.ObjectField),
 		}
 		var hasWriteField bool
 		for key, field := range objectType.Fields {
@@ -363,7 +363,7 @@ func (oc *OAS3Builder) populateWriteSchemaType(schemaType schema.Type) (schema.T
 			if name == "" {
 				continue
 			}
-			writeObject.Fields[key] = schema.ObjectField{
+			writeObject.Fields[key] = rest.ObjectField{
 				Description: field.Description,
 				Type:        ut,
 			}

@@ -67,11 +67,9 @@ func (oc *oas3OperationBuilder) BuildFunction(itemGet *v3.Operation) (*rest.REST
 			Servers:    oc.builder.convertServers(itemGet.Servers),
 			Response:   *schemaResponse,
 		},
-		FunctionInfo: schema.FunctionInfo{
-			Name:       funcName,
-			Arguments:  oc.Arguments,
-			ResultType: resultType.Encode(),
-		},
+		Name:       funcName,
+		Arguments:  oc.Arguments,
+		ResultType: resultType.Encode(),
 	}
 
 	if itemGet.Summary != "" {
@@ -140,11 +138,9 @@ func (oc *oas3OperationBuilder) BuildProcedure(operation *v3.Operation) (*rest.R
 			RequestBody: reqBody,
 			Response:    *schemaResponse,
 		},
-		ProcedureInfo: schema.ProcedureInfo{
-			Name:       procName,
-			Arguments:  oc.Arguments,
-			ResultType: resultType.Encode(),
-		},
+		Name:       procName,
+		Arguments:  oc.Arguments,
+		ResultType: resultType.Encode(),
 	}
 
 	if operation.Summary != "" {

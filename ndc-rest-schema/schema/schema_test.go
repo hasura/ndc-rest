@@ -39,12 +39,10 @@ func TestDecodeRESTProcedureInfo(t *testing.T) {
 					URL:    "/pets",
 					Method: "post",
 				},
-				ProcedureInfo: schema.ProcedureInfo{
-					Arguments:   make(schema.ProcedureInfoArguments),
-					Description: toPtr("Create a pet"),
-					Name:        "createPets",
-					ResultType:  schema.NewNullableNamedType("Boolean").Encode(),
-				},
+				Arguments:   make(schema.ProcedureInfoArguments),
+				Description: toPtr("Create a pet"),
+				Name:        "createPets",
+				ResultType:  schema.NewNullableNamedType("Boolean").Encode(),
 			},
 		},
 	}
@@ -115,17 +113,15 @@ func TestDecodeRESTFunctionInfo(t *testing.T) {
 						},
 					},
 				},
-				FunctionInfo: schema.FunctionInfo{
-					Arguments: schema.FunctionInfoArguments{
-						"limit": schema.ArgumentInfo{
-							Description: toPtr("How many items to return at one time (max 100)"),
-							Type:        schema.NewNullableNamedType("Int").Encode(),
-						},
+				Arguments: schema.FunctionInfoArguments{
+					"limit": schema.ArgumentInfo{
+						Description: toPtr("How many items to return at one time (max 100)"),
+						Type:        schema.NewNullableNamedType("Int").Encode(),
 					},
-					Description: toPtr("List all pets"),
-					Name:        "listPets",
-					ResultType:  schema.NewArrayType(schema.NewNamedType("Pet")).Encode(),
 				},
+				Description: toPtr("List all pets"),
+				Name:        "listPets",
+				ResultType:  schema.NewArrayType(schema.NewNamedType("Pet")).Encode(),
 			},
 		},
 	}

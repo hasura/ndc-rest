@@ -78,11 +78,9 @@ func (oc *oas2OperationBuilder) BuildFunction(pathKey string, operation *v2.Oper
 			},
 			Security: convertSecurities(operation.Security),
 		},
-		FunctionInfo: schema.FunctionInfo{
-			Name:       funcName,
-			Arguments:  oc.Arguments,
-			ResultType: resultType.Encode(),
-		},
+		Name:       funcName,
+		Arguments:  oc.Arguments,
+		ResultType: resultType.Encode(),
 	}
 
 	if operation.Summary != "" {
@@ -149,11 +147,9 @@ func (oc *oas2OperationBuilder) BuildProcedure(pathKey string, method string, op
 				ContentType: responseContentType,
 			},
 		},
-		ProcedureInfo: schema.ProcedureInfo{
-			Name:       procName,
-			Arguments:  oc.Arguments,
-			ResultType: resultType.Encode(),
-		},
+		Name:       procName,
+		Arguments:  oc.Arguments,
+		ResultType: resultType.Encode(),
 	}
 
 	if operation.Summary != "" {
@@ -178,8 +174,8 @@ func (oc *oas2OperationBuilder) convertParameters(operation *v2.Operation, apiPa
 		Type:       "object",
 		Properties: make(map[string]rest.TypeSchema),
 	}
-	formDataObject := schema.ObjectType{
-		Fields: schema.ObjectTypeFields{},
+	formDataObject := rest.ObjectType{
+		Fields: map[string]rest.ObjectField{},
 	}
 	for _, param := range operation.Parameters {
 		if param == nil {
@@ -256,7 +252,7 @@ func (oc *oas2OperationBuilder) convertParameters(operation *v2.Operation, apiPa
 			}
 		case rest.InFormData:
 			if typeSchema != nil {
-				formDataObject.Fields[paramName] = schema.ObjectField{
+				formDataObject.Fields[paramName] = rest.ObjectField{
 					Type:        argument.Type,
 					Description: argument.Description,
 				}
