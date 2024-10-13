@@ -14,30 +14,11 @@
     },
     "version": "1.0.0"
   },
-  "collections": [],
   "functions": [
     {
       "request": {
         "url": "/posts",
         "method": "get",
-        "parameters": [
-          {
-            "name": "id",
-            "in": "query",
-            "schema": {
-              "type": "Int32",
-              "nullable": true
-            }
-          },
-          {
-            "name": "userId",
-            "in": "query",
-            "schema": {
-              "type": "Int32",
-              "nullable": true
-            }
-          }
-        ],
         "response": {
           "contentType": "application/json"
         }
@@ -51,6 +32,15 @@
               "name": "Int32",
               "type": "named"
             }
+          },
+          "rest": {
+            "name": "id",
+            "in": "query",
+            "schema": {
+              "type": [
+                "integer"
+              ]
+            }
           }
         },
         "userId": {
@@ -60,6 +50,15 @@
             "underlying_type": {
               "name": "Int32",
               "type": "named"
+            }
+          },
+          "rest": {
+            "name": "userId",
+            "in": "query",
+            "schema": {
+              "type": [
+                "integer"
+              ]
             }
           }
         }
@@ -78,15 +77,6 @@
       "request": {
         "url": "/posts/{id}",
         "method": "get",
-        "parameters": [
-          {
-            "name": "id",
-            "in": "path",
-            "schema": {
-              "type": "Int32"
-            }
-          }
-        ],
         "response": {
           "contentType": "application/json"
         }
@@ -97,6 +87,15 @@
           "type": {
             "name": "Int32",
             "type": "named"
+          },
+          "rest": {
+            "name": "id",
+            "in": "path",
+            "schema": {
+              "type": [
+                "integer"
+              ]
+            }
           }
         }
       },
@@ -111,15 +110,6 @@
       "request": {
         "url": "/posts/{id}/comments",
         "method": "get",
-        "parameters": [
-          {
-            "name": "id",
-            "in": "path",
-            "schema": {
-              "type": "Int32"
-            }
-          }
-        ],
         "response": {
           "contentType": "application/json"
         }
@@ -130,6 +120,15 @@
           "type": {
             "name": "Int32",
             "type": "named"
+          },
+          "rest": {
+            "name": "id",
+            "in": "path",
+            "schema": {
+              "type": [
+                "integer"
+              ]
+            }
           }
         }
       },
@@ -147,24 +146,6 @@
       "request": {
         "url": "/comments",
         "method": "get",
-        "parameters": [
-          {
-            "name": "id",
-            "in": "query",
-            "schema": {
-              "type": "Int32",
-              "nullable": true
-            }
-          },
-          {
-            "name": "postId",
-            "in": "query",
-            "schema": {
-              "type": "Int32",
-              "nullable": true
-            }
-          }
-        ],
         "response": {
           "contentType": "application/json"
         }
@@ -178,6 +159,15 @@
               "name": "Int32",
               "type": "named"
             }
+          },
+          "rest": {
+            "name": "id",
+            "in": "query",
+            "schema": {
+              "type": [
+                "integer"
+              ]
+            }
           }
         },
         "postId": {
@@ -187,6 +177,15 @@
             "underlying_type": {
               "name": "Int32",
               "type": "named"
+            }
+          },
+          "rest": {
+            "name": "postId",
+            "in": "query",
+            "schema": {
+              "type": [
+                "integer"
+              ]
             }
           }
         }
@@ -205,15 +204,6 @@
       "request": {
         "url": "/comments/{id}",
         "method": "get",
-        "parameters": [
-          {
-            "name": "id",
-            "in": "path",
-            "schema": {
-              "type": "Int32"
-            }
-          }
-        ],
         "response": {
           "contentType": "application/json"
         }
@@ -224,6 +214,15 @@
           "type": {
             "name": "Int32",
             "type": "named"
+          },
+          "rest": {
+            "name": "id",
+            "in": "path",
+            "schema": {
+              "type": [
+                "integer"
+              ]
+            }
           }
         }
       },
@@ -238,24 +237,6 @@
       "request": {
         "url": "/albums",
         "method": "get",
-        "parameters": [
-          {
-            "name": "id",
-            "in": "query",
-            "schema": {
-              "type": "Int32",
-              "nullable": true
-            }
-          },
-          {
-            "name": "userId",
-            "in": "query",
-            "schema": {
-              "type": "Int32",
-              "nullable": true
-            }
-          }
-        ],
         "response": {
           "contentType": "application/json"
         }
@@ -269,6 +250,15 @@
               "name": "Int32",
               "type": "named"
             }
+          },
+          "rest": {
+            "name": "id",
+            "in": "query",
+            "schema": {
+              "type": [
+                "integer"
+              ]
+            }
           }
         },
         "userId": {
@@ -278,6 +268,15 @@
             "underlying_type": {
               "name": "Int32",
               "type": "named"
+            }
+          },
+          "rest": {
+            "name": "userId",
+            "in": "query",
+            "schema": {
+              "type": [
+                "integer"
+              ]
             }
           }
         }
@@ -296,15 +295,6 @@
       "request": {
         "url": "/albums/{id}",
         "method": "get",
-        "parameters": [
-          {
-            "name": "id",
-            "in": "path",
-            "schema": {
-              "type": "Int32"
-            }
-          }
-        ],
         "response": {
           "contentType": "application/json"
         }
@@ -315,6 +305,15 @@
           "type": {
             "name": "Int32",
             "type": "named"
+          },
+          "rest": {
+            "name": "id",
+            "in": "path",
+            "schema": {
+              "type": [
+                "integer"
+              ]
+            }
           }
         }
       },
@@ -329,15 +328,6 @@
       "request": {
         "url": "/albums/{id}/photos",
         "method": "get",
-        "parameters": [
-          {
-            "name": "id",
-            "in": "path",
-            "schema": {
-              "type": "Int32"
-            }
-          }
-        ],
         "response": {
           "contentType": "application/json"
         }
@@ -348,6 +338,15 @@
           "type": {
             "name": "Int32",
             "type": "named"
+          },
+          "rest": {
+            "name": "id",
+            "in": "path",
+            "schema": {
+              "type": [
+                "integer"
+              ]
+            }
           }
         }
       },
@@ -365,24 +364,6 @@
       "request": {
         "url": "/photos",
         "method": "get",
-        "parameters": [
-          {
-            "name": "id",
-            "in": "query",
-            "schema": {
-              "type": "Int32",
-              "nullable": true
-            }
-          },
-          {
-            "name": "albumId",
-            "in": "query",
-            "schema": {
-              "type": "Int32",
-              "nullable": true
-            }
-          }
-        ],
         "response": {
           "contentType": "application/json"
         }
@@ -396,6 +377,15 @@
               "name": "Int32",
               "type": "named"
             }
+          },
+          "rest": {
+            "name": "albumId",
+            "in": "query",
+            "schema": {
+              "type": [
+                "integer"
+              ]
+            }
           }
         },
         "id": {
@@ -405,6 +395,15 @@
             "underlying_type": {
               "name": "Int32",
               "type": "named"
+            }
+          },
+          "rest": {
+            "name": "id",
+            "in": "query",
+            "schema": {
+              "type": [
+                "integer"
+              ]
             }
           }
         }
@@ -423,15 +422,6 @@
       "request": {
         "url": "/photos/{id}",
         "method": "get",
-        "parameters": [
-          {
-            "name": "id",
-            "in": "path",
-            "schema": {
-              "type": "Int32"
-            }
-          }
-        ],
         "response": {
           "contentType": "application/json"
         }
@@ -442,6 +432,15 @@
           "type": {
             "name": "Int32",
             "type": "named"
+          },
+          "rest": {
+            "name": "id",
+            "in": "path",
+            "schema": {
+              "type": [
+                "integer"
+              ]
+            }
           }
         }
       },
@@ -456,24 +455,6 @@
       "request": {
         "url": "/todos",
         "method": "get",
-        "parameters": [
-          {
-            "name": "id",
-            "in": "query",
-            "schema": {
-              "type": "Int32",
-              "nullable": true
-            }
-          },
-          {
-            "name": "userId",
-            "in": "query",
-            "schema": {
-              "type": "Int32",
-              "nullable": true
-            }
-          }
-        ],
         "response": {
           "contentType": "application/json"
         }
@@ -487,6 +468,15 @@
               "name": "Int32",
               "type": "named"
             }
+          },
+          "rest": {
+            "name": "id",
+            "in": "query",
+            "schema": {
+              "type": [
+                "integer"
+              ]
+            }
           }
         },
         "userId": {
@@ -496,6 +486,15 @@
             "underlying_type": {
               "name": "Int32",
               "type": "named"
+            }
+          },
+          "rest": {
+            "name": "userId",
+            "in": "query",
+            "schema": {
+              "type": [
+                "integer"
+              ]
             }
           }
         }
@@ -514,15 +513,6 @@
       "request": {
         "url": "/todos/{id}",
         "method": "get",
-        "parameters": [
-          {
-            "name": "id",
-            "in": "path",
-            "schema": {
-              "type": "Int32"
-            }
-          }
-        ],
         "response": {
           "contentType": "application/json"
         }
@@ -533,6 +523,15 @@
           "type": {
             "name": "Int32",
             "type": "named"
+          },
+          "rest": {
+            "name": "id",
+            "in": "path",
+            "schema": {
+              "type": [
+                "integer"
+              ]
+            }
           }
         }
       },
@@ -547,24 +546,6 @@
       "request": {
         "url": "/users",
         "method": "get",
-        "parameters": [
-          {
-            "name": "id",
-            "in": "query",
-            "schema": {
-              "type": "Int32",
-              "nullable": true
-            }
-          },
-          {
-            "name": "email",
-            "in": "query",
-            "schema": {
-              "type": "Int32",
-              "nullable": true
-            }
-          }
-        ],
         "response": {
           "contentType": "application/json"
         }
@@ -578,6 +559,15 @@
               "name": "Int32",
               "type": "named"
             }
+          },
+          "rest": {
+            "name": "email",
+            "in": "query",
+            "schema": {
+              "type": [
+                "integer"
+              ]
+            }
           }
         },
         "id": {
@@ -587,6 +577,15 @@
             "underlying_type": {
               "name": "Int32",
               "type": "named"
+            }
+          },
+          "rest": {
+            "name": "id",
+            "in": "query",
+            "schema": {
+              "type": [
+                "integer"
+              ]
             }
           }
         }
@@ -605,15 +604,6 @@
       "request": {
         "url": "/users/{id}",
         "method": "get",
-        "parameters": [
-          {
-            "name": "id",
-            "in": "path",
-            "schema": {
-              "type": "Int32"
-            }
-          }
-        ],
         "response": {
           "contentType": "application/json"
         }
@@ -624,6 +614,15 @@
           "type": {
             "name": "Int32",
             "type": "named"
+          },
+          "rest": {
+            "name": "id",
+            "in": "path",
+            "schema": {
+              "type": [
+                "integer"
+              ]
+            }
           }
         }
       },
@@ -661,6 +660,12 @@
               "name": "Int64",
               "type": "named"
             }
+          },
+          "rest": {
+            "type": [
+              "integer"
+            ],
+            "format": "int64"
           }
         },
         "title": {
@@ -670,6 +675,11 @@
               "name": "String",
               "type": "named"
             }
+          },
+          "rest": {
+            "type": [
+              "string"
+            ]
           }
         },
         "userId": {
@@ -679,6 +689,12 @@
               "name": "Int64",
               "type": "named"
             }
+          },
+          "rest": {
+            "type": [
+              "integer"
+            ],
+            "format": "int64"
           }
         }
       }
@@ -692,6 +708,11 @@
               "name": "String",
               "type": "named"
             }
+          },
+          "rest": {
+            "type": [
+              "string"
+            ]
           }
         },
         "email": {
@@ -701,6 +722,12 @@
               "name": "String",
               "type": "named"
             }
+          },
+          "rest": {
+            "type": [
+              "string"
+            ],
+            "format": "email"
           }
         },
         "id": {
@@ -710,6 +737,12 @@
               "name": "Int64",
               "type": "named"
             }
+          },
+          "rest": {
+            "type": [
+              "integer"
+            ],
+            "format": "int64"
           }
         },
         "name": {
@@ -719,6 +752,11 @@
               "name": "String",
               "type": "named"
             }
+          },
+          "rest": {
+            "type": [
+              "string"
+            ]
           }
         },
         "postId": {
@@ -728,6 +766,12 @@
               "name": "Int64",
               "type": "named"
             }
+          },
+          "rest": {
+            "type": [
+              "integer"
+            ],
+            "format": "int64"
           }
         }
       }
@@ -741,6 +785,12 @@
               "name": "Int64",
               "type": "named"
             }
+          },
+          "rest": {
+            "type": [
+              "integer"
+            ],
+            "format": "int64"
           }
         },
         "id": {
@@ -750,6 +800,12 @@
               "name": "Int64",
               "type": "named"
             }
+          },
+          "rest": {
+            "type": [
+              "integer"
+            ],
+            "format": "int64"
           }
         },
         "thumbnailUrl": {
@@ -759,6 +815,12 @@
               "name": "URI",
               "type": "named"
             }
+          },
+          "rest": {
+            "type": [
+              "string"
+            ],
+            "format": "uri"
           }
         },
         "title": {
@@ -768,6 +830,11 @@
               "name": "String",
               "type": "named"
             }
+          },
+          "rest": {
+            "type": [
+              "string"
+            ]
           }
         },
         "url": {
@@ -777,6 +844,12 @@
               "name": "URI",
               "type": "named"
             }
+          },
+          "rest": {
+            "type": [
+              "string"
+            ],
+            "format": "uri"
           }
         }
       }
@@ -790,6 +863,11 @@
               "name": "String",
               "type": "named"
             }
+          },
+          "rest": {
+            "type": [
+              "string"
+            ]
           }
         },
         "id": {
@@ -799,6 +877,12 @@
               "name": "Int64",
               "type": "named"
             }
+          },
+          "rest": {
+            "type": [
+              "integer"
+            ],
+            "format": "int64"
           }
         },
         "title": {
@@ -808,6 +892,11 @@
               "name": "String",
               "type": "named"
             }
+          },
+          "rest": {
+            "type": [
+              "string"
+            ]
           }
         },
         "userId": {
@@ -817,6 +906,12 @@
               "name": "Int64",
               "type": "named"
             }
+          },
+          "rest": {
+            "type": [
+              "integer"
+            ],
+            "format": "int64"
           }
         }
       }
@@ -830,6 +925,11 @@
               "name": "Boolean",
               "type": "named"
             }
+          },
+          "rest": {
+            "type": [
+              "boolean"
+            ]
           }
         },
         "id": {
@@ -839,6 +939,12 @@
               "name": "Int64",
               "type": "named"
             }
+          },
+          "rest": {
+            "type": [
+              "integer"
+            ],
+            "format": "int64"
           }
         },
         "title": {
@@ -848,6 +954,11 @@
               "name": "String",
               "type": "named"
             }
+          },
+          "rest": {
+            "type": [
+              "string"
+            ]
           }
         },
         "userId": {
@@ -857,6 +968,12 @@
               "name": "Int64",
               "type": "named"
             }
+          },
+          "rest": {
+            "type": [
+              "integer"
+            ],
+            "format": "int64"
           }
         }
       }
@@ -870,6 +987,11 @@
               "name": "UserAddress",
               "type": "named"
             }
+          },
+          "rest": {
+            "type": [
+              "object"
+            ]
           }
         },
         "company": {
@@ -879,6 +1001,11 @@
               "name": "UserCompany",
               "type": "named"
             }
+          },
+          "rest": {
+            "type": [
+              "object"
+            ]
           }
         },
         "email": {
@@ -888,6 +1015,12 @@
               "name": "String",
               "type": "named"
             }
+          },
+          "rest": {
+            "type": [
+              "string"
+            ],
+            "format": "email"
           }
         },
         "id": {
@@ -897,6 +1030,12 @@
               "name": "Int64",
               "type": "named"
             }
+          },
+          "rest": {
+            "type": [
+              "integer"
+            ],
+            "format": "int64"
           }
         },
         "name": {
@@ -906,6 +1045,11 @@
               "name": "String",
               "type": "named"
             }
+          },
+          "rest": {
+            "type": [
+              "string"
+            ]
           }
         },
         "phone": {
@@ -915,6 +1059,11 @@
               "name": "String",
               "type": "named"
             }
+          },
+          "rest": {
+            "type": [
+              "string"
+            ]
           }
         },
         "username": {
@@ -924,6 +1073,11 @@
               "name": "String",
               "type": "named"
             }
+          },
+          "rest": {
+            "type": [
+              "string"
+            ]
           }
         },
         "website": {
@@ -933,6 +1087,11 @@
               "name": "String",
               "type": "named"
             }
+          },
+          "rest": {
+            "type": [
+              "string"
+            ]
           }
         }
       }
@@ -946,6 +1105,11 @@
               "name": "String",
               "type": "named"
             }
+          },
+          "rest": {
+            "type": [
+              "string"
+            ]
           }
         },
         "geo": {
@@ -955,6 +1119,11 @@
               "name": "UserAddressGeo",
               "type": "named"
             }
+          },
+          "rest": {
+            "type": [
+              "object"
+            ]
           }
         },
         "street": {
@@ -964,6 +1133,11 @@
               "name": "String",
               "type": "named"
             }
+          },
+          "rest": {
+            "type": [
+              "string"
+            ]
           }
         },
         "suite": {
@@ -973,6 +1147,11 @@
               "name": "String",
               "type": "named"
             }
+          },
+          "rest": {
+            "type": [
+              "string"
+            ]
           }
         },
         "zipcode": {
@@ -982,6 +1161,11 @@
               "name": "String",
               "type": "named"
             }
+          },
+          "rest": {
+            "type": [
+              "string"
+            ]
           }
         }
       }
@@ -995,6 +1179,11 @@
               "name": "String",
               "type": "named"
             }
+          },
+          "rest": {
+            "type": [
+              "string"
+            ]
           }
         },
         "lng": {
@@ -1004,6 +1193,11 @@
               "name": "String",
               "type": "named"
             }
+          },
+          "rest": {
+            "type": [
+              "string"
+            ]
           }
         }
       }
@@ -1017,6 +1211,11 @@
               "name": "String",
               "type": "named"
             }
+          },
+          "rest": {
+            "type": [
+              "string"
+            ]
           }
         },
         "catchPhrase": {
@@ -1026,6 +1225,11 @@
               "name": "String",
               "type": "named"
             }
+          },
+          "rest": {
+            "type": [
+              "string"
+            ]
           }
         },
         "name": {
@@ -1035,6 +1239,11 @@
               "name": "String",
               "type": "named"
             }
+          },
+          "rest": {
+            "type": [
+              "string"
+            ]
           }
         }
       }
@@ -1046,10 +1255,7 @@
         "url": "/posts",
         "method": "post",
         "requestBody": {
-          "contentType": "application/json",
-          "schema": {
-            "type": "Post"
-          }
+          "contentType": "application/json"
         },
         "response": {
           "contentType": "application/json"
@@ -1061,6 +1267,12 @@
           "type": {
             "name": "Post",
             "type": "named"
+          },
+          "rest": {
+            "in": "body",
+            "schema": {
+              "type": null
+            }
           }
         }
       },
@@ -1075,20 +1287,8 @@
       "request": {
         "url": "/posts/{id}",
         "method": "put",
-        "parameters": [
-          {
-            "name": "id",
-            "in": "path",
-            "schema": {
-              "type": "Int32"
-            }
-          }
-        ],
         "requestBody": {
-          "contentType": "application/json",
-          "schema": {
-            "type": "Post"
-          }
+          "contentType": "application/json"
         },
         "response": {
           "contentType": "application/json"
@@ -1100,6 +1300,12 @@
           "type": {
             "name": "Post",
             "type": "named"
+          },
+          "rest": {
+            "in": "body",
+            "schema": {
+              "type": null
+            }
           }
         },
         "id": {
@@ -1107,6 +1313,15 @@
           "type": {
             "name": "Int32",
             "type": "named"
+          },
+          "rest": {
+            "name": "id",
+            "in": "path",
+            "schema": {
+              "type": [
+                "integer"
+              ]
+            }
           }
         }
       },
@@ -1121,20 +1336,8 @@
       "request": {
         "url": "/posts/{id}",
         "method": "patch",
-        "parameters": [
-          {
-            "name": "id",
-            "in": "path",
-            "schema": {
-              "type": "Int32"
-            }
-          }
-        ],
         "requestBody": {
-          "contentType": "application/json",
-          "schema": {
-            "type": "Post"
-          }
+          "contentType": "application/json"
         },
         "response": {
           "contentType": "application/json"
@@ -1146,6 +1349,12 @@
           "type": {
             "name": "Post",
             "type": "named"
+          },
+          "rest": {
+            "in": "body",
+            "schema": {
+              "type": null
+            }
           }
         },
         "id": {
@@ -1153,6 +1362,15 @@
           "type": {
             "name": "Int32",
             "type": "named"
+          },
+          "rest": {
+            "name": "id",
+            "in": "path",
+            "schema": {
+              "type": [
+                "integer"
+              ]
+            }
           }
         }
       },
@@ -1167,15 +1385,6 @@
       "request": {
         "url": "/posts/{id}",
         "method": "delete",
-        "parameters": [
-          {
-            "name": "id",
-            "in": "path",
-            "schema": {
-              "type": "Int32"
-            }
-          }
-        ],
         "response": {
           "contentType": "application/json"
         }
@@ -1186,6 +1395,15 @@
           "type": {
             "name": "Int32",
             "type": "named"
+          },
+          "rest": {
+            "name": "id",
+            "in": "path",
+            "schema": {
+              "type": [
+                "integer"
+              ]
+            }
           }
         }
       },

@@ -6,7 +6,7 @@ toolchain go1.23.1
 
 require (
 	github.com/hasura/ndc-rest/ndc-rest-schema v0.2.5
-	github.com/hasura/ndc-sdk-go v1.5.1
+	github.com/hasura/ndc-sdk-go v1.5.2-0.20241013153211-ca0e28914f0c
 	github.com/lmittmann/tint v1.0.5
 	go.opentelemetry.io/otel v1.31.0
 	go.opentelemetry.io/otel/trace v1.31.0

@@ -16,10 +16,14 @@ import (
 	"github.com/hasura/ndc-sdk-go/utils"
 )
 
-func (c *RESTConnector) createRequest(rawRequest *rest.Request, endpoint string, headers http.Header, arguments map[string]any) (*internal.RetryableRequest, error) {
+func (c *RESTConnector) createRequest(operation *rest.OperationInfo, endpoint string, headers http.Header, arguments map[string]any) (*internal.RetryableRequest, error) {
 	var buffer io.ReadSeeker
+
+	rawRequest := operation.Request
 	contentType := contentTypeJSON
-	bodyData, ok := arguments["body"]
+	bodyInfo, infoOk := operation.Arguments[rest.BodyKey]
+	bodyData, ok := arguments[rest.BodyKey]
+
 	if rawRequest.RequestBody != nil {
 		contentType = rawRequest.RequestBody.ContentType
 		if ok && bodyData != nil {
@@ -38,14 +42,14 @@ func (c *RESTConnector) createRequest(rawRequest *rest.Request, endpoint string,
 			} else if strings.HasPrefix(contentType, "text/") {
 				buffer = bytes.NewReader([]byte(fmt.Sprint(bodyData)))
 			} else if strings.HasPrefix(contentType, "multipart/") {
-				buffer, contentType, err = c.createMultipartForm(rawRequest.RequestBody, arguments)
+				buffer, contentType, err = c.createMultipartForm(rawRequest.RequestBody, &bodyInfo, arguments)
 				if err != nil {
 					return nil, err
 				}
 			} else {
 				switch contentType {
 				case rest.ContentTypeFormURLEncoded:
-					buffer, err = c.createFormURLEncoded(rawRequest.RequestBody, bodyData)
+					buffer, err = c.createFormURLEncoded(rawRequest.RequestBody, &bodyInfo, bodyData)
 					if err != nil {
 						return nil, err
 					}
@@ -60,7 +64,7 @@ func (c *RESTConnector) createRequest(rawRequest *rest.Request, endpoint string,
 					return nil, fmt.Errorf("unsupported content type %s", contentType)
 				}
 			}
-		} else if rawRequest.RequestBody.Schema != nil && !rawRequest.RequestBody.Schema.Nullable {
+		} else if infoOk && bodyInfo.Rest != nil && bodyInfo.Rest.Schema != nil && !bodyInfo.Rest.Schema.Nullable {
 			return nil, errors.New("request body is required")
 		}
 	}
@@ -78,8 +82,8 @@ func (c *RESTConnector) createRequest(rawRequest *rest.Request, endpoint string,
 	return request, nil
 }
 
-func (c *RESTConnector) createFormURLEncoded(reqBody *rest.RequestBody, bodyData any) (io.ReadSeeker, error) {
-	queryParams, err := c.encodeParameterValues(reqBody.Schema, bodyData, []string{"body"})
+func (c *RESTConnector) createFormURLEncoded(reqBody *rest.RequestBody, bodyInfo *rest.ArgumentInfo, bodyData any) (io.ReadSeeker, error) {
+	queryParams, err := c.encodeParameterValues(bodyInfo.Rest.Schema, bodyData, []string{"body"})
 	if err != nil {
 		return nil, err
 	}
@@ -104,7 +108,7 @@ func (c *RESTConnector) createFormURLEncoded(reqBody *rest.RequestBody, bodyData
 	return bytes.NewReader([]byte(rawQuery)), nil
 }
 
-func (c *RESTConnector) createMultipartForm(reqBody *rest.RequestBody, arguments map[string]any) (io.ReadSeeker, string, error) {
+func (c *RESTConnector) createMultipartForm(reqBody *rest.RequestBody, bodyInfo *rest.ArgumentInfo, arguments map[string]any) (io.ReadSeeker, string, error) {
 	bodyData := arguments["body"]
 
 	buffer := new(bytes.Buffer)
@@ -113,12 +117,12 @@ func (c *RESTConnector) createMultipartForm(reqBody *rest.RequestBody, arguments
 	if !ok {
 		return nil, "", fmt.Errorf("failed to decode request body, expect object, got: %v", bodyData)
 	}
-	if reqBody.Schema.Type != "object" || len(reqBody.Schema.Properties) == 0 {
+	if slices.Contains(bodyInfo.Rest.Schema.Type, "object") || len(bodyInfo.Rest.Schema.Properties) == 0 {
 		return nil, "", errors.New("invalid object schema for multipart")
 	}
 
 	for key, value := range dataMap {
-		prop, ok := reqBody.Schema.Properties[key]
+		prop, ok := bodyInfo.Rest.Schema.Properties[key]
 		if !ok {
 			continue
 		}
@@ -158,11 +162,15 @@ func (c *RESTConnector) evalMultipartFieldValue(w *internal.MultipartWriter, arg
 		}
 	}
 
-	if slices.Contains([]string{"object", "array"}, typeSchema.Type) && (encObject == nil || slices.Contains(encObject.ContentType, rest.ContentTypeJSON)) {
+	var typeName string
+	if len(typeSchema.Type) > 0 {
+		typeName = typeSchema.Type[0]
+	}
+	if slices.Contains([]string{"object", "array"}, typeName) && (encObject == nil || slices.Contains(encObject.ContentType, rest.ContentTypeJSON)) {
 		return w.WriteJSON(name, value, headers)
 	}
 
-	switch typeSchema.Type {
+	switch typeName {
 	case "file", string(rest.ScalarBinary):
 		return w.WriteDataURI(name, value, headers)
 	default:
@@ -185,7 +193,7 @@ func (c *RESTConnector) evalMultipartFieldValue(w *internal.MultipartWriter, arg
 				fieldName = keys.String()
 			}
 
-			if typeSchema.Type == "array" || len(values) > 1 {
+			if typeName == "array" || len(values) > 1 {
 				fieldName += "[]"
 				for _, v := range values {
 					if err = w.WriteField(fieldName, v, headers); err != nil {
@@ -234,8 +242,10 @@ func getRequestUploadBody(rawRequest *rest.Request) *rest.RequestBody {
 	if rawRequest.RequestBody.ContentType == "application/octet-stream" {
 		return rawRequest.RequestBody
 	}
-	if rawRequest.RequestBody.Schema != nil && rawRequest.RequestBody.Schema.Type == string(rest.ScalarBinary) {
-		return rawRequest.RequestBody
-	}
+
+	// TODO
+	// if rawRequest.RequestBody.Schema != nil && slices.Contains(rawRequest.RequestBody.Schema.Type, string(rest.ScalarBinary)) {
+	// 	return rawRequest.RequestBody
+	// }
 	return nil
 }

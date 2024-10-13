@@ -226,7 +226,10 @@ func (oc *OAS2Builder) getSchemaTypeFromProxy(schemaProxy *base.SchemaProxy, nul
 	if refName != "" && len(innerSchema.Type) > 0 && innerSchema.Type[0] == "object" {
 		refName = utils.ToPascalCase(refName)
 		ndcType = schema.NewNamedType(refName)
-		typeSchema = &rest.TypeSchema{Type: refName}
+		typeSchema = &rest.TypeSchema{
+			// TODO: remove type
+			// Type: refName,
+		}
 	} else {
 		if innerSchema.Title != "" && !strings.Contains(innerSchema.Title, " ") {
 			fieldPaths = []string{utils.ToPascalCase(innerSchema.Title)}
@@ -237,7 +240,6 @@ func (oc *OAS2Builder) getSchemaTypeFromProxy(schemaProxy *base.SchemaProxy, nul
 		}
 	}
 	if nullable {
-		typeSchema.Nullable = true
 		if !isNullableType(ndcType) {
 			ndcType = schema.NewNullableType(ndcType)
 		}
@@ -253,7 +255,7 @@ func (oc *OAS2Builder) getSchemaTypeFromParameter(param *v2.Parameter, apiPath s
 			return nil, errParameterSchemaEmpty(fieldPaths)
 		}
 		result = oc.buildScalarJSON()
-	} else if isPrimitiveScalar(param.Type) {
+	} else if isPrimitiveScalar([]string{param.Type}) {
 		scalarName := getScalarFromType(oc.schema, []string{param.Type}, param.Format, param.Enum, oc.trimPathPrefix(apiPath), fieldPaths)
 		result = schema.NewNamedType(scalarName)
 	} else {
@@ -293,7 +295,7 @@ func (oc *OAS2Builder) getSchemaType(typeSchema *base.Schema, apiPath string, fi
 		if _, ok := oc.schema.ScalarTypes[scalarName]; !ok {
 			oc.schema.ScalarTypes[scalarName] = *defaultScalarTypes[rest.ScalarJSON]
 		}
-		typeResult = createSchemaFromOpenAPISchema(typeSchema, scalarName)
+		typeResult = createSchemaFromOpenAPISchema(typeSchema)
 		return schema.NewNamedType(scalarName), typeResult, nil
 	}
 
@@ -303,16 +305,15 @@ func (oc *OAS2Builder) getSchemaType(typeSchema *base.Schema, apiPath string, fi
 			return nil, nil, errParameterSchemaEmpty(fieldPaths)
 		}
 		result = oc.buildScalarJSON()
-		typeResult = createSchemaFromOpenAPISchema(typeSchema, string(rest.ScalarJSON))
+		typeResult = createSchemaFromOpenAPISchema(typeSchema)
 	} else {
 		typeName := typeSchema.Type[0]
-		if isPrimitiveScalar(typeName) {
+		if isPrimitiveScalar(typeSchema.Type) {
 			scalarName := getScalarFromType(oc.schema, typeSchema.Type, typeSchema.Format, typeSchema.Enum, oc.trimPathPrefix(apiPath), fieldPaths)
 			result = schema.NewNamedType(scalarName)
-			typeResult = createSchemaFromOpenAPISchema(typeSchema, scalarName)
+			typeResult = createSchemaFromOpenAPISchema(typeSchema)
 		} else {
-			typeResult = createSchemaFromOpenAPISchema(typeSchema, "")
-			typeResult.Type = typeName
+			typeResult = createSchemaFromOpenAPISchema(typeSchema)
 			switch typeName {
 			case "object":
 				refName := utils.StringSliceToPascalCase(fieldPaths)
@@ -328,7 +329,6 @@ func (oc *OAS2Builder) getSchemaType(typeSchema *base.Schema, apiPath string, fi
 						object.Description = &typeSchema.Description
 					}
 
-					typeResult.Properties = make(map[string]rest.TypeSchema)
 					for prop := typeSchema.Properties.First(); prop != nil; prop = prop.Next() {
 						propName := prop.Key()
 						nullable := !slices.Contains(typeSchema.Required, propName)
@@ -337,13 +337,14 @@ func (oc *OAS2Builder) getSchemaType(typeSchema *base.Schema, apiPath string, fi
 							return nil, nil, err
 						}
 						objField := rest.ObjectField{
-							Type: propType.Encode(),
+							ObjectField: schema.ObjectField{
+								Type: propType.Encode(),
+							},
+							Rest: propApiSchema,
 						}
 						if propApiSchema.Description != "" {
 							objField.Description = &propApiSchema.Description
 						}
-						propApiSchema.Nullable = nullable
-						typeResult.Properties[propName] = *propApiSchema
 						object.Fields[propName] = objField
 
 						oc.typeUsageCounter.Add(getNamedType(propType, true, ""), 1)

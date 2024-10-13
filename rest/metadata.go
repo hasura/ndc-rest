@@ -9,7 +9,7 @@ import (
 type RESTMetadataCollection []RESTMetadata
 
 // GetFunction gets the NDC function by name
-func (rms RESTMetadataCollection) GetFunction(name string) (*rest.RESTFunctionInfo, *rest.NDCRestSettings, error) {
+func (rms RESTMetadataCollection) GetFunction(name string) (*rest.OperationInfo, *rest.NDCRestSettings, error) {
 	for _, rm := range rms {
 		fn := rm.GetFunction(name)
 		if fn != nil {
@@ -20,7 +20,7 @@ func (rms RESTMetadataCollection) GetFunction(name string) (*rest.RESTFunctionIn
 }
 
 // GetProcedure gets the NDC procedure by name
-func (rms RESTMetadataCollection) GetProcedure(name string) (*rest.RESTProcedureInfo, *rest.NDCRestSettings, error) {
+func (rms RESTMetadataCollection) GetProcedure(name string) (*rest.OperationInfo, *rest.NDCRestSettings, error) {
 	for _, rm := range rms {
 		fn := rm.GetProcedure(name)
 		if fn != nil {
@@ -33,12 +33,12 @@ func (rms RESTMetadataCollection) GetProcedure(name string) (*rest.RESTProcedure
 // RESTMetadata stores REST schema with handy methods to build requests
 type RESTMetadata struct {
 	settings   *rest.NDCRestSettings
-	functions  map[string]rest.RESTFunctionInfo
-	procedures map[string]rest.RESTProcedureInfo
+	functions  map[string]rest.OperationInfo
+	procedures map[string]rest.OperationInfo
 }
 
 // GetFunction gets the NDC function by name
-func (rm RESTMetadata) GetFunction(name string) *rest.RESTFunctionInfo {
+func (rm RESTMetadata) GetFunction(name string) *rest.OperationInfo {
 	fn, ok := rm.functions[name]
 	if !ok {
 		return nil
@@ -48,7 +48,7 @@ func (rm RESTMetadata) GetFunction(name string) *rest.RESTFunctionInfo {
 }
 
 // GetProcedure gets the NDC procedure by name
-func (rm RESTMetadata) GetProcedure(name string) *rest.RESTProcedureInfo {
+func (rm RESTMetadata) GetProcedure(name string) *rest.OperationInfo {
 	fn, ok := rm.procedures[name]
 	if !ok {
 		return nil

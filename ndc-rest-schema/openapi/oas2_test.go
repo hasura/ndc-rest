@@ -7,6 +7,7 @@ import (
 	"testing"
 
 	"github.com/hasura/ndc-rest/ndc-rest-schema/schema"
+	"gotest.tools/v3/assert"
 )
 
 func TestOpenAPIv2ToRESTSchema(t *testing.T) {
@@ -17,7 +18,7 @@ func TestOpenAPIv2ToRESTSchema(t *testing.T) {
 		Options  ConvertOptions
 		Expected string
 	}{
-		// go run . convert -f ./openapi/testdata/jsonplaceholder/swagger.json -o ./openapi/testdata/jsonplaceholder/expected.json --spec oas2 --trim-prefix /v1
+		// go run ./ndc-rest-schema convert -f ./ndc-rest-schema/openapi/testdata/jsonplaceholder/swagger.json -o ./ndc-rest-schema/openapi/testdata/jsonplaceholder/expected.json --spec oas2 --trim-prefix /v1
 		{
 			Name:     "jsonplaceholder",
 			Source:   "testdata/jsonplaceholder/swagger.json",
@@ -55,12 +56,12 @@ func TestOpenAPIv2ToRESTSchema(t *testing.T) {
 	for _, tc := range testCases {
 		t.Run(tc.Name, func(t *testing.T) {
 			sourceBytes, err := os.ReadFile(tc.Source)
-			assertNoError(t, err)
+			assert.NilError(t, err)
 
 			expectedBytes, err := os.ReadFile(tc.Expected)
-			assertNoError(t, err)
+			assert.NilError(t, err)
 			var expected schema.NDCRestSchema
-			assertNoError(t, json.Unmarshal(expectedBytes, &expected))
+			assert.NilError(t, json.Unmarshal(expectedBytes, &expected))
 
 			output, errs := OpenAPIv2ToNDCSchema(sourceBytes, tc.Options)
 			if output == nil {
@@ -74,6 +75,6 @@ func TestOpenAPIv2ToRESTSchema(t *testing.T) {
 
 	t.Run("failure_empty", func(t *testing.T) {
 		_, err := OpenAPIv2ToNDCSchema([]byte(""), ConvertOptions{})
-		assertError(t, errors.Join(err...), "there is nothing in the spec, it's empty")
+		assert.ErrorContains(t, errors.Join(err...), "there is nothing in the spec, it's empty")
 	})
 }

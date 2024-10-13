@@ -6,6 +6,7 @@ import (
 	"testing"
 
 	"gopkg.in/yaml.v3"
+	"gotest.tools/v3/assert"
 )
 
 func TestJson2Yaml(t *testing.T) {
@@ -46,11 +47,11 @@ func TestJson2Yaml(t *testing.T) {
 			}, nopLogger)
 
 			if tc.errorMsg != "" {
-				assertError(t, err, tc.errorMsg)
+				assert.ErrorContains(t, err, tc.errorMsg)
 				return
 			}
 
-			assertNoError(t, err)
+			assert.NilError(t, err)
 
 			if tc.noOutput {
 				return

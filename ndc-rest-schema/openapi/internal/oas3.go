@@ -304,7 +304,6 @@ func (oc *OAS3Builder) transformWriteSchema() {
 		}
 	}
 	for _, proc := range oc.schema.Procedures {
-		var bodyName string
 		for key, arg := range proc.Arguments {
 			ty, name, _ := oc.populateWriteSchemaType(arg.Type)
 			if name == "" {
@@ -312,13 +311,6 @@ func (oc *OAS3Builder) transformWriteSchema() {
 			}
 			arg.Type = ty
 			proc.Arguments[key] = arg
-			if key == "body" {
-				bodyName = name
-			}
-		}
-
-		if bodyName != "" && proc.Request.RequestBody != nil && proc.Request.RequestBody.Schema != nil && !isOASType(proc.Request.RequestBody.Schema.Type) {
-			proc.Request.RequestBody.Schema.Type = bodyName
 		}
 	}
 }
@@ -364,8 +356,10 @@ func (oc *OAS3Builder) populateWriteSchemaType(schemaType schema.Type) (schema.T
 				continue
 			}
 			writeObject.Fields[key] = rest.ObjectField{
-				Description: field.Description,
-				Type:        ut,
+				ObjectField: schema.ObjectField{
+					Description: field.Description,
+					Type:        ut,
+				},
 			}
 			if isInput {
 				hasWriteField = true

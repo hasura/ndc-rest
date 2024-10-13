@@ -39,8 +39,8 @@ github.com/google/go-cmp v0.5.5/go.mod h1:v8dTdLbMG2kIc/vJvl+f65V22dbkXbowE6jgT/
 github.com/google/go-cmp v0.6.0 h1:ofyhxvXcZhMsU5ulbFiLKl/XBFqE1GSq7atu8tAmTRI=
 github.com/google/go-cmp v0.6.0/go.mod h1:17dUlkBOakJ0+DkrSSNjCkIjxS6bF9zb3elmeNGIjoY=
 github.com/google/pprof v0.0.0-20210407192527-94a9f03dee38/go.mod h1:kpwsk12EmLew5upagYY7GY0pfYCcupk39gWOCRROcvE=
-github.com/hasura/ndc-sdk-go v1.5.1 h1:RYcT/PpKcfeuugG575tFv1wogEMI040LoC5Q/8ANY9o=
-github.com/hasura/ndc-sdk-go v1.5.1/go.mod h1:oik0JrwuN5iZwZjZJzIRMw9uO2xDJbCXwhS1GgaRejk=
+github.com/hasura/ndc-sdk-go v1.5.2-0.20241013153211-ca0e28914f0c h1:C+2uejHoZbaU7AuVGP3xCaT+l0HPA6Mgvcu1E5eqbLA=
+github.com/hasura/ndc-sdk-go v1.5.2-0.20241013153211-ca0e28914f0c/go.mod h1:oik0JrwuN5iZwZjZJzIRMw9uO2xDJbCXwhS1GgaRejk=
 github.com/hexops/gotextdiff v1.0.3 h1:gitA9+qJrrTCsiCl7+kh75nPqQt1cx4ZkudSTLoUqJM=
 github.com/hexops/gotextdiff v1.0.3/go.mod h1:pSWU5MAI3yDq+fZBTazCSJysOMbxWL1BSow5/V2vxeg=
 github.com/hpcloud/tail v1.0.0/go.mod h1:ab1qPbhIpdTxEkNHXyeSf5vhxWSCs/tWer42PpOxQnU=

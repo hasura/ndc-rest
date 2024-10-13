@@ -67,10 +67,9 @@ func buildSchemaFile(configDir string, conf *ConfigItem, logger *slog.Logger) (*
 
 // ApplyNDCRestSchemas applies slice of raw NDC REST schemas to the connector
 func (c *RESTConnector) ApplyNDCRestSchemas(schemas []NDCRestSchemaWithName) map[string][]string {
-	ndcSchema := &schema.SchemaResponse{
-		Collections: []schema.CollectionInfo{},
+	ndcSchema := &rest.NDCRestSchema{
 		ScalarTypes: make(schema.SchemaResponseScalarTypes),
-		ObjectTypes: make(schema.SchemaResponseObjectTypes),
+		ObjectTypes: make(map[string]rest.ObjectType),
 	}
 	errors := make(map[string][]string)
 
@@ -153,8 +152,8 @@ func (c *RESTConnector) ApplyNDCRestSchemas(schemas []NDCRestSchemaWithName) map
 		}
 		meta := RESTMetadata{
 			settings:   settings,
-			functions:  map[string]rest.RESTFunctionInfo{},
-			procedures: map[string]rest.RESTProcedureInfo{},
+			functions:  map[string]rest.OperationInfo{},
+			procedures: map[string]rest.OperationInfo{},
 		}
 		var errs []string
 
@@ -167,14 +166,14 @@ func (c *RESTConnector) ApplyNDCRestSchemas(schemas []NDCRestSchemaWithName) map
 		}
 		for name, object := range item.schema.ObjectTypes {
 			if _, ok := ndcSchema.ObjectTypes[name]; !ok {
-				ndcSchema.ObjectTypes[name] = object.Schema()
+				ndcSchema.ObjectTypes[name] = object
 			} else {
 				slog.Warn(fmt.Sprintf("Object type %s is conflicted", name))
 			}
 		}
 
-		var functionSchemas []schema.FunctionInfo
-		var procedureSchemas []schema.ProcedureInfo
+		var functionSchemas []*rest.OperationInfo
+		var procedureSchemas []*rest.OperationInfo
 		for _, fnItem := range item.schema.Functions {
 			if fnItem.Request == nil || fnItem.Request.URL == "" {
 				continue
@@ -184,7 +183,7 @@ func (c *RESTConnector) ApplyNDCRestSchemas(schemas []NDCRestSchemaWithName) map
 				errs = append(errs, fmt.Sprintf("function %s: %s", fnItem.Name, err))
 				continue
 			}
-			fn := rest.RESTFunctionInfo{
+			fn := rest.OperationInfo{
 				Request:     req,
 				Arguments:   fnItem.Arguments,
 				Description: fnItem.Description,
@@ -192,7 +191,7 @@ func (c *RESTConnector) ApplyNDCRestSchemas(schemas []NDCRestSchemaWithName) map
 				ResultType:  fnItem.ResultType,
 			}
 			meta.functions[fnItem.Name] = fn
-			functionSchemas = append(functionSchemas, fn.Schema())
+			functionSchemas = append(functionSchemas, &fn)
 		}
 
 		for _, procItem := range item.schema.Procedures {
@@ -204,14 +203,14 @@ func (c *RESTConnector) ApplyNDCRestSchemas(schemas []NDCRestSchemaWithName) map
 				errs = append(errs, fmt.Sprintf("procedure %s: %s", procItem.Name, err))
 				continue
 			}
-			meta.procedures[procItem.Name] = rest.RESTProcedureInfo{
+			meta.procedures[procItem.Name] = rest.OperationInfo{
 				Request:     req,
 				Name:        procItem.Name,
 				Arguments:   procItem.Arguments,
 				Description: procItem.Description,
 				ResultType:  procItem.ResultType,
 			}
-			procedureSchemas = append(procedureSchemas, procItem.Schema())
+			procedureSchemas = append(procedureSchemas, procItem)
 		}
 
 		if len(errs) > 0 {
@@ -224,7 +223,7 @@ func (c *RESTConnector) ApplyNDCRestSchemas(schemas []NDCRestSchemaWithName) map
 		c.metadata = append(c.metadata, meta)
 	}
 
-	schemaBytes, err := json.Marshal(ndcSchema)
+	schemaBytes, err := json.Marshal(ndcSchema.ToSchemaResponse())
 	if err != nil {
 		errors["schema"] = []string{err.Error()}
 	}
@@ -233,7 +232,7 @@ func (c *RESTConnector) ApplyNDCRestSchemas(schemas []NDCRestSchemaWithName) map
 		return errors
 	}
 
-	c.schema = &schema.SchemaResponse{
+	c.schema = &rest.NDCRestSchema{
 		ScalarTypes: ndcSchema.ScalarTypes,
 		ObjectTypes: ndcSchema.ObjectTypes,
 	}
@@ -279,9 +278,11 @@ func buildRESTArguments(restSchema *rest.NDCRestSchema, conf *ConfigItem) {
 
 	restSchema.ObjectTypes[internal.RESTSingleOptionsObjectName] = internal.SingleObjectType
 
-	restSingleOptionsArgument := schema.ArgumentInfo{
-		Description: internal.SingleObjectType.Description,
-		Type:        schema.NewNullableNamedType(internal.RESTSingleOptionsObjectName).Encode(),
+	restSingleOptionsArgument := rest.ArgumentInfo{
+		ArgumentInfo: schema.ArgumentInfo{
+			Description: internal.SingleObjectType.Description,
+			Type:        schema.NewNullableNamedType(internal.RESTSingleOptionsObjectName).Encode(),
+		},
 	}
 
 	for _, fn := range restSchema.Functions {
@@ -301,16 +302,22 @@ func buildRESTArguments(restSchema *rest.NDCRestSchema, conf *ConfigItem) {
 		Description: utils.ToPtr("The error response of the remote request"),
 		Fields: map[string]rest.ObjectField{
 			"server": {
-				Description: utils.ToPtr("Identity of the remote server"),
-				Type:        schema.NewNamedType(internal.RESTServerIDScalarName).Encode(),
+				ObjectField: schema.ObjectField{
+					Description: utils.ToPtr("Identity of the remote server"),
+					Type:        schema.NewNamedType(internal.RESTServerIDScalarName).Encode(),
+				},
 			},
 			"message": {
-				Description: utils.ToPtr("An optional human-readable summary of the error"),
-				Type:        schema.NewNullableType(schema.NewNamedType(string(rest.ScalarString))).Encode(),
+				ObjectField: schema.ObjectField{
+					Description: utils.ToPtr("An optional human-readable summary of the error"),
+					Type:        schema.NewNullableType(schema.NewNamedType(string(rest.ScalarString))).Encode(),
+				},
 			},
 			"details": {
-				Description: utils.ToPtr("Any additional structured information about the error"),
-				Type:        schema.NewNullableType(schema.NewNamedType(string(rest.ScalarJSON))).Encode(),
+				ObjectField: schema.ObjectField{
+					Description: utils.ToPtr("Any additional structured information about the error"),
+					Type:        schema.NewNullableType(schema.NewNamedType(string(rest.ScalarJSON))).Encode(),
+				},
 			},
 		},
 	}
@@ -319,7 +326,7 @@ func buildRESTArguments(restSchema *rest.NDCRestSchema, conf *ConfigItem) {
 	for i := range functionsLen {
 		fn := restSchema.Functions[i]
 		funcName := buildDistributedName(fn.Name)
-		distributedFn := &rest.RESTFunctionInfo{
+		distributedFn := &rest.OperationInfo{
 			Request:     fn.Request,
 			Arguments:   cloneDistributedArguments(fn.Arguments),
 			Description: fn.Description,
@@ -334,7 +341,7 @@ func buildRESTArguments(restSchema *rest.NDCRestSchema, conf *ConfigItem) {
 		proc := restSchema.Procedures[i]
 		procName := buildDistributedName(proc.Name)
 
-		distributedProc := &rest.RESTProcedureInfo{
+		distributedProc := &rest.OperationInfo{
 			Request:     proc.Request,
 			Arguments:   cloneDistributedArguments(proc.Arguments),
 			Description: proc.Description,
@@ -345,16 +352,18 @@ func buildRESTArguments(restSchema *rest.NDCRestSchema, conf *ConfigItem) {
 	}
 }
 
-func cloneDistributedArguments(arguments map[string]schema.ArgumentInfo) map[string]schema.ArgumentInfo {
-	result := map[string]schema.ArgumentInfo{}
+func cloneDistributedArguments(arguments map[string]rest.ArgumentInfo) map[string]rest.ArgumentInfo {
+	result := map[string]rest.ArgumentInfo{}
 	for k, v := range arguments {
 		if k != internal.RESTOptionsArgumentName {
 			result[k] = v
 		}
 	}
-	result[internal.RESTOptionsArgumentName] = schema.ArgumentInfo{
-		Description: internal.DistributedObjectType.Description,
-		Type:        schema.NewNullableNamedType(internal.RESTDistributedOptionsObjectName).Encode(),
+	result[internal.RESTOptionsArgumentName] = rest.ArgumentInfo{
+		ArgumentInfo: schema.ArgumentInfo{
+			Description: internal.DistributedObjectType.Description,
+			Type:        schema.NewNullableNamedType(internal.RESTDistributedOptionsObjectName).Encode(),
+		},
 	}
 	return result
 }
@@ -367,12 +376,16 @@ func buildDistributedResultObjectType(restSchema *rest.NDCRestSchema, operationN
 		Description: utils.ToPtr("Distributed response data of " + operationName),
 		Fields: map[string]rest.ObjectField{
 			"server": {
-				Description: utils.ToPtr("Identity of the remote server"),
-				Type:        schema.NewNamedType(internal.RESTServerIDScalarName).Encode(),
+				ObjectField: schema.ObjectField{
+					Description: utils.ToPtr("Identity of the remote server"),
+					Type:        schema.NewNamedType(internal.RESTServerIDScalarName).Encode(),
+				},
 			},
 			"data": {
-				Description: utils.ToPtr("A result of " + operationName),
-				Type:        underlyingType,
+				ObjectField: schema.ObjectField{
+					Description: utils.ToPtr("A result of " + operationName),
+					Type:        underlyingType,
+				},
 			},
 		},
 	}
@@ -381,12 +394,16 @@ func buildDistributedResultObjectType(restSchema *rest.NDCRestSchema, operationN
 		Description: utils.ToPtr("Distributed responses of " + operationName),
 		Fields: map[string]rest.ObjectField{
 			"results": {
-				Description: utils.ToPtr("Results of " + operationName),
-				Type:        schema.NewArrayType(schema.NewNamedType(distResultDataType)).Encode(),
+				ObjectField: schema.ObjectField{
+					Description: utils.ToPtr("Results of " + operationName),
+					Type:        schema.NewArrayType(schema.NewNamedType(distResultDataType)).Encode(),
+				},
 			},
 			"errors": {
-				Description: utils.ToPtr("Error responses of " + operationName),
-				Type:        schema.NewArrayType(schema.NewNamedType(internal.DistributedErrorObjectName)).Encode(),
+				ObjectField: schema.ObjectField{
+					Description: utils.ToPtr("Error responses of " + operationName),
+					Type:        schema.NewArrayType(schema.NewNamedType(internal.DistributedErrorObjectName)).Encode(),
+				},
 			},
 		},
 	}
@@ -402,7 +419,7 @@ func printSchemaValidationError(logger *slog.Logger, errors map[string][]string)
 	logger.Error("errors happen when validating NDC REST schemas", slog.Any("errors", errors))
 }
 
-func parseRESTOptionsFromArguments(arguments map[string]schema.ArgumentInfo, rawRestOptions any) (*internal.RESTOptions, error) {
+func parseRESTOptionsFromArguments(arguments map[string]rest.ArgumentInfo, rawRestOptions any) (*internal.RESTOptions, error) {
 	var result internal.RESTOptions
 	if err := result.FromValue(rawRestOptions); err != nil {
 		return nil, err

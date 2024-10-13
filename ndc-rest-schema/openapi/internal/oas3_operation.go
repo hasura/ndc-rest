@@ -1,7 +1,6 @@
 package internal
 
 import (
-	"errors"
 	"fmt"
 	"log/slog"
 	"strconv"
@@ -14,11 +13,10 @@ import (
 )
 
 type oas3OperationBuilder struct {
-	builder       *OAS3Builder
-	pathKey       string
-	method        string
-	Arguments     map[string]schema.ArgumentInfo
-	RequestParams []rest.RequestParameter
+	builder   *OAS3Builder
+	pathKey   string
+	method    string
+	Arguments map[string]rest.ArgumentInfo
 }
 
 func newOAS3OperationBuilder(builder *OAS3Builder, pathKey string, method string) *oas3OperationBuilder {
@@ -26,12 +24,12 @@ func newOAS3OperationBuilder(builder *OAS3Builder, pathKey string, method string
 		builder:   builder,
 		pathKey:   pathKey,
 		method:    method,
-		Arguments: make(map[string]schema.ArgumentInfo),
+		Arguments: make(map[string]rest.ArgumentInfo),
 	}
 }
 
 // BuildFunction build a REST NDC function information from OpenAPI v3 operation
-func (oc *oas3OperationBuilder) BuildFunction(itemGet *v3.Operation) (*rest.RESTFunctionInfo, error) {
+func (oc *oas3OperationBuilder) BuildFunction(itemGet *v3.Operation) (*rest.OperationInfo, error) {
 	funcName := itemGet.OperationId
 	if funcName == "" {
 		funcName = buildPathMethodName(oc.pathKey, "get", oc.builder.ConvertOptions)
@@ -58,14 +56,13 @@ func (oc *oas3OperationBuilder) BuildFunction(itemGet *v3.Operation) (*rest.REST
 		return nil, fmt.Errorf("%s: %w", funcName, err)
 	}
 
-	function := rest.RESTFunctionInfo{
+	function := rest.OperationInfo{
 		Request: &rest.Request{
-			URL:        oc.pathKey,
-			Method:     "get",
-			Parameters: sortRequestParameters(oc.RequestParams),
-			Security:   convertSecurities(itemGet.Security),
-			Servers:    oc.builder.convertServers(itemGet.Servers),
-			Response:   *schemaResponse,
+			URL:      oc.pathKey,
+			Method:   "get",
+			Security: convertSecurities(itemGet.Security),
+			Servers:  oc.builder.convertServers(itemGet.Servers),
+			Response: *schemaResponse,
 		},
 		Name:       funcName,
 		Arguments:  oc.Arguments,
@@ -79,7 +76,7 @@ func (oc *oas3OperationBuilder) BuildFunction(itemGet *v3.Operation) (*rest.REST
 	return &function, nil
 }
 
-func (oc *oas3OperationBuilder) BuildProcedure(operation *v3.Operation) (*rest.RESTProcedureInfo, error) {
+func (oc *oas3OperationBuilder) BuildProcedure(operation *v3.Operation) (*rest.OperationInfo, error) {
 	if operation == nil {
 		return nil, nil
 	}
@@ -118,21 +115,25 @@ func (oc *oas3OperationBuilder) BuildProcedure(operation *v3.Operation) (*rest.R
 	if reqBody != nil {
 		description := fmt.Sprintf("Request body of %s %s", strings.ToUpper(oc.method), oc.pathKey)
 		// renaming query parameter name `body` if exist to avoid conflicts
-		if paramData, ok := oc.Arguments["body"]; ok {
+		if paramData, ok := oc.Arguments[rest.BodyKey]; ok {
 			oc.Arguments["paramBody"] = paramData
 		}
 
-		oc.Arguments["body"] = schema.ArgumentInfo{
-			Description: &description,
-			Type:        schemaType.Encode(),
+		oc.Arguments[rest.BodyKey] = rest.ArgumentInfo{
+			ArgumentInfo: schema.ArgumentInfo{
+				Description: &description,
+				Type:        schemaType.Encode(),
+			},
+			Rest: &rest.RequestParameter{
+				In: rest.InBody,
+			},
 		}
 	}
 
-	procedure := rest.RESTProcedureInfo{
+	procedure := rest.OperationInfo{
 		Request: &rest.Request{
 			URL:         oc.pathKey,
 			Method:      oc.method,
-			Parameters:  sortRequestParameters(oc.RequestParams),
 			Security:    convertSecurities(operation.Security),
 			Servers:     oc.builder.convertServers(operation.Servers),
 			RequestBody: reqBody,
@@ -161,7 +162,7 @@ func (oc *oas3OperationBuilder) convertParameters(params []*v3.Parameter, apiPat
 		}
 		paramName := param.Name
 		if paramName == "" {
-			return errors.New("parameter name is empty")
+			return errParameterNameRequired
 		}
 		paramRequired := false
 		if param.Required != nil && *param.Required {
@@ -190,16 +191,18 @@ func (oc *oas3OperationBuilder) convertParameters(params []*v3.Parameter, apiPat
 			}
 			encoding.Style = style
 		}
-		oc.RequestParams = append(oc.RequestParams, rest.RequestParameter{
-			Name:           paramName,
-			In:             paramLocation,
-			Schema:         apiSchema,
-			EncodingObject: encoding,
-		})
 
 		oc.builder.typeUsageCounter.Add(getNamedType(schemaType, true, ""), 1)
-		argument := schema.ArgumentInfo{
-			Type: schemaType.Encode(),
+		argument := rest.ArgumentInfo{
+			ArgumentInfo: schema.ArgumentInfo{
+				Type: schemaType.Encode(),
+			},
+			Rest: &rest.RequestParameter{
+				Name:           paramName,
+				In:             paramLocation,
+				Schema:         apiSchema,
+				EncodingObject: encoding,
+			},
 		}
 		if param.Description != "" {
 			argument.Description = &param.Description
@@ -245,7 +248,8 @@ func (oc *oas3OperationBuilder) convertRequestBody(reqBody *v3.RequestBody, apiP
 	oc.builder.typeUsageCounter.Add(getNamedType(schemaType, true, ""), 1)
 	bodyResult := &rest.RequestBody{
 		ContentType: contentType,
-		Schema:      typeSchema,
+		// TODO: move to argument
+		// Schema:      typeSchema,
 	}
 
 	if content.Encoding != nil {
@@ -300,7 +304,7 @@ func (oc *oas3OperationBuilder) convertRequestBody(reqBody *v3.RequestBody, apiP
 					}
 
 					argumentName := encodeHeaderArgumentName(key)
-					item.Headers[key] = rest.RequestParameter{
+					headerParam := rest.RequestParameter{
 						ArgumentName:   argumentName,
 						Schema:         typeSchema,
 						EncodingObject: headerEncoding,
@@ -313,8 +317,11 @@ func (oc *oas3OperationBuilder) convertRequestBody(reqBody *v3.RequestBody, apiP
 					if header.Description != "" {
 						argument.Description = &header.Description
 					}
-
-					oc.Arguments[argumentName] = argument
+					item.Headers[key] = headerParam
+					oc.Arguments[argumentName] = rest.ArgumentInfo{
+						ArgumentInfo: argument,
+						Rest:         &headerParam,
+					}
 				}
 			}
 

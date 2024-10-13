@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"os"
 
+	rest "github.com/hasura/ndc-rest/ndc-rest-schema/schema"
 	"github.com/hasura/ndc-rest/rest/internal"
 	"github.com/hasura/ndc-sdk-go/connector"
 	"github.com/hasura/ndc-sdk-go/schema"
@@ -17,7 +18,7 @@ type RESTConnector struct {
 	metadata     RESTMetadataCollection
 	capabilities *schema.RawCapabilitiesResponse
 	rawSchema    *schema.RawSchemaResponse
-	schema       *schema.SchemaResponse
+	schema       *rest.NDCRestSchema
 	client       *internal.HTTPClient
 }
 

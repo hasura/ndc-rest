@@ -13,10 +13,13 @@ import (
 	rest "github.com/hasura/ndc-rest/ndc-rest-schema/schema"
 	"github.com/hasura/ndc-rest/rest/internal"
 	"github.com/hasura/ndc-sdk-go/schema"
+	"github.com/hasura/ndc-sdk-go/utils"
 	sdkUtils "github.com/hasura/ndc-sdk-go/utils"
 )
 
-func (c *RESTConnector) evalURLAndHeaderParameters(request *rest.Request, argumentsSchema map[string]schema.ArgumentInfo, arguments map[string]any) (string, http.Header, error) {
+var urlAndHeaderLocations = []rest.ParameterLocation{rest.InPath, rest.InQuery, rest.InPath}
+
+func (c *RESTConnector) evalURLAndHeaderParameters(request *rest.Request, argumentsSchema map[string]rest.ArgumentInfo, arguments map[string]any) (string, http.Header, error) {
 	endpoint, err := url.Parse(request.URL)
 	if err != nil {
 		return "", nil, err
@@ -29,23 +32,12 @@ func (c *RESTConnector) evalURLAndHeaderParameters(request *rest.Request, argume
 		}
 	}
 
-	for _, param := range request.Parameters {
-		argName := param.ArgumentName
-		if argName == "" {
-			argName = param.Name
-		}
-		_, schemaOk := argumentsSchema[argName]
-		if !schemaOk {
+	for argumentKey, argumentInfo := range argumentsSchema {
+		if argumentInfo.Rest == nil || !slices.Contains(urlAndHeaderLocations, argumentInfo.Rest.In) {
 			continue
 		}
-		value, ok := arguments[argName]
-
-		if !ok || value == nil {
-			if param.Schema != nil && !param.Schema.Nullable {
-				return "", nil, fmt.Errorf("argument %s is required", argName)
-			}
-		} else if err := c.evalURLAndHeaderParameterBySchema(endpoint, &headers, &param, value); err != nil {
-			return "", nil, err
+		if err := c.evalURLAndHeaderParameterBySchema(endpoint, &headers, &argumentInfo, arguments[argumentKey]); err != nil {
+			return "", nil, fmt.Errorf("%s: %w", argumentKey, err)
 		}
 	}
 	return endpoint.String(), headers, nil
@@ -54,8 +46,13 @@ func (c *RESTConnector) evalURLAndHeaderParameters(request *rest.Request, argume
 // the query parameters serialization follows [OAS 3.1 spec]
 //
 // [OAS 3.1 spec]: https://swagger.io/docs/specification/serialization/
-func (c *RESTConnector) evalURLAndHeaderParameterBySchema(endpoint *url.URL, header *http.Header, param *rest.RequestParameter, value any) error {
-	queryParams, err := c.encodeParameterValues(param.Schema, value, []string{param.Name})
+func (c *RESTConnector) evalURLAndHeaderParameterBySchema(endpoint *url.URL, header *http.Header, argumentInfo *rest.ArgumentInfo, value any) error {
+	queryParams, err := c.encodeParameterValues(&rest.ObjectField{
+		ObjectField: schema.ObjectField{
+			Type: argumentInfo.Type,
+		},
+		Rest: argumentInfo.Rest.Schema,
+	}, reflect.ValueOf(value), []string{argumentInfo.Rest.Name})
 	if err != nil {
 		return err
 	}
@@ -67,83 +64,61 @@ func (c *RESTConnector) evalURLAndHeaderParameterBySchema(endpoint *url.URL, hea
 	// following the OAS spec to serialize parameters
 	// https://swagger.io/docs/specification/serialization/
 	// https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#parameter-object
-	switch param.In {
+	switch argumentInfo.Rest.In {
 	case rest.InHeader:
-		setHeaderParameters(header, param, queryParams)
+		setHeaderParameters(header, argumentInfo.Rest, queryParams)
 	case rest.InQuery:
 		q := endpoint.Query()
 		for _, qp := range queryParams {
-			evalQueryParameterURL(&q, param.Name, param.EncodingObject, qp.Keys(), qp.Values())
+			evalQueryParameterURL(&q, argumentInfo.Rest.Name, argumentInfo.Rest.EncodingObject, qp.Keys(), qp.Values())
 		}
-		endpoint.RawQuery = encodeQueryValues(q, param.AllowReserved)
+		endpoint.RawQuery = encodeQueryValues(q, argumentInfo.Rest.AllowReserved)
 	case rest.InPath:
 		defaultParam := queryParams.FindDefault()
 		if defaultParam != nil {
-			endpoint.Path = strings.ReplaceAll(endpoint.Path, fmt.Sprintf("{%s}", param.Name), strings.Join(defaultParam.Values(), ","))
+			endpoint.Path = strings.ReplaceAll(endpoint.Path, "{"+argumentInfo.Rest.Name+"}", strings.Join(defaultParam.Values(), ","))
 		}
 	}
 	return nil
 }
 
-func (c *RESTConnector) encodeParameterValues(typeSchema *rest.TypeSchema, value any, fieldPaths []string) (internal.ParameterItems, error) {
+func (c *RESTConnector) encodeParameterValues(objectField *rest.ObjectField, reflectValue reflect.Value, fieldPaths []string) (internal.ParameterItems, error) {
 	results := internal.ParameterItems{}
-	reflectValue := reflect.ValueOf(value)
 
 	if reflectValue.Kind() == reflect.Invalid {
 		return results, nil
 	}
-	reflectValue, ok := sdkUtils.UnwrapPointerFromReflectValue(reflectValue)
-	if !ok {
-		if typeSchema.Nullable {
-			return results, nil
-		} else {
-			return nil, fmt.Errorf("parameter %s is required", strings.Join(fieldPaths, ""))
-		}
+	typeSchema := objectField.Rest
+	var typeName string
+	if len(typeSchema.Type) > 0 {
+		typeName = strings.ToLower(typeSchema.Type[0])
 	}
+	reflectValue, nonNull := sdkUtils.UnwrapPointerFromReflectValue(reflectValue)
 
-	value = reflectValue.Interface()
-
-	switch strings.ToLower(typeSchema.Type) {
-	case "object":
-		if len(typeSchema.Properties) == 0 {
+	switch ty := objectField.Type.Interface().(type) {
+	case *schema.NullableType:
+		if !nonNull {
 			return results, nil
 		}
-		mapValue, ok := value.(map[string]any)
-		if !ok {
-			return nil, fmt.Errorf("%s: expected object, got %v", strings.Join(fieldPaths, ""), value)
+		return c.encodeParameterValues(&rest.ObjectField{
+			ObjectField: schema.ObjectField{
+				Type: ty.UnderlyingType,
+			},
+			Rest: typeSchema,
+		}, reflectValue, fieldPaths)
+	case *schema.ArrayType:
+		if !slices.Contains([]reflect.Kind{reflect.Slice, reflect.Array}, reflectValue.Kind()) {
+			return nil, fmt.Errorf("%s: expected array, got %v", strings.Join(fieldPaths, ""), reflectValue.Interface())
 		}
+		for i := range reflectValue.Len() {
+			propPaths := append(fieldPaths, "["+strconv.Itoa(i)+"]")
 
-		for k, prop := range typeSchema.Properties {
-			propPaths := append(fieldPaths, "."+k)
-			fieldVal, ok := mapValue[k]
-			if !ok {
-				if !prop.Nullable {
-					return nil, fmt.Errorf("parameter %s is required", strings.Join(propPaths, ""))
-				}
-				continue
-			}
-
-			output, err := c.encodeParameterValues(&prop, fieldVal, propPaths)
-			if err != nil {
-				return nil, err
-			}
-
-			for _, pair := range output {
-				results.Add(append([]internal.Key{internal.NewKey(k)}, pair.Keys()...), pair.Values())
-			}
-		}
-
-		return results, nil
-	case "array":
-		arrayValue, ok := value.([]any)
-		if !ok {
-			return nil, fmt.Errorf("%s: expected array, got %v", strings.Join(fieldPaths, ""), value)
-		}
-
-		for i, itemValue := range arrayValue {
-			propPaths := append(fieldPaths, fmt.Sprintf("[%d]", i))
-
-			outputs, err := c.encodeParameterValues(typeSchema.Items, itemValue, propPaths)
+			outputs, err := c.encodeParameterValues(&rest.ObjectField{
+				ObjectField: schema.ObjectField{
+					Type: ty.ElementType,
+				},
+				Rest: typeSchema.Items,
+			}, reflectValue.Index(i), propPaths)
 			if err != nil {
 				return nil, err
 			}
@@ -157,55 +132,107 @@ func (c *RESTConnector) encodeParameterValues(typeSchema *rest.TypeSchema, value
 				}
 			}
 		}
+
 		return results, nil
-	case string(schema.TypeRepresentationTypeString), string(schema.TypeRepresentationTypeDate), string(schema.TypeRepresentationTypeTimestamp), string(schema.TypeRepresentationTypeTimestampTZ), string(schema.TypeRepresentationTypeUUID), string(schema.TypeRepresentationTypeBytes), string(rest.ScalarBytes), string(rest.ScalarBinary):
-		return encodeParameterString(value, fieldPaths)
-	case string(schema.TypeRepresentationTypeInt32), string(schema.TypeRepresentationTypeInt64), strings.ToLower(string(rest.ScalarUnixTime)), "integer", "long":
-		return encodeParameterInt(value, fieldPaths)
-	case string(schema.TypeRepresentationTypeFloat32), string(schema.TypeRepresentationTypeFloat64), "float":
-		return encodeParameterFloat(value, fieldPaths)
-	case string(schema.TypeRepresentationTypeBoolean), string(rest.ScalarBoolean):
-		return encodeParameterBool(value, fieldPaths)
-	default:
-		iScalar, ok := c.schema.ScalarTypes[typeSchema.Type]
+	case *schema.NamedType:
+		iScalar, ok := c.schema.ScalarTypes[typeName]
 		if ok {
-			switch ty := iScalar.Representation.Interface().(type) {
-			case *schema.TypeRepresentationBoolean:
-				return encodeParameterBool(value, fieldPaths)
-			case *schema.TypeRepresentationString, *schema.TypeRepresentationDate, *schema.TypeRepresentationTimestamp, *schema.TypeRepresentationTimestampTZ, *schema.TypeRepresentationBytes, *schema.TypeRepresentationUUID:
-				return encodeParameterString(value, fieldPaths)
-			case *schema.TypeRepresentationEnum:
-				valueStr, err := sdkUtils.DecodeString(value)
-				if err != nil {
-					return nil, fmt.Errorf("%s: %w", strings.Join(fieldPaths, ""), err)
-				}
-
-				if !slices.Contains(ty.OneOf, valueStr) {
-					return nil, fmt.Errorf("%s: invalid enum value '%s'", strings.Join(fieldPaths, ""), valueStr)
-				}
-
-				return []internal.ParameterItem{internal.NewParameterItem([]internal.Key{}, []string{valueStr})}, nil
-			case *schema.TypeRepresentationInt8, *schema.TypeRepresentationInt16, *schema.TypeRepresentationInt32, *schema.TypeRepresentationInt64, *schema.TypeRepresentationBigDecimal:
-				return encodeParameterInt(value, fieldPaths)
-			case *schema.TypeRepresentationFloat32, *schema.TypeRepresentationFloat64:
-				return encodeParameterFloat(value, fieldPaths)
-			}
+			return encodeParameterReflectionValues(reflectValue, &iScalar, fieldPaths)
 		}
-
-		return encodeParameterReflectionValues(reflectValue, fieldPaths)
+	default:
+		return nil, fmt.Errorf("invalid type %v", objectField.Type)
 	}
+	// switch typeName {
+	// case "object":
+	// 	objectInfo, ok := c.schema.ObjectTypes
+	// 	if len(typeSchema.Properties) == 0 {
+	// 		return results, nil
+	// 	}
+	// 	mapValue, ok := value.(map[string]any)
+	// 	if !ok {
+	// 		return nil, fmt.Errorf("%s: expected object, got %v", strings.Join(fieldPaths, ""), value)
+	// 	}
+
+	// 	for k, prop := range typeSchema.Properties {
+	// 		propPaths := append(fieldPaths, "."+k)
+	// 		fieldVal, ok := mapValue[k]
+	// 		if !ok {
+	// 			if !prop.Nullable {
+	// 				return nil, fmt.Errorf("parameter %s is required", strings.Join(propPaths, ""))
+	// 			}
+	// 			continue
+	// 		}
+
+	// 		output, err := c.encodeParameterValues(&prop, fieldVal, propPaths)
+	// 		if err != nil {
+	// 			return nil, err
+	// 		}
+
+	// 		for _, pair := range output {
+	// 			results.Add(append([]internal.Key{internal.NewKey(k)}, pair.Keys()...), pair.Values())
+	// 		}
+	// 	}
+
+	// 	return results, nil
+	// }
 }
 
-func encodeParameterReflectionValues(reflectValue reflect.Value, fieldPaths []string) (internal.ParameterItems, error) {
+func encodeParameterReflectionValues(reflectValue reflect.Value, scalar *schema.ScalarType, fieldPaths []string) (internal.ParameterItems, error) {
 	results := internal.ParameterItems{}
-	reflectValue, ok := sdkUtils.UnwrapPointerFromReflectValue(reflectValue)
-	if !ok {
-		return results, nil
+
+	switch sl := scalar.Representation.Interface().(type) {
+	case *schema.TypeRepresentationBoolean:
+		value, err := utils.DecodeBooleanReflection(reflectValue)
+		if err != nil {
+			return nil, fmt.Errorf("%s: %w", strings.Join(fieldPaths, ""), err)
+		}
+		return []internal.ParameterItem{
+			internal.NewParameterItem([]internal.Key{}, []string{strconv.FormatBool(value)}),
+		}, nil
+	case *schema.TypeRepresentationString:
+		value, err := utils.DecodeStringReflection(reflectValue)
+		if err != nil {
+			return nil, fmt.Errorf("%s: %w", strings.Join(fieldPaths, ""), err)
+		}
+		return []internal.ParameterItem{internal.NewParameterItem([]internal.Key{}, []string{value})}, nil
+	case *schema.TypeRepresentationInteger, *schema.TypeRepresentationInt8, *schema.TypeRepresentationInt16, *schema.TypeRepresentationInt32, *schema.TypeRepresentationInt64, *schema.TypeRepresentationBigInteger:
+		value, err := utils.DecodeIntReflection[int64](reflectValue)
+		if err != nil {
+			return nil, fmt.Errorf("%s: %w", strings.Join(fieldPaths, ""), err)
+		}
+		return []internal.ParameterItem{
+			internal.NewParameterItem([]internal.Key{}, []string{strconv.FormatInt(value, 10)}),
+		}, nil
+	case *schema.TypeRepresentationNumber, *schema.TypeRepresentationFloat32, *schema.TypeRepresentationFloat64, *schema.TypeRepresentationBigDecimal:
+		value, err := utils.DecodeFloatReflection[float64](reflectValue)
+		if err != nil {
+			return nil, fmt.Errorf("%s: %w", strings.Join(fieldPaths, ""), err)
+		}
+		return []internal.ParameterItem{
+			internal.NewParameterItem([]internal.Key{}, []string{fmt.Sprint(value)}),
+		}, nil
+	case *schema.TypeRepresentationEnum:
+		value, err := utils.DecodeStringReflection(reflectValue)
+		if err != nil {
+			return nil, fmt.Errorf("%s: %w", strings.Join(fieldPaths, ""), err)
+		}
+		if !slices.Contains(sl.OneOf, value) {
+			return nil, fmt.Errorf("%s: the value must be one of %v, got %s", strings.Join(fieldPaths, ""), sl.OneOf, value)
+		}
+		return []internal.ParameterItem{internal.NewParameterItem([]internal.Key{}, []string{value})}, nil
+	default:
+		b, err := json.Marshal(reflectValue.Interface())
+		if err != nil {
+			return nil, fmt.Errorf("%s: %w", strings.Join(fieldPaths, ""), err)
+		}
+		values := []string{strings.Trim(string(b), `"`)}
+		return []internal.ParameterItem{internal.NewParameterItem([]internal.Key{}, values)}, nil
 	}
 
 	kind := reflectValue.Kind()
 	switch kind {
 	case reflect.Bool:
+		// if strings.Contains([]schema.ScalarType{schema.TypeRepresentationBoolean, schema.TypeRepresentationJSON}, scalar.Representation.Type())  ==
 		return []internal.ParameterItem{
 			internal.NewParameterItem([]internal.Key{}, []string{strconv.FormatBool(reflectValue.Bool())}),
 		}, nil

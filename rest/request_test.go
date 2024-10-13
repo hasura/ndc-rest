@@ -150,7 +150,7 @@ func TestCreateMultipartForm(t *testing.T) {
 			assert.NilError(t, json.Unmarshal([]byte(tc.RawBody), &reqBody))
 			assert.NilError(t, json.Unmarshal([]byte(tc.RawArguments), &arguments))
 
-			buf, mediaType, err := rc.createMultipartForm(&reqBody, arguments)
+			buf, mediaType, err := rc.createMultipartForm(&reqBody, &rest.ArgumentInfo{}, arguments)
 			assert.NilError(t, err)
 
 			// log.Println("form data:", string(buf.String()))
@@ -315,7 +315,7 @@ func TestCreateFormURLEncoded(t *testing.T) {
 			assert.NilError(t, json.Unmarshal([]byte(tc.RawBody), &reqBody))
 			assert.NilError(t, json.Unmarshal([]byte(tc.RawArguments), &arguments))
 
-			buf, err := rc.createFormURLEncoded(&reqBody, arguments["body"])
+			buf, err := rc.createFormURLEncoded(&reqBody, &rest.ArgumentInfo{}, arguments["body"])
 			assert.NilError(t, err)
 			result, err := io.ReadAll(buf)
 			assert.NilError(t, err)

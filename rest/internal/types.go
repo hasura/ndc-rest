@@ -30,8 +30,10 @@ var SingleObjectType rest.ObjectType = rest.ObjectType{
 	Description: utils.ToPtr("Execution options for REST requests to a single server"),
 	Fields: map[string]rest.ObjectField{
 		"servers": {
-			Description: utils.ToPtr("Specify remote servers to receive the request. If there are many server IDs the server is selected randomly"),
-			Type:        schema.NewNullableType(schema.NewArrayType(schema.NewNamedType(RESTServerIDScalarName))).Encode(),
+			ObjectField: schema.ObjectField{
+				Description: utils.ToPtr("Specify remote servers to receive the request. If there are many server IDs the server is selected randomly"),
+				Type:        schema.NewNullableType(schema.NewArrayType(schema.NewNamedType(RESTServerIDScalarName))).Encode(),
+			},
 		},
 	},
 }
@@ -41,12 +43,16 @@ var DistributedObjectType rest.ObjectType = rest.ObjectType{
 	Description: utils.ToPtr("Distributed execution options for REST requests to multiple servers"),
 	Fields: map[string]rest.ObjectField{
 		"servers": {
-			Description: utils.ToPtr("Specify remote servers to receive the request"),
-			Type:        schema.NewNullableType(schema.NewArrayType(schema.NewNamedType(RESTServerIDScalarName))).Encode(),
+			ObjectField: schema.ObjectField{
+				Description: utils.ToPtr("Specify remote servers to receive the request"),
+				Type:        schema.NewNullableType(schema.NewArrayType(schema.NewNamedType(RESTServerIDScalarName))).Encode(),
+			},
 		},
 		"parallel": {
-			Description: utils.ToPtr("Execute requests to remote servers in parallel"),
-			Type:        schema.NewNullableNamedType(string(rest.ScalarBoolean)).Encode(),
+			ObjectField: schema.ObjectField{
+				Description: utils.ToPtr("Execute requests to remote servers in parallel"),
+				Type:        schema.NewNullableNamedType(string(rest.ScalarBoolean)).Encode(),
+			},
 		},
 	},
 }

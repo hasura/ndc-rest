@@ -13,6 +13,7 @@ var (
 	errBuildSchemaFailed  = errors.New("failed to build NDC REST schema")
 	errInvalidSchema      = errors.New("failed to validate NDC REST schema")
 	errHTTPMethodRequired = errors.New("the HTTP method is required")
+	errArgumentRequired   = errors.New("argument is required")
 )
 
 const (

@@ -2,25 +2,17 @@ package schema
 
 import (
 	"encoding/json"
-	"fmt"
-	"reflect"
-	"strings"
 	"testing"
 
 	"github.com/hasura/ndc-sdk-go/schema"
+	"gotest.tools/v3/assert"
 )
-
-func assertDeepEqual(_ *testing.T, expected any, reality any, msgs ...string) {
-	if !reflect.DeepEqual(expected, reality) {
-		panic(fmt.Errorf("%s: not equal\nexpected: %+v\ngot     : %+v", strings.Join(msgs, " "), expected, reality))
-	}
-}
 
 func TestDecodeRESTProcedureInfo(t *testing.T) {
 	testCases := []struct {
 		name     string
 		raw      string
-		expected RESTProcedureInfo
+		expected OperationInfo
 	}{
 		{
 			name: "success",
@@ -34,12 +26,12 @@ func TestDecodeRESTProcedureInfo(t *testing.T) {
 					"underlying_type": { "name": "Boolean", "type": "named" }
 				}
 			}`,
-			expected: RESTProcedureInfo{
+			expected: OperationInfo{
 				Request: &Request{
 					URL:    "/pets",
 					Method: "post",
 				},
-				Arguments:   make(schema.ProcedureInfoArguments),
+				Arguments:   map[string]ArgumentInfo{},
 				Description: toPtr("Create a pet"),
 				Name:        "createPets",
 				ResultType:  schema.NewNullableNamedType("Boolean").Encode(),
@@ -49,13 +41,13 @@ func TestDecodeRESTProcedureInfo(t *testing.T) {
 
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			var procedure RESTProcedureInfo
+			var procedure OperationInfo
 			if err := json.Unmarshal([]byte(tc.raw), &procedure); err != nil {
 				t.Errorf("failed to unmarshal: %s", err)
 				t.FailNow()
 			}
-			assertDeepEqual(t, tc.expected, procedure)
-			assertDeepEqual(t, tc.expected.Request.Clone(), procedure.Request.Clone())
+			assert.DeepEqual(t, tc.expected, procedure)
+			assert.DeepEqual(t, tc.expected.Request.Clone(), procedure.Request.Clone())
 		})
 	}
 }
@@ -64,21 +56,14 @@ func TestDecodeRESTFunctionInfo(t *testing.T) {
 	testCases := []struct {
 		name     string
 		raw      string
-		expected RESTFunctionInfo
+		expected OperationInfo
 	}{
 		{
 			name: "success",
-			raw: ` {
+			raw: `{
 				"request": {
 					"url": "/pets",
-					"method": "get",
-					"parameters": [
-						{
-							"name": "limit",
-							"in": "query",
-							"schema": { "type": "integer", "maximum": 100, "format": "int32", "nullable": true }
-						}
-					]
+					"method": "get"
 				},
 				"arguments": {
 					"limit": {
@@ -86,6 +71,11 @@ func TestDecodeRESTFunctionInfo(t *testing.T) {
 						"type": {
 							"type": "nullable",
 							"underlying_type": { "name": "Int", "type": "named" }
+						},
+						"rest": {
+							"name": "limit",
+							"in": "query",
+							"schema": { "type": ["integer"], "maximum": 100, "format": "int32", "nullable": true }
 						}
 					}
 				},
@@ -96,27 +86,26 @@ func TestDecodeRESTFunctionInfo(t *testing.T) {
 					"type": "array"
 				}
 			}`,
-			expected: RESTFunctionInfo{
+			expected: OperationInfo{
 				Request: &Request{
 					URL:    "/pets",
 					Method: "get",
-					Parameters: []RequestParameter{
-						{
+				},
+				Arguments: map[string]ArgumentInfo{
+					"limit": {
+						ArgumentInfo: schema.ArgumentInfo{
+							Description: toPtr("How many items to return at one time (max 100)"),
+							Type:        schema.NewNullableNamedType("Int").Encode(),
+						},
+						Rest: &RequestParameter{
 							Name: "limit",
 							In:   "query",
 							Schema: &TypeSchema{
-								Type:     "integer",
-								Maximum:  toPtr(float64(100)),
-								Format:   "int32",
-								Nullable: true,
+								Type:    []string{"integer"},
+								Maximum: toPtr(float64(100)),
+								Format:  "int32",
 							},
 						},
-					},
-				},
-				Arguments: schema.FunctionInfoArguments{
-					"limit": schema.ArgumentInfo{
-						Description: toPtr("How many items to return at one time (max 100)"),
-						Type:        schema.NewNullableNamedType("Int").Encode(),
 					},
 				},
 				Description: toPtr("List all pets"),
@@ -128,14 +117,13 @@ func TestDecodeRESTFunctionInfo(t *testing.T) {
 
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			var fn RESTFunctionInfo
+			var fn OperationInfo
 			if err := json.Unmarshal([]byte(tc.raw), &fn); err != nil {
 				t.Errorf("failed to unmarshal: %s", err)
 				t.FailNow()
 			}
-			assertDeepEqual(t, tc.expected, fn)
-			assertDeepEqual(t, tc.expected.Request.Clone(), fn.Request.Clone())
-
+			assert.DeepEqual(t, tc.expected, fn)
+			assert.DeepEqual(t, tc.expected.Request.Clone(), fn.Request.Clone())
 		})
 	}
 }

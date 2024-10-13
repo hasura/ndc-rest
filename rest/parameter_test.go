@@ -873,7 +873,7 @@ func TestEncodeParameterValues(t *testing.T) {
 
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			var info rest.RESTProcedureInfo
+			var info rest.OperationInfo
 			assert.NilError(t, json.Unmarshal([]byte(tc.rawProcedureSchema), &info))
 
 			var arguments map[string]any
