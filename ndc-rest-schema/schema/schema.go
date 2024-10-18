@@ -2,6 +2,7 @@ package schema
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 
 	"github.com/hasura/ndc-sdk-go/schema"
@@ -307,7 +308,7 @@ func (j *ObjectField) UnmarshalJSON(b []byte) error {
 	}
 	rawType, ok := raw["type"]
 	if !ok || len(rawType) == 0 {
-		return fmt.Errorf("field type in ObjectField: required")
+		return errors.New("field type in ObjectField: required")
 	}
 
 	if err := json.Unmarshal(rawType, &j.Type); err != nil {
@@ -356,7 +357,7 @@ func (j *ArgumentInfo) UnmarshalJSON(b []byte) error {
 	}
 	rawType, ok := raw["type"]
 	if !ok || len(rawType) == 0 {
-		return fmt.Errorf("field type in ArgumentInfo: required")
+		return errors.New("field type in ArgumentInfo: required")
 	}
 
 	if err := json.Unmarshal(rawType, &j.Type); err != nil {

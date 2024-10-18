@@ -207,7 +207,7 @@ func encodeScalarParameterReflectionValues(reflectValue reflect.Value, scalar *s
 			return nil, fmt.Errorf("%s: %w", strings.Join(fieldPaths, ""), err)
 		}
 		return []ParameterItem{NewParameterItem([]Key{}, []string{value})}, nil
-	case *schema.TypeRepresentationInteger, *schema.TypeRepresentationInt8, *schema.TypeRepresentationInt16, *schema.TypeRepresentationInt32, *schema.TypeRepresentationInt64, *schema.TypeRepresentationBigInteger:
+	case *schema.TypeRepresentationInteger, *schema.TypeRepresentationInt8, *schema.TypeRepresentationInt16, *schema.TypeRepresentationInt32, *schema.TypeRepresentationInt64, *schema.TypeRepresentationBigInteger: //nolint:all
 		value, err := utils.DecodeIntReflection[int64](reflectValue)
 		if err != nil {
 			return nil, fmt.Errorf("%s: %w", strings.Join(fieldPaths, ""), err)
@@ -215,7 +215,7 @@ func encodeScalarParameterReflectionValues(reflectValue reflect.Value, scalar *s
 		return []ParameterItem{
 			NewParameterItem([]Key{}, []string{strconv.FormatInt(value, 10)}),
 		}, nil
-	case *schema.TypeRepresentationNumber, *schema.TypeRepresentationFloat32, *schema.TypeRepresentationFloat64, *schema.TypeRepresentationBigDecimal:
+	case *schema.TypeRepresentationNumber, *schema.TypeRepresentationFloat32, *schema.TypeRepresentationFloat64, *schema.TypeRepresentationBigDecimal: //nolint:all
 		value, err := utils.DecodeFloatReflection[float64](reflectValue)
 		if err != nil {
 			return nil, fmt.Errorf("%s: %w", strings.Join(fieldPaths, ""), err)
@@ -352,41 +352,6 @@ func encodeQueryValues(qValues url.Values, allowReserved bool) string {
 		index++
 	}
 	return builder.String()
-}
-
-func encodeParameterBool(value any, fieldPaths []string) (ParameterItems, error) {
-	result, err := sdkUtils.DecodeBoolean(value)
-	if err != nil {
-		return nil, fmt.Errorf("%s: %w", strings.Join(fieldPaths, ""), err)
-	}
-
-	return []ParameterItem{
-		NewParameterItem([]Key{}, []string{strconv.FormatBool(result)}),
-	}, nil
-}
-
-func encodeParameterString(value any, fieldPaths []string) (ParameterItems, error) {
-	result, err := sdkUtils.DecodeString(value)
-	if err != nil {
-		return nil, fmt.Errorf("%s: %w", strings.Join(fieldPaths, ""), err)
-	}
-	return []ParameterItem{NewParameterItem([]Key{}, []string{result})}, nil
-}
-
-func encodeParameterInt(value any, fieldPaths []string) (ParameterItems, error) {
-	intValue, err := sdkUtils.DecodeInt[int64](value)
-	if err != nil {
-		return nil, fmt.Errorf("%s: %w", strings.Join(fieldPaths, ""), err)
-	}
-	return []ParameterItem{NewParameterItem([]Key{}, []string{strconv.FormatInt(intValue, 10)})}, nil
-}
-
-func encodeParameterFloat(value any, fieldPaths []string) (ParameterItems, error) {
-	floatValue, err := sdkUtils.DecodeFloat[float64](value)
-	if err != nil {
-		return nil, fmt.Errorf("%s: %w", strings.Join(fieldPaths, ""), err)
-	}
-	return []ParameterItem{NewParameterItem([]Key{}, []string{fmt.Sprintf("%f", floatValue)})}, nil
 }
 
 func setHeaderParameters(header *http.Header, param *rest.RequestParameter, queryParams ParameterItems) {

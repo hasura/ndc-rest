@@ -260,10 +260,6 @@ func isPrimitiveScalar(names []string) bool {
 	return true
 }
 
-func isOASType(name string) bool {
-	return slices.Contains([]string{"boolean", "integer", "number", "string", "file", "long", "array", "object"}, name)
-}
-
 // get the inner named type of the type encoder
 func getNamedType(typeSchema schema.TypeEncoder, recursive bool, defaultValue string) string {
 	switch ty := typeSchema.(type) {
