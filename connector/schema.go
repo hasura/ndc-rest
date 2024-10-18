@@ -9,10 +9,10 @@ import (
 	"reflect"
 	"strconv"
 
+	"github.com/hasura/ndc-rest/connector/internal"
 	"github.com/hasura/ndc-rest/ndc-rest-schema/command"
 	rest "github.com/hasura/ndc-rest/ndc-rest-schema/schema"
 	restUtils "github.com/hasura/ndc-rest/ndc-rest-schema/utils"
-	"github.com/hasura/ndc-rest/rest/internal"
 	"github.com/hasura/ndc-sdk-go/schema"
 	"github.com/hasura/ndc-sdk-go/utils"
 )

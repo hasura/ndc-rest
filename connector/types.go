@@ -4,9 +4,9 @@ import (
 	"errors"
 	"net/http"
 
+	"github.com/hasura/ndc-rest/connector/internal"
 	"github.com/hasura/ndc-rest/ndc-rest-schema/command"
 	rest "github.com/hasura/ndc-rest/ndc-rest-schema/schema"
-	"github.com/hasura/ndc-rest/rest/internal"
 )
 
 var (

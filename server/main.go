@@ -1,7 +1,7 @@
 package main
 
 import (
-	"github.com/hasura/ndc-rest/rest"
+	rest "github.com/hasura/ndc-rest/connector"
 	"github.com/hasura/ndc-sdk-go/connector"
 )
 
