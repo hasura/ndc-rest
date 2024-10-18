@@ -7,7 +7,7 @@ toolchain go1.23.1
 require (
 	github.com/alecthomas/kong v1.2.1
 	github.com/evanphx/json-patch v0.5.2
-	github.com/hasura/ndc-sdk-go v1.5.2-0.20241013153211-ca0e28914f0c
+	github.com/hasura/ndc-sdk-go v1.5.2-0.20241013164146-0bf9f9a9ab8c
 	github.com/invopop/jsonschema v0.12.0
 	github.com/lmittmann/tint v1.0.5
 	github.com/pb33f/libopenapi v0.18.3

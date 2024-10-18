@@ -52,11 +52,11 @@ func (c *RESTConnector) execQuery(ctx context.Context, request *schema.QueryRequ
 		})
 	}
 
-	endpoint, headers, err := c.evalURLAndHeaderParameters(function.Request, function.Arguments, rawArgs)
+	// 2. build the request
+	builder := internal.NewRequestBuilder(c.schema, function, rawArgs)
+	httpRequest, err := builder.Build()
 	if err != nil {
-		return nil, schema.UnprocessableContentError("failed to evaluate URL and Headers from parameters", map[string]any{
-			"cause": err.Error(),
-		})
+		return nil, err
 	}
 
 	restOptions, err := parseRESTOptionsFromArguments(function.Arguments, rawArgs[internal.RESTOptionsArgumentName])
@@ -66,13 +66,8 @@ func (c *RESTConnector) execQuery(ctx context.Context, request *schema.QueryRequ
 		})
 	}
 
-	// 2. create and execute request
-	// 3. evaluate response selection
 	restOptions.Settings = settings
-	httpRequest, err := c.createRequest(function, endpoint, headers, nil)
-	if err != nil {
-		return nil, err
-	}
 
+	// 3. execute request and evaluate response selection
 	return c.client.Send(ctx, httpRequest, queryFields, function.ResultType, restOptions)
 }

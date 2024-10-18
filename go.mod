@@ -5,8 +5,9 @@ go 1.23.0
 toolchain go1.23.1
 
 require (
+	github.com/google/uuid v1.6.0
 	github.com/hasura/ndc-rest/ndc-rest-schema v0.2.5
-	github.com/hasura/ndc-sdk-go v1.5.2-0.20241013153211-ca0e28914f0c
+	github.com/hasura/ndc-sdk-go v1.5.2-0.20241013164146-0bf9f9a9ab8c
 	github.com/lmittmann/tint v1.0.5
 	go.opentelemetry.io/otel v1.31.0
 	go.opentelemetry.io/otel/trace v1.31.0
@@ -27,7 +28,6 @@ require (
 	github.com/go-logr/stdr v1.2.2 // indirect
 	github.com/go-viper/mapstructure/v2 v2.2.1 // indirect
 	github.com/google/go-cmp v0.6.0 // indirect
-	github.com/google/uuid v1.6.0 // indirect
 	github.com/grpc-ecosystem/grpc-gateway/v2 v2.22.0 // indirect
 	github.com/invopop/jsonschema v0.12.0 // indirect
 	github.com/klauspost/compress v1.17.11 // indirect

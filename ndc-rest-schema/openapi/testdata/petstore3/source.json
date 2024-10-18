@@ -2730,6 +2730,364 @@
         }
       }
     },
+    "/v1/invoices": {
+      "get": {
+        "description": "<p>You can list all invoices, or list the invoices for a specific customer. The invoices are returned sorted by creation date, with the most recently created invoices appearing first.</p>",
+        "operationId": "GetInvoices",
+        "parameters": [
+          {
+            "description": "The collection method of the invoice to retrieve. Either `charge_automatically` or `send_invoice`.",
+            "in": "query",
+            "name": "collection_method",
+            "required": false,
+            "schema": {
+              "enum": ["charge_automatically", "send_invoice"],
+              "type": "string"
+            },
+            "style": "form"
+          },
+          {
+            "description": "Only return invoices that were created during the given date interval.",
+            "explode": true,
+            "in": "query",
+            "name": "created",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "properties": {
+                    "gt": {
+                      "type": "integer"
+                    },
+                    "gte": {
+                      "type": "integer"
+                    },
+                    "lt": {
+                      "type": "integer"
+                    },
+                    "lte": {
+                      "type": "integer"
+                    }
+                  },
+                  "title": "range_query_specs",
+                  "type": "object"
+                },
+                {
+                  "type": "integer"
+                }
+              ]
+            },
+            "style": "deepObject"
+          },
+          {
+            "description": "Only return invoices for the customer specified by this customer ID.",
+            "in": "query",
+            "name": "customer",
+            "required": false,
+            "schema": {
+              "maxLength": 5000,
+              "type": "string"
+            },
+            "style": "form"
+          },
+          {
+            "explode": true,
+            "in": "query",
+            "name": "due_date",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "properties": {
+                    "gt": {
+                      "type": "integer"
+                    },
+                    "gte": {
+                      "type": "integer"
+                    },
+                    "lt": {
+                      "type": "integer"
+                    },
+                    "lte": {
+                      "type": "integer"
+                    }
+                  },
+                  "title": "range_query_specs",
+                  "type": "object"
+                },
+                {
+                  "type": "integer"
+                }
+              ]
+            },
+            "style": "deepObject"
+          },
+          {
+            "description": "A cursor for use in pagination. `ending_before` is an object ID that defines your place in the list. For instance, if you make a list request and receive 100 objects, starting with `obj_bar`, your subsequent call can include `ending_before=obj_bar` in order to fetch the previous page of the list.",
+            "in": "query",
+            "name": "ending_before",
+            "required": false,
+            "schema": {
+              "maxLength": 5000,
+              "type": "string"
+            },
+            "style": "form"
+          },
+          {
+            "description": "Specifies which fields in the response should be expanded.",
+            "explode": true,
+            "in": "query",
+            "name": "expand",
+            "required": false,
+            "schema": {
+              "items": {
+                "maxLength": 5000,
+                "type": "string"
+              },
+              "type": "array"
+            },
+            "style": "deepObject"
+          },
+          {
+            "description": "A limit on the number of objects to be returned. Limit can range between 1 and 100, and the default is 10.",
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "type": "integer"
+            },
+            "style": "form"
+          },
+          {
+            "description": "A cursor for use in pagination. `starting_after` is an object ID that defines your place in the list. For instance, if you make a list request and receive 100 objects, ending with `obj_foo`, your subsequent call can include `starting_after=obj_foo` in order to fetch the next page of the list.",
+            "in": "query",
+            "name": "starting_after",
+            "required": false,
+            "schema": {
+              "maxLength": 5000,
+              "type": "string"
+            },
+            "style": "form"
+          },
+          {
+            "description": "The status of the invoice, one of `draft`, `open`, `paid`, `uncollectible`, or `void`. [Learn more](https://stripe.com/docs/billing/invoices/workflow#workflow-overview)",
+            "in": "query",
+            "name": "status",
+            "required": false,
+            "schema": {
+              "enum": ["draft", "open", "paid", "uncollectible", "void"],
+              "type": "string",
+              "x-stripeBypassValidation": true
+            },
+            "style": "form"
+          },
+          {
+            "description": "Only return invoices for the subscription specified by this subscription ID.",
+            "in": "query",
+            "name": "subscription",
+            "required": false,
+            "schema": {
+              "maxLength": 5000,
+              "type": "string"
+            },
+            "style": "form"
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/x-www-form-urlencoded": {
+              "encoding": {},
+              "schema": {
+                "additionalProperties": false,
+                "properties": {},
+                "type": "object"
+              }
+            }
+          },
+          "required": false
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "description": "",
+                  "properties": {
+                    "has_more": {
+                      "description": "True if this list has another page of items after this one that can be fetched.",
+                      "type": "boolean"
+                    },
+                    "object": {
+                      "description": "String representing the object's type. Objects of the same type share the same value. Always has the value `list`.",
+                      "enum": ["list"],
+                      "type": "string"
+                    },
+                    "url": {
+                      "description": "The URL where this list can be accessed.",
+                      "maxLength": 5000,
+                      "pattern": "^/v1/invoices",
+                      "type": "string"
+                    }
+                  },
+                  "required": ["has_more", "object", "url"],
+                  "title": "InvoicesResourceList",
+                  "type": "object",
+                  "x-expandableFields": ["data"]
+                }
+              }
+            },
+            "description": "Successful response."
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/error"
+                }
+              }
+            },
+            "description": "Error response."
+          }
+        }
+      }
+    },
+    "/v1/files": {
+      "post": {
+        "operationId": "PostFiles",
+        "requestBody": {
+          "content": {
+            "multipart/form-data": {
+              "encoding": {
+                "expand": {
+                  "explode": true,
+                  "style": "deepObject"
+                },
+                "expand_json": {
+                  "contentType": "application/json"
+                },
+                "file": {
+                  "headers": {
+                    "X-Rate-Limit-Limit": {
+                      "explode": false,
+                      "argumentName": "headerXRateLimitLimit",
+                      "schema": {
+                        "type": ["integer"]
+                      }
+                    }
+                  }
+                },
+                "file_link_data": {
+                  "explode": true,
+                  "style": "deepObject"
+                }
+              },
+              "schema": {
+                "additionalProperties": false,
+                "properties": {
+                  "expand": {
+                    "description": "Specifies which fields in the response should be expanded.",
+                    "items": {
+                      "maxLength": 5000,
+                      "type": "string"
+                    },
+                    "type": "array"
+                  },
+                  "expand_json": {
+                    "items": {
+                      "maxLength": 5000,
+                      "type": "string"
+                    },
+                    "type": "array"
+                  },
+                  "file": {
+                    "description": "A file to upload. Make sure that the specifications follow RFC 2388, which defines file transfers for the `multipart/form-data` protocol.",
+                    "format": "binary",
+                    "type": "string"
+                  },
+                  "file_link_data": {
+                    "description": "Optional parameters that automatically create a [file link](https://stripe.com/docs/api#file_links) for the newly created file.",
+                    "properties": {
+                      "create": {
+                        "type": "boolean"
+                      },
+                      "expires_at": {
+                        "format": "unix-time",
+                        "type": "integer"
+                      },
+                      "metadata": {
+                        "anyOf": [
+                          {
+                            "additionalProperties": {
+                              "type": "string"
+                            },
+                            "type": "object"
+                          },
+                          {
+                            "enum": [""],
+                            "type": "string"
+                          }
+                        ]
+                      }
+                    },
+                    "required": ["create"],
+                    "title": "file_link_creation_params",
+                    "type": "object"
+                  },
+                  "purpose": {
+                    "description": "The [purpose](https://stripe.com/docs/file-upload#uploading-a-file) of the uploaded file.",
+                    "enum": [
+                      "account_requirement",
+                      "additional_verification",
+                      "business_icon",
+                      "business_logo",
+                      "customer_signature",
+                      "dispute_evidence",
+                      "identity_document",
+                      "issuing_regulatory_reporting",
+                      "pci_document",
+                      "tax_document_user_upload",
+                      "terminal_reader_splashscreen"
+                    ],
+                    "type": "string",
+                    "x-stripeBypassValidation": true
+                  }
+                },
+                "required": ["file", "purpose"],
+                "type": "object"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse"
+                }
+              }
+            },
+            "description": "Successful response."
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/error"
+                }
+              }
+            },
+            "description": "Error response."
+          }
+        },
+        "servers": [
+          {
+            "url": "https://files.stripe.com/"
+          }
+        ]
+      }
+    },
     "/fine_tuning/jobs": {
       "post": {
         "operationId": "createFineTuningJob",

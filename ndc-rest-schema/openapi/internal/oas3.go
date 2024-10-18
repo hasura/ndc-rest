@@ -29,8 +29,9 @@ type OAS3Builder struct {
 
 // SchemaInfoCache stores prebuilt information of component schema types.
 type SchemaInfoCache struct {
-	Name   string
-	Schema schema.TypeEncoder
+	Name       string
+	Schema     schema.TypeEncoder
+	TypeSchema *rest.TypeSchema
 }
 
 // NewOAS3Builder creates an OAS3Builder instance
@@ -329,6 +330,9 @@ func (oc *OAS3Builder) populateWriteSchemaType(schemaType schema.Type) (schema.T
 			oc.schemaCache[ty.Name] = SchemaInfoCache{
 				Name:   ty.Name,
 				Schema: schema.NewNamedType(ty.Name),
+				TypeSchema: &rest.TypeSchema{
+					Type: []string{"object"},
+				},
 			}
 		}
 
@@ -360,6 +364,7 @@ func (oc *OAS3Builder) populateWriteSchemaType(schemaType schema.Type) (schema.T
 					Description: field.Description,
 					Type:        ut,
 				},
+				Rest: field.Rest,
 			}
 			if isInput {
 				hasWriteField = true

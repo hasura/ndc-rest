@@ -27,13 +27,13 @@ func TestOpenAPIv2ToRESTSchema(t *testing.T) {
 				TrimPrefix: "/v1",
 			},
 		},
-		// go run . convert -f ./openapi/testdata/petstore2/swagger.json -o ./openapi/testdata/petstore2/expected.json --spec oas2
+		// go run ./ndc-rest-schema convert -f ./ndc-rest-schema/openapi/testdata/petstore2/swagger.json -o ./ndc-rest-schema/openapi/testdata/petstore2/expected.json --spec oas2
 		{
 			Name:     "petstore2",
 			Source:   "testdata/petstore2/swagger.json",
 			Expected: "testdata/petstore2/expected.json",
 		},
-		// go run . convert -f ./openapi/testdata/prefix2/source.json -o ./openapi/testdata/prefix2/expected_single_word.json --spec oas2 --prefix hasura
+		// go run ./ndc-rest-schema convert -f ./ndc-rest-schema/openapi/testdata/prefix2/source.json -o ./ndc-rest-schema/openapi/testdata/prefix2/expected_single_word.json --spec oas2 --prefix hasura
 		{
 			Name:     "prefix2_single_word",
 			Source:   "testdata/prefix2/source.json",
@@ -42,7 +42,7 @@ func TestOpenAPIv2ToRESTSchema(t *testing.T) {
 				Prefix: "hasura",
 			},
 		},
-		// go run . convert -f ./openapi/testdata/prefix2/source.json -o ./openapi/testdata/prefix2/expected_multi_words.json --spec oas2 --prefix hasura_mock_json
+		// go run ./ndc-rest-schema convert -f ./ndc-rest-schema/openapi/testdata/prefix2/source.json -o ./ndc-rest-schema/openapi/testdata/prefix2/expected_multi_words.json --spec oas2 --prefix hasura_mock_json
 		{
 			Name:     "prefix2_single_word",
 			Source:   "testdata/prefix2/source.json",

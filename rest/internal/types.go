@@ -2,6 +2,7 @@ package internal
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 
 	rest "github.com/hasura/ndc-rest/ndc-rest-schema/schema"
@@ -13,6 +14,11 @@ const (
 	contentTypeHeader          = "Content-Type"
 	defaultTimeoutSeconds uint = 30
 	defaultRetryDelays    uint = 1000
+)
+
+var (
+	errArgumentRequired        = errors.New("argument is required")
+	errRequestBodyTypeRequired = errors.New("failed to decode request body, empty body type")
 )
 
 var defaultRetryHTTPStatus = []int64{429, 500, 502, 503}

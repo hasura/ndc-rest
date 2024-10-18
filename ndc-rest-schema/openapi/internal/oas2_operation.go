@@ -255,9 +255,8 @@ func (oc *oas2OperationBuilder) convertParameters(operation *v2.Operation, apiPa
 						Type:        argument.Type,
 						Description: argument.Description,
 					},
+					Rest: typeSchema,
 				}
-				// TTODO: remove
-				// formData.Properties[paramName] = *typeSchema
 			}
 		default:
 			argument.Rest = &rest.RequestParameter{
@@ -281,7 +280,7 @@ func (oc *oas2OperationBuilder) convertParameters(operation *v2.Operation, apiPa
 				Description: &desc,
 			},
 			Rest: &rest.RequestParameter{
-				In:     rest.InBody,
+				In:     rest.InFormData,
 				Schema: &formData,
 			},
 		}

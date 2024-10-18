@@ -160,6 +160,26 @@ type EncodingObject struct {
 	Headers map[string]RequestParameter `json:"headers,omitempty" mapstructure:"headers" yaml:"headers,omitempty"`
 }
 
+// SetHeader sets the encoding header
+func (eo *EncodingObject) SetHeader(key string, param RequestParameter) {
+	if eo.Headers == nil {
+		eo.Headers = make(map[string]RequestParameter)
+	}
+	eo.Headers[key] = param
+}
+
+// GetHeader gets the encoding header by key
+func (eo *EncodingObject) GetHeader(key string) *RequestParameter {
+	if len(eo.Headers) == 0 {
+		return nil
+	}
+	result, ok := eo.Headers[key]
+	if !ok {
+		return nil
+	}
+	return &result
+}
+
 // RequestBody defines flexible request body with content types
 type RequestBody struct {
 	ContentType string                    `json:"contentType,omitempty" mapstructure:"contentType" yaml:"contentType,omitempty"`
@@ -270,7 +290,7 @@ func (of ObjectType) Schema() schema.ObjectType {
 type ObjectField struct {
 	schema.ObjectField `yaml:",inline"`
 
-	// The request parameter information of the REST request
+	// The field schema information of the REST request
 	Rest *TypeSchema `json:"rest,omitempty" mapstructure:"rest" yaml:"rest,omitempty"`
 }
 
@@ -287,24 +307,24 @@ func (j *ObjectField) UnmarshalJSON(b []byte) error {
 	}
 	rawType, ok := raw["type"]
 	if !ok || len(rawType) == 0 {
-		return fmt.Errorf("field type in ArgumentInfo: required")
+		return fmt.Errorf("field type in ObjectField: required")
 	}
 
 	if err := json.Unmarshal(rawType, &j.Type); err != nil {
-		return fmt.Errorf("field type in ArgumentInfo: %w", err)
+		return fmt.Errorf("field type in ObjectField: %w", err)
 	}
 
 	if rawDesc, ok := raw["description"]; ok {
 		var desc string
 		if err := json.Unmarshal(rawDesc, &desc); err != nil {
-			return fmt.Errorf("field description in ArgumentInfo: %w", err)
+			return fmt.Errorf("field description in ObjectField: %w", err)
 		}
 		j.Description = &desc
 	}
 	if rawArguments, ok := raw["arguments"]; ok {
 		var arguments schema.ObjectFieldArguments
 		if err := json.Unmarshal(rawArguments, &arguments); err != nil {
-			return fmt.Errorf("field arguments in ArgumentInfo: %w", err)
+			return fmt.Errorf("field arguments in ObjectField: %w", err)
 		}
 		j.Arguments = arguments
 	}
@@ -312,7 +332,7 @@ func (j *ObjectField) UnmarshalJSON(b []byte) error {
 	if rawType, ok := raw["rest"]; ok {
 		var ty TypeSchema
 		if err := json.Unmarshal(rawType, &ty); err != nil {
-			return fmt.Errorf("field parameter in ArgumentInfo: %w", err)
+			return fmt.Errorf("field rest in ObjectField: %w", err)
 		}
 		j.Rest = &ty
 	}

@@ -45,11 +45,11 @@ func (c *RESTConnector) execProcedure(ctx context.Context, operation *schema.Mut
 		})
 	}
 
-	endpoint, headers, err := c.evalURLAndHeaderParameters(procedure.Request, procedure.Arguments, rawArgs)
+	// 2. build the request
+	builder := internal.NewRequestBuilder(c.schema, procedure, rawArgs)
+	httpRequest, err := builder.Build()
 	if err != nil {
-		return nil, schema.BadRequestError("failed to evaluate URL and Headers from parameters", map[string]any{
-			"cause": err.Error(),
-		})
+		return nil, err
 	}
 
 	restOptions, err := parseRESTOptionsFromArguments(procedure.Arguments, rawArgs[internal.RESTOptionsArgumentName])
@@ -59,14 +59,9 @@ func (c *RESTConnector) execProcedure(ctx context.Context, operation *schema.Mut
 		})
 	}
 
-	// 2. create and execute request
-	// 3. evaluate response selection
 	restOptions.Settings = settings
-	httpRequest, err := c.createRequest(procedure, endpoint, headers, rawArgs)
-	if err != nil {
-		return nil, err
-	}
 
+	// 3. execute the request and evaluate response selection
 	result, err := c.client.Send(ctx, httpRequest, operation.Fields, procedure.ResultType, restOptions)
 	if err != nil {
 		return nil, err

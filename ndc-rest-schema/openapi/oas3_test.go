@@ -18,7 +18,7 @@ func TestOpenAPIv3ToRESTSchema(t *testing.T) {
 		Expected string
 		Options  ConvertOptions
 	}{
-		// go run . convert  -f ./openapi/testdata/petstore3/source.json -o ./openapi/testdata/petstore3/expected.json --trim-prefix /v1 --spec openapi3 --env-prefix PET_STORE
+		// go run ./ndc-rest-schema convert -f ./ndc-rest-schema/openapi/testdata/petstore3/source.json -o ./ndc-rest-schema/openapi/testdata/petstore3/expected.json --trim-prefix /v1 --spec openapi3 --env-prefix PET_STORE
 		{
 			Name:     "petstore3",
 			Source:   "testdata/petstore3/source.json",
@@ -28,21 +28,21 @@ func TestOpenAPIv3ToRESTSchema(t *testing.T) {
 				EnvPrefix:  "PET_STORE",
 			},
 		},
-		// go run . convert -f ./openapi/testdata/onesignal/source.json -o ./openapi/testdata/onesignal/expected.json --spec openapi3
+		// go run ./ndc-rest-schema convert -f ./ndc-rest-schema/openapi/testdata/onesignal/source.json -o ./ndc-rest-schema/openapi/testdata/onesignal/expected.json --spec openapi3
 		{
 			Name:     "onesignal",
 			Source:   "testdata/onesignal/source.json",
 			Expected: "testdata/onesignal/expected.json",
 			Options:  ConvertOptions{},
 		},
-		// go run . convert -f ./openapi/testdata/openai/source.json -o ./openapi/testdata/openai/expected.json --spec openapi3
+		// go run ./ndc-rest-schema convert -f ./ndc-rest-schema/openapi/testdata/openai/source.json -o ./ndc-rest-schema/openapi/testdata/openai/expected.json --spec openapi3
 		{
 			Name:     "openai",
 			Source:   "testdata/openai/source.json",
 			Expected: "testdata/openai/expected.json",
 			Options:  ConvertOptions{},
 		},
-		// go run . convert -f ./openapi/testdata/prefix3/source.json -o ./openapi/testdata/prefix3/expected_single_word.json --spec openapi3 --prefix hasura
+		// go run ./ndc-rest-schema convert -f ./ndc-rest-schema/openapi/testdata/prefix3/source.json -o ./ndc-rest-schema/openapi/testdata/prefix3/expected_single_word.json --spec openapi3 --prefix hasura
 		{
 			Name:     "prefix3_single_word",
 			Source:   "testdata/prefix3/source.json",
@@ -51,7 +51,7 @@ func TestOpenAPIv3ToRESTSchema(t *testing.T) {
 				Prefix: "hasura",
 			},
 		},
-		// go run . convert -f ./openapi/testdata/prefix3/source.json -o ./openapi/testdata/prefix3/expected_multi_words.json --spec openapi3 --prefix hasura_one_signal
+		// go run ./ndc-rest-schema convert -f ./ndc-rest-schema/openapi/testdata/prefix3/source.json -o ./ndc-rest-schema/openapi/testdata/prefix3/expected_multi_words.json --spec openapi3 --prefix hasura_one_signal
 		{
 			Name:     "prefix3_multi_words",
 			Source:   "testdata/prefix3/source.json",
@@ -88,9 +88,13 @@ func TestOpenAPIv3ToRESTSchema(t *testing.T) {
 }
 
 func assertRESTSchemaEqual(t *testing.T, expected *schema.NDCRestSchema, output *schema.NDCRestSchema) {
+	t.Helper()
 	assert.DeepEqual(t, expected.Settings, output.Settings)
 	assert.DeepEqual(t, expected.ScalarTypes, output.ScalarTypes)
-	assert.DeepEqual(t, expected.ObjectTypes, output.ObjectTypes)
+	objectBs, _ := json.Marshal(output.ObjectTypes)
+	var objectTypes map[string]schema.ObjectType
+	assert.NilError(t, json.Unmarshal(objectBs, &objectTypes))
+	assert.DeepEqual(t, expected.ObjectTypes, objectTypes)
 	assert.DeepEqual(t, expected.Procedures, output.Procedures)
 	assert.DeepEqual(t, expected.Functions, output.Functions)
 }

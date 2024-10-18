@@ -248,12 +248,10 @@ func (oc *oas3OperationBuilder) convertRequestBody(reqBody *v3.RequestBody, apiP
 	oc.builder.typeUsageCounter.Add(getNamedType(schemaType, true, ""), 1)
 	bodyResult := &rest.RequestBody{
 		ContentType: contentType,
-		// TODO: move to argument
-		// Schema:      typeSchema,
 	}
 
 	if content.Encoding != nil {
-		encoding := make(map[string]rest.EncodingObject)
+		bodyResult.Encoding = make(map[string]rest.EncodingObject)
 		for iter := content.Encoding.First(); iter != nil; iter = iter.Next() {
 			encodingValue := iter.Value()
 			if encodingValue == nil {
@@ -292,7 +290,6 @@ func (oc *oas3OperationBuilder) convertRequestBody(reqBody *v3.RequestBody, apiP
 					headerEncoding := rest.EncodingObject{
 						AllowReserved: header.AllowReserved,
 						Explode:       &header.Explode,
-						Headers:       map[string]rest.RequestParameter{},
 					}
 
 					if header.Style != "" {
@@ -325,9 +322,8 @@ func (oc *oas3OperationBuilder) convertRequestBody(reqBody *v3.RequestBody, apiP
 				}
 			}
 
-			encoding[iter.Key()] = item
+			bodyResult.Encoding[iter.Key()] = item
 		}
-		bodyResult.Encoding = encoding
 	}
 	return bodyResult, schemaType, nil
 }
