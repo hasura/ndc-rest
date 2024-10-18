@@ -188,21 +188,13 @@ func canSetEnumToSchema(sm *rest.NDCRestSchema, scalarName string, enums []strin
 	return false
 }
 
-func createSchemaFromOpenAPISchema(input *base.Schema, typeName string) *rest.TypeSchema {
+func createSchemaFromOpenAPISchema(input *base.Schema) *rest.TypeSchema {
 	ps := &rest.TypeSchema{}
 	if input == nil {
 		return ps
 	}
-	if typeName != "" {
-		ps.Type = typeName
-	} else {
-		if len(input.Type) > 1 {
-			ps.Type = string(rest.ScalarJSON)
-		} else if len(input.Type) > 0 {
-			ps.Type = input.Type[0]
-		}
-		ps.Format = input.Format
-	}
+	ps.Type = input.Type
+	ps.Format = input.Format
 	ps.Pattern = input.Pattern
 	ps.Maximum = input.Maximum
 	ps.Minimum = input.Minimum
@@ -259,24 +251,13 @@ func convertSecurity(security *base.SecurityRequirement) rest.AuthSecurity {
 }
 
 // check if the OAS type is a scalar
-func isPrimitiveScalar(name string) bool {
-	return slices.Contains([]string{"boolean", "integer", "number", "string", "file", "long"}, name)
-}
-
-func isOASType(name string) bool {
-	return slices.Contains([]string{"boolean", "integer", "number", "string", "file", "long", "array", "object"}, name)
-}
-
-// sort request parameters in order: in -> name
-func sortRequestParameters(input []rest.RequestParameter) []rest.RequestParameter {
-	slices.SortFunc(input, func(a rest.RequestParameter, b rest.RequestParameter) int {
-		if result := strings.Compare(string(a.In), string(b.In)); result != 0 {
-			return result
+func isPrimitiveScalar(names []string) bool {
+	for _, name := range names {
+		if !slices.Contains([]string{"boolean", "integer", "number", "string", "file", "long"}, name) {
+			return false
 		}
-		return strings.Compare(a.Name, b.Name)
-	})
-
-	return input
+	}
+	return true
 }
 
 // get the inner named type of the type encoder

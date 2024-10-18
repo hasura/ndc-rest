@@ -2,6 +2,7 @@ package internal
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 
 	rest "github.com/hasura/ndc-rest/ndc-rest-schema/schema"
@@ -15,6 +16,11 @@ const (
 	defaultRetryDelays    uint = 1000
 )
 
+var (
+	errArgumentRequired        = errors.New("argument is required")
+	errRequestBodyTypeRequired = errors.New("failed to decode request body, empty body type")
+)
+
 var defaultRetryHTTPStatus = []int64{429, 500, 502, 503}
 
 const (
@@ -26,27 +32,33 @@ const (
 )
 
 // SingleObjectType represents the object type of REST execution options for single server
-var SingleObjectType schema.ObjectType = schema.ObjectType{
+var SingleObjectType rest.ObjectType = rest.ObjectType{
 	Description: utils.ToPtr("Execution options for REST requests to a single server"),
-	Fields: schema.ObjectTypeFields{
-		"servers": schema.ObjectField{
-			Description: utils.ToPtr("Specify remote servers to receive the request. If there are many server IDs the server is selected randomly"),
-			Type:        schema.NewNullableType(schema.NewArrayType(schema.NewNamedType(RESTServerIDScalarName))).Encode(),
+	Fields: map[string]rest.ObjectField{
+		"servers": {
+			ObjectField: schema.ObjectField{
+				Description: utils.ToPtr("Specify remote servers to receive the request. If there are many server IDs the server is selected randomly"),
+				Type:        schema.NewNullableType(schema.NewArrayType(schema.NewNamedType(RESTServerIDScalarName))).Encode(),
+			},
 		},
 	},
 }
 
 // DistributedObjectType represents the object type of REST execution options for distributed servers
-var DistributedObjectType schema.ObjectType = schema.ObjectType{
+var DistributedObjectType rest.ObjectType = rest.ObjectType{
 	Description: utils.ToPtr("Distributed execution options for REST requests to multiple servers"),
-	Fields: schema.ObjectTypeFields{
-		"servers": schema.ObjectField{
-			Description: utils.ToPtr("Specify remote servers to receive the request"),
-			Type:        schema.NewNullableType(schema.NewArrayType(schema.NewNamedType(RESTServerIDScalarName))).Encode(),
+	Fields: map[string]rest.ObjectField{
+		"servers": {
+			ObjectField: schema.ObjectField{
+				Description: utils.ToPtr("Specify remote servers to receive the request"),
+				Type:        schema.NewNullableType(schema.NewArrayType(schema.NewNamedType(RESTServerIDScalarName))).Encode(),
+			},
 		},
-		"parallel": schema.ObjectField{
-			Description: utils.ToPtr("Execute requests to remote servers in parallel"),
-			Type:        schema.NewNullableNamedType(string(rest.ScalarBoolean)).Encode(),
+		"parallel": {
+			ObjectField: schema.ObjectField{
+				Description: utils.ToPtr("Execute requests to remote servers in parallel"),
+				Type:        schema.NewNullableNamedType(string(rest.ScalarBoolean)).Encode(),
+			},
 		},
 	},
 }

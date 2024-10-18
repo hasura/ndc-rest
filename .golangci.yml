@@ -38,6 +38,7 @@ linters:
     - noctx
     - unparam
     - forbidigo
+    - tagalign
 
 issues:
   exclude-files:

@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os"
 	"regexp"
+	"slices"
 	"strconv"
 	"strings"
 
@@ -192,6 +193,15 @@ func (et *EnvString) Value() *string {
 	return &copyVal
 }
 
+// Equal checks if the current value equals the target
+func (et EnvString) Equal(target EnvString) bool {
+	srcValue := et.Value()
+	targetValue := target.Value()
+
+	return (srcValue == nil && targetValue == nil) ||
+		(srcValue != nil && targetValue != nil && *srcValue == *targetValue)
+}
+
 // String implements the Stringer interface
 func (et EnvString) String() string {
 	if et.IsEmpty() {
@@ -301,6 +311,21 @@ func (j EnvInt) JSONSchema() *jsonschema.Schema {
 func (j EnvInt) WithValue(value int64) *EnvInt {
 	j.value = &value
 	return &j
+}
+
+// Equal checks if the current value equals the target
+func (et EnvInt) Equal(target EnvInt) bool {
+	srcValue, err := et.Value()
+	if err != nil {
+		return false
+	}
+	targetValue, err := target.Value()
+	if err != nil {
+		return false
+	}
+
+	return (srcValue == nil && targetValue == nil) ||
+		(srcValue != nil && targetValue != nil && *srcValue == *targetValue)
 }
 
 // String implements the Stringer interface
@@ -437,6 +462,20 @@ func (j EnvInts) JSONSchema() *jsonschema.Schema {
 func (j EnvInts) WithValue(value []int64) *EnvInts {
 	j.value = value
 	return &j
+}
+
+// Equal checks if the current value equals the target
+func (et EnvInts) Equal(target EnvInts) bool {
+	srcValue, err := et.Value()
+	if err != nil {
+		return false
+	}
+	targetValue, err := target.Value()
+	if err != nil {
+		return false
+	}
+
+	return slices.Equal(srcValue, targetValue)
 }
 
 // String implements the Stringer interface
@@ -584,6 +623,21 @@ func (j EnvBoolean) WithValue(value bool) *EnvBoolean {
 	return &j
 }
 
+// Equal checks if the current value equals the target
+func (et EnvBoolean) Equal(target EnvBoolean) bool {
+	srcValue, err := et.Value()
+	if err != nil {
+		return false
+	}
+	targetValue, err := target.Value()
+	if err != nil {
+		return false
+	}
+
+	return (srcValue == nil && targetValue == nil) ||
+		(srcValue != nil && targetValue != nil && *srcValue == *targetValue)
+}
+
 // String implements the Stringer interface
 func (et EnvBoolean) String() string {
 	if et.IsEmpty() {
@@ -718,6 +772,20 @@ func (j EnvStrings) JSONSchema() *jsonschema.Schema {
 func (j EnvStrings) WithValue(value []string) *EnvStrings {
 	j.value = value
 	return &j
+}
+
+// Equal checks if the current value equals the target
+func (et EnvStrings) Equal(target EnvStrings) bool {
+	srcValue, err := et.Value()
+	if err != nil {
+		return false
+	}
+	targetValue, err := target.Value()
+	if err != nil {
+		return false
+	}
+
+	return slices.Equal(srcValue, targetValue)
 }
 
 // String implements the Stringer interface

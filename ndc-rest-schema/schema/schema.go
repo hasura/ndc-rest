@@ -2,6 +2,8 @@ package schema
 
 import (
 	"encoding/json"
+	"errors"
+	"fmt"
 
 	"github.com/hasura/ndc-sdk-go/schema"
 )
@@ -13,18 +15,15 @@ type NDCRestSchema struct {
 	SchemaRef string           `json:"$schema,omitempty"  mapstructure:"$schema"  yaml:"$schema,omitempty"`
 	Settings  *NDCRestSettings `json:"settings,omitempty" mapstructure:"settings" yaml:"settings,omitempty"`
 
-	// Collections which are available for queries
-	Collections []schema.CollectionInfo `json:"collections" mapstructure:"collections" yaml:"collections"`
-
 	// Functions (i.e. collections which return a single column and row)
-	Functions []*RESTFunctionInfo `json:"functions" mapstructure:"functions" yaml:"functions"`
+	Functions []*OperationInfo `json:"functions" mapstructure:"functions" yaml:"functions"`
 
 	// A list of object types which can be used as the types of arguments, or return
 	// types of procedures. Names should not overlap with scalar type names.
-	ObjectTypes schema.SchemaResponseObjectTypes `json:"object_types" mapstructure:"object_types" yaml:"object_types"`
+	ObjectTypes map[string]ObjectType `json:"object_types" mapstructure:"object_types" yaml:"object_types"`
 
 	// Procedures which are available for execution as part of mutations
-	Procedures []*RESTProcedureInfo `json:"procedures" mapstructure:"procedures" yaml:"procedures"`
+	Procedures []*OperationInfo `json:"procedures" mapstructure:"procedures" yaml:"procedures"`
 
 	// A list of scalar types which will be used as the types of collection columns
 	ScalarTypes schema.SchemaResponseScalarTypes `json:"scalar_types" mapstructure:"scalar_types" yaml:"scalar_types"`
@@ -35,10 +34,9 @@ func NewNDCRestSchema() *NDCRestSchema {
 	return &NDCRestSchema{
 		SchemaRef:   "https://raw.githubusercontent.com/hasura/ndc-rest-schema/main/jsonschema/ndc-rest-schema.jsonschema",
 		Settings:    &NDCRestSettings{},
-		Collections: []schema.CollectionInfo{},
-		Functions:   []*RESTFunctionInfo{},
-		Procedures:  []*RESTProcedureInfo{},
-		ObjectTypes: make(schema.SchemaResponseObjectTypes),
+		Functions:   []*OperationInfo{},
+		Procedures:  []*OperationInfo{},
+		ObjectTypes: make(map[string]ObjectType),
 		ScalarTypes: make(schema.SchemaResponseScalarTypes),
 	}
 }
@@ -47,17 +45,20 @@ func NewNDCRestSchema() *NDCRestSchema {
 func (ndc NDCRestSchema) ToSchemaResponse() *schema.SchemaResponse {
 	functions := make([]schema.FunctionInfo, len(ndc.Functions))
 	for i, fn := range ndc.Functions {
-		functions[i] = fn.FunctionInfo
+		functions[i] = fn.FunctionSchema()
 	}
 	procedures := make([]schema.ProcedureInfo, len(ndc.Procedures))
 	for i, proc := range ndc.Procedures {
-		procedures[i] = proc.ProcedureInfo
+		procedures[i] = proc.ProcedureSchema()
 	}
-
+	objectTypes := make(schema.SchemaResponseObjectTypes)
+	for key, object := range ndc.ObjectTypes {
+		objectTypes[key] = object.Schema()
+	}
 	return &schema.SchemaResponse{
-		Collections: ndc.Collections,
-		ObjectTypes: ndc.ObjectTypes,
+		Collections: []schema.CollectionInfo{},
 		ScalarTypes: ndc.ScalarTypes,
+		ObjectTypes: objectTypes,
 		Functions:   functions,
 		Procedures:  procedures,
 	}
@@ -69,12 +70,11 @@ type Response struct {
 
 // Request represents the HTTP request information of the webhook
 type Request struct {
-	URL        string               `json:"url,omitempty"        mapstructure:"url"                                              yaml:"url,omitempty"`
-	Method     string               `json:"method,omitempty"     jsonschema:"enum=get,enum=post,enum=put,enum=patch,enum=delete" mapstructure:"method"       yaml:"method,omitempty"`
-	Type       RequestType          `json:"type,omitempty"       mapstructure:"type"                                             yaml:"type,omitempty"`
-	Headers    map[string]EnvString `json:"headers,omitempty"    mapstructure:"headers"                                          yaml:"headers,omitempty"`
-	Parameters []RequestParameter   `json:"parameters,omitempty" mapstructure:"parameters"                                       yaml:"parameters,omitempty"`
-	Security   AuthSecurities       `json:"security,omitempty"   mapstructure:"security"                                         yaml:"security,omitempty"`
+	URL      string               `json:"url,omitempty" mapstructure:"url" yaml:"url,omitempty"`
+	Method   string               `json:"method,omitempty" mapstructure:"method" yaml:"method,omitempty" jsonschema:"enum=get,enum=post,enum=put,enum=patch,enum=delete"`
+	Type     RequestType          `json:"type,omitempty" mapstructure:"type" yaml:"type,omitempty"`
+	Headers  map[string]EnvString `json:"headers,omitempty" mapstructure:"headers" yaml:"headers,omitempty"`
+	Security AuthSecurities       `json:"security,omitempty" mapstructure:"security" yaml:"security,omitempty"`
 	// configure the request timeout in seconds, default 30s
 	Timeout     uint           `json:"timeout,omitempty"     mapstructure:"timeout"     yaml:"timeout,omitempty"`
 	Servers     []ServerConfig `json:"servers,omitempty"     mapstructure:"servers"     yaml:"servers,omitempty"`
@@ -90,7 +90,6 @@ func (r Request) Clone() *Request {
 		Method:      r.Method,
 		Type:        r.Type,
 		Headers:     r.Headers,
-		Parameters:  r.Parameters,
 		Timeout:     r.Timeout,
 		Retry:       r.Retry,
 		Security:    r.Security,
@@ -103,30 +102,27 @@ func (r Request) Clone() *Request {
 // RequestParameter represents an HTTP request parameter
 type RequestParameter struct {
 	EncodingObject `yaml:",inline"`
-
-	Name         string            `json:"name,omitempty"         mapstructure:"name"                   yaml:"name,omitempty"`
-	ArgumentName string            `json:"argumentName,omitempty" mapstructure:"argumentName,omitempty" yaml:"argumentName,omitempty"`
-	In           ParameterLocation `json:"in,omitempty"           mapstructure:"in"                     yaml:"in,omitempty"`
-	Schema       *TypeSchema       `json:"schema,omitempty"       mapstructure:"schema"                 yaml:"schema,omitempty"`
+	Name           string            `json:"name,omitempty"         mapstructure:"name"                   yaml:"name,omitempty"`
+	ArgumentName   string            `json:"argumentName,omitempty" mapstructure:"argumentName,omitempty" yaml:"argumentName,omitempty"`
+	In             ParameterLocation `json:"in,omitempty"           mapstructure:"in"                     yaml:"in,omitempty"`
+	Schema         *TypeSchema       `json:"schema,omitempty"       mapstructure:"schema"                 yaml:"schema,omitempty"`
 }
 
 // TypeSchema represents a serializable object of OpenAPI schema
 // that is used for validation
 type TypeSchema struct {
-	Type        string                `json:"type"                 mapstructure:"type"       yaml:"type"`
-	Format      string                `json:"format,omitempty"     mapstructure:"format"     yaml:"format,omitempty"`
-	Pattern     string                `json:"pattern,omitempty"    mapstructure:"pattern"    yaml:"pattern,omitempty"`
-	Nullable    bool                  `json:"nullable,omitempty"   mapstructure:"nullable"   yaml:"nullable,omitempty"`
-	Maximum     *float64              `json:"maximum,omitempty"    mapstructure:"maximum"    yaml:"maximum,omitempty"`
-	Minimum     *float64              `json:"minimum,omitempty,"   mapstructure:"minimum"    yaml:"minimum,omitempty"`
-	MaxLength   *int64                `json:"maxLength,omitempty"  mapstructure:"maxLength"  yaml:"maxLength,omitempty"`
-	MinLength   *int64                `json:"minLength,omitempty"  mapstructure:"minLength"  yaml:"minLength,omitempty"`
-	Enum        []string              `json:"enum,omitempty"       mapstructure:"enum"       yaml:"enum,omitempty"`
-	Items       *TypeSchema           `json:"items,omitempty"      mapstructure:"items"      yaml:"items,omitempty"`
-	Properties  map[string]TypeSchema `json:"properties,omitempty" mapstructure:"properties" yaml:"properties,omitempty"`
-	Description string                `json:"-"                    yaml:"-"`
-	ReadOnly    bool                  `json:"-"                    yaml:"-"`
-	WriteOnly   bool                  `json:"-"                    yaml:"-"`
+	Type        []string    `json:"type"                 mapstructure:"type"       yaml:"type"`
+	Format      string      `json:"format,omitempty"     mapstructure:"format"     yaml:"format,omitempty"`
+	Pattern     string      `json:"pattern,omitempty"    mapstructure:"pattern"    yaml:"pattern,omitempty"`
+	Maximum     *float64    `json:"maximum,omitempty"    mapstructure:"maximum"    yaml:"maximum,omitempty"`
+	Minimum     *float64    `json:"minimum,omitempty,"   mapstructure:"minimum"    yaml:"minimum,omitempty"`
+	MaxLength   *int64      `json:"maxLength,omitempty"  mapstructure:"maxLength"  yaml:"maxLength,omitempty"`
+	MinLength   *int64      `json:"minLength,omitempty"  mapstructure:"minLength"  yaml:"minLength,omitempty"`
+	Enum        []string    `json:"enum,omitempty"       mapstructure:"enum"       yaml:"enum,omitempty"`
+	Items       *TypeSchema `json:"items,omitempty"      mapstructure:"items"      yaml:"items,omitempty"`
+	Description string      `json:"-"                    yaml:"-"`
+	ReadOnly    bool        `json:"-"                    yaml:"-"`
+	WriteOnly   bool        `json:"-"                    yaml:"-"`
 }
 
 // RetryPolicy represents the retry policy of request
@@ -165,21 +161,47 @@ type EncodingObject struct {
 	Headers map[string]RequestParameter `json:"headers,omitempty" mapstructure:"headers" yaml:"headers,omitempty"`
 }
 
+// SetHeader sets the encoding header
+func (eo *EncodingObject) SetHeader(key string, param RequestParameter) {
+	if eo.Headers == nil {
+		eo.Headers = make(map[string]RequestParameter)
+	}
+	eo.Headers[key] = param
+}
+
+// GetHeader gets the encoding header by key
+func (eo *EncodingObject) GetHeader(key string) *RequestParameter {
+	if len(eo.Headers) == 0 {
+		return nil
+	}
+	result, ok := eo.Headers[key]
+	if !ok {
+		return nil
+	}
+	return &result
+}
+
 // RequestBody defines flexible request body with content types
 type RequestBody struct {
 	ContentType string                    `json:"contentType,omitempty" mapstructure:"contentType" yaml:"contentType,omitempty"`
-	Schema      *TypeSchema               `json:"schema,omitempty"      mapstructure:"schema"      yaml:"schema,omitempty"`
 	Encoding    map[string]EncodingObject `json:"encoding,omitempty"    mapstructure:"encoding"    yaml:"encoding,omitempty"`
 }
 
-// RESTFunctionInfo extends NDC query function with OpenAPI REST information
-type RESTFunctionInfo struct {
-	Request             *Request `json:"request" mapstructure:"request" yaml:"request"`
-	schema.FunctionInfo `yaml:",inline"`
+// OperationInfo extends connector command operation with OpenAPI REST information
+type OperationInfo struct {
+	Request *Request `json:"request" mapstructure:"request" yaml:"request"`
+	// Any arguments that this collection requires
+	Arguments map[string]ArgumentInfo `json:"arguments" yaml:"arguments" mapstructure:"arguments"`
+	// Column description
+	Description *string `json:"description,omitempty" yaml:"description,omitempty" mapstructure:"description,omitempty"`
+	// The name of the procedure
+	Name string `json:"name" yaml:"name" mapstructure:"name"`
+	// The name of the result type
+	ResultType schema.Type `json:"result_type" yaml:"result_type" mapstructure:"result_type"`
 }
 
 // UnmarshalJSON implements json.Unmarshaler.
-func (j *RESTFunctionInfo) UnmarshalJSON(b []byte) error {
+func (j *OperationInfo) UnmarshalJSON(b []byte) error {
 	var raw map[string]json.RawMessage
 	if err := json.Unmarshal(b, &raw); err != nil {
 		return err
@@ -194,43 +216,170 @@ func (j *RESTFunctionInfo) UnmarshalJSON(b []byte) error {
 		j.Request = &request
 	}
 
-	var function schema.FunctionInfo
-	if err := function.UnmarshalJSONMap(raw); err != nil {
-		return err
-	}
-
-	j.FunctionInfo = function
-	return nil
-}
-
-// RESTProcedureInfo extends NDC mutation procedure with OpenAPI REST information
-type RESTProcedureInfo struct {
-	Request              *Request `json:"request" mapstructure:"request" yaml:"request"`
-	schema.ProcedureInfo `yaml:",inline"`
-}
-
-// UnmarshalJSON implements json.Unmarshaler.
-func (j *RESTProcedureInfo) UnmarshalJSON(b []byte) error {
-	var raw map[string]json.RawMessage
-	if err := json.Unmarshal(b, &raw); err != nil {
-		return err
-	}
-
-	rawReq, ok := raw["request"]
+	rawArguments, ok := raw["arguments"]
 	if ok {
-		var request Request
-		if err := json.Unmarshal(rawReq, &request); err != nil {
+		var arguments map[string]ArgumentInfo
+		if err := json.Unmarshal(rawArguments, &arguments); err != nil {
 			return err
 		}
-		j.Request = &request
+		j.Arguments = arguments
 	}
+
+	delete(raw, "arguments")
 
 	var procedure schema.ProcedureInfo
 	if err := procedure.UnmarshalJSONMap(raw); err != nil {
 		return err
 	}
 
-	j.ProcedureInfo = procedure
+	j.Description = procedure.Description
+	j.Name = procedure.Name
+	j.ResultType = procedure.ResultType
+	return nil
+}
+
+// Schema returns the connector schema of the function
+func (j OperationInfo) FunctionSchema() schema.FunctionInfo {
+	arguments := make(schema.FunctionInfoArguments)
+	for key, argument := range j.Arguments {
+		arguments[key] = argument.ArgumentInfo
+	}
+	return schema.FunctionInfo{
+		Name:        j.Name,
+		Arguments:   arguments,
+		Description: j.Description,
+		ResultType:  j.ResultType,
+	}
+}
+
+// Schema returns the connector schema of the function
+func (j OperationInfo) ProcedureSchema() schema.ProcedureInfo {
+	arguments := make(schema.ProcedureInfoArguments)
+	for key, argument := range j.Arguments {
+		arguments[key] = argument.ArgumentInfo
+	}
+	return schema.ProcedureInfo{
+		Name:        j.Name,
+		Arguments:   arguments,
+		Description: j.Description,
+		ResultType:  j.ResultType,
+	}
+}
+
+// ObjectType represents the object type of rest schema
+type ObjectType struct {
+	// Description of this type
+	Description *string `json:"description,omitempty" yaml:"description,omitempty" mapstructure:"description,omitempty"`
+	// Fields defined on this object type
+	Fields map[string]ObjectField `json:"fields" yaml:"fields" mapstructure:"fields"`
+}
+
+// Schema returns schema the object field
+func (of ObjectType) Schema() schema.ObjectType {
+	result := schema.ObjectType{
+		Description: of.Description,
+		Fields:      schema.ObjectTypeFields{},
+	}
+
+	for key, field := range of.Fields {
+		result.Fields[key] = field.Schema()
+	}
+	return result
+}
+
+// ObjectField defined on this object type
+type ObjectField struct {
+	schema.ObjectField `yaml:",inline"`
+
+	// The field schema information of the REST request
+	Rest *TypeSchema `json:"rest,omitempty" mapstructure:"rest" yaml:"rest,omitempty"`
+}
+
+// Schema returns schema the object field
+func (of ObjectField) Schema() schema.ObjectField {
+	return of.ObjectField
+}
+
+// UnmarshalJSON implements json.Unmarshaler.
+func (j *ObjectField) UnmarshalJSON(b []byte) error {
+	var raw map[string]json.RawMessage
+	if err := json.Unmarshal(b, &raw); err != nil {
+		return err
+	}
+	rawType, ok := raw["type"]
+	if !ok || len(rawType) == 0 {
+		return errors.New("field type in ObjectField: required")
+	}
+
+	if err := json.Unmarshal(rawType, &j.Type); err != nil {
+		return fmt.Errorf("field type in ObjectField: %w", err)
+	}
+
+	if rawDesc, ok := raw["description"]; ok {
+		var desc string
+		if err := json.Unmarshal(rawDesc, &desc); err != nil {
+			return fmt.Errorf("field description in ObjectField: %w", err)
+		}
+		j.Description = &desc
+	}
+	if rawArguments, ok := raw["arguments"]; ok {
+		var arguments schema.ObjectFieldArguments
+		if err := json.Unmarshal(rawArguments, &arguments); err != nil {
+			return fmt.Errorf("field arguments in ObjectField: %w", err)
+		}
+		j.Arguments = arguments
+	}
+
+	if rawType, ok := raw["rest"]; ok {
+		var ty TypeSchema
+		if err := json.Unmarshal(rawType, &ty); err != nil {
+			return fmt.Errorf("field rest in ObjectField: %w", err)
+		}
+		j.Rest = &ty
+	}
+
+	return nil
+}
+
+// ArgumentInfo the information of REST request argument
+type ArgumentInfo struct {
+	schema.ArgumentInfo `yaml:",inline"`
+
+	// The request parameter information of the REST request
+	Rest *RequestParameter `json:"rest,omitempty" mapstructure:"rest" yaml:"rest,omitempty"`
+}
+
+// UnmarshalJSON implements json.Unmarshaler.
+func (j *ArgumentInfo) UnmarshalJSON(b []byte) error {
+	var raw map[string]json.RawMessage
+	if err := json.Unmarshal(b, &raw); err != nil {
+		return err
+	}
+	rawType, ok := raw["type"]
+	if !ok || len(rawType) == 0 {
+		return errors.New("field type in ArgumentInfo: required")
+	}
+
+	if err := json.Unmarshal(rawType, &j.Type); err != nil {
+		return fmt.Errorf("field type in ArgumentInfo: %w", err)
+	}
+
+	if rawDesc, ok := raw["description"]; ok {
+		var desc string
+		if err := json.Unmarshal(rawDesc, &desc); err != nil {
+			return fmt.Errorf("field description in ArgumentInfo: %w", err)
+		}
+		j.Description = &desc
+	}
+
+	if rawParameter, ok := raw["rest"]; ok {
+		var param RequestParameter
+		if err := json.Unmarshal(rawParameter, &param); err != nil {
+			return fmt.Errorf("field rest in ArgumentInfo: %w", err)
+		}
+		j.Rest = &param
+	}
+
 	return nil
 }
 

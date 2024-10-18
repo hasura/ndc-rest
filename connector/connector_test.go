@@ -543,6 +543,7 @@ func TestRESTConnector_multiSchemas(t *testing.T) {
 }
 
 func createMockServer(t *testing.T, apiKey string, bearerToken string) *httptest.Server {
+	t.Helper()
 	mux := http.NewServeMux()
 
 	writeResponse := func(w http.ResponseWriter, body string) {
@@ -709,6 +710,7 @@ func (mds *mockMultiSchemaServer) createServer() *httptest.Server {
 }
 
 func assertNdcOperations(t *testing.T, dir string, targetURL string) {
+	t.Helper()
 	queryFiles, err := os.ReadDir(dir)
 	if err != nil {
 		if !os.IsNotExist(err) {
@@ -737,6 +739,7 @@ func assertNdcOperations(t *testing.T, dir string, targetURL string) {
 }
 
 func test_createServer(t *testing.T, dir string) *connector.Server[Configuration, State] {
+	t.Helper()
 	c := NewRESTConnector()
 	server, err := connector.NewServer(c, &connector.ServerOptions{
 		Configuration: dir,
@@ -750,6 +753,7 @@ func test_createServer(t *testing.T, dir string) *connector.Server[Configuration
 }
 
 func assertHTTPResponse[B any](t *testing.T, res *http.Response, statusCode int, expectedBody B) {
+	t.Helper()
 	defer res.Body.Close()
 
 	bodyBytes, err := io.ReadAll(res.Body)

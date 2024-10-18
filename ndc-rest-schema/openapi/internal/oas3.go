@@ -29,8 +29,9 @@ type OAS3Builder struct {
 
 // SchemaInfoCache stores prebuilt information of component schema types.
 type SchemaInfoCache struct {
-	Name   string
-	Schema schema.TypeEncoder
+	Name       string
+	Schema     schema.TypeEncoder
+	TypeSchema *rest.TypeSchema
 }
 
 // NewOAS3Builder creates an OAS3Builder instance
@@ -304,7 +305,6 @@ func (oc *OAS3Builder) transformWriteSchema() {
 		}
 	}
 	for _, proc := range oc.schema.Procedures {
-		var bodyName string
 		for key, arg := range proc.Arguments {
 			ty, name, _ := oc.populateWriteSchemaType(arg.Type)
 			if name == "" {
@@ -312,13 +312,6 @@ func (oc *OAS3Builder) transformWriteSchema() {
 			}
 			arg.Type = ty
 			proc.Arguments[key] = arg
-			if key == "body" {
-				bodyName = name
-			}
-		}
-
-		if bodyName != "" && proc.Request.RequestBody != nil && proc.Request.RequestBody.Schema != nil && !isOASType(proc.Request.RequestBody.Schema.Type) {
-			proc.Request.RequestBody.Schema.Type = bodyName
 		}
 	}
 }
@@ -337,6 +330,9 @@ func (oc *OAS3Builder) populateWriteSchemaType(schemaType schema.Type) (schema.T
 			oc.schemaCache[ty.Name] = SchemaInfoCache{
 				Name:   ty.Name,
 				Schema: schema.NewNamedType(ty.Name),
+				TypeSchema: &rest.TypeSchema{
+					Type: []string{"object"},
+				},
 			}
 		}
 
@@ -353,9 +349,9 @@ func (oc *OAS3Builder) populateWriteSchemaType(schemaType schema.Type) (schema.T
 		if !ok {
 			return schemaType, ty.Name, false
 		}
-		writeObject := schema.ObjectType{
+		writeObject := rest.ObjectType{
 			Description: objectType.Description,
-			Fields:      make(schema.ObjectTypeFields),
+			Fields:      make(map[string]rest.ObjectField),
 		}
 		var hasWriteField bool
 		for key, field := range objectType.Fields {
@@ -363,9 +359,12 @@ func (oc *OAS3Builder) populateWriteSchemaType(schemaType schema.Type) (schema.T
 			if name == "" {
 				continue
 			}
-			writeObject.Fields[key] = schema.ObjectField{
-				Description: field.Description,
-				Type:        ut,
+			writeObject.Fields[key] = rest.ObjectField{
+				ObjectField: schema.ObjectField{
+					Description: field.Description,
+					Type:        ut,
+				},
+				Rest: field.Rest,
 			}
 			if isInput {
 				hasWriteField = true

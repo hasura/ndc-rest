@@ -54,9 +54,13 @@ func (oc *oas3SchemaBuilder) getSchemaTypeFromProxy(schemaProxy *base.SchemaProx
 	} else if typeCache, ok := oc.builder.schemaCache[rawRefName]; ok {
 		isRef = true
 		ndcType = typeCache.Schema
-		typeSchema = &rest.TypeSchema{
-			Type:        typeCache.Name,
-			Description: innerSchema.Description,
+		typeSchema = typeCache.TypeSchema
+		if typeSchema == nil {
+			typeSchema = &rest.TypeSchema{
+				// TODO: remove cache
+				Type:        []string{"object"},
+				Description: innerSchema.Description,
+			}
 		}
 	} else {
 		// return early object from ref
@@ -76,13 +80,15 @@ func (oc *oas3SchemaBuilder) getSchemaTypeFromProxy(schemaProxy *base.SchemaProx
 			}
 			typeSchema.Description = innerSchema.Description
 			oc.builder.schemaCache[rawRefName] = SchemaInfoCache{
-				Name:   schemaName,
-				Schema: ndcType,
+				Name:       schemaName,
+				Schema:     ndcType,
+				TypeSchema: typeSchema,
 			}
 		} else {
 			ndcType = schema.NewNamedType(schemaName)
 			typeSchema = &rest.TypeSchema{
-				Type:        schemaName,
+				// TODO: remove cache
+				Type:        []string{"object"},
 				Description: innerSchema.Description,
 			}
 		}
@@ -93,7 +99,6 @@ func (oc *oas3SchemaBuilder) getSchemaTypeFromProxy(schemaProxy *base.SchemaProx
 	}
 
 	if nullable {
-		typeSchema.Nullable = true
 		if !isNullableType(ndcType) {
 			ndcType = schema.NewNullableType(ndcType)
 		}
@@ -145,7 +150,7 @@ func (oc *oas3SchemaBuilder) getSchemaType(typeSchema *base.Schema, fieldPaths [
 	var typeResult *rest.TypeSchema
 	var isRef bool
 	if oneOfLength > 0 || (typeSchema.AdditionalProperties != nil && (typeSchema.AdditionalProperties.B || typeSchema.AdditionalProperties.A != nil)) {
-		typeResult = createSchemaFromOpenAPISchema(typeSchema, string(rest.ScalarJSON))
+		typeResult = createSchemaFromOpenAPISchema(typeSchema)
 		return oc.builder.buildScalarJSON(), typeResult, false, nil
 	}
 
@@ -155,34 +160,37 @@ func (oc *oas3SchemaBuilder) getSchemaType(typeSchema *base.Schema, fieldPaths [
 			return nil, nil, false, errParameterSchemaEmpty(fieldPaths)
 		}
 		result = oc.builder.buildScalarJSON()
-		typeResult = createSchemaFromOpenAPISchema(typeSchema, string(rest.ScalarJSON))
-	} else if len(typeSchema.Type) > 1 || isPrimitiveScalar(typeSchema.Type[0]) {
+		typeResult = createSchemaFromOpenAPISchema(typeSchema)
+	} else if len(typeSchema.Type) > 1 || isPrimitiveScalar(typeSchema.Type) {
 		scalarName := getScalarFromType(oc.builder.schema, typeSchema.Type, typeSchema.Format, typeSchema.Enum, oc.builder.trimPathPrefix(oc.apiPath), fieldPaths)
 		result = schema.NewNamedType(scalarName)
-		typeResult = createSchemaFromOpenAPISchema(typeSchema, scalarName)
+		typeResult = createSchemaFromOpenAPISchema(typeSchema)
 	} else {
 		typeName := typeSchema.Type[0]
-		typeResult = createSchemaFromOpenAPISchema(typeSchema, typeName)
+		typeResult = createSchemaFromOpenAPISchema(typeSchema)
 		switch typeName {
 		case "object":
 			refName := utils.StringSliceToPascalCase(fieldPaths)
+			objectTypeSchema := &rest.TypeSchema{
+				Type: []string{"object"},
+			}
 
 			if typeSchema.Properties == nil || typeSchema.Properties.IsZero() {
 				if typeSchema.AdditionalProperties != nil && (typeSchema.AdditionalProperties.A == nil || !typeSchema.AdditionalProperties.B) {
 					return nil, nil, false, nil
 				}
 				// treat no-property objects as a JSON scalar
-				return oc.builder.buildScalarJSON(), &rest.TypeSchema{Type: string(rest.ScalarJSON)}, false, nil
+				return oc.builder.buildScalarJSON(), objectTypeSchema, false, nil
 			}
 
-			object := schema.ObjectType{
-				Fields: make(schema.ObjectTypeFields),
+			object := rest.ObjectType{
+				Fields: make(map[string]rest.ObjectField),
 			}
-			readObject := schema.ObjectType{
-				Fields: make(schema.ObjectTypeFields),
+			readObject := rest.ObjectType{
+				Fields: make(map[string]rest.ObjectField),
 			}
-			writeObject := schema.ObjectType{
-				Fields: make(schema.ObjectTypeFields),
+			writeObject := rest.ObjectType{
+				Fields: make(map[string]rest.ObjectField),
 			}
 			if typeSchema.Description != "" {
 				object.Description = &typeSchema.Description
@@ -190,7 +198,6 @@ func (oc *oas3SchemaBuilder) getSchemaType(typeSchema *base.Schema, fieldPaths [
 				writeObject.Description = &typeSchema.Description
 			}
 
-			typeResult.Properties = make(map[string]rest.TypeSchema)
 			for prop := typeSchema.Properties.First(); prop != nil; prop = prop.Next() {
 				propName := prop.Key()
 				oc.builder.Logger.Debug(
@@ -206,17 +213,16 @@ func (oc *oas3SchemaBuilder) getSchemaType(typeSchema *base.Schema, fieldPaths [
 					continue
 				}
 				oc.builder.typeUsageCounter.Add(getNamedType(propType, true, ""), 1)
-				objField := schema.ObjectField{
-					Type: propType.Encode(),
+				objField := rest.ObjectField{
+					ObjectField: schema.ObjectField{
+						Type: propType.Encode(),
+					},
+					Rest: propApiSchema,
 				}
 				if propApiSchema.Description != "" {
 					objField.Description = &propApiSchema.Description
 				}
 
-				if (!propApiSchema.ReadOnly && !propApiSchema.WriteOnly) || (!oc.writeMode && propApiSchema.ReadOnly) || (oc.writeMode || propApiSchema.WriteOnly) {
-					propApiSchema.Nullable = nullable
-					typeResult.Properties[propName] = *propApiSchema
-				}
 				if !propApiSchema.ReadOnly && !propApiSchema.WriteOnly {
 					object.Fields[propName] = objField
 				} else if !oc.writeMode && propApiSchema.ReadOnly {
@@ -290,15 +296,14 @@ func (oc *oas3SchemaBuilder) buildAllOfAnyOfSchemaType(schemaProxies []*base.Sch
 	if len(proxies) == 1 {
 		return oc.getSchemaTypeFromProxy(proxies[0], nullable, fieldPaths)
 	}
-	readObject := schema.ObjectType{
-		Fields: schema.ObjectTypeFields{},
+	readObject := rest.ObjectType{
+		Fields: map[string]rest.ObjectField{},
 	}
-	writeObject := schema.ObjectType{
-		Fields: schema.ObjectTypeFields{},
+	writeObject := rest.ObjectType{
+		Fields: map[string]rest.ObjectField{},
 	}
 	typeSchema := &rest.TypeSchema{
-		Type:       "object",
-		Properties: map[string]rest.TypeSchema{},
+		Type: []string{"object"},
 	}
 
 	for i, item := range proxies {
@@ -310,7 +315,7 @@ func (oc *oas3SchemaBuilder) buildAllOfAnyOfSchemaType(schemaProxies []*base.Sch
 
 		name := getNamedType(enc, true, "")
 		writeName := formatWriteObjectName(name)
-		isObject := !isPrimitiveScalar(ty.Type) && ty.Type != "array"
+		isObject := !isPrimitiveScalar(ty.Type) && !slices.Contains(ty.Type, "array")
 		if isObject {
 			if _, ok := oc.builder.schema.ScalarTypes[name]; ok {
 				isObject = false
@@ -324,8 +329,6 @@ func (oc *oas3SchemaBuilder) buildAllOfAnyOfSchemaType(schemaProxies []*base.Sch
 			}
 			// TODO: should we keep the original anyOf or allOf type schema
 			ty = &rest.TypeSchema{
-				Type:        string(rest.ScalarJSON),
-				Nullable:    ty.Nullable,
 				Description: ty.Description,
 			}
 			return oc.builder.buildScalarJSON(), ty, false, nil
@@ -377,10 +380,5 @@ func (oc *oas3SchemaBuilder) buildAllOfAnyOfSchemaType(schemaProxies []*base.Sch
 		refName = writeRefName
 	}
 
-	if len(typeSchema.Properties) == 0 {
-		typeSchema = &rest.TypeSchema{
-			Type: refName,
-		}
-	}
 	return schema.NewNamedType(refName), typeSchema, false, nil
 }

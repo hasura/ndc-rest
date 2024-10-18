@@ -4,19 +4,15 @@ import (
 	"errors"
 	"net/http"
 
+	"github.com/hasura/ndc-rest/connector/internal"
 	"github.com/hasura/ndc-rest/ndc-rest-schema/command"
 	rest "github.com/hasura/ndc-rest/ndc-rest-schema/schema"
-	"github.com/hasura/ndc-rest/rest/internal"
 )
 
 var (
-	errBuildSchemaFailed  = errors.New("failed to build NDC REST schema")
 	errInvalidSchema      = errors.New("failed to validate NDC REST schema")
+	errBuildSchemaFailed  = errors.New("failed to build NDC REST schema")
 	errHTTPMethodRequired = errors.New("the HTTP method is required")
-)
-
-const (
-	contentTypeJSON = "application/json"
 )
 
 // ConfigItem extends the ConvertConfig with advanced options

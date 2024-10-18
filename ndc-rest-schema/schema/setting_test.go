@@ -3,6 +3,8 @@ package schema
 import (
 	"encoding/json"
 	"testing"
+
+	"gotest.tools/v3/assert"
 )
 
 func TestNDCRestSettings(t *testing.T) {
@@ -112,14 +114,16 @@ func TestNDCRestSettings(t *testing.T) {
 				t.FailNow()
 			}
 			for i, s := range tc.expected.Servers {
-				assertDeepEqual(t, s.URL.String(), result.Servers[i].URL.String())
+				assert.DeepEqual(t, s.URL.String(), result.Servers[i].URL.String())
 			}
-			assertDeepEqual(t, tc.expected.Headers, result.Headers)
-			assertDeepEqual(t, tc.expected.Retry, result.Retry)
-			assertDeepEqual(t, tc.expected.Security, result.Security)
-			assertDeepEqual(t, tc.expected.SecuritySchemes, result.SecuritySchemes)
-			assertDeepEqual(t, tc.expected.Timeout, result.Timeout)
-			assertDeepEqual(t, tc.expected.Version, result.Version)
+			assert.DeepEqual(t, tc.expected.Headers, result.Headers)
+			assert.DeepEqual(t, tc.expected.Retry.Delay.String(), result.Retry.Delay.String())
+			assert.DeepEqual(t, tc.expected.Retry.Times.String(), result.Retry.Times.String())
+			assert.DeepEqual(t, tc.expected.Retry.HTTPStatus.String(), result.Retry.HTTPStatus.String())
+			assert.DeepEqual(t, tc.expected.Security, result.Security)
+			assert.DeepEqual(t, tc.expected.SecuritySchemes, result.SecuritySchemes)
+			assert.DeepEqual(t, tc.expected.Timeout, result.Timeout)
+			assert.DeepEqual(t, tc.expected.Version, result.Version)
 
 			_, err := json.Marshal(tc.expected)
 			if err != nil {

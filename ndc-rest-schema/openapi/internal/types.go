@@ -1,6 +1,7 @@
 package internal
 
 import (
+	"errors"
 	"log/slog"
 	"regexp"
 
@@ -12,6 +13,10 @@ var (
 	bracketRegexp         = regexp.MustCompile(`[\{\}]`)
 	schemaRefNameV2Regexp = regexp.MustCompile(`^#/definitions/([a-zA-Z0-9\.\-_]+)$`)
 	schemaRefNameV3Regexp = regexp.MustCompile(`^#/components/schemas/([a-zA-Z0-9\.\-_]+)$`)
+)
+
+var (
+	errParameterNameRequired = errors.New("parameter name is empty")
 )
 
 var defaultScalarTypes = map[rest.ScalarName]*schema.ScalarType{
