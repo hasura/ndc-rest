@@ -46,16 +46,6 @@ functions:
   - request:
       url: "/pet/findByStatus"
       method: get
-      parameters:
-        - name: status
-          in: query
-          schema:
-            type: String
-            nullable: true
-            enum:
-              - available
-              - pending
-              - sold
       security:
         - bearer: []
     arguments:
@@ -66,6 +56,14 @@ functions:
           underlying_type:
             name: String
             type: named
+        rest:
+          in: query
+          schema:
+            type: [string]
+            enum:
+              - available
+              - pending
+              - sold
     description: Finds Pets by status
     name: findPetsByStatus
     result_type:

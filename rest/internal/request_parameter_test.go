@@ -254,6 +254,13 @@ func TestEvalURLAndHeaderParameters(t *testing.T) {
 		headers      map[string]string
 	}{
 		{
+			name: "findPetsByStatus",
+			rawArguments: `{
+				"status": "available"
+			}`,
+			expectedURL: "/pet/findByStatus?status=available",
+		},
+		{
 			name: "GetInvoices",
 			rawArguments: `{
 				"collection_method": "charge_automatically",

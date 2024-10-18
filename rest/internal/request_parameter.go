@@ -18,7 +18,7 @@ import (
 	sdkUtils "github.com/hasura/ndc-sdk-go/utils"
 )
 
-var urlAndHeaderLocations = []rest.ParameterLocation{rest.InPath, rest.InQuery, rest.InPath}
+var urlAndHeaderLocations = []rest.ParameterLocation{rest.InPath, rest.InQuery, rest.InHeader}
 
 // evaluate URL and header parameters
 func (c *RequestBuilder) evalURLAndHeaderParameters() (string, http.Header, error) {
@@ -38,7 +38,7 @@ func (c *RequestBuilder) evalURLAndHeaderParameters() (string, http.Header, erro
 		if argumentInfo.Rest == nil || !slices.Contains(urlAndHeaderLocations, argumentInfo.Rest.In) {
 			continue
 		}
-		if err := c.evalURLAndHeaderParameterBySchema(endpoint, &headers, &argumentInfo, c.Operation.Arguments[argumentKey]); err != nil {
+		if err := c.evalURLAndHeaderParameterBySchema(endpoint, &headers, argumentKey, &argumentInfo, c.Arguments[argumentKey]); err != nil {
 			return "", nil, fmt.Errorf("%s: %w", argumentKey, err)
 		}
 	}
@@ -48,13 +48,16 @@ func (c *RequestBuilder) evalURLAndHeaderParameters() (string, http.Header, erro
 // the query parameters serialization follows [OAS 3.1 spec]
 //
 // [OAS 3.1 spec]: https://swagger.io/docs/specification/serialization/
-func (c *RequestBuilder) evalURLAndHeaderParameterBySchema(endpoint *url.URL, header *http.Header, argumentInfo *rest.ArgumentInfo, value any) error {
+func (c *RequestBuilder) evalURLAndHeaderParameterBySchema(endpoint *url.URL, header *http.Header, argumentKey string, argumentInfo *rest.ArgumentInfo, value any) error {
+	if argumentInfo.Rest.Name != "" {
+		argumentKey = argumentInfo.Rest.Name
+	}
 	queryParams, err := c.encodeParameterValues(&rest.ObjectField{
 		ObjectField: schema.ObjectField{
 			Type: argumentInfo.Type,
 		},
 		Rest: argumentInfo.Rest.Schema,
-	}, reflect.ValueOf(value), []string{argumentInfo.Rest.Name})
+	}, reflect.ValueOf(value), []string{argumentKey})
 	if err != nil {
 		return err
 	}
@@ -72,13 +75,13 @@ func (c *RequestBuilder) evalURLAndHeaderParameterBySchema(endpoint *url.URL, he
 	case rest.InQuery:
 		q := endpoint.Query()
 		for _, qp := range queryParams {
-			evalQueryParameterURL(&q, argumentInfo.Rest.Name, argumentInfo.Rest.EncodingObject, qp.Keys(), qp.Values())
+			evalQueryParameterURL(&q, argumentKey, argumentInfo.Rest.EncodingObject, qp.Keys(), qp.Values())
 		}
 		endpoint.RawQuery = encodeQueryValues(q, argumentInfo.Rest.AllowReserved)
 	case rest.InPath:
 		defaultParam := queryParams.FindDefault()
 		if defaultParam != nil {
-			endpoint.Path = strings.ReplaceAll(endpoint.Path, "{"+argumentInfo.Rest.Name+"}", strings.Join(defaultParam.Values(), ","))
+			endpoint.Path = strings.ReplaceAll(endpoint.Path, "{"+argumentKey+"}", strings.Join(defaultParam.Values(), ","))
 		}
 	}
 	return nil
@@ -309,7 +312,6 @@ func evalQueryParameterURL(q *url.Values, name string, encObject rest.EncodingOb
 		return
 	}
 	paramKey := buildParamQueryKey(name, encObject, keys, values)
-
 	// encode explode queries, e.g /users?id=3&id=4&id=5
 	if encObject.Explode == nil || *encObject.Explode {
 		for _, value := range values {
