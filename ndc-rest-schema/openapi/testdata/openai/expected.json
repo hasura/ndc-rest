@@ -44,9 +44,7 @@
             }
           },
           "rest": {
-            "type": [
-              "string"
-            ]
+            "type": ["string"]
           }
         },
         "name": {
@@ -56,9 +54,7 @@
             "type": "named"
           },
           "rest": {
-            "type": [
-              "string"
-            ]
+            "type": ["string"]
           }
         },
         "parameters": {
@@ -71,9 +67,7 @@
             }
           },
           "rest": {
-            "type": [
-              "object"
-            ]
+            "type": ["object"]
           }
         }
       }
@@ -87,9 +81,7 @@
             "type": "named"
           },
           "rest": {
-            "type": [
-              "object"
-            ]
+            "type": ["object"]
           }
         },
         "id": {
@@ -99,9 +91,7 @@
             "type": "named"
           },
           "rest": {
-            "type": [
-              "string"
-            ]
+            "type": ["string"]
           }
         },
         "type": {
@@ -111,9 +101,7 @@
             "type": "named"
           },
           "rest": {
-            "type": [
-              "string"
-            ]
+            "type": ["string"]
           }
         }
       }
@@ -128,9 +116,7 @@
             "type": "named"
           },
           "rest": {
-            "type": [
-              "string"
-            ]
+            "type": ["string"]
           }
         },
         "name": {
@@ -140,9 +126,7 @@
             "type": "named"
           },
           "rest": {
-            "type": [
-              "string"
-            ]
+            "type": ["string"]
           }
         }
       }
@@ -157,9 +141,7 @@
             "type": "named"
           },
           "rest": {
-            "type": [
-              "string"
-            ]
+            "type": ["string"]
           }
         },
         "function_call": {
@@ -172,9 +154,7 @@
             }
           },
           "rest": {
-            "type": [
-              "object"
-            ]
+            "type": ["object"]
           }
         },
         "role": {
@@ -184,9 +164,7 @@
             "type": "named"
           },
           "rest": {
-            "type": [
-              "string"
-            ]
+            "type": ["string"]
           }
         },
         "tool_calls": {
@@ -202,9 +180,7 @@
             }
           },
           "rest": {
-            "type": [
-              "array"
-            ]
+            "type": ["array"]
           }
         }
       }
@@ -219,9 +195,7 @@
             "type": "named"
           },
           "rest": {
-            "type": [
-              "string"
-            ]
+            "type": ["string"]
           }
         },
         "name": {
@@ -231,9 +205,7 @@
             "type": "named"
           },
           "rest": {
-            "type": [
-              "string"
-            ]
+            "type": ["string"]
           }
         }
       }
@@ -251,9 +223,7 @@
             }
           },
           "rest": {
-            "type": [
-              "boolean"
-            ]
+            "type": ["boolean"]
           }
         }
       }
@@ -270,13 +240,9 @@
             "type": "array"
           },
           "rest": {
-            "type": [
-              "array"
-            ],
+            "type": ["array"],
             "items": {
-              "type": [
-                "integer"
-              ]
+              "type": ["integer"]
             }
           }
         },
@@ -287,9 +253,7 @@
             "type": "named"
           },
           "rest": {
-            "type": [
-              "number"
-            ]
+            "type": ["number"]
           }
         },
         "token": {
@@ -299,9 +263,7 @@
             "type": "named"
           },
           "rest": {
-            "type": [
-              "string"
-            ]
+            "type": ["string"]
           }
         },
         "top_logprobs": {
@@ -314,13 +276,9 @@
             "type": "array"
           },
           "rest": {
-            "type": [
-              "array"
-            ],
+            "type": ["array"],
             "items": {
-              "type": [
-                "object"
-              ]
+              "type": ["object"]
             }
           }
         }
@@ -338,13 +296,9 @@
             "type": "array"
           },
           "rest": {
-            "type": [
-              "array"
-            ],
+            "type": ["array"],
             "items": {
-              "type": [
-                "integer"
-              ]
+              "type": ["integer"]
             }
           }
         },
@@ -355,9 +309,7 @@
             "type": "named"
           },
           "rest": {
-            "type": [
-              "number"
-            ]
+            "type": ["number"]
           }
         },
         "token": {
@@ -367,9 +319,7 @@
             "type": "named"
           },
           "rest": {
-            "type": [
-              "string"
-            ]
+            "type": ["string"]
           }
         }
       }
@@ -382,9 +332,7 @@
             "type": "named"
           },
           "rest": {
-            "type": [
-              "object"
-            ]
+            "type": ["object"]
           }
         },
         "type": {
@@ -394,9 +342,7 @@
             "type": "named"
           },
           "rest": {
-            "type": [
-              "string"
-            ]
+            "type": ["string"]
           }
         }
       }
@@ -413,9 +359,7 @@
             }
           },
           "rest": {
-            "type": [
-              "number"
-            ],
+            "type": ["number"],
             "maximum": 2,
             "minimum": -2
           }
@@ -446,9 +390,7 @@
             }
           },
           "rest": {
-            "type": [
-              "array"
-            ]
+            "type": ["array"]
           }
         },
         "logit_bias": {
@@ -461,9 +403,7 @@
             }
           },
           "rest": {
-            "type": [
-              "object"
-            ]
+            "type": ["object"]
           }
         },
         "logprobs": {
@@ -476,9 +416,7 @@
             }
           },
           "rest": {
-            "type": [
-              "boolean"
-            ]
+            "type": ["boolean"]
           }
         },
         "max_tokens": {
@@ -491,9 +429,7 @@
             }
           },
           "rest": {
-            "type": [
-              "integer"
-            ]
+            "type": ["integer"]
           }
         },
         "messages": {
@@ -506,9 +442,7 @@
             "type": "array"
           },
           "rest": {
-            "type": [
-              "array"
-            ]
+            "type": ["array"]
           }
         },
         "model": {
@@ -518,9 +452,7 @@
             "type": "named"
           },
           "rest": {
-            "type": [
-              "string"
-            ]
+            "type": ["string"]
           }
         },
         "n": {
@@ -533,9 +465,7 @@
             }
           },
           "rest": {
-            "type": [
-              "integer"
-            ],
+            "type": ["integer"],
             "maximum": 128,
             "minimum": 1
           }
@@ -550,9 +480,7 @@
             }
           },
           "rest": {
-            "type": [
-              "boolean"
-            ]
+            "type": ["boolean"]
           }
         },
         "presence_penalty": {
@@ -565,9 +493,7 @@
             }
           },
           "rest": {
-            "type": [
-              "number"
-            ],
+            "type": ["number"],
             "maximum": 2,
             "minimum": -2
           }
@@ -582,9 +508,7 @@
             }
           },
           "rest": {
-            "type": [
-              "object"
-            ]
+            "type": ["object"]
           }
         },
         "seed": {
@@ -597,9 +521,7 @@
             }
           },
           "rest": {
-            "type": [
-              "integer"
-            ],
+            "type": ["integer"],
             "maximum": 9223372036854776000,
             "minimum": -9223372036854776000
           }
@@ -614,9 +536,7 @@
             }
           },
           "rest": {
-            "type": [
-              "string"
-            ]
+            "type": ["string"]
           }
         },
         "stop": {
@@ -642,9 +562,7 @@
             }
           },
           "rest": {
-            "type": [
-              "boolean"
-            ]
+            "type": ["boolean"]
           }
         },
         "stream_options": {
@@ -657,9 +575,7 @@
             }
           },
           "rest": {
-            "type": [
-              "object"
-            ]
+            "type": ["object"]
           }
         },
         "temperature": {
@@ -672,9 +588,7 @@
             }
           },
           "rest": {
-            "type": [
-              "number"
-            ],
+            "type": ["number"],
             "maximum": 2,
             "minimum": 0
           }
@@ -688,11 +602,7 @@
               "type": "named"
             }
           },
-          "rest": {
-            "type": [
-              "object"
-            ]
-          }
+          "rest": {}
         },
         "tools": {
           "description": "A list of tools the model may call. Currently, only functions are supported as a tool. Use this to provide a list of functions the model may generate JSON inputs for. A max of 128 functions are supported.\n",
@@ -707,9 +617,7 @@
             }
           },
           "rest": {
-            "type": [
-              "array"
-            ]
+            "type": ["array"]
           }
         },
         "top_logprobs": {
@@ -722,9 +630,7 @@
             }
           },
           "rest": {
-            "type": [
-              "integer"
-            ],
+            "type": ["integer"],
             "maximum": 20,
             "minimum": 0
           }
@@ -739,9 +645,7 @@
             }
           },
           "rest": {
-            "type": [
-              "number"
-            ],
+            "type": ["number"],
             "maximum": 1,
             "minimum": 0
           }
@@ -756,9 +660,7 @@
             }
           },
           "rest": {
-            "type": [
-              "string"
-            ]
+            "type": ["string"]
           }
         }
       }
@@ -776,9 +678,7 @@
             }
           },
           "rest": {
-            "type": [
-              "string"
-            ]
+            "type": ["string"]
           }
         }
       }
@@ -796,13 +696,9 @@
             "type": "array"
           },
           "rest": {
-            "type": [
-              "array"
-            ],
+            "type": ["array"],
             "items": {
-              "type": [
-                "object"
-              ]
+              "type": ["object"]
             }
           }
         },
@@ -813,9 +709,7 @@
             "type": "named"
           },
           "rest": {
-            "type": [
-              "integer"
-            ]
+            "type": ["integer"]
           }
         },
         "id": {
@@ -825,9 +719,7 @@
             "type": "named"
           },
           "rest": {
-            "type": [
-              "string"
-            ]
+            "type": ["string"]
           }
         },
         "model": {
@@ -837,9 +729,7 @@
             "type": "named"
           },
           "rest": {
-            "type": [
-              "string"
-            ]
+            "type": ["string"]
           }
         },
         "object": {
@@ -849,9 +739,7 @@
             "type": "named"
           },
           "rest": {
-            "type": [
-              "string"
-            ]
+            "type": ["string"]
           }
         },
         "service_tier": {
@@ -864,9 +752,7 @@
             }
           },
           "rest": {
-            "type": [
-              "string"
-            ]
+            "type": ["string"]
           }
         },
         "system_fingerprint": {
@@ -879,9 +765,7 @@
             }
           },
           "rest": {
-            "type": [
-              "string"
-            ]
+            "type": ["string"]
           }
         }
       }
@@ -895,9 +779,7 @@
             "type": "named"
           },
           "rest": {
-            "type": [
-              "string"
-            ]
+            "type": ["string"]
           }
         },
         "index": {
@@ -907,9 +789,7 @@
             "type": "named"
           },
           "rest": {
-            "type": [
-              "integer"
-            ]
+            "type": ["integer"]
           }
         },
         "logprobs": {
@@ -919,9 +799,7 @@
             "type": "named"
           },
           "rest": {
-            "type": [
-              "object"
-            ]
+            "type": ["object"]
           }
         },
         "message": {
@@ -931,9 +809,7 @@
             "type": "named"
           },
           "rest": {
-            "type": [
-              "object"
-            ]
+            "type": ["object"]
           }
         }
       }
@@ -951,9 +827,7 @@
             "type": "array"
           },
           "rest": {
-            "type": [
-              "array"
-            ]
+            "type": ["array"]
           }
         }
       }
@@ -970,9 +844,7 @@
             }
           },
           "rest": {
-            "type": [
-              "string"
-            ]
+            "type": ["string"]
           }
         }
       }
@@ -989,9 +861,7 @@
             }
           },
           "rest": {
-            "type": [
-              "string"
-            ]
+            "type": ["string"]
           }
         },
         "name": {
@@ -1001,9 +871,7 @@
             "type": "named"
           },
           "rest": {
-            "type": [
-              "string"
-            ]
+            "type": ["string"]
           }
         },
         "parameters": {
@@ -1016,9 +884,7 @@
             }
           },
           "rest": {
-            "type": [
-              "object"
-            ]
+            "type": ["object"]
           }
         }
       }
@@ -1035,9 +901,7 @@
             }
           },
           "rest": {
-            "type": [
-              "integer"
-            ]
+            "type": ["integer"]
           }
         },
         "digest": {
@@ -1050,9 +914,7 @@
             }
           },
           "rest": {
-            "type": [
-              "string"
-            ]
+            "type": ["string"]
           }
         },
         "status": {
@@ -1065,9 +927,7 @@
             }
           },
           "rest": {
-            "type": [
-              "string"
-            ]
+            "type": ["string"]
           }
         },
         "total": {
@@ -1080,9 +940,7 @@
             }
           },
           "rest": {
-            "type": [
-              "integer"
-            ]
+            "type": ["integer"]
           }
         }
       }
@@ -1164,9 +1022,7 @@
       "aggregate_functions": {},
       "comparison_operators": {},
       "representation": {
-        "one_of": [
-          "function"
-        ],
+        "one_of": ["function"],
         "type": "enum"
       }
     },
@@ -1181,9 +1037,7 @@
       "aggregate_functions": {},
       "comparison_operators": {},
       "representation": {
-        "one_of": [
-          "assistant"
-        ],
+        "one_of": ["assistant"],
         "type": "enum"
       }
     },
@@ -1198,9 +1052,7 @@
       "aggregate_functions": {},
       "comparison_operators": {},
       "representation": {
-        "one_of": [
-          "function"
-        ],
+        "one_of": ["function"],
         "type": "enum"
       }
     },
@@ -1208,10 +1060,7 @@
       "aggregate_functions": {},
       "comparison_operators": {},
       "representation": {
-        "one_of": [
-          "text",
-          "json_object"
-        ],
+        "one_of": ["text", "json_object"],
         "type": "enum"
       }
     },
@@ -1219,10 +1068,7 @@
       "aggregate_functions": {},
       "comparison_operators": {},
       "representation": {
-        "one_of": [
-          "auto",
-          "default"
-        ],
+        "one_of": ["auto", "default"],
         "type": "enum"
       }
     },
@@ -1244,9 +1090,7 @@
       "aggregate_functions": {},
       "comparison_operators": {},
       "representation": {
-        "one_of": [
-          "chat.completion"
-        ],
+        "one_of": ["chat.completion"],
         "type": "enum"
       }
     },
@@ -1254,10 +1098,7 @@
       "aggregate_functions": {},
       "comparison_operators": {},
       "representation": {
-        "one_of": [
-          "scale",
-          "default"
-        ],
+        "one_of": ["scale", "default"],
         "type": "enum"
       }
     },

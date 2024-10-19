@@ -226,10 +226,7 @@ func (oc *OAS2Builder) getSchemaTypeFromProxy(schemaProxy *base.SchemaProxy, nul
 	if refName != "" && len(innerSchema.Type) > 0 && innerSchema.Type[0] == "object" {
 		refName = utils.ToPascalCase(refName)
 		ndcType = schema.NewNamedType(refName)
-		typeSchema = &rest.TypeSchema{
-			// TODO: remove type
-			// Type: refName,
-		}
+		typeSchema = createSchemaFromOpenAPISchema(innerSchema)
 	} else {
 		if innerSchema.Title != "" && !strings.Contains(innerSchema.Title, " ") {
 			fieldPaths = []string{utils.ToPascalCase(innerSchema.Title)}

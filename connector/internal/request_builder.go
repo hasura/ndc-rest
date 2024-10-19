@@ -3,10 +3,8 @@ package internal
 import (
 	"bytes"
 	"encoding/json"
-	"errors"
 	"fmt"
 	"io"
-	"log"
 	"net/http"
 	"net/url"
 	"reflect"
@@ -54,7 +52,7 @@ func (c *RequestBuilder) Build() (*RetryableRequest, error) {
 		bodyData, ok := c.Arguments[rest.BodyKey]
 		if ok && bodyData != nil {
 			var err error
-			binaryBody := getRequestUploadBody(rawRequest)
+			binaryBody := c.getRequestUploadBody(c.Operation.Request, &bodyInfo)
 			if binaryBody != nil {
 				b64, err := utils.DecodeString(bodyData)
 				if err != nil {
@@ -96,7 +94,7 @@ func (c *RequestBuilder) Build() (*RetryableRequest, error) {
 				return nil, err
 			}
 			if ty != schema.TypeNullable {
-				return nil, errors.New("request body is required")
+				return nil, errRequestBodyRequired
 			}
 		}
 	}
@@ -199,7 +197,6 @@ func (c *RequestBuilder) evalMultipartForm(w *MultipartWriter, bodyInfo *rest.Ar
 						enc = &en
 					}
 				}
-				log.Println("fields", key, fieldInfo)
 
 				if err := c.evalMultipartFieldValueRecursive(w, key, reflect.ValueOf(fieldValue), &fieldInfo, enc); err != nil {
 					return err
@@ -378,17 +375,30 @@ func (c *RequestBuilder) evalEncodingHeaders(encHeaders map[string]rest.RequestP
 	return results, nil
 }
 
-func getRequestUploadBody(rawRequest *rest.Request) *rest.RequestBody {
-	if rawRequest.RequestBody == nil {
+func (c *RequestBuilder) getRequestUploadBody(rawRequest *rest.Request, bodyInfo *rest.ArgumentInfo) *rest.RequestBody {
+	if rawRequest.RequestBody == nil || bodyInfo == nil {
 		return nil
 	}
 	if rawRequest.RequestBody.ContentType == "application/octet-stream" {
 		return rawRequest.RequestBody
 	}
 
-	// TODO
-	// if rawRequest.RequestBody.Schema != nil && slices.Contains(rawRequest.RequestBody.Schema.Type, string(rest.ScalarBinary)) {
-	// 	return rawRequest.RequestBody
-	// }
-	return nil
+	bi, ok, err := UnwrapNullableType(bodyInfo.Type)
+	if err != nil || !ok {
+		return nil
+	}
+	namedType, ok := bi.(*schema.NamedType)
+	if !ok {
+		return nil
+	}
+	iScalar, ok := c.Schema.ScalarTypes[namedType.Name]
+	if !ok {
+		return nil
+	}
+	_, err = iScalar.Representation.AsBytes()
+	if err != nil {
+		return nil
+	}
+
+	return rawRequest.RequestBody
 }

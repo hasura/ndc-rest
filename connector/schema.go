@@ -3,7 +3,6 @@ package rest
 import (
 	"context"
 	"encoding/json"
-	"errors"
 	"fmt"
 	"log/slog"
 	"reflect"
@@ -48,7 +47,7 @@ func BuildSchemaFiles(configDir string, files []ConfigItem, logger *slog.Logger)
 
 func buildSchemaFile(configDir string, conf *ConfigItem, logger *slog.Logger) (*rest.NDCRestSchema, error) {
 	if conf.ConvertConfig.File == "" {
-		return nil, errors.New("file path is empty")
+		return nil, errFilePathRequired
 	}
 	command.ResolveConvertConfigArguments(&conf.ConvertConfig, configDir, nil)
 	ndcSchema, err := command.ConvertToNDCSchema(&conf.ConvertConfig, logger)

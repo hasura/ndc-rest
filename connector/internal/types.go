@@ -18,6 +18,7 @@ const (
 
 var (
 	errArgumentRequired        = errors.New("argument is required")
+	errRequestBodyRequired     = errors.New("request body is required")
 	errRequestBodyTypeRequired = errors.New("failed to decode request body, empty body type")
 )
 

@@ -256,21 +256,33 @@ func (oc *OAS3Builder) convertComponentSchemas(schemaItem orderedmap.Pair[string
 	if _, ok := oc.schema.ObjectTypes[typeKey]; ok {
 		return nil
 	}
-	typeEncoder, _, _, err := newOAS3SchemaBuilder(oc, "", rest.InBody, false).
+	typeEncoder, schemaResult, _, err := newOAS3SchemaBuilder(oc, "", rest.InBody, false).
 		getSchemaType(typeSchema, []string{typeKey})
 	if err != nil {
 		return err
 	}
 
+	var typeName string
+	if typeEncoder != nil {
+		typeName = getNamedType(typeEncoder, true, "")
+	}
+	cacheKey := "#/components/schemas/" + typeKey
 	// treat no-property objects as a Arbitrary JSON scalar
-	if typeEncoder == nil || getNamedType(typeEncoder, true, "") == string(rest.ScalarJSON) {
+	if typeEncoder == nil || typeName == string(rest.ScalarJSON) {
 		refName := utils.ToPascalCase(typeKey)
 		scalar := schema.NewScalarType()
 		scalar.Representation = schema.NewTypeRepresentationJSON().Encode()
 		oc.schema.ScalarTypes[refName] = *scalar
-		oc.schemaCache["#/components/schemas/"+typeKey] = SchemaInfoCache{
-			Name:   refName,
-			Schema: schema.NewNamedType(refName),
+		oc.schemaCache[cacheKey] = SchemaInfoCache{
+			Name:       refName,
+			Schema:     schema.NewNamedType(refName),
+			TypeSchema: schemaResult,
+		}
+	} else {
+		oc.schemaCache[cacheKey] = SchemaInfoCache{
+			Name:       typeName,
+			Schema:     typeEncoder,
+			TypeSchema: schemaResult,
 		}
 	}
 

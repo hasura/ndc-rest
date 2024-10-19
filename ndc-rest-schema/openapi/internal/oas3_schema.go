@@ -55,13 +55,6 @@ func (oc *oas3SchemaBuilder) getSchemaTypeFromProxy(schemaProxy *base.SchemaProx
 		isRef = true
 		ndcType = typeCache.Schema
 		typeSchema = typeCache.TypeSchema
-		if typeSchema == nil {
-			typeSchema = &rest.TypeSchema{
-				// TODO: remove cache
-				Type:        []string{"object"},
-				Description: innerSchema.Description,
-			}
-		}
 	} else {
 		// return early object from ref
 		refName := getSchemaRefTypeNameV3(rawRefName)
@@ -86,11 +79,7 @@ func (oc *oas3SchemaBuilder) getSchemaTypeFromProxy(schemaProxy *base.SchemaProx
 			}
 		} else {
 			ndcType = schema.NewNamedType(schemaName)
-			typeSchema = &rest.TypeSchema{
-				// TODO: remove cache
-				Type:        []string{"object"},
-				Description: innerSchema.Description,
-			}
+			typeSchema = createSchemaFromOpenAPISchema(innerSchema)
 		}
 	}
 
@@ -147,10 +136,9 @@ func (oc *oas3SchemaBuilder) getSchemaType(typeSchema *base.Schema, fieldPaths [
 		return enc, ty, isRef, nil
 	}
 
-	var typeResult *rest.TypeSchema
+	typeResult := createSchemaFromOpenAPISchema(typeSchema)
 	var isRef bool
 	if oneOfLength > 0 || (typeSchema.AdditionalProperties != nil && (typeSchema.AdditionalProperties.B || typeSchema.AdditionalProperties.A != nil)) {
-		typeResult = createSchemaFromOpenAPISchema(typeSchema)
 		return oc.builder.buildScalarJSON(), typeResult, false, nil
 	}
 
@@ -160,27 +148,20 @@ func (oc *oas3SchemaBuilder) getSchemaType(typeSchema *base.Schema, fieldPaths [
 			return nil, nil, false, errParameterSchemaEmpty(fieldPaths)
 		}
 		result = oc.builder.buildScalarJSON()
-		typeResult = createSchemaFromOpenAPISchema(typeSchema)
 	} else if len(typeSchema.Type) > 1 || isPrimitiveScalar(typeSchema.Type) {
 		scalarName := getScalarFromType(oc.builder.schema, typeSchema.Type, typeSchema.Format, typeSchema.Enum, oc.builder.trimPathPrefix(oc.apiPath), fieldPaths)
 		result = schema.NewNamedType(scalarName)
-		typeResult = createSchemaFromOpenAPISchema(typeSchema)
 	} else {
 		typeName := typeSchema.Type[0]
-		typeResult = createSchemaFromOpenAPISchema(typeSchema)
 		switch typeName {
 		case "object":
 			refName := utils.StringSliceToPascalCase(fieldPaths)
-			objectTypeSchema := &rest.TypeSchema{
-				Type: []string{"object"},
-			}
-
 			if typeSchema.Properties == nil || typeSchema.Properties.IsZero() {
 				if typeSchema.AdditionalProperties != nil && (typeSchema.AdditionalProperties.A == nil || !typeSchema.AdditionalProperties.B) {
 					return nil, nil, false, nil
 				}
 				// treat no-property objects as a JSON scalar
-				return oc.builder.buildScalarJSON(), objectTypeSchema, false, nil
+				return oc.builder.buildScalarJSON(), typeResult, false, nil
 			}
 
 			object := rest.ObjectType{

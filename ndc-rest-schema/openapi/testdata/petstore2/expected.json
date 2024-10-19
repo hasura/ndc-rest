@@ -689,7 +689,9 @@
             }
           },
           "rest": {
-            "type": null
+            "type": [
+              "object"
+            ]
           }
         },
         "id": {
@@ -1126,7 +1128,9 @@
           "rest": {
             "in": "body",
             "schema": {
-              "type": null
+              "type": [
+                "object"
+              ]
             }
           }
         }
@@ -1170,7 +1174,9 @@
           "rest": {
             "in": "body",
             "schema": {
-              "type": null
+              "type": [
+                "object"
+              ]
             }
           }
         }
@@ -1330,7 +1336,9 @@
           "rest": {
             "in": "body",
             "schema": {
-              "type": null
+              "type": [
+                "object"
+              ]
             }
           }
         }
@@ -1400,7 +1408,9 @@
           "rest": {
             "in": "body",
             "schema": {
-              "type": null
+              "type": [
+                "object"
+              ]
             }
           }
         },
@@ -1503,7 +1513,9 @@
           "rest": {
             "in": "body",
             "schema": {
-              "type": null
+              "type": [
+                "object"
+              ]
             }
           }
         }

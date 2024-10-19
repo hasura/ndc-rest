@@ -250,7 +250,7 @@ func (oc *oas3OperationBuilder) convertRequestBody(reqBody *v3.RequestBody, apiP
 		ContentType: contentType,
 	}
 
-	if content.Encoding != nil {
+	if content.Encoding != nil && content.Encoding.Len() > 0 {
 		bodyResult.Encoding = make(map[string]rest.EncodingObject)
 		for iter := content.Encoding.First(); iter != nil; iter = iter.Next() {
 			encodingValue := iter.Value()
@@ -272,7 +272,7 @@ func (oc *oas3OperationBuilder) convertRequestBody(reqBody *v3.RequestBody, apiP
 				item.Style = style
 			}
 
-			if encodingValue.Headers != nil {
+			if encodingValue.Headers != nil && encodingValue.Headers.Len() > 0 {
 				item.Headers = make(map[string]rest.RequestParameter)
 				for encodingHeader := encodingValue.Headers.First(); encodingHeader != nil; encodingHeader = encodingHeader.Next() {
 					key := strings.TrimSpace(encodingHeader.Key())
@@ -321,7 +321,6 @@ func (oc *oas3OperationBuilder) convertRequestBody(reqBody *v3.RequestBody, apiP
 					}
 				}
 			}
-
 			bodyResult.Encoding[iter.Key()] = item
 		}
 	}

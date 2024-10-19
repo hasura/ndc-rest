@@ -13,6 +13,7 @@ var (
 	errInvalidSchema      = errors.New("failed to validate NDC REST schema")
 	errBuildSchemaFailed  = errors.New("failed to build NDC REST schema")
 	errHTTPMethodRequired = errors.New("the HTTP method is required")
+	errFilePathRequired   = errors.New("file path is empty")
 )
 
 // ConfigItem extends the ConvertConfig with advanced options

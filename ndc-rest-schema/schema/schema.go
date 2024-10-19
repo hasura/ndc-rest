@@ -70,11 +70,11 @@ type Response struct {
 
 // Request represents the HTTP request information of the webhook
 type Request struct {
-	URL      string               `json:"url,omitempty" mapstructure:"url" yaml:"url,omitempty"`
-	Method   string               `json:"method,omitempty" mapstructure:"method" yaml:"method,omitempty" jsonschema:"enum=get,enum=post,enum=put,enum=patch,enum=delete"`
-	Type     RequestType          `json:"type,omitempty" mapstructure:"type" yaml:"type,omitempty"`
-	Headers  map[string]EnvString `json:"headers,omitempty" mapstructure:"headers" yaml:"headers,omitempty"`
-	Security AuthSecurities       `json:"security,omitempty" mapstructure:"security" yaml:"security,omitempty"`
+	URL      string               `json:"url,omitempty"      mapstructure:"url"                                              yaml:"url,omitempty"`
+	Method   string               `json:"method,omitempty"   jsonschema:"enum=get,enum=post,enum=put,enum=patch,enum=delete" mapstructure:"method"     yaml:"method,omitempty"`
+	Type     RequestType          `json:"type,omitempty"     mapstructure:"type"                                             yaml:"type,omitempty"`
+	Headers  map[string]EnvString `json:"headers,omitempty"  mapstructure:"headers"                                          yaml:"headers,omitempty"`
+	Security AuthSecurities       `json:"security,omitempty" mapstructure:"security"                                         yaml:"security,omitempty"`
 	// configure the request timeout in seconds, default 30s
 	Timeout     uint           `json:"timeout,omitempty"     mapstructure:"timeout"     yaml:"timeout,omitempty"`
 	Servers     []ServerConfig `json:"servers,omitempty"     mapstructure:"servers"     yaml:"servers,omitempty"`
@@ -111,18 +111,17 @@ type RequestParameter struct {
 // TypeSchema represents a serializable object of OpenAPI schema
 // that is used for validation
 type TypeSchema struct {
-	Type        []string    `json:"type"                 mapstructure:"type"       yaml:"type"`
-	Format      string      `json:"format,omitempty"     mapstructure:"format"     yaml:"format,omitempty"`
-	Pattern     string      `json:"pattern,omitempty"    mapstructure:"pattern"    yaml:"pattern,omitempty"`
-	Maximum     *float64    `json:"maximum,omitempty"    mapstructure:"maximum"    yaml:"maximum,omitempty"`
-	Minimum     *float64    `json:"minimum,omitempty,"   mapstructure:"minimum"    yaml:"minimum,omitempty"`
-	MaxLength   *int64      `json:"maxLength,omitempty"  mapstructure:"maxLength"  yaml:"maxLength,omitempty"`
-	MinLength   *int64      `json:"minLength,omitempty"  mapstructure:"minLength"  yaml:"minLength,omitempty"`
-	Enum        []string    `json:"enum,omitempty"       mapstructure:"enum"       yaml:"enum,omitempty"`
-	Items       *TypeSchema `json:"items,omitempty"      mapstructure:"items"      yaml:"items,omitempty"`
-	Description string      `json:"-"                    yaml:"-"`
-	ReadOnly    bool        `json:"-"                    yaml:"-"`
-	WriteOnly   bool        `json:"-"                    yaml:"-"`
+	Type        []string    `json:"type"                mapstructure:"type"      yaml:"type"`
+	Format      string      `json:"format,omitempty"    mapstructure:"format"    yaml:"format,omitempty"`
+	Pattern     string      `json:"pattern,omitempty"   mapstructure:"pattern"   yaml:"pattern,omitempty"`
+	Maximum     *float64    `json:"maximum,omitempty"   mapstructure:"maximum"   yaml:"maximum,omitempty"`
+	Minimum     *float64    `json:"minimum,omitempty,"  mapstructure:"minimum"   yaml:"minimum,omitempty"`
+	MaxLength   *int64      `json:"maxLength,omitempty" mapstructure:"maxLength" yaml:"maxLength,omitempty"`
+	MinLength   *int64      `json:"minLength,omitempty" mapstructure:"minLength" yaml:"minLength,omitempty"`
+	Items       *TypeSchema `json:"items,omitempty"     mapstructure:"items"     yaml:"items,omitempty"`
+	Description string      `json:"-"                   yaml:"-"`
+	ReadOnly    bool        `json:"-"                   yaml:"-"`
+	WriteOnly   bool        `json:"-"                   yaml:"-"`
 }
 
 // RetryPolicy represents the retry policy of request
@@ -191,13 +190,13 @@ type RequestBody struct {
 type OperationInfo struct {
 	Request *Request `json:"request" mapstructure:"request" yaml:"request"`
 	// Any arguments that this collection requires
-	Arguments map[string]ArgumentInfo `json:"arguments" yaml:"arguments" mapstructure:"arguments"`
+	Arguments map[string]ArgumentInfo `json:"arguments" mapstructure:"arguments" yaml:"arguments"`
 	// Column description
-	Description *string `json:"description,omitempty" yaml:"description,omitempty" mapstructure:"description,omitempty"`
+	Description *string `json:"description,omitempty" mapstructure:"description,omitempty" yaml:"description,omitempty"`
 	// The name of the procedure
-	Name string `json:"name" yaml:"name" mapstructure:"name"`
+	Name string `json:"name" mapstructure:"name" yaml:"name"`
 	// The name of the result type
-	ResultType schema.Type `json:"result_type" yaml:"result_type" mapstructure:"result_type"`
+	ResultType schema.Type `json:"result_type" mapstructure:"result_type" yaml:"result_type"`
 }
 
 // UnmarshalJSON implements json.Unmarshaler.
@@ -269,9 +268,9 @@ func (j OperationInfo) ProcedureSchema() schema.ProcedureInfo {
 // ObjectType represents the object type of rest schema
 type ObjectType struct {
 	// Description of this type
-	Description *string `json:"description,omitempty" yaml:"description,omitempty" mapstructure:"description,omitempty"`
+	Description *string `json:"description,omitempty" mapstructure:"description,omitempty" yaml:"description,omitempty"`
 	// Fields defined on this object type
-	Fields map[string]ObjectField `json:"fields" yaml:"fields" mapstructure:"fields"`
+	Fields map[string]ObjectField `json:"fields" mapstructure:"fields" yaml:"fields"`
 }
 
 // Schema returns schema the object field

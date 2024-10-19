@@ -160,7 +160,9 @@
           "rest": {
             "in": "body",
             "schema": {
-              "type": null
+              "type": [
+                "object"
+              ]
             }
           }
         }
