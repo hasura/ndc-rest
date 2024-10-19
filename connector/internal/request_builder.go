@@ -240,10 +240,10 @@ func (c *RequestBuilder) evalMultipartFieldValueRecursive(w *MultipartWriter, na
 		if !notNull {
 			return fmt.Errorf("%s: %w", name, errArgumentRequired)
 		}
-		if fieldInfo.Rest == nil || (enc != nil && slices.Contains(enc.ContentType, rest.ContentTypeJSON)) {
+		if enc != nil && slices.Contains(enc.ContentType, rest.ContentTypeJSON) {
 			var headers http.Header
 			var err error
-			if enc != nil && len(enc.Headers) > 0 {
+			if len(enc.Headers) > 0 {
 				headers, err = c.evalEncodingHeaders(enc.Headers)
 				if err != nil {
 					return err
@@ -252,7 +252,7 @@ func (c *RequestBuilder) evalMultipartFieldValueRecursive(w *MultipartWriter, na
 			return w.WriteJSON(name, value.Interface(), headers)
 		}
 		if !slices.Contains([]reflect.Kind{reflect.Slice, reflect.Array}, value.Kind()) {
-			return fmt.Errorf("%s: expected array type, got %v", name, value.Interface())
+			return fmt.Errorf("%s: expected array type, got %v", name, value.Kind())
 		}
 
 		for i := range value.Len() {

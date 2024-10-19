@@ -5,6 +5,7 @@ import (
 	"log/slog"
 	"strconv"
 	"strings"
+	"time"
 
 	rest "github.com/hasura/ndc-rest/ndc-rest-schema/schema"
 	"github.com/hasura/ndc-rest/ndc-rest-schema/utils"
@@ -30,6 +31,7 @@ func newOAS3OperationBuilder(builder *OAS3Builder, pathKey string, method string
 
 // BuildFunction build a REST NDC function information from OpenAPI v3 operation
 func (oc *oas3OperationBuilder) BuildFunction(itemGet *v3.Operation) (*rest.OperationInfo, error) {
+	start := time.Now()
 	funcName := itemGet.OperationId
 	if funcName == "" {
 		funcName = buildPathMethodName(oc.pathKey, "get", oc.builder.ConvertOptions)
@@ -38,11 +40,15 @@ func (oc *oas3OperationBuilder) BuildFunction(itemGet *v3.Operation) (*rest.Oper
 		funcName = utils.StringSliceToCamelCase([]string{oc.builder.Prefix, funcName})
 	}
 
-	oc.builder.Logger.Info("function",
-		slog.String("name", funcName),
-		slog.String("path", oc.pathKey),
-		slog.String("method", oc.method),
-	)
+	defer func() {
+		oc.builder.Logger.Info("function",
+			slog.String("name", funcName),
+			slog.String("path", oc.pathKey),
+			slog.String("method", oc.method),
+			slog.Duration("duration", time.Now().Sub(start)),
+		)
+	}()
+
 	resultType, schemaResponse, err := oc.convertResponse(itemGet.Responses, oc.pathKey, []string{funcName, "Result"})
 	if err != nil {
 		return nil, fmt.Errorf("%s: %w", oc.pathKey, err)
@@ -80,7 +86,7 @@ func (oc *oas3OperationBuilder) BuildProcedure(operation *v3.Operation) (*rest.O
 	if operation == nil {
 		return nil, nil
 	}
-
+	start := time.Now()
 	procName := operation.OperationId
 	if procName == "" {
 		procName = buildPathMethodName(oc.pathKey, oc.method, oc.builder.ConvertOptions)
@@ -89,11 +95,16 @@ func (oc *oas3OperationBuilder) BuildProcedure(operation *v3.Operation) (*rest.O
 	if oc.builder.Prefix != "" {
 		procName = utils.StringSliceToCamelCase([]string{oc.builder.Prefix, procName})
 	}
-	oc.builder.Logger.Info("procedure",
-		slog.String("name", procName),
-		slog.String("path", oc.pathKey),
-		slog.String("method", oc.method),
-	)
+
+	defer func() {
+		oc.builder.Logger.Info("procedure",
+			slog.String("name", procName),
+			slog.String("path", oc.pathKey),
+			slog.String("method", oc.method),
+			slog.Duration("duration", time.Now().Sub(start)),
+		)
+	}()
+
 	resultType, schemaResponse, err := oc.convertResponse(operation.Responses, oc.pathKey, []string{procName, "Result"})
 	if err != nil {
 		return nil, fmt.Errorf("%s: %w", oc.pathKey, err)

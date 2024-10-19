@@ -54,7 +54,10 @@ func (oc *oas3SchemaBuilder) getSchemaTypeFromProxy(schemaProxy *base.SchemaProx
 	} else if typeCache, ok := oc.builder.schemaCache[rawRefName]; ok {
 		isRef = true
 		ndcType = typeCache.Schema
-		typeSchema = typeCache.TypeSchema
+		typeSchema = createSchemaFromOpenAPISchema(innerSchema)
+		if typeCache.TypeSchema != nil {
+			typeSchema.Type = typeCache.TypeSchema.Type
+		}
 	} else {
 		// return early object from ref
 		refName := getSchemaRefTypeNameV3(rawRefName)
@@ -71,7 +74,6 @@ func (oc *oas3SchemaBuilder) getSchemaTypeFromProxy(schemaProxy *base.SchemaProx
 			if err != nil {
 				return nil, nil, false, err
 			}
-			typeSchema.Description = innerSchema.Description
 			oc.builder.schemaCache[rawRefName] = SchemaInfoCache{
 				Name:       schemaName,
 				Schema:     ndcType,
@@ -199,6 +201,9 @@ func (oc *oas3SchemaBuilder) getSchemaType(typeSchema *base.Schema, fieldPaths [
 						Type: propType.Encode(),
 					},
 					Rest: propApiSchema,
+				}
+				if propApiSchema == nil {
+					propApiSchema = &rest.TypeSchema{}
 				}
 				if propApiSchema.Description != "" {
 					objField.Description = &propApiSchema.Description

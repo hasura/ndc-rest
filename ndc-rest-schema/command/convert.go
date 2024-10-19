@@ -7,6 +7,7 @@ import (
 	"log/slog"
 	"os"
 	"path/filepath"
+	"time"
 
 	"github.com/hasura/ndc-rest/ndc-rest-schema/openapi"
 	"github.com/hasura/ndc-rest/ndc-rest-schema/schema"
@@ -34,6 +35,7 @@ type ConvertCommandArguments struct {
 
 // ConvertToNDCSchema converts to NDC REST schema from file
 func CommandConvertToNDCSchema(args *ConvertCommandArguments, logger *slog.Logger) error {
+	start := time.Now()
 	logger.Debug(
 		"converting the document to NDC REST schema",
 		slog.String("file", args.File),
@@ -96,7 +98,7 @@ func CommandConvertToNDCSchema(args *ConvertCommandArguments, logger *slog.Logge
 			return err
 		}
 
-		logger.Info("generated successfully")
+		logger.Info("generated successfully", slog.Duration("execution_time", time.Since(start)))
 		return nil
 	}
 

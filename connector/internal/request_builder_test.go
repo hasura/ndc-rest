@@ -25,18 +25,18 @@ func TestCreateMultipartForm(t *testing.T) {
 		{
 			Name: "PostFiles",
 			RawArguments: `{
-        "body": {
-          "expand": ["foo"],
-          "expand_json": ["foo","bar"],
-          "file": "aGVsbG8gd29ybGQ=",
-          "file_link_data": {
-            "create": true,
-            "expires_at": 181320689
-          },
-          "purpose": "business_icon"
-        },
+		    "body": {
+		      "expand": ["foo"],
+		      "expand_json": ["foo","bar"],
+		      "file": "aGVsbG8gd29ybGQ=",
+		      "file_link_data": {
+		        "create": true,
+		        "expires_at": 181320689
+		      },
+		      "purpose": "business_icon"
+		    },
 				"headerXRateLimitLimit": 10
-      }`,
+		  }`,
 			Expected: map[string]string{
 				"expand[]":                  `foo`,
 				"expand_json":               `["foo","bar"]`,
@@ -53,6 +53,23 @@ func TestCreateMultipartForm(t *testing.T) {
 					"X-Rate-Limit-Limit": []string{"10"},
 				},
 			},
+		},
+		{
+			Name: "uploadPetMultipart",
+			RawArguments: `{
+        "body": {
+          "address": {
+            "street": "street 1",
+            "location": [0, 1]
+          }
+        }
+      }`,
+			Expected: map[string]string{
+				"address.street":      `street 1`,
+				"address.location[0]": `0`,
+				"address.location[1]": `1`,
+			},
+			ExpectedHeaders: map[string]http.Header{},
 		},
 	}
 

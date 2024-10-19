@@ -90,9 +90,6 @@ func (c *RequestBuilder) evalURLAndHeaderParameterBySchema(endpoint *url.URL, he
 func (c *RequestBuilder) encodeParameterValues(objectField *rest.ObjectField, reflectValue reflect.Value, fieldPaths []string) (ParameterItems, error) {
 	results := ParameterItems{}
 
-	if reflectValue.Kind() == reflect.Invalid {
-		return results, nil
-	}
 	typeSchema := objectField.Rest
 	reflectValue, nonNull := sdkUtils.UnwrapPointerFromReflectValue(reflectValue)
 
@@ -262,12 +259,97 @@ func encodeScalarParameterReflectionValues(reflectValue reflect.Value, scalar *s
 		}
 		return []ParameterItem{NewParameterItem([]Key{}, []string{rawValue})}, nil
 	default:
-		b, err := json.Marshal(reflectValue.Interface())
-		if err != nil {
-			return nil, fmt.Errorf("%s: %w", strings.Join(fieldPaths, ""), err)
+		return encodeParameterReflectionValues(reflectValue, fieldPaths)
+	}
+}
+
+func encodeParameterReflectionValues(reflectValue reflect.Value, fieldPaths []string) (ParameterItems, error) {
+	results := ParameterItems{}
+	reflectValue, ok := sdkUtils.UnwrapPointerFromReflectValue(reflectValue)
+	if !ok {
+		return results, nil
+	}
+
+	kind := reflectValue.Kind()
+	switch kind {
+	case reflect.Bool:
+		return []ParameterItem{
+			NewParameterItem([]Key{}, []string{strconv.FormatBool(reflectValue.Bool())}),
+		}, nil
+	case reflect.String:
+		return []ParameterItem{NewParameterItem([]Key{}, []string{reflectValue.String()})}, nil
+	case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64:
+		return []ParameterItem{
+			NewParameterItem([]Key{}, []string{strconv.FormatInt(reflectValue.Int(), 10)}),
+		}, nil
+	case reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64:
+		return []ParameterItem{
+			NewParameterItem([]Key{}, []string{strconv.FormatUint(reflectValue.Uint(), 10)}),
+		}, nil
+	case reflect.Float32, reflect.Float64:
+		return []ParameterItem{
+			NewParameterItem([]Key{}, []string{fmt.Sprintf("%f", reflectValue.Float())}),
+		}, nil
+	case reflect.Slice:
+		valueLen := reflectValue.Len()
+		for i := range valueLen {
+			propPaths := append(fieldPaths, fmt.Sprintf("[%d]", i))
+			elem := reflectValue.Index(i)
+
+			outputs, err := encodeParameterReflectionValues(elem, propPaths)
+			if err != nil {
+				return nil, err
+			}
+
+			for _, output := range outputs {
+				results.Add(append([]Key{NewIndexKey(i)}, output.Keys()...), output.Values())
+			}
 		}
-		values := []string{strings.Trim(string(b), `"`)}
-		return []ParameterItem{NewParameterItem([]Key{}, values)}, nil
+		return results, nil
+	case reflect.Map, reflect.Interface:
+		anyValue := reflectValue.Interface()
+		object, ok := anyValue.(map[string]any)
+		if !ok {
+			b, err := json.Marshal(anyValue)
+			if err != nil {
+				return nil, fmt.Errorf("%s: %w", strings.Join(fieldPaths, ""), err)
+			}
+			values := []string{strings.Trim(string(b), `"`)}
+			return []ParameterItem{NewParameterItem([]Key{}, values)}, nil
+		}
+
+		for key, fieldValue := range object {
+			propPaths := append(fieldPaths, "."+key)
+
+			output, err := encodeParameterReflectionValues(reflect.ValueOf(fieldValue), propPaths)
+			if err != nil {
+				return nil, err
+			}
+
+			for _, pair := range output {
+				results.Add(append([]Key{NewKey(key)}, pair.Keys()...), pair.Values())
+			}
+		}
+
+		return results, nil
+	case reflect.Struct:
+		reflectType := reflectValue.Type()
+		for fieldIndex := range reflectValue.NumField() {
+			fieldVal := reflectValue.Field(fieldIndex)
+			fieldType := reflectType.Field(fieldIndex)
+			propPaths := append(fieldPaths, "."+fieldType.Name)
+			output, err := encodeParameterReflectionValues(fieldVal, propPaths)
+			if err != nil {
+				return nil, err
+			}
+
+			for _, pair := range output {
+				results.Add(append([]Key{NewKey(fieldType.Name)}, pair.Keys()...), pair.Values())
+			}
+		}
+		return results, nil
+	default:
+		return nil, fmt.Errorf("%s: failed to encode parameter, got %s", strings.Join(fieldPaths, ""), kind)
 	}
 }
 
