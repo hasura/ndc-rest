@@ -45,7 +45,7 @@ func (oc *oas3OperationBuilder) BuildFunction(itemGet *v3.Operation) (*rest.Oper
 			slog.String("name", funcName),
 			slog.String("path", oc.pathKey),
 			slog.String("method", oc.method),
-			slog.Duration("duration", time.Now().Sub(start)),
+			slog.Duration("duration", time.Since(start)),
 		)
 	}()
 
@@ -101,7 +101,7 @@ func (oc *oas3OperationBuilder) BuildProcedure(operation *v3.Operation) (*rest.O
 			slog.String("name", procName),
 			slog.String("path", oc.pathKey),
 			slog.String("method", oc.method),
-			slog.Duration("duration", time.Now().Sub(start)),
+			slog.Duration("duration", time.Since(start)),
 		)
 	}()
 
