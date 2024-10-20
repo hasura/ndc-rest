@@ -1,11 +1,11 @@
 package internal
 
 import (
-	"errors"
 	"fmt"
 	"log/slog"
 	"slices"
 	"strconv"
+	"strings"
 
 	rest "github.com/hasura/ndc-rest/ndc-rest-schema/schema"
 	"github.com/hasura/ndc-rest/ndc-rest-schema/utils"
@@ -14,22 +14,21 @@ import (
 )
 
 type oas2OperationBuilder struct {
-	builder       *OAS2Builder
-	Arguments     map[string]schema.ArgumentInfo
-	RequestParams []rest.RequestParameter
+	builder   *OAS2Builder
+	Arguments map[string]rest.ArgumentInfo
 }
 
 func newOAS2OperationBuilder(builder *OAS2Builder) *oas2OperationBuilder {
 	return &oas2OperationBuilder{
 		builder:   builder,
-		Arguments: make(map[string]schema.ArgumentInfo),
+		Arguments: make(map[string]rest.ArgumentInfo),
 	}
 }
 
 // BuildFunction build a REST NDC function information from OpenAPI v2 operation
-func (oc *oas2OperationBuilder) BuildFunction(pathKey string, operation *v2.Operation) (*rest.RESTFunctionInfo, error) {
+func (oc *oas2OperationBuilder) BuildFunction(pathKey string, operation *v2.Operation) (*rest.OperationInfo, string, error) {
 	if operation == nil {
-		return nil, nil
+		return nil, "", nil
 	}
 	funcName := operation.OperationId
 	if funcName == "" {
@@ -52,50 +51,44 @@ func (oc *oas2OperationBuilder) BuildFunction(pathKey string, operation *v2.Oper
 			slog.Any("produces", operation.Produces),
 			slog.Any("consumes", operation.Consumes),
 		)
-		return nil, nil
+		return nil, "", nil
 	}
 
 	resultType, err := oc.convertResponse(operation.Responses, pathKey, []string{funcName, "Result"})
 	if err != nil {
-		return nil, fmt.Errorf("%s: %w", pathKey, err)
+		return nil, "", fmt.Errorf("%s: %w", pathKey, err)
 	}
 	if resultType == nil {
-		return nil, nil
+		return nil, "", nil
 	}
 	reqBody, err := oc.convertParameters(operation, pathKey, []string{funcName})
 	if err != nil {
-		return nil, fmt.Errorf("%s: %w", funcName, err)
+		return nil, "", fmt.Errorf("%s: %w", funcName, err)
 	}
 
-	function := rest.RESTFunctionInfo{
+	description := oc.getOperationDescription(pathKey, "get", operation)
+	function := rest.OperationInfo{
 		Request: &rest.Request{
 			URL:         pathKey,
 			Method:      "get",
-			Parameters:  oc.RequestParams,
 			RequestBody: reqBody,
 			Response: rest.Response{
 				ContentType: responseContentType,
 			},
 			Security: convertSecurities(operation.Security),
 		},
-		FunctionInfo: schema.FunctionInfo{
-			Name:       funcName,
-			Arguments:  oc.Arguments,
-			ResultType: resultType.Encode(),
-		},
+		Description: &description,
+		Arguments:   oc.Arguments,
+		ResultType:  resultType.Encode(),
 	}
 
-	if operation.Summary != "" {
-		function.Description = &operation.Summary
-	}
-
-	return &function, nil
+	return &function, funcName, nil
 }
 
 // BuildProcedure build a REST NDC function information from OpenAPI v2 operation
-func (oc *oas2OperationBuilder) BuildProcedure(pathKey string, method string, operation *v2.Operation) (*rest.RESTProcedureInfo, error) {
+func (oc *oas2OperationBuilder) BuildProcedure(pathKey string, method string, operation *v2.Operation) (*rest.OperationInfo, string, error) {
 	if operation == nil {
-		return nil, nil
+		return nil, "", nil
 	}
 
 	procName := operation.OperationId
@@ -121,46 +114,40 @@ func (oc *oas2OperationBuilder) BuildProcedure(pathKey string, method string, op
 			slog.Any("produces", operation.Produces),
 			slog.Any("consumes", operation.Consumes),
 		)
-		return nil, nil
+		return nil, "", nil
 	}
 
 	resultType, err := oc.convertResponse(operation.Responses, pathKey, []string{procName, "Result"})
 	if err != nil {
-		return nil, fmt.Errorf("%s: %w", pathKey, err)
+		return nil, "", fmt.Errorf("%s: %w", pathKey, err)
 	}
 
 	if resultType == nil {
-		return nil, nil
+		return nil, "", nil
 	}
 
 	reqBody, err := oc.convertParameters(operation, pathKey, []string{procName})
 	if err != nil {
-		return nil, fmt.Errorf("%s: %w", pathKey, err)
+		return nil, "", fmt.Errorf("%s: %w", pathKey, err)
 	}
 
-	procedure := rest.RESTProcedureInfo{
+	description := oc.getOperationDescription(pathKey, method, operation)
+	procedure := rest.OperationInfo{
 		Request: &rest.Request{
 			URL:         pathKey,
 			Method:      method,
-			Parameters:  oc.RequestParams,
 			RequestBody: reqBody,
 			Security:    convertSecurities(operation.Security),
 			Response: rest.Response{
 				ContentType: responseContentType,
 			},
 		},
-		ProcedureInfo: schema.ProcedureInfo{
-			Name:       procName,
-			Arguments:  oc.Arguments,
-			ResultType: resultType.Encode(),
-		},
+		Description: &description,
+		Arguments:   oc.Arguments,
+		ResultType:  resultType.Encode(),
 	}
 
-	if operation.Summary != "" {
-		procedure.Description = &operation.Summary
-	}
-
-	return &procedure, nil
+	return &procedure, procName, nil
 }
 
 func (oc *oas2OperationBuilder) convertParameters(operation *v2.Operation, apiPath string, fieldPaths []string) (*rest.RequestBody, error) {
@@ -175,11 +162,10 @@ func (oc *oas2OperationBuilder) convertParameters(operation *v2.Operation, apiPa
 
 	var requestBody *rest.RequestBody
 	formData := rest.TypeSchema{
-		Type:       "object",
-		Properties: make(map[string]rest.TypeSchema),
+		Type: []string{"object"},
 	}
-	formDataObject := schema.ObjectType{
-		Fields: schema.ObjectTypeFields{},
+	formDataObject := rest.ObjectType{
+		Fields: map[string]rest.ObjectField{},
 	}
 	for _, param := range operation.Parameters {
 		if param == nil {
@@ -187,7 +173,7 @@ func (oc *oas2OperationBuilder) convertParameters(operation *v2.Operation, apiPa
 		}
 		paramName := param.Name
 		if paramName == "" {
-			return nil, errors.New("parameter name is empty")
+			return nil, errParameterNameRequired
 		}
 
 		var typeEncoder schema.TypeEncoder
@@ -204,11 +190,9 @@ func (oc *oas2OperationBuilder) convertParameters(operation *v2.Operation, apiPa
 			if err != nil {
 				return nil, err
 			}
-			nullable := !paramRequired
 			typeSchema = &rest.TypeSchema{
-				Type:     getNamedType(typeEncoder, false, param.Type),
-				Pattern:  param.Pattern,
-				Nullable: nullable,
+				Type:    []string{param.Type},
+				Pattern: param.Pattern,
 			}
 			if param.Maximum != nil {
 				maximum := float64(*param.Maximum)
@@ -240,8 +224,10 @@ func (oc *oas2OperationBuilder) convertParameters(operation *v2.Operation, apiPa
 
 		oc.builder.typeUsageCounter.Add(getNamedType(typeEncoder, true, ""), 1)
 		schemaType := typeEncoder.Encode()
-		argument := schema.ArgumentInfo{
-			Type: schemaType,
+		argument := rest.ArgumentInfo{
+			ArgumentInfo: schema.ArgumentInfo{
+				Type: schemaType,
+			},
 		}
 		if param.Description != "" {
 			argument.Description = &param.Description
@@ -249,42 +235,52 @@ func (oc *oas2OperationBuilder) convertParameters(operation *v2.Operation, apiPa
 
 		switch paramLocation {
 		case rest.InBody:
-			oc.Arguments["body"] = argument
+			argument.Rest = &rest.RequestParameter{
+				In:     rest.InBody,
+				Schema: typeSchema,
+			}
+			oc.Arguments[rest.BodyKey] = argument
 			requestBody = &rest.RequestBody{
 				ContentType: contentType,
-				Schema:      typeSchema,
 			}
 		case rest.InFormData:
 			if typeSchema != nil {
-				formDataObject.Fields[paramName] = schema.ObjectField{
-					Type:        argument.Type,
-					Description: argument.Description,
+				formDataObject.Fields[paramName] = rest.ObjectField{
+					ObjectField: schema.ObjectField{
+						Type:        argument.Type,
+						Description: argument.Description,
+					},
+					Rest: typeSchema,
 				}
-				formData.Properties[paramName] = *typeSchema
 			}
 		default:
-			oc.Arguments[paramName] = argument
-			oc.RequestParams = append(oc.RequestParams, rest.RequestParameter{
+			argument.Rest = &rest.RequestParameter{
 				Name:   paramName,
 				In:     paramLocation,
 				Schema: typeSchema,
-			})
+			}
+			oc.Arguments[paramName] = argument
 		}
 	}
 
-	if len(formData.Properties) > 0 {
+	if len(formDataObject.Fields) > 0 {
 		bodyName := utils.StringSliceToPascalCase(fieldPaths) + "Body"
 		oc.builder.schema.ObjectTypes[bodyName] = formDataObject
 		oc.builder.typeUsageCounter.Add(bodyName, 1)
 
 		desc := "Form data of " + apiPath
-		oc.Arguments["body"] = schema.ArgumentInfo{
-			Type:        schema.NewNamedType(bodyName).Encode(),
-			Description: &desc,
+		oc.Arguments["body"] = rest.ArgumentInfo{
+			ArgumentInfo: schema.ArgumentInfo{
+				Type:        schema.NewNamedType(bodyName).Encode(),
+				Description: &desc,
+			},
+			Rest: &rest.RequestParameter{
+				In:     rest.InFormData,
+				Schema: &formData,
+			},
 		}
 		requestBody = &rest.RequestBody{
 			ContentType: contentType,
-			Schema:      &formData,
 		}
 	}
 
@@ -349,4 +345,14 @@ func (oc *oas2OperationBuilder) getResponseContentTypeV2(contentTypes []string) 
 		}
 	}
 	return ""
+}
+
+func (oc *oas2OperationBuilder) getOperationDescription(pathKey string, method string, operation *v2.Operation) string {
+	if operation.Summary != "" {
+		return utils.StripHTMLTags(operation.Summary)
+	}
+	if operation.Description != "" {
+		return utils.StripHTMLTags(operation.Description)
+	}
+	return strings.ToUpper(method) + " " + pathKey
 }

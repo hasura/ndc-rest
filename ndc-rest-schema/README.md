@@ -20,7 +20,7 @@ This module includes libraries and tools to convert other API schemas to Native 
 **Install**
 
 ```go
-go install github.com/hasura/ndc-rest/ndc-rest-schema
+go install github.com/hasura/ndc-rest/ndc-rest-schema@latest
 ```
 
 ## Quick start
@@ -83,12 +83,6 @@ The NDC REST configuration adds `request` information into `functions` and `proc
     headers:
       Foo: bar
     timeout: 30 # seconds, default 30s
-    parameters:
-      - name: petId
-        in: path
-        schema:
-          type: string
-          nullable: false
     security:
       - api_key: []
 ```
@@ -153,19 +147,10 @@ settings:
   version: 1.0.18
 collections: []
 functions:
-  - request:
+  findPetsByStatus:
+    request:
       url: "/pet/findByStatus"
       method: get
-      parameters:
-        - name: status
-          in: query
-          schema:
-            type: String
-            nullable: true
-            enum:
-              - available
-              - pending
-              - sold
       security:
         - petstore_auth:
             - write:pets
@@ -178,15 +163,25 @@ functions:
           underlying_type:
             name: String
             type: named
+        rest:
+          name: status
+          in: query
+          schema:
+            type: string
+            nullable: true
+            enum:
+              - available
+              - pending
+              - sold
     description: Finds Pets by status
-    name: findPetsByStatus
     result_type:
       element_type:
         name: Pet
         type: named
       type: array
 procedures:
-  - request:
+  addPet:
+    request:
       url: "/pet"
       method: post
       headers:
@@ -201,8 +196,11 @@ procedures:
         type:
           name: Pet
           type: named
+        rest:
+          in: body
+          schema:
+            type: object
     description: Add a new pet to the store
-    name: addPet
     result_type:
       name: Pet
       type: named

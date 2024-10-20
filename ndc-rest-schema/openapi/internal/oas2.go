@@ -165,44 +165,44 @@ func (oc *OAS2Builder) pathToNDCOperations(pathItem orderedmap.Pair[string, *v2.
 	pathKey := pathItem.Key()
 	pathValue := pathItem.Value()
 
-	funcGet, err := newOAS2OperationBuilder(oc).BuildFunction(pathKey, pathValue.Get)
+	funcGet, funcName, err := newOAS2OperationBuilder(oc).BuildFunction(pathKey, pathValue.Get)
 	if err != nil {
 		return err
 	}
 	if funcGet != nil {
-		oc.schema.Functions = append(oc.schema.Functions, funcGet)
+		oc.schema.Functions[funcName] = *funcGet
 	}
 
-	procPost, err := newOAS2OperationBuilder(oc).BuildProcedure(pathKey, "post", pathValue.Post)
+	procPost, procPostName, err := newOAS2OperationBuilder(oc).BuildProcedure(pathKey, "post", pathValue.Post)
 	if err != nil {
 		return err
 	}
 	if procPost != nil {
-		oc.schema.Procedures = append(oc.schema.Procedures, procPost)
+		oc.schema.Procedures[procPostName] = *procPost
 	}
 
-	procPut, err := newOAS2OperationBuilder(oc).BuildProcedure(pathKey, "put", pathValue.Put)
+	procPut, procPutName, err := newOAS2OperationBuilder(oc).BuildProcedure(pathKey, "put", pathValue.Put)
 	if err != nil {
 		return err
 	}
 	if procPut != nil {
-		oc.schema.Procedures = append(oc.schema.Procedures, procPut)
+		oc.schema.Procedures[procPutName] = *procPut
 	}
 
-	procPatch, err := newOAS2OperationBuilder(oc).BuildProcedure(pathKey, "patch", pathValue.Patch)
+	procPatch, procPatchName, err := newOAS2OperationBuilder(oc).BuildProcedure(pathKey, "patch", pathValue.Patch)
 	if err != nil {
 		return err
 	}
 	if procPatch != nil {
-		oc.schema.Procedures = append(oc.schema.Procedures, procPatch)
+		oc.schema.Procedures[procPatchName] = *procPatch
 	}
 
-	procDelete, err := newOAS2OperationBuilder(oc).BuildProcedure(pathKey, "delete", pathValue.Delete)
+	procDelete, procDeleteName, err := newOAS2OperationBuilder(oc).BuildProcedure(pathKey, "delete", pathValue.Delete)
 	if err != nil {
 		return err
 	}
 	if procDelete != nil {
-		oc.schema.Procedures = append(oc.schema.Procedures, procDelete)
+		oc.schema.Procedures[procDeleteName] = *procDelete
 	}
 	return nil
 }
@@ -226,7 +226,7 @@ func (oc *OAS2Builder) getSchemaTypeFromProxy(schemaProxy *base.SchemaProxy, nul
 	if refName != "" && len(innerSchema.Type) > 0 && innerSchema.Type[0] == "object" {
 		refName = utils.ToPascalCase(refName)
 		ndcType = schema.NewNamedType(refName)
-		typeSchema = &rest.TypeSchema{Type: refName}
+		typeSchema = createSchemaFromOpenAPISchema(innerSchema)
 	} else {
 		if innerSchema.Title != "" && !strings.Contains(innerSchema.Title, " ") {
 			fieldPaths = []string{utils.ToPascalCase(innerSchema.Title)}
@@ -237,7 +237,6 @@ func (oc *OAS2Builder) getSchemaTypeFromProxy(schemaProxy *base.SchemaProxy, nul
 		}
 	}
 	if nullable {
-		typeSchema.Nullable = true
 		if !isNullableType(ndcType) {
 			ndcType = schema.NewNullableType(ndcType)
 		}
@@ -253,7 +252,7 @@ func (oc *OAS2Builder) getSchemaTypeFromParameter(param *v2.Parameter, apiPath s
 			return nil, errParameterSchemaEmpty(fieldPaths)
 		}
 		result = oc.buildScalarJSON()
-	} else if isPrimitiveScalar(param.Type) {
+	} else if isPrimitiveScalar([]string{param.Type}) {
 		scalarName := getScalarFromType(oc.schema, []string{param.Type}, param.Format, param.Enum, oc.trimPathPrefix(apiPath), fieldPaths)
 		result = schema.NewNamedType(scalarName)
 	} else {
@@ -293,7 +292,7 @@ func (oc *OAS2Builder) getSchemaType(typeSchema *base.Schema, apiPath string, fi
 		if _, ok := oc.schema.ScalarTypes[scalarName]; !ok {
 			oc.schema.ScalarTypes[scalarName] = *defaultScalarTypes[rest.ScalarJSON]
 		}
-		typeResult = createSchemaFromOpenAPISchema(typeSchema, scalarName)
+		typeResult = createSchemaFromOpenAPISchema(typeSchema)
 		return schema.NewNamedType(scalarName), typeResult, nil
 	}
 
@@ -303,16 +302,15 @@ func (oc *OAS2Builder) getSchemaType(typeSchema *base.Schema, apiPath string, fi
 			return nil, nil, errParameterSchemaEmpty(fieldPaths)
 		}
 		result = oc.buildScalarJSON()
-		typeResult = createSchemaFromOpenAPISchema(typeSchema, string(rest.ScalarJSON))
+		typeResult = createSchemaFromOpenAPISchema(typeSchema)
 	} else {
 		typeName := typeSchema.Type[0]
-		if isPrimitiveScalar(typeName) {
+		if isPrimitiveScalar(typeSchema.Type) {
 			scalarName := getScalarFromType(oc.schema, typeSchema.Type, typeSchema.Format, typeSchema.Enum, oc.trimPathPrefix(apiPath), fieldPaths)
 			result = schema.NewNamedType(scalarName)
-			typeResult = createSchemaFromOpenAPISchema(typeSchema, scalarName)
+			typeResult = createSchemaFromOpenAPISchema(typeSchema)
 		} else {
-			typeResult = createSchemaFromOpenAPISchema(typeSchema, "")
-			typeResult.Type = typeName
+			typeResult = createSchemaFromOpenAPISchema(typeSchema)
 			switch typeName {
 			case "object":
 				refName := utils.StringSliceToPascalCase(fieldPaths)
@@ -321,14 +319,13 @@ func (oc *OAS2Builder) getSchemaType(typeSchema *base.Schema, apiPath string, fi
 					// treat no-property objects as a JSON scalar
 					oc.schema.ScalarTypes[refName] = *defaultScalarTypes[rest.ScalarJSON]
 				} else {
-					object := schema.ObjectType{
-						Fields: make(schema.ObjectTypeFields),
+					object := rest.ObjectType{
+						Fields: make(map[string]rest.ObjectField),
 					}
 					if typeSchema.Description != "" {
 						object.Description = &typeSchema.Description
 					}
 
-					typeResult.Properties = make(map[string]rest.TypeSchema)
 					for prop := typeSchema.Properties.First(); prop != nil; prop = prop.Next() {
 						propName := prop.Key()
 						nullable := !slices.Contains(typeSchema.Required, propName)
@@ -336,14 +333,15 @@ func (oc *OAS2Builder) getSchemaType(typeSchema *base.Schema, apiPath string, fi
 						if err != nil {
 							return nil, nil, err
 						}
-						objField := schema.ObjectField{
-							Type: propType.Encode(),
+						objField := rest.ObjectField{
+							ObjectField: schema.ObjectField{
+								Type: propType.Encode(),
+							},
+							Rest: propApiSchema,
 						}
 						if propApiSchema.Description != "" {
 							objField.Description = &propApiSchema.Description
 						}
-						propApiSchema.Nullable = nullable
-						typeResult.Properties[propName] = *propApiSchema
 						object.Fields[propName] = objField
 
 						oc.typeUsageCounter.Add(getNamedType(propType, true, ""), 1)

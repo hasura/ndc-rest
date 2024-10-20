@@ -28,45 +28,11 @@
     },
     "version": "1.2.2"
   },
-  "collections": [],
-  "functions": [
-    {
+  "functions": {
+    "hasuraOneSignalGetNotifications": {
       "request": {
         "url": "/notifications",
         "method": "get",
-        "parameters": [
-          {
-            "name": "app_id",
-            "in": "query",
-            "schema": {
-              "type": "String"
-            }
-          },
-          {
-            "name": "kind",
-            "in": "query",
-            "schema": {
-              "type": "Int32",
-              "nullable": true
-            }
-          },
-          {
-            "name": "limit",
-            "in": "query",
-            "schema": {
-              "type": "Int32",
-              "nullable": true
-            }
-          },
-          {
-            "name": "offset",
-            "in": "query",
-            "schema": {
-              "type": "Int32",
-              "nullable": true
-            }
-          }
-        ],
         "security": [
           {
             "app_key": []
@@ -82,6 +48,15 @@
           "type": {
             "name": "String",
             "type": "named"
+          },
+          "rest": {
+            "name": "app_id",
+            "in": "query",
+            "schema": {
+              "type": [
+                "string"
+              ]
+            }
           }
         },
         "kind": {
@@ -91,6 +66,15 @@
             "underlying_type": {
               "name": "Int32",
               "type": "named"
+            }
+          },
+          "rest": {
+            "name": "kind",
+            "in": "query",
+            "schema": {
+              "type": [
+                "integer"
+              ]
             }
           }
         },
@@ -102,6 +86,15 @@
               "name": "Int32",
               "type": "named"
             }
+          },
+          "rest": {
+            "name": "limit",
+            "in": "query",
+            "schema": {
+              "type": [
+                "integer"
+              ]
+            }
           }
         },
         "offset": {
@@ -111,6 +104,15 @@
             "underlying_type": {
               "name": "Int32",
               "type": "named"
+            }
+          },
+          "rest": {
+            "name": "offset",
+            "in": "query",
+            "schema": {
+              "type": [
+                "integer"
+              ]
             }
           }
         }
@@ -122,7 +124,7 @@
         "type": "named"
       }
     }
-  ],
+  },
   "object_types": {
     "CreateNotificationSuccessResponse": {
       "fields": {
@@ -133,6 +135,9 @@
               "name": "Notification200Errors",
               "type": "named"
             }
+          },
+          "rest": {
+            "type": null
           }
         },
         "external_id": {
@@ -142,6 +147,11 @@
               "name": "String",
               "type": "named"
             }
+          },
+          "rest": {
+            "type": [
+              "string"
+            ]
           }
         },
         "id": {
@@ -151,6 +161,11 @@
               "name": "String",
               "type": "named"
             }
+          },
+          "rest": {
+            "type": [
+              "string"
+            ]
           }
         },
         "recipients": {
@@ -160,6 +175,11 @@
               "name": "Int32",
               "type": "named"
             }
+          },
+          "rest": {
+            "type": [
+              "integer"
+            ]
           }
         }
       }
@@ -174,6 +194,11 @@
               "name": "Int32",
               "type": "named"
             }
+          },
+          "rest": {
+            "type": [
+              "integer"
+            ]
           }
         },
         "errored": {
@@ -184,6 +209,11 @@
               "name": "Int32",
               "type": "named"
             }
+          },
+          "rest": {
+            "type": [
+              "integer"
+            ]
           }
         },
         "failed": {
@@ -194,6 +224,11 @@
               "name": "Int32",
               "type": "named"
             }
+          },
+          "rest": {
+            "type": [
+              "integer"
+            ]
           }
         },
         "received": {
@@ -204,6 +239,11 @@
               "name": "Int32",
               "type": "named"
             }
+          },
+          "rest": {
+            "type": [
+              "integer"
+            ]
           }
         },
         "successful": {
@@ -214,6 +254,11 @@
               "name": "Int32",
               "type": "named"
             }
+          },
+          "rest": {
+            "type": [
+              "integer"
+            ]
           }
         }
       }
@@ -225,6 +270,11 @@
           "type": {
             "name": "String",
             "type": "named"
+          },
+          "rest": {
+            "type": [
+              "string"
+            ]
           }
         },
         "key": {
@@ -235,6 +285,11 @@
               "name": "String",
               "type": "named"
             }
+          },
+          "rest": {
+            "type": [
+              "string"
+            ]
           }
         },
         "relation": {
@@ -242,6 +297,11 @@
           "type": {
             "name": "FilterRelation",
             "type": "named"
+          },
+          "rest": {
+            "type": [
+              "string"
+            ]
           }
         },
         "value": {
@@ -252,12 +312,105 @@
               "name": "String",
               "type": "named"
             }
+          },
+          "rest": {
+            "type": [
+              "string"
+            ]
           }
         }
       }
     },
     "NotificationInput": {
       "fields": {
+        "contents": {
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "StringMap",
+              "type": "named"
+            }
+          },
+          "rest": {
+            "type": [
+              "object"
+            ]
+          }
+        },
+        "custom_data": {
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "JSON",
+              "type": "named"
+            }
+          },
+          "rest": {
+            "type": [
+              "object"
+            ]
+          }
+        },
+        "data": {
+          "description": "Channel: Push Notifications\nPlatform: Huawei\nA custom map of data that is passed back to your app. Same as using Additional Data within the dashboard. Can use up to 2048 bytes of data.\nExample: {\"abc\": 123, \"foo\": \"bar\", \"event_performed\": true, \"amount\": 12.1}\n",
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "JSON",
+              "type": "named"
+            }
+          },
+          "rest": {
+            "type": [
+              "object"
+            ]
+          }
+        },
+        "filters": {
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "element_type": {
+                "name": "Filter",
+                "type": "named"
+              },
+              "type": "array"
+            }
+          },
+          "rest": {
+            "type": [
+              "array"
+            ]
+          }
+        },
+        "headings": {
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "StringMap",
+              "type": "named"
+            }
+          },
+          "rest": {
+            "type": [
+              "object"
+            ]
+          }
+        },
+        "id": {
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "String",
+              "type": "named"
+            }
+          },
+          "rest": {
+            "type": [
+              "string"
+            ]
+          }
+        },
         "send_after": {
           "type": {
             "type": "nullable",
@@ -265,6 +418,26 @@
               "name": "TimestampTZ",
               "type": "named"
             }
+          },
+          "rest": {
+            "type": [
+              "string"
+            ],
+            "format": "date-time"
+          }
+        },
+        "subtitle": {
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "StringMap",
+              "type": "named"
+            }
+          },
+          "rest": {
+            "type": [
+              "object"
+            ]
           }
         }
       }
@@ -278,6 +451,11 @@
               "name": "Int32",
               "type": "named"
             }
+          },
+          "rest": {
+            "type": [
+              "integer"
+            ]
           }
         },
         "notifications": {
@@ -290,6 +468,11 @@
               },
               "type": "array"
             }
+          },
+          "rest": {
+            "type": [
+              "array"
+            ]
           }
         },
         "offset": {
@@ -299,6 +482,11 @@
               "name": "Int32",
               "type": "named"
             }
+          },
+          "rest": {
+            "type": [
+              "integer"
+            ]
           }
         },
         "total_count": {
@@ -308,6 +496,11 @@
               "name": "Int32",
               "type": "named"
             }
+          },
+          "rest": {
+            "type": [
+              "integer"
+            ]
           }
         }
       }
@@ -322,6 +515,12 @@
               "name": "Int64",
               "type": "named"
             }
+          },
+          "rest": {
+            "type": [
+              "integer"
+            ],
+            "format": "int64"
           }
         },
         "contents": {
@@ -331,6 +530,11 @@
               "name": "StringMap",
               "type": "named"
             }
+          },
+          "rest": {
+            "type": [
+              "object"
+            ]
           }
         },
         "converted": {
@@ -341,24 +545,11 @@
               "name": "Int32",
               "type": "named"
             }
-          }
-        },
-        "custom_data": {
-          "type": {
-            "type": "nullable",
-            "underlying_type": {
-              "name": "JSON",
-              "type": "named"
-            }
-          }
-        },
-        "data": {
-          "type": {
-            "type": "nullable",
-            "underlying_type": {
-              "name": "JSON",
-              "type": "named"
-            }
+          },
+          "rest": {
+            "type": [
+              "integer"
+            ]
           }
         },
         "errored": {
@@ -369,6 +560,11 @@
               "name": "Int32",
               "type": "named"
             }
+          },
+          "rest": {
+            "type": [
+              "integer"
+            ]
           }
         },
         "excluded_segments": {
@@ -381,6 +577,16 @@
               },
               "type": "array"
             }
+          },
+          "rest": {
+            "type": [
+              "array"
+            ],
+            "items": {
+              "type": [
+                "string"
+              ]
+            }
           }
         },
         "failed": {
@@ -391,6 +597,11 @@
               "name": "Int32",
               "type": "named"
             }
+          },
+          "rest": {
+            "type": [
+              "integer"
+            ]
           }
         },
         "filters": {
@@ -403,6 +614,11 @@
               },
               "type": "array"
             }
+          },
+          "rest": {
+            "type": [
+              "array"
+            ]
           }
         },
         "headings": {
@@ -412,6 +628,11 @@
               "name": "StringMap",
               "type": "named"
             }
+          },
+          "rest": {
+            "type": [
+              "object"
+            ]
           }
         },
         "id": {
@@ -421,6 +642,11 @@
               "name": "String",
               "type": "named"
             }
+          },
+          "rest": {
+            "type": [
+              "string"
+            ]
           }
         },
         "include_player_ids": {
@@ -432,6 +658,16 @@
                 "type": "named"
               },
               "type": "array"
+            }
+          },
+          "rest": {
+            "type": [
+              "array"
+            ],
+            "items": {
+              "type": [
+                "string"
+              ]
             }
           }
         },
@@ -445,6 +681,16 @@
               },
               "type": "array"
             }
+          },
+          "rest": {
+            "type": [
+              "array"
+            ],
+            "items": {
+              "type": [
+                "string"
+              ]
+            }
           }
         },
         "outcomes": {
@@ -457,6 +703,11 @@
               },
               "type": "array"
             }
+          },
+          "rest": {
+            "type": [
+              "array"
+            ]
           }
         },
         "platform_delivery_stats": {
@@ -467,6 +718,11 @@
               "name": "PlatformDeliveryData",
               "type": "named"
             }
+          },
+          "rest": {
+            "type": [
+              "object"
+            ]
           }
         },
         "queued_at": {
@@ -477,6 +733,12 @@
               "name": "Int64",
               "type": "named"
             }
+          },
+          "rest": {
+            "type": [
+              "integer"
+            ],
+            "format": "int64"
           }
         },
         "received": {
@@ -487,6 +749,11 @@
               "name": "Int32",
               "type": "named"
             }
+          },
+          "rest": {
+            "type": [
+              "integer"
+            ]
           }
         },
         "remaining": {
@@ -497,6 +764,11 @@
               "name": "Int32",
               "type": "named"
             }
+          },
+          "rest": {
+            "type": [
+              "integer"
+            ]
           }
         },
         "send_after": {
@@ -507,6 +779,12 @@
               "name": "Int64",
               "type": "named"
             }
+          },
+          "rest": {
+            "type": [
+              "integer"
+            ],
+            "format": "int64"
           }
         },
         "subtitle": {
@@ -516,6 +794,11 @@
               "name": "StringMap",
               "type": "named"
             }
+          },
+          "rest": {
+            "type": [
+              "object"
+            ]
           }
         },
         "successful": {
@@ -526,6 +809,11 @@
               "name": "Int32",
               "type": "named"
             }
+          },
+          "rest": {
+            "type": [
+              "integer"
+            ]
           }
         },
         "target_channel": {
@@ -535,6 +823,11 @@
               "name": "PlayerNotificationTargetTargetChannel",
               "type": "named"
             }
+          },
+          "rest": {
+            "type": [
+              "string"
+            ]
           }
         },
         "throttle_rate_per_minute": {
@@ -545,6 +838,11 @@
               "name": "Int32",
               "type": "named"
             }
+          },
+          "rest": {
+            "type": [
+              "integer"
+            ]
           }
         }
       }
@@ -555,18 +853,33 @@
           "type": {
             "name": "OutcomeDataAggregation",
             "type": "named"
+          },
+          "rest": {
+            "type": [
+              "string"
+            ]
           }
         },
         "id": {
           "type": {
             "name": "String",
             "type": "named"
+          },
+          "rest": {
+            "type": [
+              "string"
+            ]
           }
         },
         "value": {
           "type": {
             "name": "Int32",
             "type": "named"
+          },
+          "rest": {
+            "type": [
+              "integer"
+            ]
           }
         }
       }
@@ -581,6 +894,11 @@
               "name": "DeliveryData",
               "type": "named"
             }
+          },
+          "rest": {
+            "type": [
+              "object"
+            ]
           }
         },
         "chrome_web_push": {
@@ -590,6 +908,11 @@
               "name": "DeliveryData",
               "type": "named"
             }
+          },
+          "rest": {
+            "type": [
+              "object"
+            ]
           }
         },
         "edge_web_push": {
@@ -599,6 +922,11 @@
               "name": "DeliveryData",
               "type": "named"
             }
+          },
+          "rest": {
+            "type": [
+              "object"
+            ]
           }
         },
         "email": {
@@ -608,6 +936,11 @@
               "name": "DeliveryData",
               "type": "named"
             }
+          },
+          "rest": {
+            "type": [
+              "object"
+            ]
           }
         },
         "firefox_web_push": {
@@ -617,6 +950,11 @@
               "name": "DeliveryData",
               "type": "named"
             }
+          },
+          "rest": {
+            "type": [
+              "object"
+            ]
           }
         },
         "ios": {
@@ -626,6 +964,11 @@
               "name": "DeliveryData",
               "type": "named"
             }
+          },
+          "rest": {
+            "type": [
+              "object"
+            ]
           }
         },
         "safari_web_push": {
@@ -635,6 +978,11 @@
               "name": "DeliveryData",
               "type": "named"
             }
+          },
+          "rest": {
+            "type": [
+              "object"
+            ]
           }
         },
         "sms": {
@@ -644,6 +992,11 @@
               "name": "DeliveryData",
               "type": "named"
             }
+          },
+          "rest": {
+            "type": [
+              "object"
+            ]
           }
         }
       }
@@ -658,13 +1011,18 @@
               "name": "String",
               "type": "named"
             }
+          },
+          "rest": {
+            "type": [
+              "string"
+            ]
           }
         }
       }
     }
   },
-  "procedures": [
-    {
+  "procedures": {
+    "hasuraOneSignalCreateNotification": {
       "request": {
         "url": "/notifications",
         "method": "post",
@@ -674,10 +1032,7 @@
           }
         ],
         "requestBody": {
-          "contentType": "application/json",
-          "schema": {
-            "type": "NotificationInput"
-          }
+          "contentType": "application/json"
         },
         "response": {
           "contentType": "application/json"
@@ -689,6 +1044,9 @@
           "type": {
             "name": "NotificationInput",
             "type": "named"
+          },
+          "rest": {
+            "in": "body"
           }
         }
       },
@@ -699,7 +1057,7 @@
         "type": "named"
       }
     }
-  ],
+  },
   "scalar_types": {
     "FilterRelation": {
       "aggregate_functions": {},

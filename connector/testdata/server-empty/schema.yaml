@@ -1,0 +1,44 @@
+---
+settings:
+  timeout: 10
+  retry:
+    times: 1
+    delay: 500
+    httpStatus: [429, 500, 501, 502]
+collections: []
+functions:
+  findPets:
+    request:
+      url: "/pet"
+      method: get
+      parameters: []
+      security: []
+    arguments: {}
+    description: Finds Pets
+    name: findPets
+    result_type:
+      element_type:
+        name: Pet
+        type: named
+      type: array
+procedures: []
+object_types:
+  Pet:
+    fields:
+      id:
+        type:
+          type: nullable
+          underlying_type:
+            name: Int
+            type: named
+      name:
+        type:
+          name: String
+          type: named
+scalar_types:
+  Int:
+    aggregate_functions: {}
+    comparison_operators: {}
+  String:
+    aggregate_functions: {}
+    comparison_operators: {}

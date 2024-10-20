@@ -29,8 +29,9 @@ type OAS3Builder struct {
 
 // SchemaInfoCache stores prebuilt information of component schema types.
 type SchemaInfoCache struct {
-	Name   string
-	Schema schema.TypeEncoder
+	Name       string
+	Schema     schema.TypeEncoder
+	TypeSchema *rest.TypeSchema
 }
 
 // NewOAS3Builder creates an OAS3Builder instance
@@ -199,45 +200,45 @@ func (oc *OAS3Builder) pathToNDCOperations(pathItem orderedmap.Pair[string, *v3.
 	pathValue := pathItem.Value()
 
 	if pathValue.Get != nil {
-		funcGet, err := newOAS3OperationBuilder(oc, pathKey, "get").BuildFunction(pathValue.Get)
+		funcGet, funcName, err := newOAS3OperationBuilder(oc, pathKey, "get").BuildFunction(pathValue.Get)
 		if err != nil {
 			return err
 		}
 		if funcGet != nil {
-			oc.schema.Functions = append(oc.schema.Functions, funcGet)
+			oc.schema.Functions[funcName] = *funcGet
 		}
 	}
 
-	procPost, err := newOAS3OperationBuilder(oc, pathKey, "post").BuildProcedure(pathValue.Post)
+	procPost, procPostName, err := newOAS3OperationBuilder(oc, pathKey, "post").BuildProcedure(pathValue.Post)
 	if err != nil {
 		return err
 	}
 	if procPost != nil {
-		oc.schema.Procedures = append(oc.schema.Procedures, procPost)
+		oc.schema.Procedures[procPostName] = *procPost
 	}
 
-	procPut, err := newOAS3OperationBuilder(oc, pathKey, "put").BuildProcedure(pathValue.Put)
+	procPut, procPutName, err := newOAS3OperationBuilder(oc, pathKey, "put").BuildProcedure(pathValue.Put)
 	if err != nil {
 		return err
 	}
 	if procPut != nil {
-		oc.schema.Procedures = append(oc.schema.Procedures, procPut)
+		oc.schema.Procedures[procPutName] = *procPut
 	}
 
-	procPatch, err := newOAS3OperationBuilder(oc, pathKey, "patch").BuildProcedure(pathValue.Patch)
+	procPatch, procPutName, err := newOAS3OperationBuilder(oc, pathKey, "patch").BuildProcedure(pathValue.Patch)
 	if err != nil {
 		return err
 	}
 	if procPatch != nil {
-		oc.schema.Procedures = append(oc.schema.Procedures, procPatch)
+		oc.schema.Procedures[procPutName] = *procPatch
 	}
 
-	procDelete, err := newOAS3OperationBuilder(oc, pathKey, "delete").BuildProcedure(pathValue.Delete)
+	procDelete, procDeleteName, err := newOAS3OperationBuilder(oc, pathKey, "delete").BuildProcedure(pathValue.Delete)
 	if err != nil {
 		return err
 	}
 	if procDelete != nil {
-		oc.schema.Procedures = append(oc.schema.Procedures, procDelete)
+		oc.schema.Procedures[procDeleteName] = *procDelete
 	}
 	return nil
 }
@@ -255,21 +256,33 @@ func (oc *OAS3Builder) convertComponentSchemas(schemaItem orderedmap.Pair[string
 	if _, ok := oc.schema.ObjectTypes[typeKey]; ok {
 		return nil
 	}
-	typeEncoder, _, _, err := newOAS3SchemaBuilder(oc, "", rest.InBody, false).
+	typeEncoder, schemaResult, _, err := newOAS3SchemaBuilder(oc, "", rest.InBody, false).
 		getSchemaType(typeSchema, []string{typeKey})
 	if err != nil {
 		return err
 	}
 
+	var typeName string
+	if typeEncoder != nil {
+		typeName = getNamedType(typeEncoder, true, "")
+	}
+	cacheKey := "#/components/schemas/" + typeKey
 	// treat no-property objects as a Arbitrary JSON scalar
-	if typeEncoder == nil || getNamedType(typeEncoder, true, "") == string(rest.ScalarJSON) {
+	if typeEncoder == nil || typeName == string(rest.ScalarJSON) {
 		refName := utils.ToPascalCase(typeKey)
 		scalar := schema.NewScalarType()
 		scalar.Representation = schema.NewTypeRepresentationJSON().Encode()
 		oc.schema.ScalarTypes[refName] = *scalar
-		oc.schemaCache["#/components/schemas/"+typeKey] = SchemaInfoCache{
-			Name:   refName,
-			Schema: schema.NewNamedType(refName),
+		oc.schemaCache[cacheKey] = SchemaInfoCache{
+			Name:       refName,
+			Schema:     schema.NewNamedType(refName),
+			TypeSchema: schemaResult,
+		}
+	} else {
+		oc.schemaCache[cacheKey] = SchemaInfoCache{
+			Name:       typeName,
+			Schema:     typeEncoder,
+			TypeSchema: schemaResult,
 		}
 	}
 
@@ -304,7 +317,6 @@ func (oc *OAS3Builder) transformWriteSchema() {
 		}
 	}
 	for _, proc := range oc.schema.Procedures {
-		var bodyName string
 		for key, arg := range proc.Arguments {
 			ty, name, _ := oc.populateWriteSchemaType(arg.Type)
 			if name == "" {
@@ -312,13 +324,6 @@ func (oc *OAS3Builder) transformWriteSchema() {
 			}
 			arg.Type = ty
 			proc.Arguments[key] = arg
-			if key == "body" {
-				bodyName = name
-			}
-		}
-
-		if bodyName != "" && proc.Request.RequestBody != nil && proc.Request.RequestBody.Schema != nil && !isOASType(proc.Request.RequestBody.Schema.Type) {
-			proc.Request.RequestBody.Schema.Type = bodyName
 		}
 	}
 }
@@ -337,6 +342,9 @@ func (oc *OAS3Builder) populateWriteSchemaType(schemaType schema.Type) (schema.T
 			oc.schemaCache[ty.Name] = SchemaInfoCache{
 				Name:   ty.Name,
 				Schema: schema.NewNamedType(ty.Name),
+				TypeSchema: &rest.TypeSchema{
+					Type: []string{"object"},
+				},
 			}
 		}
 
@@ -353,9 +361,9 @@ func (oc *OAS3Builder) populateWriteSchemaType(schemaType schema.Type) (schema.T
 		if !ok {
 			return schemaType, ty.Name, false
 		}
-		writeObject := schema.ObjectType{
+		writeObject := rest.ObjectType{
 			Description: objectType.Description,
-			Fields:      make(schema.ObjectTypeFields),
+			Fields:      make(map[string]rest.ObjectField),
 		}
 		var hasWriteField bool
 		for key, field := range objectType.Fields {
@@ -363,9 +371,12 @@ func (oc *OAS3Builder) populateWriteSchemaType(schemaType schema.Type) (schema.T
 			if name == "" {
 				continue
 			}
-			writeObject.Fields[key] = schema.ObjectField{
-				Description: field.Description,
-				Type:        ut,
+			writeObject.Fields[key] = rest.ObjectField{
+				ObjectField: schema.ObjectField{
+					Description: field.Description,
+					Type:        ut,
+				},
+				Rest: field.Rest,
 			}
 			if isInput {
 				hasWriteField = true

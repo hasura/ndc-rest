@@ -14,30 +14,11 @@
     },
     "version": "1.0.0"
   },
-  "collections": [],
-  "functions": [
-    {
+  "functions": {
+    "hasuraMockJsonGetPosts": {
       "request": {
         "url": "/posts",
         "method": "get",
-        "parameters": [
-          {
-            "name": "id",
-            "in": "query",
-            "schema": {
-              "type": "Int32",
-              "nullable": true
-            }
-          },
-          {
-            "name": "userId",
-            "in": "query",
-            "schema": {
-              "type": "Int32",
-              "nullable": true
-            }
-          }
-        ],
         "response": {
           "contentType": "application/json"
         }
@@ -51,6 +32,15 @@
               "name": "Int32",
               "type": "named"
             }
+          },
+          "rest": {
+            "name": "id",
+            "in": "query",
+            "schema": {
+              "type": [
+                "integer"
+              ]
+            }
           }
         },
         "userId": {
@@ -60,6 +50,15 @@
             "underlying_type": {
               "name": "Int32",
               "type": "named"
+            }
+          },
+          "rest": {
+            "name": "userId",
+            "in": "query",
+            "schema": {
+              "type": [
+                "integer"
+              ]
             }
           }
         }
@@ -74,7 +73,7 @@
         "type": "array"
       }
     }
-  ],
+  },
   "object_types": {
     "Post": {
       "fields": {
@@ -85,6 +84,11 @@
               "name": "String",
               "type": "named"
             }
+          },
+          "rest": {
+            "type": [
+              "string"
+            ]
           }
         },
         "id": {
@@ -94,6 +98,12 @@
               "name": "Int64",
               "type": "named"
             }
+          },
+          "rest": {
+            "type": [
+              "integer"
+            ],
+            "format": "int64"
           }
         },
         "title": {
@@ -103,6 +113,11 @@
               "name": "String",
               "type": "named"
             }
+          },
+          "rest": {
+            "type": [
+              "string"
+            ]
           }
         },
         "userId": {
@@ -112,21 +127,24 @@
               "name": "Int64",
               "type": "named"
             }
+          },
+          "rest": {
+            "type": [
+              "integer"
+            ],
+            "format": "int64"
           }
         }
       }
     }
   },
-  "procedures": [
-    {
+  "procedures": {
+    "hasuraMockJsonCreatePost": {
       "request": {
         "url": "/posts",
         "method": "post",
         "requestBody": {
-          "contentType": "application/json",
-          "schema": {
-            "type": "Post"
-          }
+          "contentType": "application/json"
         },
         "response": {
           "contentType": "application/json"
@@ -138,6 +156,14 @@
           "type": {
             "name": "Post",
             "type": "named"
+          },
+          "rest": {
+            "in": "body",
+            "schema": {
+              "type": [
+                "object"
+              ]
+            }
           }
         }
       },
@@ -148,7 +174,7 @@
         "type": "named"
       }
     }
-  ],
+  },
   "scalar_types": {
     "Int32": {
       "aggregate_functions": {},

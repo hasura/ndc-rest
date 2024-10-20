@@ -30,8 +30,7 @@
     ],
     "version": "2.1.0"
   },
-  "collections": [],
-  "functions": [],
+  "functions": {},
   "object_types": {
     "ChatCompletionFunctions": {
       "fields": {
@@ -43,6 +42,11 @@
               "name": "String",
               "type": "named"
             }
+          },
+          "rest": {
+            "type": [
+              "string"
+            ]
           }
         },
         "name": {
@@ -50,6 +54,11 @@
           "type": {
             "name": "String",
             "type": "named"
+          },
+          "rest": {
+            "type": [
+              "string"
+            ]
           }
         },
         "parameters": {
@@ -60,6 +69,11 @@
               "name": "FunctionParameters",
               "type": "named"
             }
+          },
+          "rest": {
+            "type": [
+              "object"
+            ]
           }
         }
       }
@@ -71,6 +85,11 @@
           "type": {
             "name": "ChatCompletionMessageToolCallFunction",
             "type": "named"
+          },
+          "rest": {
+            "type": [
+              "object"
+            ]
           }
         },
         "id": {
@@ -78,6 +97,11 @@
           "type": {
             "name": "String",
             "type": "named"
+          },
+          "rest": {
+            "type": [
+              "string"
+            ]
           }
         },
         "type": {
@@ -85,6 +109,11 @@
           "type": {
             "name": "ChatCompletionMessageToolCallType",
             "type": "named"
+          },
+          "rest": {
+            "type": [
+              "string"
+            ]
           }
         }
       }
@@ -97,6 +126,11 @@
           "type": {
             "name": "String",
             "type": "named"
+          },
+          "rest": {
+            "type": [
+              "string"
+            ]
           }
         },
         "name": {
@@ -104,6 +138,11 @@
           "type": {
             "name": "String",
             "type": "named"
+          },
+          "rest": {
+            "type": [
+              "string"
+            ]
           }
         }
       }
@@ -116,6 +155,11 @@
           "type": {
             "name": "String",
             "type": "named"
+          },
+          "rest": {
+            "type": [
+              "string"
+            ]
           }
         },
         "function_call": {
@@ -126,6 +170,11 @@
               "name": "ChatCompletionResponseMessageFunctionCall",
               "type": "named"
             }
+          },
+          "rest": {
+            "type": [
+              "object"
+            ]
           }
         },
         "role": {
@@ -133,6 +182,11 @@
           "type": {
             "name": "ChatCompletionResponseMessageRole",
             "type": "named"
+          },
+          "rest": {
+            "type": [
+              "string"
+            ]
           }
         },
         "tool_calls": {
@@ -146,6 +200,11 @@
               },
               "type": "array"
             }
+          },
+          "rest": {
+            "type": [
+              "array"
+            ]
           }
         }
       }
@@ -158,6 +217,11 @@
           "type": {
             "name": "String",
             "type": "named"
+          },
+          "rest": {
+            "type": [
+              "string"
+            ]
           }
         },
         "name": {
@@ -165,6 +229,11 @@
           "type": {
             "name": "String",
             "type": "named"
+          },
+          "rest": {
+            "type": [
+              "string"
+            ]
           }
         }
       }
@@ -180,6 +249,11 @@
               "name": "Boolean",
               "type": "named"
             }
+          },
+          "rest": {
+            "type": [
+              "boolean"
+            ]
           }
         }
       }
@@ -194,6 +268,16 @@
               "type": "named"
             },
             "type": "array"
+          },
+          "rest": {
+            "type": [
+              "array"
+            ],
+            "items": {
+              "type": [
+                "integer"
+              ]
+            }
           }
         },
         "logprob": {
@@ -201,6 +285,11 @@
           "type": {
             "name": "Float64",
             "type": "named"
+          },
+          "rest": {
+            "type": [
+              "number"
+            ]
           }
         },
         "token": {
@@ -208,6 +297,11 @@
           "type": {
             "name": "String",
             "type": "named"
+          },
+          "rest": {
+            "type": [
+              "string"
+            ]
           }
         },
         "top_logprobs": {
@@ -218,6 +312,16 @@
               "type": "named"
             },
             "type": "array"
+          },
+          "rest": {
+            "type": [
+              "array"
+            ],
+            "items": {
+              "type": [
+                "object"
+              ]
+            }
           }
         }
       }
@@ -232,6 +336,16 @@
               "type": "named"
             },
             "type": "array"
+          },
+          "rest": {
+            "type": [
+              "array"
+            ],
+            "items": {
+              "type": [
+                "integer"
+              ]
+            }
           }
         },
         "logprob": {
@@ -239,6 +353,11 @@
           "type": {
             "name": "Float64",
             "type": "named"
+          },
+          "rest": {
+            "type": [
+              "number"
+            ]
           }
         },
         "token": {
@@ -246,6 +365,11 @@
           "type": {
             "name": "String",
             "type": "named"
+          },
+          "rest": {
+            "type": [
+              "string"
+            ]
           }
         }
       }
@@ -256,6 +380,11 @@
           "type": {
             "name": "FunctionObject",
             "type": "named"
+          },
+          "rest": {
+            "type": [
+              "object"
+            ]
           }
         },
         "type": {
@@ -263,6 +392,11 @@
           "type": {
             "name": "ChatCompletionToolType",
             "type": "named"
+          },
+          "rest": {
+            "type": [
+              "string"
+            ]
           }
         }
       }
@@ -277,6 +411,13 @@
               "name": "Float64",
               "type": "named"
             }
+          },
+          "rest": {
+            "type": [
+              "number"
+            ],
+            "maximum": 2,
+            "minimum": -2
           }
         },
         "function_call": {
@@ -287,6 +428,9 @@
               "name": "JSON",
               "type": "named"
             }
+          },
+          "rest": {
+            "type": null
           }
         },
         "functions": {
@@ -300,6 +444,11 @@
               },
               "type": "array"
             }
+          },
+          "rest": {
+            "type": [
+              "array"
+            ]
           }
         },
         "logit_bias": {
@@ -310,6 +459,11 @@
               "name": "JSON",
               "type": "named"
             }
+          },
+          "rest": {
+            "type": [
+              "object"
+            ]
           }
         },
         "logprobs": {
@@ -320,6 +474,11 @@
               "name": "Boolean",
               "type": "named"
             }
+          },
+          "rest": {
+            "type": [
+              "boolean"
+            ]
           }
         },
         "max_tokens": {
@@ -330,6 +489,11 @@
               "name": "Int32",
               "type": "named"
             }
+          },
+          "rest": {
+            "type": [
+              "integer"
+            ]
           }
         },
         "messages": {
@@ -340,6 +504,11 @@
               "type": "named"
             },
             "type": "array"
+          },
+          "rest": {
+            "type": [
+              "array"
+            ]
           }
         },
         "model": {
@@ -347,6 +516,11 @@
           "type": {
             "name": "String",
             "type": "named"
+          },
+          "rest": {
+            "type": [
+              "string"
+            ]
           }
         },
         "n": {
@@ -357,6 +531,13 @@
               "name": "Int32",
               "type": "named"
             }
+          },
+          "rest": {
+            "type": [
+              "integer"
+            ],
+            "maximum": 128,
+            "minimum": 1
           }
         },
         "parallel_tool_calls": {
@@ -367,6 +548,11 @@
               "name": "Boolean",
               "type": "named"
             }
+          },
+          "rest": {
+            "type": [
+              "boolean"
+            ]
           }
         },
         "presence_penalty": {
@@ -377,6 +563,13 @@
               "name": "Float64",
               "type": "named"
             }
+          },
+          "rest": {
+            "type": [
+              "number"
+            ],
+            "maximum": 2,
+            "minimum": -2
           }
         },
         "response_format": {
@@ -387,6 +580,11 @@
               "name": "CreateChatCompletionRequestResponseFormat",
               "type": "named"
             }
+          },
+          "rest": {
+            "type": [
+              "object"
+            ]
           }
         },
         "seed": {
@@ -397,6 +595,13 @@
               "name": "Int32",
               "type": "named"
             }
+          },
+          "rest": {
+            "type": [
+              "integer"
+            ],
+            "maximum": 9223372036854776000,
+            "minimum": -9223372036854776000
           }
         },
         "service_tier": {
@@ -407,6 +612,11 @@
               "name": "CreateChatCompletionRequestServiceTier",
               "type": "named"
             }
+          },
+          "rest": {
+            "type": [
+              "string"
+            ]
           }
         },
         "stop": {
@@ -417,6 +627,9 @@
               "name": "JSON",
               "type": "named"
             }
+          },
+          "rest": {
+            "type": null
           }
         },
         "stream": {
@@ -427,6 +640,11 @@
               "name": "Boolean",
               "type": "named"
             }
+          },
+          "rest": {
+            "type": [
+              "boolean"
+            ]
           }
         },
         "stream_options": {
@@ -437,6 +655,11 @@
               "name": "ChatCompletionStreamOptions",
               "type": "named"
             }
+          },
+          "rest": {
+            "type": [
+              "object"
+            ]
           }
         },
         "temperature": {
@@ -447,6 +670,13 @@
               "name": "Float64",
               "type": "named"
             }
+          },
+          "rest": {
+            "type": [
+              "number"
+            ],
+            "maximum": 2,
+            "minimum": 0
           }
         },
         "tool_choice": {
@@ -457,6 +687,9 @@
               "name": "ChatCompletionToolChoiceOption",
               "type": "named"
             }
+          },
+          "rest": {
+            "type": null
           }
         },
         "tools": {
@@ -470,6 +703,11 @@
               },
               "type": "array"
             }
+          },
+          "rest": {
+            "type": [
+              "array"
+            ]
           }
         },
         "top_logprobs": {
@@ -480,6 +718,13 @@
               "name": "Int32",
               "type": "named"
             }
+          },
+          "rest": {
+            "type": [
+              "integer"
+            ],
+            "maximum": 20,
+            "minimum": 0
           }
         },
         "top_p": {
@@ -490,6 +735,13 @@
               "name": "Float64",
               "type": "named"
             }
+          },
+          "rest": {
+            "type": [
+              "number"
+            ],
+            "maximum": 1,
+            "minimum": 0
           }
         },
         "user": {
@@ -500,6 +752,11 @@
               "name": "String",
               "type": "named"
             }
+          },
+          "rest": {
+            "type": [
+              "string"
+            ]
           }
         }
       }
@@ -515,6 +772,11 @@
               "name": "CreateChatCompletionRequestResponseFormatType",
               "type": "named"
             }
+          },
+          "rest": {
+            "type": [
+              "string"
+            ]
           }
         }
       }
@@ -530,6 +792,16 @@
               "type": "named"
             },
             "type": "array"
+          },
+          "rest": {
+            "type": [
+              "array"
+            ],
+            "items": {
+              "type": [
+                "object"
+              ]
+            }
           }
         },
         "created": {
@@ -537,6 +809,11 @@
           "type": {
             "name": "Int32",
             "type": "named"
+          },
+          "rest": {
+            "type": [
+              "integer"
+            ]
           }
         },
         "id": {
@@ -544,6 +821,11 @@
           "type": {
             "name": "String",
             "type": "named"
+          },
+          "rest": {
+            "type": [
+              "string"
+            ]
           }
         },
         "model": {
@@ -551,6 +833,11 @@
           "type": {
             "name": "String",
             "type": "named"
+          },
+          "rest": {
+            "type": [
+              "string"
+            ]
           }
         },
         "object": {
@@ -558,6 +845,11 @@
           "type": {
             "name": "CreateChatCompletionResponseObject",
             "type": "named"
+          },
+          "rest": {
+            "type": [
+              "string"
+            ]
           }
         },
         "service_tier": {
@@ -568,6 +860,11 @@
               "name": "CreateChatCompletionResponseServiceTier",
               "type": "named"
             }
+          },
+          "rest": {
+            "type": [
+              "string"
+            ]
           }
         },
         "system_fingerprint": {
@@ -578,6 +875,11 @@
               "name": "String",
               "type": "named"
             }
+          },
+          "rest": {
+            "type": [
+              "string"
+            ]
           }
         }
       }
@@ -589,6 +891,11 @@
           "type": {
             "name": "CreateChatCompletionResponseChoicesFinishReason",
             "type": "named"
+          },
+          "rest": {
+            "type": [
+              "string"
+            ]
           }
         },
         "index": {
@@ -596,6 +903,11 @@
           "type": {
             "name": "Int32",
             "type": "named"
+          },
+          "rest": {
+            "type": [
+              "integer"
+            ]
           }
         },
         "logprobs": {
@@ -603,6 +915,11 @@
           "type": {
             "name": "CreateChatCompletionResponseChoicesLogprobs",
             "type": "named"
+          },
+          "rest": {
+            "type": [
+              "object"
+            ]
           }
         },
         "message": {
@@ -610,6 +927,11 @@
           "type": {
             "name": "ChatCompletionResponseMessage",
             "type": "named"
+          },
+          "rest": {
+            "type": [
+              "object"
+            ]
           }
         }
       }
@@ -625,6 +947,11 @@
               "type": "named"
             },
             "type": "array"
+          },
+          "rest": {
+            "type": [
+              "array"
+            ]
           }
         }
       }
@@ -639,6 +966,11 @@
               "name": "String",
               "type": "named"
             }
+          },
+          "rest": {
+            "type": [
+              "string"
+            ]
           }
         }
       }
@@ -653,6 +985,11 @@
               "name": "String",
               "type": "named"
             }
+          },
+          "rest": {
+            "type": [
+              "string"
+            ]
           }
         },
         "name": {
@@ -660,6 +997,11 @@
           "type": {
             "name": "String",
             "type": "named"
+          },
+          "rest": {
+            "type": [
+              "string"
+            ]
           }
         },
         "parameters": {
@@ -670,6 +1012,11 @@
               "name": "FunctionParameters",
               "type": "named"
             }
+          },
+          "rest": {
+            "type": [
+              "object"
+            ]
           }
         }
       }
@@ -684,6 +1031,11 @@
               "name": "Int32",
               "type": "named"
             }
+          },
+          "rest": {
+            "type": [
+              "integer"
+            ]
           }
         },
         "digest": {
@@ -694,6 +1046,11 @@
               "name": "String",
               "type": "named"
             }
+          },
+          "rest": {
+            "type": [
+              "string"
+            ]
           }
         },
         "status": {
@@ -704,6 +1061,11 @@
               "name": "String",
               "type": "named"
             }
+          },
+          "rest": {
+            "type": [
+              "string"
+            ]
           }
         },
         "total": {
@@ -714,53 +1076,23 @@
               "name": "Int32",
               "type": "named"
             }
+          },
+          "rest": {
+            "type": [
+              "integer"
+            ]
           }
         }
       }
     }
   },
-  "procedures": [
-    {
-      "request": {
-        "url": "/api/create",
-        "method": "post",
-        "requestBody": {
-          "contentType": "application/json",
-          "schema": {
-            "type": "CreateModelRequest"
-          }
-        },
-        "response": {
-          "contentType": "application/x-ndjson"
-        }
-      },
-      "arguments": {
-        "body": {
-          "description": "Request body of POST /api/create",
-          "type": {
-            "name": "CreateModelRequest",
-            "type": "named"
-          }
-        }
-      },
-      "name": "createModel",
-      "result_type": {
-        "element_type": {
-          "name": "ProgressResponse",
-          "type": "named"
-        },
-        "type": "array"
-      }
-    },
-    {
+  "procedures": {
+    "createChatCompletion": {
       "request": {
         "url": "/chat/completions",
         "method": "post",
         "requestBody": {
-          "contentType": "application/json",
-          "schema": {
-            "type": "CreateChatCompletionRequest"
-          }
+          "contentType": "application/json"
         },
         "response": {
           "contentType": "application/json"
@@ -772,6 +1104,9 @@
           "type": {
             "name": "CreateChatCompletionRequest",
             "type": "named"
+          },
+          "rest": {
+            "in": "body"
           }
         }
       },
@@ -781,8 +1116,41 @@
         "name": "CreateChatCompletionResponse",
         "type": "named"
       }
+    },
+    "createModel": {
+      "request": {
+        "url": "/api/create",
+        "method": "post",
+        "requestBody": {
+          "contentType": "application/json"
+        },
+        "response": {
+          "contentType": "application/x-ndjson"
+        }
+      },
+      "arguments": {
+        "body": {
+          "description": "Request body of POST /api/create",
+          "type": {
+            "name": "CreateModelRequest",
+            "type": "named"
+          },
+          "rest": {
+            "in": "body"
+          }
+        }
+      },
+      "description": "POST /api/create",
+      "name": "createModel",
+      "result_type": {
+        "element_type": {
+          "name": "ProgressResponse",
+          "type": "named"
+        },
+        "type": "array"
+      }
     }
-  ],
+  },
   "scalar_types": {
     "Boolean": {
       "aggregate_functions": {},

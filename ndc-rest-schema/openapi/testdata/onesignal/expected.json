@@ -28,45 +28,63 @@
     },
     "version": "1.2.2"
   },
-  "collections": [],
-  "functions": [
-    {
+  "functions": {
+    "get_notification": {
       "request": {
-        "url": "/notifications",
+        "url": "/notifications/{notification_id}",
         "method": "get",
-        "parameters": [
+        "security": [
           {
+            "app_key": []
+          }
+        ],
+        "response": {
+          "contentType": "application/json"
+        }
+      },
+      "arguments": {
+        "app_id": {
+          "type": {
+            "name": "String",
+            "type": "named"
+          },
+          "rest": {
             "name": "app_id",
             "in": "query",
             "schema": {
-              "type": "String"
-            }
-          },
-          {
-            "name": "kind",
-            "in": "query",
-            "schema": {
-              "type": "Int32",
-              "nullable": true
-            }
-          },
-          {
-            "name": "limit",
-            "in": "query",
-            "schema": {
-              "type": "Int32",
-              "nullable": true
-            }
-          },
-          {
-            "name": "offset",
-            "in": "query",
-            "schema": {
-              "type": "Int32",
-              "nullable": true
+              "type": [
+                "string"
+              ]
             }
           }
-        ],
+        },
+        "notification_id": {
+          "type": {
+            "name": "String",
+            "type": "named"
+          },
+          "rest": {
+            "name": "notification_id",
+            "in": "path",
+            "schema": {
+              "type": [
+                "string"
+              ]
+            }
+          }
+        }
+      },
+      "description": "View notification",
+      "name": "get_notification",
+      "result_type": {
+        "name": "NotificationWithMeta",
+        "type": "named"
+      }
+    },
+    "get_notifications": {
+      "request": {
+        "url": "/notifications",
+        "method": "get",
         "security": [
           {
             "app_key": []
@@ -82,6 +100,15 @@
           "type": {
             "name": "String",
             "type": "named"
+          },
+          "rest": {
+            "name": "app_id",
+            "in": "query",
+            "schema": {
+              "type": [
+                "string"
+              ]
+            }
           }
         },
         "kind": {
@@ -91,6 +118,15 @@
             "underlying_type": {
               "name": "Int32",
               "type": "named"
+            }
+          },
+          "rest": {
+            "name": "kind",
+            "in": "query",
+            "schema": {
+              "type": [
+                "integer"
+              ]
             }
           }
         },
@@ -102,6 +138,15 @@
               "name": "Int32",
               "type": "named"
             }
+          },
+          "rest": {
+            "name": "limit",
+            "in": "query",
+            "schema": {
+              "type": [
+                "integer"
+              ]
+            }
           }
         },
         "offset": {
@@ -112,6 +157,15 @@
               "name": "Int32",
               "type": "named"
             }
+          },
+          "rest": {
+            "name": "offset",
+            "in": "query",
+            "schema": {
+              "type": [
+                "integer"
+              ]
+            }
           }
         }
       },
@@ -121,58 +175,8 @@
         "name": "NotificationSlice",
         "type": "named"
       }
-    },
-    {
-      "request": {
-        "url": "/notifications/{notification_id}",
-        "method": "get",
-        "parameters": [
-          {
-            "name": "notification_id",
-            "in": "path",
-            "schema": {
-              "type": "String"
-            }
-          },
-          {
-            "name": "app_id",
-            "in": "query",
-            "schema": {
-              "type": "String"
-            }
-          }
-        ],
-        "security": [
-          {
-            "app_key": []
-          }
-        ],
-        "response": {
-          "contentType": "application/json"
-        }
-      },
-      "arguments": {
-        "app_id": {
-          "type": {
-            "name": "String",
-            "type": "named"
-          }
-        },
-        "notification_id": {
-          "type": {
-            "name": "String",
-            "type": "named"
-          }
-        }
-      },
-      "description": "View notification",
-      "name": "get_notification",
-      "result_type": {
-        "name": "NotificationWithMeta",
-        "type": "named"
-      }
     }
-  ],
+  },
   "object_types": {
     "CancelNotificationSuccessResponse": {
       "fields": {
@@ -183,6 +187,11 @@
               "name": "Boolean",
               "type": "named"
             }
+          },
+          "rest": {
+            "type": [
+              "boolean"
+            ]
           }
         }
       }
@@ -196,6 +205,9 @@
               "name": "Notification200Errors",
               "type": "named"
             }
+          },
+          "rest": {
+            "type": null
           }
         },
         "external_id": {
@@ -205,6 +217,11 @@
               "name": "String",
               "type": "named"
             }
+          },
+          "rest": {
+            "type": [
+              "string"
+            ]
           }
         },
         "id": {
@@ -214,6 +231,11 @@
               "name": "String",
               "type": "named"
             }
+          },
+          "rest": {
+            "type": [
+              "string"
+            ]
           }
         },
         "recipients": {
@@ -223,6 +245,11 @@
               "name": "Int32",
               "type": "named"
             }
+          },
+          "rest": {
+            "type": [
+              "integer"
+            ]
           }
         }
       }
@@ -237,6 +264,11 @@
               "name": "Int32",
               "type": "named"
             }
+          },
+          "rest": {
+            "type": [
+              "integer"
+            ]
           }
         },
         "errored": {
@@ -247,6 +279,11 @@
               "name": "Int32",
               "type": "named"
             }
+          },
+          "rest": {
+            "type": [
+              "integer"
+            ]
           }
         },
         "failed": {
@@ -257,6 +294,11 @@
               "name": "Int32",
               "type": "named"
             }
+          },
+          "rest": {
+            "type": [
+              "integer"
+            ]
           }
         },
         "received": {
@@ -267,6 +309,11 @@
               "name": "Int32",
               "type": "named"
             }
+          },
+          "rest": {
+            "type": [
+              "integer"
+            ]
           }
         },
         "successful": {
@@ -277,6 +324,11 @@
               "name": "Int32",
               "type": "named"
             }
+          },
+          "rest": {
+            "type": [
+              "integer"
+            ]
           }
         }
       }
@@ -288,6 +340,11 @@
           "type": {
             "name": "String",
             "type": "named"
+          },
+          "rest": {
+            "type": [
+              "string"
+            ]
           }
         },
         "key": {
@@ -298,6 +355,11 @@
               "name": "String",
               "type": "named"
             }
+          },
+          "rest": {
+            "type": [
+              "string"
+            ]
           }
         },
         "relation": {
@@ -305,6 +367,11 @@
           "type": {
             "name": "FilterRelation",
             "type": "named"
+          },
+          "rest": {
+            "type": [
+              "string"
+            ]
           }
         },
         "value": {
@@ -315,6 +382,11 @@
               "name": "String",
               "type": "named"
             }
+          },
+          "rest": {
+            "type": [
+              "string"
+            ]
           }
         }
       }
@@ -328,6 +400,11 @@
               "name": "String",
               "type": "named"
             }
+          },
+          "rest": {
+            "type": [
+              "string"
+            ]
           }
         },
         "email": {
@@ -338,6 +415,11 @@
               "name": "String",
               "type": "named"
             }
+          },
+          "rest": {
+            "type": [
+              "string"
+            ]
           }
         },
         "events": {
@@ -348,6 +430,11 @@
               "name": "NotificationsEvents",
               "type": "named"
             }
+          },
+          "rest": {
+            "type": [
+              "string"
+            ]
           }
         }
       }
@@ -361,6 +448,11 @@
               "name": "String",
               "type": "named"
             }
+          },
+          "rest": {
+            "type": [
+              "string"
+            ]
           }
         },
         "success": {
@@ -370,12 +462,105 @@
               "name": "Boolean",
               "type": "named"
             }
+          },
+          "rest": {
+            "type": [
+              "boolean"
+            ]
           }
         }
       }
     },
     "NotificationInput": {
       "fields": {
+        "contents": {
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "StringMap",
+              "type": "named"
+            }
+          },
+          "rest": {
+            "type": [
+              "object"
+            ]
+          }
+        },
+        "custom_data": {
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "JSON",
+              "type": "named"
+            }
+          },
+          "rest": {
+            "type": [
+              "object"
+            ]
+          }
+        },
+        "data": {
+          "description": "Channel: Push Notifications\nPlatform: Huawei\nA custom map of data that is passed back to your app. Same as using Additional Data within the dashboard. Can use up to 2048 bytes of data.\nExample: {\"abc\": 123, \"foo\": \"bar\", \"event_performed\": true, \"amount\": 12.1}\n",
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "JSON",
+              "type": "named"
+            }
+          },
+          "rest": {
+            "type": [
+              "object"
+            ]
+          }
+        },
+        "filters": {
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "element_type": {
+                "name": "Filter",
+                "type": "named"
+              },
+              "type": "array"
+            }
+          },
+          "rest": {
+            "type": [
+              "array"
+            ]
+          }
+        },
+        "headings": {
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "StringMap",
+              "type": "named"
+            }
+          },
+          "rest": {
+            "type": [
+              "object"
+            ]
+          }
+        },
+        "id": {
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "String",
+              "type": "named"
+            }
+          },
+          "rest": {
+            "type": [
+              "string"
+            ]
+          }
+        },
         "send_after": {
           "type": {
             "type": "nullable",
@@ -383,6 +568,26 @@
               "name": "TimestampTZ",
               "type": "named"
             }
+          },
+          "rest": {
+            "type": [
+              "string"
+            ],
+            "format": "date-time"
+          }
+        },
+        "subtitle": {
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "StringMap",
+              "type": "named"
+            }
+          },
+          "rest": {
+            "type": [
+              "object"
+            ]
           }
         }
       }
@@ -396,6 +601,11 @@
               "name": "Int32",
               "type": "named"
             }
+          },
+          "rest": {
+            "type": [
+              "integer"
+            ]
           }
         },
         "notifications": {
@@ -408,6 +618,11 @@
               },
               "type": "array"
             }
+          },
+          "rest": {
+            "type": [
+              "array"
+            ]
           }
         },
         "offset": {
@@ -417,6 +632,11 @@
               "name": "Int32",
               "type": "named"
             }
+          },
+          "rest": {
+            "type": [
+              "integer"
+            ]
           }
         },
         "total_count": {
@@ -426,6 +646,11 @@
               "name": "Int32",
               "type": "named"
             }
+          },
+          "rest": {
+            "type": [
+              "integer"
+            ]
           }
         }
       }
@@ -440,6 +665,12 @@
               "name": "Int64",
               "type": "named"
             }
+          },
+          "rest": {
+            "type": [
+              "integer"
+            ],
+            "format": "int64"
           }
         },
         "contents": {
@@ -449,6 +680,11 @@
               "name": "StringMap",
               "type": "named"
             }
+          },
+          "rest": {
+            "type": [
+              "object"
+            ]
           }
         },
         "converted": {
@@ -459,24 +695,11 @@
               "name": "Int32",
               "type": "named"
             }
-          }
-        },
-        "custom_data": {
-          "type": {
-            "type": "nullable",
-            "underlying_type": {
-              "name": "JSON",
-              "type": "named"
-            }
-          }
-        },
-        "data": {
-          "type": {
-            "type": "nullable",
-            "underlying_type": {
-              "name": "JSON",
-              "type": "named"
-            }
+          },
+          "rest": {
+            "type": [
+              "integer"
+            ]
           }
         },
         "errored": {
@@ -487,6 +710,11 @@
               "name": "Int32",
               "type": "named"
             }
+          },
+          "rest": {
+            "type": [
+              "integer"
+            ]
           }
         },
         "excluded_segments": {
@@ -499,6 +727,16 @@
               },
               "type": "array"
             }
+          },
+          "rest": {
+            "type": [
+              "array"
+            ],
+            "items": {
+              "type": [
+                "string"
+              ]
+            }
           }
         },
         "failed": {
@@ -509,6 +747,11 @@
               "name": "Int32",
               "type": "named"
             }
+          },
+          "rest": {
+            "type": [
+              "integer"
+            ]
           }
         },
         "filters": {
@@ -521,6 +764,11 @@
               },
               "type": "array"
             }
+          },
+          "rest": {
+            "type": [
+              "array"
+            ]
           }
         },
         "headings": {
@@ -530,6 +778,11 @@
               "name": "StringMap",
               "type": "named"
             }
+          },
+          "rest": {
+            "type": [
+              "object"
+            ]
           }
         },
         "id": {
@@ -539,6 +792,11 @@
               "name": "String",
               "type": "named"
             }
+          },
+          "rest": {
+            "type": [
+              "string"
+            ]
           }
         },
         "include_player_ids": {
@@ -550,6 +808,16 @@
                 "type": "named"
               },
               "type": "array"
+            }
+          },
+          "rest": {
+            "type": [
+              "array"
+            ],
+            "items": {
+              "type": [
+                "string"
+              ]
             }
           }
         },
@@ -563,6 +831,16 @@
               },
               "type": "array"
             }
+          },
+          "rest": {
+            "type": [
+              "array"
+            ],
+            "items": {
+              "type": [
+                "string"
+              ]
+            }
           }
         },
         "outcomes": {
@@ -575,6 +853,11 @@
               },
               "type": "array"
             }
+          },
+          "rest": {
+            "type": [
+              "array"
+            ]
           }
         },
         "platform_delivery_stats": {
@@ -585,6 +868,11 @@
               "name": "PlatformDeliveryData",
               "type": "named"
             }
+          },
+          "rest": {
+            "type": [
+              "object"
+            ]
           }
         },
         "queued_at": {
@@ -595,6 +883,12 @@
               "name": "Int64",
               "type": "named"
             }
+          },
+          "rest": {
+            "type": [
+              "integer"
+            ],
+            "format": "int64"
           }
         },
         "received": {
@@ -605,6 +899,11 @@
               "name": "Int32",
               "type": "named"
             }
+          },
+          "rest": {
+            "type": [
+              "integer"
+            ]
           }
         },
         "remaining": {
@@ -615,6 +914,11 @@
               "name": "Int32",
               "type": "named"
             }
+          },
+          "rest": {
+            "type": [
+              "integer"
+            ]
           }
         },
         "send_after": {
@@ -625,6 +929,12 @@
               "name": "Int64",
               "type": "named"
             }
+          },
+          "rest": {
+            "type": [
+              "integer"
+            ],
+            "format": "int64"
           }
         },
         "subtitle": {
@@ -634,6 +944,11 @@
               "name": "StringMap",
               "type": "named"
             }
+          },
+          "rest": {
+            "type": [
+              "object"
+            ]
           }
         },
         "successful": {
@@ -644,6 +959,11 @@
               "name": "Int32",
               "type": "named"
             }
+          },
+          "rest": {
+            "type": [
+              "integer"
+            ]
           }
         },
         "target_channel": {
@@ -653,6 +973,11 @@
               "name": "PlayerNotificationTargetTargetChannel",
               "type": "named"
             }
+          },
+          "rest": {
+            "type": [
+              "string"
+            ]
           }
         },
         "throttle_rate_per_minute": {
@@ -663,6 +988,11 @@
               "name": "Int32",
               "type": "named"
             }
+          },
+          "rest": {
+            "type": [
+              "integer"
+            ]
           }
         }
       }
@@ -673,18 +1003,33 @@
           "type": {
             "name": "OutcomeDataAggregation",
             "type": "named"
+          },
+          "rest": {
+            "type": [
+              "string"
+            ]
           }
         },
         "id": {
           "type": {
             "name": "String",
             "type": "named"
+          },
+          "rest": {
+            "type": [
+              "string"
+            ]
           }
         },
         "value": {
           "type": {
             "name": "Int32",
             "type": "named"
+          },
+          "rest": {
+            "type": [
+              "integer"
+            ]
           }
         }
       }
@@ -699,6 +1044,11 @@
               "name": "DeliveryData",
               "type": "named"
             }
+          },
+          "rest": {
+            "type": [
+              "object"
+            ]
           }
         },
         "chrome_web_push": {
@@ -708,6 +1058,11 @@
               "name": "DeliveryData",
               "type": "named"
             }
+          },
+          "rest": {
+            "type": [
+              "object"
+            ]
           }
         },
         "edge_web_push": {
@@ -717,6 +1072,11 @@
               "name": "DeliveryData",
               "type": "named"
             }
+          },
+          "rest": {
+            "type": [
+              "object"
+            ]
           }
         },
         "email": {
@@ -726,6 +1086,11 @@
               "name": "DeliveryData",
               "type": "named"
             }
+          },
+          "rest": {
+            "type": [
+              "object"
+            ]
           }
         },
         "firefox_web_push": {
@@ -735,6 +1100,11 @@
               "name": "DeliveryData",
               "type": "named"
             }
+          },
+          "rest": {
+            "type": [
+              "object"
+            ]
           }
         },
         "ios": {
@@ -744,6 +1114,11 @@
               "name": "DeliveryData",
               "type": "named"
             }
+          },
+          "rest": {
+            "type": [
+              "object"
+            ]
           }
         },
         "safari_web_push": {
@@ -753,6 +1128,11 @@
               "name": "DeliveryData",
               "type": "named"
             }
+          },
+          "rest": {
+            "type": [
+              "object"
+            ]
           }
         },
         "sms": {
@@ -762,6 +1142,11 @@
               "name": "DeliveryData",
               "type": "named"
             }
+          },
+          "rest": {
+            "type": [
+              "object"
+            ]
           }
         }
       }
@@ -776,67 +1161,21 @@
               "name": "String",
               "type": "named"
             }
+          },
+          "rest": {
+            "type": [
+              "string"
+            ]
           }
         }
       }
     }
   },
-  "procedures": [
-    {
-      "request": {
-        "url": "/notifications",
-        "method": "post",
-        "security": [
-          {
-            "app_key": []
-          }
-        ],
-        "requestBody": {
-          "contentType": "application/json",
-          "schema": {
-            "type": "NotificationInput"
-          }
-        },
-        "response": {
-          "contentType": "application/json"
-        }
-      },
-      "arguments": {
-        "body": {
-          "description": "Request body of POST /notifications",
-          "type": {
-            "name": "NotificationInput",
-            "type": "named"
-          }
-        }
-      },
-      "description": "Create notification",
-      "name": "create_notification",
-      "result_type": {
-        "name": "CreateNotificationSuccessResponse",
-        "type": "named"
-      }
-    },
-    {
+  "procedures": {
+    "cancel_notification": {
       "request": {
         "url": "/notifications/{notification_id}",
         "method": "delete",
-        "parameters": [
-          {
-            "name": "notification_id",
-            "in": "path",
-            "schema": {
-              "type": "String"
-            }
-          },
-          {
-            "name": "app_id",
-            "in": "query",
-            "schema": {
-              "type": "String"
-            }
-          }
-        ],
         "security": [
           {
             "app_key": []
@@ -851,12 +1190,30 @@
           "type": {
             "name": "String",
             "type": "named"
+          },
+          "rest": {
+            "name": "app_id",
+            "in": "query",
+            "schema": {
+              "type": [
+                "string"
+              ]
+            }
           }
         },
         "notification_id": {
           "type": {
             "name": "String",
             "type": "named"
+          },
+          "rest": {
+            "name": "notification_id",
+            "in": "path",
+            "schema": {
+              "type": [
+                "string"
+              ]
+            }
           }
         }
       },
@@ -867,43 +1224,52 @@
         "type": "named"
       }
     },
-    {
+    "create_notification": {
       "request": {
-        "url": "/notifications/{notification_id}/history",
+        "url": "/notifications",
         "method": "post",
-        "parameters": [
-          {
-            "name": "notification_id",
-            "in": "path",
-            "schema": {
-              "type": "String"
-            }
-          }
-        ],
         "security": [
           {
             "app_key": []
           }
         ],
         "requestBody": {
-          "contentType": "application/json",
-          "schema": {
-            "type": "object",
-            "properties": {
-              "app_id": {
-                "type": "String",
-                "nullable": true
-              },
-              "email": {
-                "type": "String",
-                "nullable": true
-              },
-              "events": {
-                "type": "NotificationsEvents",
-                "nullable": true
-              }
-            }
+          "contentType": "application/json"
+        },
+        "response": {
+          "contentType": "application/json"
+        }
+      },
+      "arguments": {
+        "body": {
+          "description": "Request body of POST /notifications",
+          "type": {
+            "name": "NotificationInput",
+            "type": "named"
+          },
+          "rest": {
+            "in": "body"
           }
+        }
+      },
+      "description": "Create notification",
+      "name": "create_notification",
+      "result_type": {
+        "name": "CreateNotificationSuccessResponse",
+        "type": "named"
+      }
+    },
+    "get_notification_history": {
+      "request": {
+        "url": "/notifications/{notification_id}/history",
+        "method": "post",
+        "security": [
+          {
+            "app_key": []
+          }
+        ],
+        "requestBody": {
+          "contentType": "application/json"
         },
         "response": {
           "contentType": "application/json"
@@ -915,6 +1281,9 @@
           "type": {
             "name": "GetNotificationHistoryBody",
             "type": "named"
+          },
+          "rest": {
+            "in": "body"
           }
         },
         "notification_id": {
@@ -922,6 +1291,15 @@
           "type": {
             "name": "String",
             "type": "named"
+          },
+          "rest": {
+            "name": "notification_id",
+            "in": "path",
+            "schema": {
+              "type": [
+                "string"
+              ]
+            }
           }
         }
       },
@@ -932,7 +1310,7 @@
         "type": "named"
       }
     }
-  ],
+  },
   "scalar_types": {
     "Boolean": {
       "aggregate_functions": {},

@@ -8,6 +8,8 @@ import (
 	"github.com/invopop/jsonschema"
 )
 
+const BodyKey = "body"
+
 // SchemaSpecType represents the spec enum of schema
 type SchemaSpecType string
 

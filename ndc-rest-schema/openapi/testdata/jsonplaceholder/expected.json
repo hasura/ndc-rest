@@ -14,248 +14,11 @@
     },
     "version": "1.0.0"
   },
-  "collections": [],
-  "functions": [
-    {
-      "request": {
-        "url": "/posts",
-        "method": "get",
-        "parameters": [
-          {
-            "name": "id",
-            "in": "query",
-            "schema": {
-              "type": "Int32",
-              "nullable": true
-            }
-          },
-          {
-            "name": "userId",
-            "in": "query",
-            "schema": {
-              "type": "Int32",
-              "nullable": true
-            }
-          }
-        ],
-        "response": {
-          "contentType": "application/json"
-        }
-      },
-      "arguments": {
-        "id": {
-          "description": "Filter by post ID",
-          "type": {
-            "type": "nullable",
-            "underlying_type": {
-              "name": "Int32",
-              "type": "named"
-            }
-          }
-        },
-        "userId": {
-          "description": "Filter by user ID",
-          "type": {
-            "type": "nullable",
-            "underlying_type": {
-              "name": "Int32",
-              "type": "named"
-            }
-          }
-        }
-      },
-      "description": "Get all available posts",
-      "name": "getPosts",
-      "result_type": {
-        "element_type": {
-          "name": "Post",
-          "type": "named"
-        },
-        "type": "array"
-      }
-    },
-    {
-      "request": {
-        "url": "/posts/{id}",
-        "method": "get",
-        "parameters": [
-          {
-            "name": "id",
-            "in": "path",
-            "schema": {
-              "type": "Int32"
-            }
-          }
-        ],
-        "response": {
-          "contentType": "application/json"
-        }
-      },
-      "arguments": {
-        "id": {
-          "description": "The ID of the post to retrieve",
-          "type": {
-            "name": "Int32",
-            "type": "named"
-          }
-        }
-      },
-      "description": "Get specific post",
-      "name": "getPostById",
-      "result_type": {
-        "name": "Post",
-        "type": "named"
-      }
-    },
-    {
-      "request": {
-        "url": "/posts/{id}/comments",
-        "method": "get",
-        "parameters": [
-          {
-            "name": "id",
-            "in": "path",
-            "schema": {
-              "type": "Int32"
-            }
-          }
-        ],
-        "response": {
-          "contentType": "application/json"
-        }
-      },
-      "arguments": {
-        "id": {
-          "description": "post id",
-          "type": {
-            "name": "Int32",
-            "type": "named"
-          }
-        }
-      },
-      "description": "Get comments for a specific post",
-      "name": "getPostsIdComments",
-      "result_type": {
-        "element_type": {
-          "name": "Comment",
-          "type": "named"
-        },
-        "type": "array"
-      }
-    },
-    {
-      "request": {
-        "url": "/comments",
-        "method": "get",
-        "parameters": [
-          {
-            "name": "id",
-            "in": "query",
-            "schema": {
-              "type": "Int32",
-              "nullable": true
-            }
-          },
-          {
-            "name": "postId",
-            "in": "query",
-            "schema": {
-              "type": "Int32",
-              "nullable": true
-            }
-          }
-        ],
-        "response": {
-          "contentType": "application/json"
-        }
-      },
-      "arguments": {
-        "id": {
-          "description": "Filter by comment ID",
-          "type": {
-            "type": "nullable",
-            "underlying_type": {
-              "name": "Int32",
-              "type": "named"
-            }
-          }
-        },
-        "postId": {
-          "description": "Filter by post ID",
-          "type": {
-            "type": "nullable",
-            "underlying_type": {
-              "name": "Int32",
-              "type": "named"
-            }
-          }
-        }
-      },
-      "description": "Get all available comments",
-      "name": "getComments",
-      "result_type": {
-        "element_type": {
-          "name": "Comment",
-          "type": "named"
-        },
-        "type": "array"
-      }
-    },
-    {
-      "request": {
-        "url": "/comments/{id}",
-        "method": "get",
-        "parameters": [
-          {
-            "name": "id",
-            "in": "path",
-            "schema": {
-              "type": "Int32"
-            }
-          }
-        ],
-        "response": {
-          "contentType": "application/json"
-        }
-      },
-      "arguments": {
-        "id": {
-          "description": "The ID of the comment to retrieve",
-          "type": {
-            "name": "Int32",
-            "type": "named"
-          }
-        }
-      },
-      "description": "Get specific comment",
-      "name": "getComment",
-      "result_type": {
-        "name": "Comment",
-        "type": "named"
-      }
-    },
-    {
+  "functions": {
+    "getAlbums": {
       "request": {
         "url": "/albums",
         "method": "get",
-        "parameters": [
-          {
-            "name": "id",
-            "in": "query",
-            "schema": {
-              "type": "Int32",
-              "nullable": true
-            }
-          },
-          {
-            "name": "userId",
-            "in": "query",
-            "schema": {
-              "type": "Int32",
-              "nullable": true
-            }
-          }
-        ],
         "response": {
           "contentType": "application/json"
         }
@@ -269,6 +32,15 @@
               "name": "Int32",
               "type": "named"
             }
+          },
+          "rest": {
+            "name": "id",
+            "in": "query",
+            "schema": {
+              "type": [
+                "integer"
+              ]
+            }
           }
         },
         "userId": {
@@ -278,6 +50,15 @@
             "underlying_type": {
               "name": "Int32",
               "type": "named"
+            }
+          },
+          "rest": {
+            "name": "userId",
+            "in": "query",
+            "schema": {
+              "type": [
+                "integer"
+              ]
             }
           }
         }
@@ -292,19 +73,10 @@
         "type": "array"
       }
     },
-    {
+    "getAlbumsId": {
       "request": {
         "url": "/albums/{id}",
         "method": "get",
-        "parameters": [
-          {
-            "name": "id",
-            "in": "path",
-            "schema": {
-              "type": "Int32"
-            }
-          }
-        ],
         "response": {
           "contentType": "application/json"
         }
@@ -315,6 +87,15 @@
           "type": {
             "name": "Int32",
             "type": "named"
+          },
+          "rest": {
+            "name": "id",
+            "in": "path",
+            "schema": {
+              "type": [
+                "integer"
+              ]
+            }
           }
         }
       },
@@ -325,19 +106,10 @@
         "type": "named"
       }
     },
-    {
+    "getAlbumsIdPhotos": {
       "request": {
         "url": "/albums/{id}/photos",
         "method": "get",
-        "parameters": [
-          {
-            "name": "id",
-            "in": "path",
-            "schema": {
-              "type": "Int32"
-            }
-          }
-        ],
         "response": {
           "contentType": "application/json"
         }
@@ -348,6 +120,15 @@
           "type": {
             "name": "Int32",
             "type": "named"
+          },
+          "rest": {
+            "name": "id",
+            "in": "path",
+            "schema": {
+              "type": [
+                "integer"
+              ]
+            }
           }
         }
       },
@@ -361,28 +142,134 @@
         "type": "array"
       }
     },
-    {
+    "getComment": {
       "request": {
-        "url": "/photos",
+        "url": "/comments/{id}",
         "method": "get",
-        "parameters": [
-          {
+        "response": {
+          "contentType": "application/json"
+        }
+      },
+      "arguments": {
+        "id": {
+          "description": "The ID of the comment to retrieve",
+          "type": {
+            "name": "Int32",
+            "type": "named"
+          },
+          "rest": {
+            "name": "id",
+            "in": "path",
+            "schema": {
+              "type": [
+                "integer"
+              ]
+            }
+          }
+        }
+      },
+      "description": "Get specific comment",
+      "name": "getComment",
+      "result_type": {
+        "name": "Comment",
+        "type": "named"
+      }
+    },
+    "getComments": {
+      "request": {
+        "url": "/comments",
+        "method": "get",
+        "response": {
+          "contentType": "application/json"
+        }
+      },
+      "arguments": {
+        "id": {
+          "description": "Filter by comment ID",
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "Int32",
+              "type": "named"
+            }
+          },
+          "rest": {
             "name": "id",
             "in": "query",
             "schema": {
-              "type": "Int32",
-              "nullable": true
-            }
-          },
-          {
-            "name": "albumId",
-            "in": "query",
-            "schema": {
-              "type": "Int32",
-              "nullable": true
+              "type": [
+                "integer"
+              ]
             }
           }
-        ],
+        },
+        "postId": {
+          "description": "Filter by post ID",
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "Int32",
+              "type": "named"
+            }
+          },
+          "rest": {
+            "name": "postId",
+            "in": "query",
+            "schema": {
+              "type": [
+                "integer"
+              ]
+            }
+          }
+        }
+      },
+      "description": "Get all available comments",
+      "name": "getComments",
+      "result_type": {
+        "element_type": {
+          "name": "Comment",
+          "type": "named"
+        },
+        "type": "array"
+      }
+    },
+    "getPhoto": {
+      "request": {
+        "url": "/photos/{id}",
+        "method": "get",
+        "response": {
+          "contentType": "application/json"
+        }
+      },
+      "arguments": {
+        "id": {
+          "description": "The ID of the photo to retrieve",
+          "type": {
+            "name": "Int32",
+            "type": "named"
+          },
+          "rest": {
+            "name": "id",
+            "in": "path",
+            "schema": {
+              "type": [
+                "integer"
+              ]
+            }
+          }
+        }
+      },
+      "description": "Get specific photo",
+      "name": "getPhoto",
+      "result_type": {
+        "name": "Photo",
+        "type": "named"
+      }
+    },
+    "getPhotos": {
+      "request": {
+        "url": "/photos",
+        "method": "get",
         "response": {
           "contentType": "application/json"
         }
@@ -396,6 +283,15 @@
               "name": "Int32",
               "type": "named"
             }
+          },
+          "rest": {
+            "name": "albumId",
+            "in": "query",
+            "schema": {
+              "type": [
+                "integer"
+              ]
+            }
           }
         },
         "id": {
@@ -405,6 +301,15 @@
             "underlying_type": {
               "name": "Int32",
               "type": "named"
+            }
+          },
+          "rest": {
+            "name": "id",
+            "in": "query",
+            "schema": {
+              "type": [
+                "integer"
+              ]
             }
           }
         }
@@ -419,73 +324,64 @@
         "type": "array"
       }
     },
-    {
+    "getPostById": {
       "request": {
-        "url": "/photos/{id}",
+        "url": "/posts/{id}",
         "method": "get",
-        "parameters": [
-          {
-            "name": "id",
-            "in": "path",
-            "schema": {
-              "type": "Int32"
-            }
-          }
-        ],
         "response": {
           "contentType": "application/json"
         }
       },
       "arguments": {
         "id": {
-          "description": "The ID of the photo to retrieve",
+          "description": "The ID of the post to retrieve",
           "type": {
             "name": "Int32",
             "type": "named"
+          },
+          "rest": {
+            "name": "id",
+            "in": "path",
+            "schema": {
+              "type": [
+                "integer"
+              ]
+            }
           }
         }
       },
-      "description": "Get specific photo",
-      "name": "getPhoto",
+      "description": "Get specific post",
+      "name": "getPostById",
       "result_type": {
-        "name": "Photo",
+        "name": "Post",
         "type": "named"
       }
     },
-    {
+    "getPosts": {
       "request": {
-        "url": "/todos",
+        "url": "/posts",
         "method": "get",
-        "parameters": [
-          {
-            "name": "id",
-            "in": "query",
-            "schema": {
-              "type": "Int32",
-              "nullable": true
-            }
-          },
-          {
-            "name": "userId",
-            "in": "query",
-            "schema": {
-              "type": "Int32",
-              "nullable": true
-            }
-          }
-        ],
         "response": {
           "contentType": "application/json"
         }
       },
       "arguments": {
         "id": {
-          "description": "Filter by todo ID",
+          "description": "Filter by post ID",
           "type": {
             "type": "nullable",
             "underlying_type": {
               "name": "Int32",
               "type": "named"
+            }
+          },
+          "rest": {
+            "name": "id",
+            "in": "query",
+            "schema": {
+              "type": [
+                "integer"
+              ]
             }
           }
         },
@@ -497,144 +393,65 @@
               "name": "Int32",
               "type": "named"
             }
-          }
-        }
-      },
-      "description": "Get all available todos",
-      "name": "getTodos",
-      "result_type": {
-        "element_type": {
-          "name": "Todo",
-          "type": "named"
-        },
-        "type": "array"
-      }
-    },
-    {
-      "request": {
-        "url": "/todos/{id}",
-        "method": "get",
-        "parameters": [
-          {
-            "name": "id",
-            "in": "path",
-            "schema": {
-              "type": "Int32"
-            }
-          }
-        ],
-        "response": {
-          "contentType": "application/json"
-        }
-      },
-      "arguments": {
-        "id": {
-          "description": "The ID of the todo to retrieve",
-          "type": {
-            "name": "Int32",
-            "type": "named"
-          }
-        }
-      },
-      "description": "Get specific todo",
-      "name": "getTodo",
-      "result_type": {
-        "name": "Todo",
-        "type": "named"
-      }
-    },
-    {
-      "request": {
-        "url": "/users",
-        "method": "get",
-        "parameters": [
-          {
-            "name": "id",
-            "in": "query",
-            "schema": {
-              "type": "Int32",
-              "nullable": true
-            }
           },
-          {
-            "name": "email",
+          "rest": {
+            "name": "userId",
             "in": "query",
             "schema": {
-              "type": "Int32",
-              "nullable": true
-            }
-          }
-        ],
-        "response": {
-          "contentType": "application/json"
-        }
-      },
-      "arguments": {
-        "email": {
-          "description": "Filter by user email address",
-          "type": {
-            "type": "nullable",
-            "underlying_type": {
-              "name": "Int32",
-              "type": "named"
-            }
-          }
-        },
-        "id": {
-          "description": "Filter by user ID",
-          "type": {
-            "type": "nullable",
-            "underlying_type": {
-              "name": "Int32",
-              "type": "named"
+              "type": [
+                "integer"
+              ]
             }
           }
         }
       },
-      "description": "Get all available users",
-      "name": "getUsers",
+      "description": "Get all available posts",
+      "name": "getPosts",
       "result_type": {
         "element_type": {
-          "name": "User",
+          "name": "Post",
           "type": "named"
         },
         "type": "array"
       }
     },
-    {
+    "getPostsIdComments": {
       "request": {
-        "url": "/users/{id}",
+        "url": "/posts/{id}/comments",
         "method": "get",
-        "parameters": [
-          {
-            "name": "id",
-            "in": "path",
-            "schema": {
-              "type": "Int32"
-            }
-          }
-        ],
         "response": {
           "contentType": "application/json"
         }
       },
       "arguments": {
         "id": {
-          "description": "The ID of the user to retrieve",
+          "description": "post id",
           "type": {
             "name": "Int32",
             "type": "named"
+          },
+          "rest": {
+            "name": "id",
+            "in": "path",
+            "schema": {
+              "type": [
+                "integer"
+              ]
+            }
           }
         }
       },
-      "description": "Get specific user",
-      "name": "getUser",
+      "description": "Get comments for a specific post",
+      "name": "getPostsIdComments",
       "result_type": {
-        "name": "User",
-        "type": "named"
+        "element_type": {
+          "name": "Comment",
+          "type": "named"
+        },
+        "type": "array"
       }
     },
-    {
+    "getTest": {
       "request": {
         "url": "/v1/test",
         "method": "get",
@@ -649,8 +466,190 @@
         "name": "User",
         "type": "named"
       }
+    },
+    "getTodo": {
+      "request": {
+        "url": "/todos/{id}",
+        "method": "get",
+        "response": {
+          "contentType": "application/json"
+        }
+      },
+      "arguments": {
+        "id": {
+          "description": "The ID of the todo to retrieve",
+          "type": {
+            "name": "Int32",
+            "type": "named"
+          },
+          "rest": {
+            "name": "id",
+            "in": "path",
+            "schema": {
+              "type": [
+                "integer"
+              ]
+            }
+          }
+        }
+      },
+      "description": "Get specific todo",
+      "name": "getTodo",
+      "result_type": {
+        "name": "Todo",
+        "type": "named"
+      }
+    },
+    "getTodos": {
+      "request": {
+        "url": "/todos",
+        "method": "get",
+        "response": {
+          "contentType": "application/json"
+        }
+      },
+      "arguments": {
+        "id": {
+          "description": "Filter by todo ID",
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "Int32",
+              "type": "named"
+            }
+          },
+          "rest": {
+            "name": "id",
+            "in": "query",
+            "schema": {
+              "type": [
+                "integer"
+              ]
+            }
+          }
+        },
+        "userId": {
+          "description": "Filter by user ID",
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "Int32",
+              "type": "named"
+            }
+          },
+          "rest": {
+            "name": "userId",
+            "in": "query",
+            "schema": {
+              "type": [
+                "integer"
+              ]
+            }
+          }
+        }
+      },
+      "description": "Get all available todos",
+      "name": "getTodos",
+      "result_type": {
+        "element_type": {
+          "name": "Todo",
+          "type": "named"
+        },
+        "type": "array"
+      }
+    },
+    "getUser": {
+      "request": {
+        "url": "/users/{id}",
+        "method": "get",
+        "response": {
+          "contentType": "application/json"
+        }
+      },
+      "arguments": {
+        "id": {
+          "description": "The ID of the user to retrieve",
+          "type": {
+            "name": "Int32",
+            "type": "named"
+          },
+          "rest": {
+            "name": "id",
+            "in": "path",
+            "schema": {
+              "type": [
+                "integer"
+              ]
+            }
+          }
+        }
+      },
+      "description": "Get specific user",
+      "name": "getUser",
+      "result_type": {
+        "name": "User",
+        "type": "named"
+      }
+    },
+    "getUsers": {
+      "request": {
+        "url": "/users",
+        "method": "get",
+        "response": {
+          "contentType": "application/json"
+        }
+      },
+      "arguments": {
+        "email": {
+          "description": "Filter by user email address",
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "Int32",
+              "type": "named"
+            }
+          },
+          "rest": {
+            "name": "email",
+            "in": "query",
+            "schema": {
+              "type": [
+                "integer"
+              ]
+            }
+          }
+        },
+        "id": {
+          "description": "Filter by user ID",
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "Int32",
+              "type": "named"
+            }
+          },
+          "rest": {
+            "name": "id",
+            "in": "query",
+            "schema": {
+              "type": [
+                "integer"
+              ]
+            }
+          }
+        }
+      },
+      "description": "Get all available users",
+      "name": "getUsers",
+      "result_type": {
+        "element_type": {
+          "name": "User",
+          "type": "named"
+        },
+        "type": "array"
+      }
     }
-  ],
+  },
   "object_types": {
     "Album": {
       "fields": {
@@ -661,6 +660,12 @@
               "name": "Int64",
               "type": "named"
             }
+          },
+          "rest": {
+            "type": [
+              "integer"
+            ],
+            "format": "int64"
           }
         },
         "title": {
@@ -670,6 +675,11 @@
               "name": "String",
               "type": "named"
             }
+          },
+          "rest": {
+            "type": [
+              "string"
+            ]
           }
         },
         "userId": {
@@ -679,6 +689,12 @@
               "name": "Int64",
               "type": "named"
             }
+          },
+          "rest": {
+            "type": [
+              "integer"
+            ],
+            "format": "int64"
           }
         }
       }
@@ -692,6 +708,11 @@
               "name": "String",
               "type": "named"
             }
+          },
+          "rest": {
+            "type": [
+              "string"
+            ]
           }
         },
         "email": {
@@ -701,6 +722,12 @@
               "name": "String",
               "type": "named"
             }
+          },
+          "rest": {
+            "type": [
+              "string"
+            ],
+            "format": "email"
           }
         },
         "id": {
@@ -710,6 +737,12 @@
               "name": "Int64",
               "type": "named"
             }
+          },
+          "rest": {
+            "type": [
+              "integer"
+            ],
+            "format": "int64"
           }
         },
         "name": {
@@ -719,6 +752,11 @@
               "name": "String",
               "type": "named"
             }
+          },
+          "rest": {
+            "type": [
+              "string"
+            ]
           }
         },
         "postId": {
@@ -728,6 +766,12 @@
               "name": "Int64",
               "type": "named"
             }
+          },
+          "rest": {
+            "type": [
+              "integer"
+            ],
+            "format": "int64"
           }
         }
       }
@@ -741,6 +785,12 @@
               "name": "Int64",
               "type": "named"
             }
+          },
+          "rest": {
+            "type": [
+              "integer"
+            ],
+            "format": "int64"
           }
         },
         "id": {
@@ -750,6 +800,12 @@
               "name": "Int64",
               "type": "named"
             }
+          },
+          "rest": {
+            "type": [
+              "integer"
+            ],
+            "format": "int64"
           }
         },
         "thumbnailUrl": {
@@ -759,6 +815,12 @@
               "name": "URI",
               "type": "named"
             }
+          },
+          "rest": {
+            "type": [
+              "string"
+            ],
+            "format": "uri"
           }
         },
         "title": {
@@ -768,6 +830,11 @@
               "name": "String",
               "type": "named"
             }
+          },
+          "rest": {
+            "type": [
+              "string"
+            ]
           }
         },
         "url": {
@@ -777,6 +844,12 @@
               "name": "URI",
               "type": "named"
             }
+          },
+          "rest": {
+            "type": [
+              "string"
+            ],
+            "format": "uri"
           }
         }
       }
@@ -790,6 +863,11 @@
               "name": "String",
               "type": "named"
             }
+          },
+          "rest": {
+            "type": [
+              "string"
+            ]
           }
         },
         "id": {
@@ -799,6 +877,12 @@
               "name": "Int64",
               "type": "named"
             }
+          },
+          "rest": {
+            "type": [
+              "integer"
+            ],
+            "format": "int64"
           }
         },
         "title": {
@@ -808,6 +892,11 @@
               "name": "String",
               "type": "named"
             }
+          },
+          "rest": {
+            "type": [
+              "string"
+            ]
           }
         },
         "userId": {
@@ -817,6 +906,12 @@
               "name": "Int64",
               "type": "named"
             }
+          },
+          "rest": {
+            "type": [
+              "integer"
+            ],
+            "format": "int64"
           }
         }
       }
@@ -830,6 +925,11 @@
               "name": "Boolean",
               "type": "named"
             }
+          },
+          "rest": {
+            "type": [
+              "boolean"
+            ]
           }
         },
         "id": {
@@ -839,6 +939,12 @@
               "name": "Int64",
               "type": "named"
             }
+          },
+          "rest": {
+            "type": [
+              "integer"
+            ],
+            "format": "int64"
           }
         },
         "title": {
@@ -848,6 +954,11 @@
               "name": "String",
               "type": "named"
             }
+          },
+          "rest": {
+            "type": [
+              "string"
+            ]
           }
         },
         "userId": {
@@ -857,6 +968,12 @@
               "name": "Int64",
               "type": "named"
             }
+          },
+          "rest": {
+            "type": [
+              "integer"
+            ],
+            "format": "int64"
           }
         }
       }
@@ -870,6 +987,11 @@
               "name": "UserAddress",
               "type": "named"
             }
+          },
+          "rest": {
+            "type": [
+              "object"
+            ]
           }
         },
         "company": {
@@ -879,6 +1001,11 @@
               "name": "UserCompany",
               "type": "named"
             }
+          },
+          "rest": {
+            "type": [
+              "object"
+            ]
           }
         },
         "email": {
@@ -888,6 +1015,12 @@
               "name": "String",
               "type": "named"
             }
+          },
+          "rest": {
+            "type": [
+              "string"
+            ],
+            "format": "email"
           }
         },
         "id": {
@@ -897,6 +1030,12 @@
               "name": "Int64",
               "type": "named"
             }
+          },
+          "rest": {
+            "type": [
+              "integer"
+            ],
+            "format": "int64"
           }
         },
         "name": {
@@ -906,6 +1045,11 @@
               "name": "String",
               "type": "named"
             }
+          },
+          "rest": {
+            "type": [
+              "string"
+            ]
           }
         },
         "phone": {
@@ -915,6 +1059,11 @@
               "name": "String",
               "type": "named"
             }
+          },
+          "rest": {
+            "type": [
+              "string"
+            ]
           }
         },
         "username": {
@@ -924,6 +1073,11 @@
               "name": "String",
               "type": "named"
             }
+          },
+          "rest": {
+            "type": [
+              "string"
+            ]
           }
         },
         "website": {
@@ -933,6 +1087,11 @@
               "name": "String",
               "type": "named"
             }
+          },
+          "rest": {
+            "type": [
+              "string"
+            ]
           }
         }
       }
@@ -946,6 +1105,11 @@
               "name": "String",
               "type": "named"
             }
+          },
+          "rest": {
+            "type": [
+              "string"
+            ]
           }
         },
         "geo": {
@@ -955,6 +1119,11 @@
               "name": "UserAddressGeo",
               "type": "named"
             }
+          },
+          "rest": {
+            "type": [
+              "object"
+            ]
           }
         },
         "street": {
@@ -964,6 +1133,11 @@
               "name": "String",
               "type": "named"
             }
+          },
+          "rest": {
+            "type": [
+              "string"
+            ]
           }
         },
         "suite": {
@@ -973,6 +1147,11 @@
               "name": "String",
               "type": "named"
             }
+          },
+          "rest": {
+            "type": [
+              "string"
+            ]
           }
         },
         "zipcode": {
@@ -982,6 +1161,11 @@
               "name": "String",
               "type": "named"
             }
+          },
+          "rest": {
+            "type": [
+              "string"
+            ]
           }
         }
       }
@@ -995,6 +1179,11 @@
               "name": "String",
               "type": "named"
             }
+          },
+          "rest": {
+            "type": [
+              "string"
+            ]
           }
         },
         "lng": {
@@ -1004,6 +1193,11 @@
               "name": "String",
               "type": "named"
             }
+          },
+          "rest": {
+            "type": [
+              "string"
+            ]
           }
         }
       }
@@ -1017,6 +1211,11 @@
               "name": "String",
               "type": "named"
             }
+          },
+          "rest": {
+            "type": [
+              "string"
+            ]
           }
         },
         "catchPhrase": {
@@ -1026,6 +1225,11 @@
               "name": "String",
               "type": "named"
             }
+          },
+          "rest": {
+            "type": [
+              "string"
+            ]
           }
         },
         "name": {
@@ -1035,21 +1239,23 @@
               "name": "String",
               "type": "named"
             }
+          },
+          "rest": {
+            "type": [
+              "string"
+            ]
           }
         }
       }
     }
   },
-  "procedures": [
-    {
+  "procedures": {
+    "createPost": {
       "request": {
         "url": "/posts",
         "method": "post",
         "requestBody": {
-          "contentType": "application/json",
-          "schema": {
-            "type": "Post"
-          }
+          "contentType": "application/json"
         },
         "response": {
           "contentType": "application/json"
@@ -1061,6 +1267,14 @@
           "type": {
             "name": "Post",
             "type": "named"
+          },
+          "rest": {
+            "in": "body",
+            "schema": {
+              "type": [
+                "object"
+              ]
+            }
           }
         }
       },
@@ -1071,111 +1285,10 @@
         "type": "named"
       }
     },
-    {
-      "request": {
-        "url": "/posts/{id}",
-        "method": "put",
-        "parameters": [
-          {
-            "name": "id",
-            "in": "path",
-            "schema": {
-              "type": "Int32"
-            }
-          }
-        ],
-        "requestBody": {
-          "contentType": "application/json",
-          "schema": {
-            "type": "Post"
-          }
-        },
-        "response": {
-          "contentType": "application/json"
-        }
-      },
-      "arguments": {
-        "body": {
-          "description": "Post object that needs to be updated",
-          "type": {
-            "name": "Post",
-            "type": "named"
-          }
-        },
-        "id": {
-          "description": "The ID of the post to retrieve",
-          "type": {
-            "name": "Int32",
-            "type": "named"
-          }
-        }
-      },
-      "description": "Update specific post",
-      "name": "updatePostById",
-      "result_type": {
-        "name": "Post",
-        "type": "named"
-      }
-    },
-    {
-      "request": {
-        "url": "/posts/{id}",
-        "method": "patch",
-        "parameters": [
-          {
-            "name": "id",
-            "in": "path",
-            "schema": {
-              "type": "Int32"
-            }
-          }
-        ],
-        "requestBody": {
-          "contentType": "application/json",
-          "schema": {
-            "type": "Post"
-          }
-        },
-        "response": {
-          "contentType": "application/json"
-        }
-      },
-      "arguments": {
-        "body": {
-          "description": "Post object that needs to be updated",
-          "type": {
-            "name": "Post",
-            "type": "named"
-          }
-        },
-        "id": {
-          "description": "The ID of the post to retrieve",
-          "type": {
-            "name": "Int32",
-            "type": "named"
-          }
-        }
-      },
-      "description": "patch specific post",
-      "name": "patchPostById",
-      "result_type": {
-        "name": "Post",
-        "type": "named"
-      }
-    },
-    {
+    "deletePostById": {
       "request": {
         "url": "/posts/{id}",
         "method": "delete",
-        "parameters": [
-          {
-            "name": "id",
-            "in": "path",
-            "schema": {
-              "type": "Int32"
-            }
-          }
-        ],
         "response": {
           "contentType": "application/json"
         }
@@ -1186,6 +1299,15 @@
           "type": {
             "name": "Int32",
             "type": "named"
+          },
+          "rest": {
+            "name": "id",
+            "in": "path",
+            "schema": {
+              "type": [
+                "integer"
+              ]
+            }
           }
         }
       },
@@ -1198,8 +1320,110 @@
           "type": "named"
         }
       }
+    },
+    "patchPostById": {
+      "request": {
+        "url": "/posts/{id}",
+        "method": "patch",
+        "requestBody": {
+          "contentType": "application/json"
+        },
+        "response": {
+          "contentType": "application/json"
+        }
+      },
+      "arguments": {
+        "body": {
+          "description": "Post object that needs to be updated",
+          "type": {
+            "name": "Post",
+            "type": "named"
+          },
+          "rest": {
+            "in": "body",
+            "schema": {
+              "type": [
+                "object"
+              ]
+            }
+          }
+        },
+        "id": {
+          "description": "The ID of the post to retrieve",
+          "type": {
+            "name": "Int32",
+            "type": "named"
+          },
+          "rest": {
+            "name": "id",
+            "in": "path",
+            "schema": {
+              "type": [
+                "integer"
+              ]
+            }
+          }
+        }
+      },
+      "description": "patch specific post",
+      "name": "patchPostById",
+      "result_type": {
+        "name": "Post",
+        "type": "named"
+      }
+    },
+    "updatePostById": {
+      "request": {
+        "url": "/posts/{id}",
+        "method": "put",
+        "requestBody": {
+          "contentType": "application/json"
+        },
+        "response": {
+          "contentType": "application/json"
+        }
+      },
+      "arguments": {
+        "body": {
+          "description": "Post object that needs to be updated",
+          "type": {
+            "name": "Post",
+            "type": "named"
+          },
+          "rest": {
+            "in": "body",
+            "schema": {
+              "type": [
+                "object"
+              ]
+            }
+          }
+        },
+        "id": {
+          "description": "The ID of the post to retrieve",
+          "type": {
+            "name": "Int32",
+            "type": "named"
+          },
+          "rest": {
+            "name": "id",
+            "in": "path",
+            "schema": {
+              "type": [
+                "integer"
+              ]
+            }
+          }
+        }
+      },
+      "description": "Update specific post",
+      "name": "updatePostById",
+      "result_type": {
+        "name": "Post",
+        "type": "named"
+      }
     }
-  ],
+  },
   "scalar_types": {
     "Boolean": {
       "aggregate_functions": {},

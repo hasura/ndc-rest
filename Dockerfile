@@ -2,7 +2,8 @@
 FROM golang:1.23 AS builder
 
 WORKDIR /app
-COPY go.mod go.sum ./
+COPY ndc-rest-schema ./ndc-rest-schema
+COPY go.mod go.sum go.work ./
 RUN go mod download
 COPY . .
 RUN CGO_ENABLED=0 go build -v -o ndc-cli ./server

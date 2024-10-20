@@ -1,7 +1,7 @@
 package main
 
 import (
-	"github.com/hasura/ndc-rest/rest"
+	rest "github.com/hasura/ndc-rest/connector"
 	"github.com/hasura/ndc-sdk-go/connector"
 )
 
@@ -13,7 +13,7 @@ import (
 //
 // [NDC Go SDK]: https://github.com/hasura/ndc-sdk-go
 func main() {
-	if err := rest.Start[rest.Configuration, rest.State](
+	if err := rest.Start(
 		rest.NewRESTConnector(),
 		connector.WithMetricsPrefix("ndc_rest"),
 		connector.WithDefaultServiceName("ndc_rest"),
