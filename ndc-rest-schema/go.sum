@@ -43,8 +43,8 @@ github.com/google/go-cmp v0.6.0/go.mod h1:17dUlkBOakJ0+DkrSSNjCkIjxS6bF9zb3elmeN
 github.com/google/pprof v0.0.0-20210407192527-94a9f03dee38/go.mod h1:kpwsk12EmLew5upagYY7GY0pfYCcupk39gWOCRROcvE=
 github.com/google/uuid v1.6.0 h1:NIvaJDMOsjHA8n1jAhLSgzrAzy1Hgr+hNrb57e+94F0=
 github.com/google/uuid v1.6.0/go.mod h1:TIyPZe4MgqvfeYDBFedMoGGpEw/LqOeaOT+nhxU+yHo=
-github.com/hasura/ndc-sdk-go v1.5.2-0.20241019165818-020cacb4fabe h1:tKNvg3TqC6XkDNXeJiIdM+DRkd6UaM2Yob2UolPDiBQ=
-github.com/hasura/ndc-sdk-go v1.5.2-0.20241019165818-020cacb4fabe/go.mod h1:oik0JrwuN5iZwZjZJzIRMw9uO2xDJbCXwhS1GgaRejk=
+github.com/hasura/ndc-sdk-go v1.5.2-0.20241020093415-b752942bd505 h1:6ATW3s+x5aJ+hGzdlNr1f5nu9IV8SY/lakVuOCMvBjM=
+github.com/hasura/ndc-sdk-go v1.5.2-0.20241020093415-b752942bd505/go.mod h1:oik0JrwuN5iZwZjZJzIRMw9uO2xDJbCXwhS1GgaRejk=
 github.com/hexops/gotextdiff v1.0.3 h1:gitA9+qJrrTCsiCl7+kh75nPqQt1cx4ZkudSTLoUqJM=
 github.com/hexops/gotextdiff v1.0.3/go.mod h1:pSWU5MAI3yDq+fZBTazCSJysOMbxWL1BSow5/V2vxeg=
 github.com/hpcloud/tail v1.0.0/go.mod h1:ab1qPbhIpdTxEkNHXyeSf5vhxWSCs/tWer42PpOxQnU=
@@ -96,8 +96,8 @@ github.com/vmware-labs/yaml-jsonpath v0.3.2/go.mod h1:U6whw1z03QyqgWdgXxvVnQ90zN
 github.com/wk8/go-ordered-map/v2 v2.1.9-0.20240815153524-6ea36470d1bd h1:dLuIF2kX9c+KknGJUdJi1Il1SDiTSK158/BB9kdgAew=
 github.com/wk8/go-ordered-map/v2 v2.1.9-0.20240815153524-6ea36470d1bd/go.mod h1:DbzwytT4g/odXquuOCqroKvtxxldI4nb3nuesHF/Exo=
 github.com/yuin/goldmark v1.2.1/go.mod h1:3hX8gzYuyVAZsxl0MRgGTJEmQBFcNTphYh9decYSb74=
-go.opentelemetry.io/otel v1.28.0 h1:/SqNcYk+idO0CxKEUOtKQClMK/MimZihKYMruSMViUo=
-go.opentelemetry.io/otel v1.28.0/go.mod h1:q68ijF8Fc8CnMHKyzqL6akLO46ePnjkgfIMIjUIX9z4=
+go.opentelemetry.io/otel v1.31.0 h1:NsJcKPIW0D0H3NgzPDHmo0WW6SptzPdqg/L1zsIm2hY=
+go.opentelemetry.io/otel v1.31.0/go.mod h1:O0C14Yl9FgkjqcCZAsE053C13OaddMYr/hz6clDkEJE=
 golang.org/x/crypto v0.0.0-20190308221718-c2843e01d9a2/go.mod h1:djNgcEr1/C05ACkg1iLfiJU5Ep61QUkGW8qpdssI0+w=
 golang.org/x/crypto v0.0.0-20191011191535-87dc89f01550/go.mod h1:yigFU9vqHzYiE8UmvKecakEJjdnWj3jj499lnFckfCI=
 golang.org/x/crypto v0.0.0-20200622213623-75b288015ac9/go.mod h1:LzIPMQfyMNhhGPhUkYOs5KpL4U8rLKemX1yGLhDgUto=

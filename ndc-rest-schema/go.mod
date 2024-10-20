@@ -7,7 +7,7 @@ toolchain go1.23.1
 require (
 	github.com/alecthomas/kong v1.2.1
 	github.com/evanphx/json-patch v0.5.2
-	github.com/hasura/ndc-sdk-go v1.5.2-0.20241019165818-020cacb4fabe
+	github.com/hasura/ndc-sdk-go v1.5.2-0.20241020093415-b752942bd505
 	github.com/invopop/jsonschema v0.12.0
 	github.com/lmittmann/tint v1.0.5
 	github.com/pb33f/libopenapi v0.18.3
@@ -27,6 +27,6 @@ require (
 	github.com/pkg/errors v0.9.1 // indirect
 	github.com/sergi/go-diff v1.3.1 // indirect
 	github.com/vmware-labs/yaml-jsonpath v0.3.2 // indirect
-	go.opentelemetry.io/otel v1.28.0 // indirect
+	go.opentelemetry.io/otel v1.31.0 // indirect
 	golang.org/x/net v0.30.0 // indirect
 )
