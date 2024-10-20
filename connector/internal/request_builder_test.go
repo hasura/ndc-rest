@@ -79,7 +79,7 @@ func TestCreateMultipartForm(t *testing.T) {
 			var info *rest.OperationInfo
 			for _, f := range ndcSchema.Procedures {
 				if f.Name == tc.Name {
-					info = f
+					info = &f
 					break
 				}
 			}
@@ -566,7 +566,7 @@ func TestCreateFormURLEncoded(t *testing.T) {
 			var info *rest.OperationInfo
 			for _, f := range ndcSchema.Procedures {
 				if f.Name == tc.Name {
-					info = f
+					info = &f
 					break
 				}
 			}

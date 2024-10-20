@@ -14,8 +14,8 @@
     },
     "version": "1.0.0"
   },
-  "functions": [
-    {
+  "functions": {
+    "hasuraMockJsonGetPosts": {
       "request": {
         "url": "/posts",
         "method": "get",
@@ -73,7 +73,7 @@
         "type": "array"
       }
     }
-  ],
+  },
   "object_types": {
     "Post": {
       "fields": {
@@ -138,8 +138,8 @@
       }
     }
   },
-  "procedures": [
-    {
+  "procedures": {
+    "hasuraMockJsonCreatePost": {
       "request": {
         "url": "/posts",
         "method": "post",
@@ -174,7 +174,7 @@
         "type": "named"
       }
     }
-  ],
+  },
   "scalar_types": {
     "Int32": {
       "aggregate_functions": {},

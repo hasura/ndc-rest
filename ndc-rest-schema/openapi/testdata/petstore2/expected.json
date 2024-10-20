@@ -40,8 +40,8 @@
     },
     "version": "1.0.6"
   },
-  "functions": [
-    {
+  "functions": {
+    "findPetsByStatus": {
       "request": {
         "url": "/pet/findByStatus",
         "method": "get",
@@ -88,7 +88,7 @@
         "type": "array"
       }
     },
-    {
+    "findPetsByTags": {
       "request": {
         "url": "/pet/findByTags",
         "method": "get",
@@ -135,7 +135,63 @@
         "type": "array"
       }
     },
-    {
+    "getInventory": {
+      "request": {
+        "url": "/store/inventory",
+        "method": "get",
+        "security": [
+          {
+            "api_key": []
+          }
+        ],
+        "response": {
+          "contentType": "application/json"
+        }
+      },
+      "arguments": {},
+      "description": "Returns pet inventories by status",
+      "name": "getInventory",
+      "result_type": {
+        "name": "JSON",
+        "type": "named"
+      }
+    },
+    "getOrderById": {
+      "request": {
+        "url": "/store/order/{orderId}",
+        "method": "get",
+        "response": {
+          "contentType": "application/json"
+        }
+      },
+      "arguments": {
+        "orderId": {
+          "description": "ID of pet that needs to be fetched",
+          "type": {
+            "name": "Int64",
+            "type": "named"
+          },
+          "rest": {
+            "name": "orderId",
+            "in": "path",
+            "schema": {
+              "type": [
+                "integer"
+              ],
+              "maximum": 10,
+              "minimum": 1
+            }
+          }
+        }
+      },
+      "description": "Find purchase order by ID",
+      "name": "getOrderById",
+      "result_type": {
+        "name": "Order",
+        "type": "named"
+      }
+    },
+    "getPetById": {
       "request": {
         "url": "/pet/{petId}",
         "method": "get",
@@ -173,63 +229,23 @@
         "type": "named"
       }
     },
-    {
+    "getSnake": {
       "request": {
-        "url": "/store/order/{orderId}",
+        "url": "/snake",
         "method": "get",
-        "response": {
-          "contentType": "application/json"
-        }
-      },
-      "arguments": {
-        "orderId": {
-          "description": "ID of pet that needs to be fetched",
-          "type": {
-            "name": "Int64",
-            "type": "named"
-          },
-          "rest": {
-            "name": "orderId",
-            "in": "path",
-            "schema": {
-              "type": [
-                "integer"
-              ],
-              "maximum": 10,
-              "minimum": 1
-            }
-          }
-        }
-      },
-      "description": "Find purchase order by ID",
-      "name": "getOrderById",
-      "result_type": {
-        "name": "Order",
-        "type": "named"
-      }
-    },
-    {
-      "request": {
-        "url": "/store/inventory",
-        "method": "get",
-        "security": [
-          {
-            "api_key": []
-          }
-        ],
         "response": {
           "contentType": "application/json"
         }
       },
       "arguments": {},
-      "description": "Returns pet inventories by status",
-      "name": "getInventory",
+      "description": "Get snake",
+      "name": "getSnake",
       "result_type": {
-        "name": "JSON",
+        "name": "SnakeObject",
         "type": "named"
       }
     },
-    {
+    "getUserByName": {
       "request": {
         "url": "/user/{username}",
         "method": "get",
@@ -262,72 +278,7 @@
         "type": "named"
       }
     },
-    {
-      "request": {
-        "url": "/user/login",
-        "method": "get",
-        "response": {
-          "contentType": "application/json"
-        }
-      },
-      "arguments": {
-        "password": {
-          "description": "The password for login in clear text",
-          "type": {
-            "name": "String",
-            "type": "named"
-          },
-          "rest": {
-            "name": "password",
-            "in": "query",
-            "schema": {
-              "type": [
-                "string"
-              ]
-            }
-          }
-        },
-        "username": {
-          "description": "The user name for login",
-          "type": {
-            "name": "String",
-            "type": "named"
-          },
-          "rest": {
-            "name": "username",
-            "in": "query",
-            "schema": {
-              "type": [
-                "string"
-              ]
-            }
-          }
-        }
-      },
-      "description": "Logs user into the system",
-      "name": "loginUser",
-      "result_type": {
-        "name": "String",
-        "type": "named"
-      }
-    },
-    {
-      "request": {
-        "url": "/snake",
-        "method": "get",
-        "response": {
-          "contentType": "application/json"
-        }
-      },
-      "arguments": {},
-      "description": "Get snake",
-      "name": "getSnake",
-      "result_type": {
-        "name": "SnakeObject",
-        "type": "named"
-      }
-    },
-    {
+    "listOAuth2Clients": {
       "request": {
         "url": "/clients",
         "method": "get",
@@ -422,8 +373,57 @@
         },
         "type": "array"
       }
+    },
+    "loginUser": {
+      "request": {
+        "url": "/user/login",
+        "method": "get",
+        "response": {
+          "contentType": "application/json"
+        }
+      },
+      "arguments": {
+        "password": {
+          "description": "The password for login in clear text",
+          "type": {
+            "name": "String",
+            "type": "named"
+          },
+          "rest": {
+            "name": "password",
+            "in": "query",
+            "schema": {
+              "type": [
+                "string"
+              ]
+            }
+          }
+        },
+        "username": {
+          "description": "The user name for login",
+          "type": {
+            "name": "String",
+            "type": "named"
+          },
+          "rest": {
+            "name": "username",
+            "in": "query",
+            "schema": {
+              "type": [
+                "string"
+              ]
+            }
+          }
+        }
+      },
+      "description": "Logs user into the system",
+      "name": "loginUser",
+      "result_type": {
+        "name": "String",
+        "type": "named"
+      }
     }
-  ],
+  },
   "object_types": {
     "ApiResponse": {
       "fields": {
@@ -1039,67 +1039,8 @@
       }
     }
   },
-  "procedures": [
-    {
-      "request": {
-        "url": "/pet/{petId}/uploadImage",
-        "method": "post",
-        "security": [
-          {
-            "petstore_auth": [
-              "write:pets",
-              "read:pets"
-            ]
-          }
-        ],
-        "requestBody": {
-          "contentType": "multipart/form-data"
-        },
-        "response": {
-          "contentType": "application/json"
-        }
-      },
-      "arguments": {
-        "body": {
-          "description": "Form data of /pet/{petId}/uploadImage",
-          "type": {
-            "name": "UploadFileBody",
-            "type": "named"
-          },
-          "rest": {
-            "in": "formData",
-            "schema": {
-              "type": [
-                "object"
-              ]
-            }
-          }
-        },
-        "petId": {
-          "description": "ID of pet to update",
-          "type": {
-            "name": "Int64",
-            "type": "named"
-          },
-          "rest": {
-            "name": "petId",
-            "in": "path",
-            "schema": {
-              "type": [
-                "integer"
-              ]
-            }
-          }
-        }
-      },
-      "description": "uploads an image",
-      "name": "uploadFile",
-      "result_type": {
-        "name": "ApiResponse",
-        "type": "named"
-      }
-    },
-    {
+  "procedures": {
+    "addPet": {
       "request": {
         "url": "/pet",
         "method": "post",
@@ -1145,106 +1086,51 @@
         }
       }
     },
-    {
+    "addSnake": {
       "request": {
-        "url": "/pet",
-        "method": "put",
-        "security": [
-          {
-            "petstore_auth": [
-              "write:pets",
-              "read:pets"
-            ]
-          }
-        ],
-        "requestBody": {
-          "contentType": "application/json"
-        },
+        "url": "/snake",
+        "method": "post",
         "response": {
           "contentType": "application/json"
         }
       },
-      "arguments": {
-        "body": {
-          "description": "Pet object that needs to be added to the store",
-          "type": {
-            "name": "Pet",
-            "type": "named"
-          },
-          "rest": {
-            "in": "body",
-            "schema": {
-              "type": [
-                "object"
-              ]
-            }
-          }
-        }
-      },
-      "description": "Update an existing pet",
-      "name": "updatePet",
+      "arguments": {},
+      "description": "Create snake",
+      "name": "addSnake",
       "result_type": {
-        "type": "nullable",
-        "underlying_type": {
-          "name": "Boolean",
-          "type": "named"
-        }
+        "name": "SnakeObject",
+        "type": "named"
       }
     },
-    {
+    "deleteOrder": {
       "request": {
-        "url": "/pet/{petId}",
-        "method": "post",
-        "security": [
-          {
-            "petstore_auth": [
-              "write:pets",
-              "read:pets"
-            ]
-          }
-        ],
-        "requestBody": {
-          "contentType": "application/x-www-form-urlencoded"
-        },
+        "url": "/store/order/{orderId}",
+        "method": "delete",
         "response": {
           "contentType": "application/json"
         }
       },
       "arguments": {
-        "body": {
-          "description": "Form data of /pet/{petId}",
-          "type": {
-            "name": "UpdatePetWithFormBody",
-            "type": "named"
-          },
-          "rest": {
-            "in": "formData",
-            "schema": {
-              "type": [
-                "object"
-              ]
-            }
-          }
-        },
-        "petId": {
-          "description": "ID of pet that needs to be updated",
+        "orderId": {
+          "description": "ID of the order that needs to be deleted",
           "type": {
             "name": "Int64",
             "type": "named"
           },
           "rest": {
-            "name": "petId",
+            "name": "orderId",
             "in": "path",
             "schema": {
               "type": [
                 "integer"
-              ]
+              ],
+              "minimum": 1
             }
           }
         }
       },
-      "description": "Updates a pet in the store with form data",
-      "name": "updatePetWithForm",
+      "description": "Delete purchase order by ID",
+      "name": "deleteOrder",
       "result_type": {
         "type": "nullable",
         "underlying_type": {
@@ -1253,7 +1139,7 @@
         }
       }
     },
-    {
+    "deletePet": {
       "request": {
         "url": "/pet/{petId}",
         "method": "delete",
@@ -1315,7 +1201,76 @@
         }
       }
     },
-    {
+    "deleteUser": {
+      "request": {
+        "url": "/user/{username}",
+        "method": "delete",
+        "response": {
+          "contentType": "application/json"
+        }
+      },
+      "arguments": {
+        "username": {
+          "description": "The name that needs to be deleted",
+          "type": {
+            "name": "String",
+            "type": "named"
+          },
+          "rest": {
+            "name": "username",
+            "in": "path",
+            "schema": {
+              "type": [
+                "string"
+              ]
+            }
+          }
+        }
+      },
+      "description": "Delete user",
+      "name": "deleteUser",
+      "result_type": {
+        "type": "nullable",
+        "underlying_type": {
+          "name": "Boolean",
+          "type": "named"
+        }
+      }
+    },
+    "dynamicClientRegistrationCreateOAuth2Client": {
+      "request": {
+        "url": "/oauth2/register",
+        "method": "post",
+        "requestBody": {
+          "contentType": "application/json"
+        },
+        "response": {
+          "contentType": "application/json"
+        }
+      },
+      "arguments": {
+        "body": {
+          "type": {
+            "name": "OAuth2Client",
+            "type": "named"
+          },
+          "rest": {
+            "in": "body",
+            "schema": {
+              "type": [
+                "object"
+              ]
+            }
+          }
+        }
+      },
+      "name": "dynamicClientRegistrationCreateOAuth2Client",
+      "result_type": {
+        "name": "OAuth2Client",
+        "type": "named"
+      }
+    },
+    "placeOrder": {
       "request": {
         "url": "/store/order",
         "method": "post",
@@ -1350,35 +1305,44 @@
         "type": "named"
       }
     },
-    {
+    "updatePet": {
       "request": {
-        "url": "/store/order/{orderId}",
-        "method": "delete",
+        "url": "/pet",
+        "method": "put",
+        "security": [
+          {
+            "petstore_auth": [
+              "write:pets",
+              "read:pets"
+            ]
+          }
+        ],
+        "requestBody": {
+          "contentType": "application/json"
+        },
         "response": {
           "contentType": "application/json"
         }
       },
       "arguments": {
-        "orderId": {
-          "description": "ID of the order that needs to be deleted",
+        "body": {
+          "description": "Pet object that needs to be added to the store",
           "type": {
-            "name": "Int64",
+            "name": "Pet",
             "type": "named"
           },
           "rest": {
-            "name": "orderId",
-            "in": "path",
+            "in": "body",
             "schema": {
               "type": [
-                "integer"
-              ],
-              "minimum": 1
+                "object"
+              ]
             }
           }
         }
       },
-      "description": "Delete purchase order by ID",
-      "name": "deleteOrder",
+      "description": "Update an existing pet",
+      "name": "updatePet",
       "result_type": {
         "type": "nullable",
         "underlying_type": {
@@ -1387,7 +1351,69 @@
         }
       }
     },
-    {
+    "updatePetWithForm": {
+      "request": {
+        "url": "/pet/{petId}",
+        "method": "post",
+        "security": [
+          {
+            "petstore_auth": [
+              "write:pets",
+              "read:pets"
+            ]
+          }
+        ],
+        "requestBody": {
+          "contentType": "application/x-www-form-urlencoded"
+        },
+        "response": {
+          "contentType": "application/json"
+        }
+      },
+      "arguments": {
+        "body": {
+          "description": "Form data of /pet/{petId}",
+          "type": {
+            "name": "UpdatePetWithFormBody",
+            "type": "named"
+          },
+          "rest": {
+            "in": "formData",
+            "schema": {
+              "type": [
+                "object"
+              ]
+            }
+          }
+        },
+        "petId": {
+          "description": "ID of pet that needs to be updated",
+          "type": {
+            "name": "Int64",
+            "type": "named"
+          },
+          "rest": {
+            "name": "petId",
+            "in": "path",
+            "schema": {
+              "type": [
+                "integer"
+              ]
+            }
+          }
+        }
+      },
+      "description": "Updates a pet in the store with form data",
+      "name": "updatePetWithForm",
+      "result_type": {
+        "type": "nullable",
+        "underlying_type": {
+          "name": "Boolean",
+          "type": "named"
+        }
+      }
+    },
+    "updateUser": {
       "request": {
         "url": "/user/{username}",
         "method": "put",
@@ -1441,64 +1467,20 @@
         }
       }
     },
-    {
+    "uploadFile": {
       "request": {
-        "url": "/user/{username}",
-        "method": "delete",
-        "response": {
-          "contentType": "application/json"
-        }
-      },
-      "arguments": {
-        "username": {
-          "description": "The name that needs to be deleted",
-          "type": {
-            "name": "String",
-            "type": "named"
-          },
-          "rest": {
-            "name": "username",
-            "in": "path",
-            "schema": {
-              "type": [
-                "string"
-              ]
-            }
+        "url": "/pet/{petId}/uploadImage",
+        "method": "post",
+        "security": [
+          {
+            "petstore_auth": [
+              "write:pets",
+              "read:pets"
+            ]
           }
-        }
-      },
-      "description": "Delete user",
-      "name": "deleteUser",
-      "result_type": {
-        "type": "nullable",
-        "underlying_type": {
-          "name": "Boolean",
-          "type": "named"
-        }
-      }
-    },
-    {
-      "request": {
-        "url": "/snake",
-        "method": "post",
-        "response": {
-          "contentType": "application/json"
-        }
-      },
-      "arguments": {},
-      "description": "Create snake",
-      "name": "addSnake",
-      "result_type": {
-        "name": "SnakeObject",
-        "type": "named"
-      }
-    },
-    {
-      "request": {
-        "url": "/oauth2/register",
-        "method": "post",
+        ],
         "requestBody": {
-          "contentType": "application/json"
+          "contentType": "multipart/form-data"
         },
         "response": {
           "contentType": "application/json"
@@ -1506,27 +1488,45 @@
       },
       "arguments": {
         "body": {
+          "description": "Form data of /pet/{petId}/uploadImage",
           "type": {
-            "name": "OAuth2Client",
+            "name": "UploadFileBody",
             "type": "named"
           },
           "rest": {
-            "in": "body",
+            "in": "formData",
             "schema": {
               "type": [
                 "object"
               ]
             }
           }
+        },
+        "petId": {
+          "description": "ID of pet to update",
+          "type": {
+            "name": "Int64",
+            "type": "named"
+          },
+          "rest": {
+            "name": "petId",
+            "in": "path",
+            "schema": {
+              "type": [
+                "integer"
+              ]
+            }
+          }
         }
       },
-      "name": "dynamicClientRegistrationCreateOAuth2Client",
+      "description": "uploads an image",
+      "name": "uploadFile",
       "result_type": {
-        "name": "OAuth2Client",
+        "name": "ApiResponse",
         "type": "named"
       }
     }
-  ],
+  },
   "scalar_types": {
     "Binary": {
       "aggregate_functions": {},

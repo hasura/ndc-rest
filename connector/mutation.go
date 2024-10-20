@@ -6,11 +6,12 @@ import (
 	"fmt"
 
 	"github.com/hasura/ndc-rest/connector/internal"
+	"github.com/hasura/ndc-rest/ndc-rest-schema/configuration"
 	"github.com/hasura/ndc-sdk-go/schema"
 )
 
 // Mutation executes a mutation.
-func (c *RESTConnector) Mutation(ctx context.Context, configuration *Configuration, state *State, request *schema.MutationRequest) (*schema.MutationResponse, error) {
+func (c *RESTConnector) Mutation(ctx context.Context, configuration *configuration.Configuration, state *State, request *schema.MutationRequest) (*schema.MutationResponse, error) {
 	operationResults := make([]schema.MutationOperationResults, len(request.Operations))
 
 	for i, operation := range request.Operations {

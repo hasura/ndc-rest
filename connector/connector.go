@@ -7,6 +7,7 @@ import (
 	"os"
 
 	"github.com/hasura/ndc-rest/connector/internal"
+	"github.com/hasura/ndc-rest/ndc-rest-schema/configuration"
 	rest "github.com/hasura/ndc-rest/ndc-rest-schema/schema"
 	"github.com/hasura/ndc-sdk-go/connector"
 	"github.com/hasura/ndc-sdk-go/schema"
@@ -15,7 +16,7 @@ import (
 
 // RESTConnector implements the SDK interface of NDC specification
 type RESTConnector struct {
-	metadata     RESTMetadataCollection
+	metadata     internal.MetadataCollection
 	capabilities *schema.RawCapabilitiesResponse
 	rawSchema    *schema.RawSchemaResponse
 	schema       *rest.NDCRestSchema
@@ -35,7 +36,7 @@ func NewRESTConnector(opts ...Option) *RESTConnector {
 
 // ParseConfiguration validates the configuration files provided by the user, returning a validated 'Configuration',
 // or throwing an error to prevents Connector startup.
-func (c *RESTConnector) ParseConfiguration(ctx context.Context, configurationDir string) (*Configuration, error) {
+func (c *RESTConnector) ParseConfiguration(ctx context.Context, configurationDir string) (*configuration.Configuration, error) {
 	restCapabilities := schema.CapabilitiesResponse{
 		Version: "0.1.6",
 		Capabilities: schema.Capabilities{
@@ -79,7 +80,7 @@ func (c *RESTConnector) ParseConfiguration(ctx context.Context, configurationDir
 //
 // In addition, this function should register any
 // connector-specific metrics with the metrics registry.
-func (c *RESTConnector) TryInitState(ctx context.Context, configuration *Configuration, metrics *connector.TelemetryState) (*State, error) {
+func (c *RESTConnector) TryInitState(ctx context.Context, configuration *configuration.Configuration, metrics *connector.TelemetryState) (*State, error) {
 	c.client.SetTracer(metrics.Tracer)
 	return &State{}, nil
 }
@@ -90,27 +91,27 @@ func (c *RESTConnector) TryInitState(ctx context.Context, configuration *Configu
 // is able to reach its data source over the network.
 //
 // Should throw if the check fails, else resolve.
-func (c *RESTConnector) HealthCheck(ctx context.Context, configuration *Configuration, state *State) error {
+func (c *RESTConnector) HealthCheck(ctx context.Context, configuration *configuration.Configuration, state *State) error {
 	return nil
 }
 
 // GetCapabilities get the connector's capabilities.
-func (c *RESTConnector) GetCapabilities(configuration *Configuration) schema.CapabilitiesResponseMarshaler {
+func (c *RESTConnector) GetCapabilities(configuration *configuration.Configuration) schema.CapabilitiesResponseMarshaler {
 	return c.capabilities
 }
 
 // QueryExplain explains a query by creating an execution plan.
-func (c *RESTConnector) QueryExplain(ctx context.Context, configuration *Configuration, state *State, request *schema.QueryRequest) (*schema.ExplainResponse, error) {
+func (c *RESTConnector) QueryExplain(ctx context.Context, configuration *configuration.Configuration, state *State, request *schema.QueryRequest) (*schema.ExplainResponse, error) {
 	return nil, schema.NotSupportedError("query explain has not been supported yet", nil)
 }
 
 // MutationExplain explains a mutation by creating an execution plan.
-func (c *RESTConnector) MutationExplain(ctx context.Context, configuration *Configuration, state *State, request *schema.MutationRequest) (*schema.ExplainResponse, error) {
+func (c *RESTConnector) MutationExplain(ctx context.Context, configuration *configuration.Configuration, state *State, request *schema.MutationRequest) (*schema.ExplainResponse, error) {
 	return nil, schema.NotSupportedError("mutation explain has not been supported yet", nil)
 }
 
-func parseConfiguration(configurationDir string) (*Configuration, error) {
-	var config Configuration
+func parseConfiguration(configurationDir string) (*configuration.Configuration, error) {
+	var config configuration.Configuration
 	jsonBytes, err := os.ReadFile(configurationDir + "/config.json")
 	if err == nil {
 		if err = json.Unmarshal(jsonBytes, &config); err != nil {

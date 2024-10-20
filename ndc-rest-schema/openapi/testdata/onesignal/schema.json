@@ -4,6 +4,28 @@
     {
       "arguments": {
         "app_id": {
+          "type": {
+            "name": "String",
+            "type": "named"
+          }
+        },
+        "notification_id": {
+          "type": {
+            "name": "String",
+            "type": "named"
+          }
+        }
+      },
+      "description": "View notification",
+      "name": "get_notification",
+      "result_type": {
+        "name": "NotificationWithMeta",
+        "type": "named"
+      }
+    },
+    {
+      "arguments": {
+        "app_id": {
           "description": "The app ID that you want to view notifications from",
           "type": {
             "name": "String",
@@ -45,28 +67,6 @@
       "name": "get_notifications",
       "result_type": {
         "name": "NotificationSlice",
-        "type": "named"
-      }
-    },
-    {
-      "arguments": {
-        "app_id": {
-          "type": {
-            "name": "String",
-            "type": "named"
-          }
-        },
-        "notification_id": {
-          "type": {
-            "name": "String",
-            "type": "named"
-          }
-        }
-      },
-      "description": "View notification",
-      "name": "get_notification",
-      "result_type": {
-        "name": "NotificationWithMeta",
         "type": "named"
       }
     }
@@ -731,23 +731,6 @@
   "procedures": [
     {
       "arguments": {
-        "body": {
-          "description": "Request body of POST /notifications",
-          "type": {
-            "name": "NotificationInput",
-            "type": "named"
-          }
-        }
-      },
-      "description": "Create notification",
-      "name": "create_notification",
-      "result_type": {
-        "name": "CreateNotificationSuccessResponse",
-        "type": "named"
-      }
-    },
-    {
-      "arguments": {
         "app_id": {
           "type": {
             "name": "String",
@@ -765,6 +748,23 @@
       "name": "cancel_notification",
       "result_type": {
         "name": "CancelNotificationSuccessResponse",
+        "type": "named"
+      }
+    },
+    {
+      "arguments": {
+        "body": {
+          "description": "Request body of POST /notifications",
+          "type": {
+            "name": "NotificationInput",
+            "type": "named"
+          }
+        }
+      },
+      "description": "Create notification",
+      "name": "create_notification",
+      "result_type": {
+        "name": "CreateNotificationSuccessResponse",
         "type": "named"
       }
     },

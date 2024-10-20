@@ -692,6 +692,23 @@
     {
       "arguments": {
         "body": {
+          "description": "Request body of POST /chat/completions",
+          "type": {
+            "name": "CreateChatCompletionRequest",
+            "type": "named"
+          }
+        }
+      },
+      "description": "Creates a model response for the given chat conversation.",
+      "name": "createChatCompletion",
+      "result_type": {
+        "name": "CreateChatCompletionResponse",
+        "type": "named"
+      }
+    },
+    {
+      "arguments": {
+        "body": {
           "description": "Request body of POST /api/create",
           "type": {
             "name": "CreateModelRequest",
@@ -706,23 +723,6 @@
           "type": "named"
         },
         "type": "array"
-      }
-    },
-    {
-      "arguments": {
-        "body": {
-          "description": "Request body of POST /chat/completions",
-          "type": {
-            "name": "CreateChatCompletionRequest",
-            "type": "named"
-          }
-        }
-      },
-      "description": "Creates a model response for the given chat conversation.",
-      "name": "createChatCompletion",
-      "result_type": {
-        "name": "CreateChatCompletionResponse",
-        "type": "named"
       }
     }
   ],

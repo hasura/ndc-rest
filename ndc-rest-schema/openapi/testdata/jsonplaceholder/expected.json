@@ -14,226 +14,8 @@
     },
     "version": "1.0.0"
   },
-  "functions": [
-    {
-      "request": {
-        "url": "/posts",
-        "method": "get",
-        "response": {
-          "contentType": "application/json"
-        }
-      },
-      "arguments": {
-        "id": {
-          "description": "Filter by post ID",
-          "type": {
-            "type": "nullable",
-            "underlying_type": {
-              "name": "Int32",
-              "type": "named"
-            }
-          },
-          "rest": {
-            "name": "id",
-            "in": "query",
-            "schema": {
-              "type": [
-                "integer"
-              ]
-            }
-          }
-        },
-        "userId": {
-          "description": "Filter by user ID",
-          "type": {
-            "type": "nullable",
-            "underlying_type": {
-              "name": "Int32",
-              "type": "named"
-            }
-          },
-          "rest": {
-            "name": "userId",
-            "in": "query",
-            "schema": {
-              "type": [
-                "integer"
-              ]
-            }
-          }
-        }
-      },
-      "description": "Get all available posts",
-      "name": "getPosts",
-      "result_type": {
-        "element_type": {
-          "name": "Post",
-          "type": "named"
-        },
-        "type": "array"
-      }
-    },
-    {
-      "request": {
-        "url": "/posts/{id}",
-        "method": "get",
-        "response": {
-          "contentType": "application/json"
-        }
-      },
-      "arguments": {
-        "id": {
-          "description": "The ID of the post to retrieve",
-          "type": {
-            "name": "Int32",
-            "type": "named"
-          },
-          "rest": {
-            "name": "id",
-            "in": "path",
-            "schema": {
-              "type": [
-                "integer"
-              ]
-            }
-          }
-        }
-      },
-      "description": "Get specific post",
-      "name": "getPostById",
-      "result_type": {
-        "name": "Post",
-        "type": "named"
-      }
-    },
-    {
-      "request": {
-        "url": "/posts/{id}/comments",
-        "method": "get",
-        "response": {
-          "contentType": "application/json"
-        }
-      },
-      "arguments": {
-        "id": {
-          "description": "post id",
-          "type": {
-            "name": "Int32",
-            "type": "named"
-          },
-          "rest": {
-            "name": "id",
-            "in": "path",
-            "schema": {
-              "type": [
-                "integer"
-              ]
-            }
-          }
-        }
-      },
-      "description": "Get comments for a specific post",
-      "name": "getPostsIdComments",
-      "result_type": {
-        "element_type": {
-          "name": "Comment",
-          "type": "named"
-        },
-        "type": "array"
-      }
-    },
-    {
-      "request": {
-        "url": "/comments",
-        "method": "get",
-        "response": {
-          "contentType": "application/json"
-        }
-      },
-      "arguments": {
-        "id": {
-          "description": "Filter by comment ID",
-          "type": {
-            "type": "nullable",
-            "underlying_type": {
-              "name": "Int32",
-              "type": "named"
-            }
-          },
-          "rest": {
-            "name": "id",
-            "in": "query",
-            "schema": {
-              "type": [
-                "integer"
-              ]
-            }
-          }
-        },
-        "postId": {
-          "description": "Filter by post ID",
-          "type": {
-            "type": "nullable",
-            "underlying_type": {
-              "name": "Int32",
-              "type": "named"
-            }
-          },
-          "rest": {
-            "name": "postId",
-            "in": "query",
-            "schema": {
-              "type": [
-                "integer"
-              ]
-            }
-          }
-        }
-      },
-      "description": "Get all available comments",
-      "name": "getComments",
-      "result_type": {
-        "element_type": {
-          "name": "Comment",
-          "type": "named"
-        },
-        "type": "array"
-      }
-    },
-    {
-      "request": {
-        "url": "/comments/{id}",
-        "method": "get",
-        "response": {
-          "contentType": "application/json"
-        }
-      },
-      "arguments": {
-        "id": {
-          "description": "The ID of the comment to retrieve",
-          "type": {
-            "name": "Int32",
-            "type": "named"
-          },
-          "rest": {
-            "name": "id",
-            "in": "path",
-            "schema": {
-              "type": [
-                "integer"
-              ]
-            }
-          }
-        }
-      },
-      "description": "Get specific comment",
-      "name": "getComment",
-      "result_type": {
-        "name": "Comment",
-        "type": "named"
-      }
-    },
-    {
+  "functions": {
+    "getAlbums": {
       "request": {
         "url": "/albums",
         "method": "get",
@@ -291,7 +73,7 @@
         "type": "array"
       }
     },
-    {
+    "getAlbumsId": {
       "request": {
         "url": "/albums/{id}",
         "method": "get",
@@ -324,7 +106,7 @@
         "type": "named"
       }
     },
-    {
+    "getAlbumsIdPhotos": {
       "request": {
         "url": "/albums/{id}/photos",
         "method": "get",
@@ -360,7 +142,131 @@
         "type": "array"
       }
     },
-    {
+    "getComment": {
+      "request": {
+        "url": "/comments/{id}",
+        "method": "get",
+        "response": {
+          "contentType": "application/json"
+        }
+      },
+      "arguments": {
+        "id": {
+          "description": "The ID of the comment to retrieve",
+          "type": {
+            "name": "Int32",
+            "type": "named"
+          },
+          "rest": {
+            "name": "id",
+            "in": "path",
+            "schema": {
+              "type": [
+                "integer"
+              ]
+            }
+          }
+        }
+      },
+      "description": "Get specific comment",
+      "name": "getComment",
+      "result_type": {
+        "name": "Comment",
+        "type": "named"
+      }
+    },
+    "getComments": {
+      "request": {
+        "url": "/comments",
+        "method": "get",
+        "response": {
+          "contentType": "application/json"
+        }
+      },
+      "arguments": {
+        "id": {
+          "description": "Filter by comment ID",
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "Int32",
+              "type": "named"
+            }
+          },
+          "rest": {
+            "name": "id",
+            "in": "query",
+            "schema": {
+              "type": [
+                "integer"
+              ]
+            }
+          }
+        },
+        "postId": {
+          "description": "Filter by post ID",
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "Int32",
+              "type": "named"
+            }
+          },
+          "rest": {
+            "name": "postId",
+            "in": "query",
+            "schema": {
+              "type": [
+                "integer"
+              ]
+            }
+          }
+        }
+      },
+      "description": "Get all available comments",
+      "name": "getComments",
+      "result_type": {
+        "element_type": {
+          "name": "Comment",
+          "type": "named"
+        },
+        "type": "array"
+      }
+    },
+    "getPhoto": {
+      "request": {
+        "url": "/photos/{id}",
+        "method": "get",
+        "response": {
+          "contentType": "application/json"
+        }
+      },
+      "arguments": {
+        "id": {
+          "description": "The ID of the photo to retrieve",
+          "type": {
+            "name": "Int32",
+            "type": "named"
+          },
+          "rest": {
+            "name": "id",
+            "in": "path",
+            "schema": {
+              "type": [
+                "integer"
+              ]
+            }
+          }
+        }
+      },
+      "description": "Get specific photo",
+      "name": "getPhoto",
+      "result_type": {
+        "name": "Photo",
+        "type": "named"
+      }
+    },
+    "getPhotos": {
       "request": {
         "url": "/photos",
         "method": "get",
@@ -418,9 +324,9 @@
         "type": "array"
       }
     },
-    {
+    "getPostById": {
       "request": {
-        "url": "/photos/{id}",
+        "url": "/posts/{id}",
         "method": "get",
         "response": {
           "contentType": "application/json"
@@ -428,7 +334,7 @@
       },
       "arguments": {
         "id": {
-          "description": "The ID of the photo to retrieve",
+          "description": "The ID of the post to retrieve",
           "type": {
             "name": "Int32",
             "type": "named"
@@ -444,14 +350,157 @@
           }
         }
       },
-      "description": "Get specific photo",
-      "name": "getPhoto",
+      "description": "Get specific post",
+      "name": "getPostById",
       "result_type": {
-        "name": "Photo",
+        "name": "Post",
         "type": "named"
       }
     },
-    {
+    "getPosts": {
+      "request": {
+        "url": "/posts",
+        "method": "get",
+        "response": {
+          "contentType": "application/json"
+        }
+      },
+      "arguments": {
+        "id": {
+          "description": "Filter by post ID",
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "Int32",
+              "type": "named"
+            }
+          },
+          "rest": {
+            "name": "id",
+            "in": "query",
+            "schema": {
+              "type": [
+                "integer"
+              ]
+            }
+          }
+        },
+        "userId": {
+          "description": "Filter by user ID",
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "Int32",
+              "type": "named"
+            }
+          },
+          "rest": {
+            "name": "userId",
+            "in": "query",
+            "schema": {
+              "type": [
+                "integer"
+              ]
+            }
+          }
+        }
+      },
+      "description": "Get all available posts",
+      "name": "getPosts",
+      "result_type": {
+        "element_type": {
+          "name": "Post",
+          "type": "named"
+        },
+        "type": "array"
+      }
+    },
+    "getPostsIdComments": {
+      "request": {
+        "url": "/posts/{id}/comments",
+        "method": "get",
+        "response": {
+          "contentType": "application/json"
+        }
+      },
+      "arguments": {
+        "id": {
+          "description": "post id",
+          "type": {
+            "name": "Int32",
+            "type": "named"
+          },
+          "rest": {
+            "name": "id",
+            "in": "path",
+            "schema": {
+              "type": [
+                "integer"
+              ]
+            }
+          }
+        }
+      },
+      "description": "Get comments for a specific post",
+      "name": "getPostsIdComments",
+      "result_type": {
+        "element_type": {
+          "name": "Comment",
+          "type": "named"
+        },
+        "type": "array"
+      }
+    },
+    "getTest": {
+      "request": {
+        "url": "/v1/test",
+        "method": "get",
+        "response": {
+          "contentType": "application/json"
+        }
+      },
+      "arguments": {},
+      "description": "Get test",
+      "name": "getTest",
+      "result_type": {
+        "name": "User",
+        "type": "named"
+      }
+    },
+    "getTodo": {
+      "request": {
+        "url": "/todos/{id}",
+        "method": "get",
+        "response": {
+          "contentType": "application/json"
+        }
+      },
+      "arguments": {
+        "id": {
+          "description": "The ID of the todo to retrieve",
+          "type": {
+            "name": "Int32",
+            "type": "named"
+          },
+          "rest": {
+            "name": "id",
+            "in": "path",
+            "schema": {
+              "type": [
+                "integer"
+              ]
+            }
+          }
+        }
+      },
+      "description": "Get specific todo",
+      "name": "getTodo",
+      "result_type": {
+        "name": "Todo",
+        "type": "named"
+      }
+    },
+    "getTodos": {
       "request": {
         "url": "/todos",
         "method": "get",
@@ -509,9 +558,9 @@
         "type": "array"
       }
     },
-    {
+    "getUser": {
       "request": {
-        "url": "/todos/{id}",
+        "url": "/users/{id}",
         "method": "get",
         "response": {
           "contentType": "application/json"
@@ -519,7 +568,7 @@
       },
       "arguments": {
         "id": {
-          "description": "The ID of the todo to retrieve",
+          "description": "The ID of the user to retrieve",
           "type": {
             "name": "Int32",
             "type": "named"
@@ -535,14 +584,14 @@
           }
         }
       },
-      "description": "Get specific todo",
-      "name": "getTodo",
+      "description": "Get specific user",
+      "name": "getUser",
       "result_type": {
-        "name": "Todo",
+        "name": "User",
         "type": "named"
       }
     },
-    {
+    "getUsers": {
       "request": {
         "url": "/users",
         "method": "get",
@@ -599,57 +648,8 @@
         },
         "type": "array"
       }
-    },
-    {
-      "request": {
-        "url": "/users/{id}",
-        "method": "get",
-        "response": {
-          "contentType": "application/json"
-        }
-      },
-      "arguments": {
-        "id": {
-          "description": "The ID of the user to retrieve",
-          "type": {
-            "name": "Int32",
-            "type": "named"
-          },
-          "rest": {
-            "name": "id",
-            "in": "path",
-            "schema": {
-              "type": [
-                "integer"
-              ]
-            }
-          }
-        }
-      },
-      "description": "Get specific user",
-      "name": "getUser",
-      "result_type": {
-        "name": "User",
-        "type": "named"
-      }
-    },
-    {
-      "request": {
-        "url": "/v1/test",
-        "method": "get",
-        "response": {
-          "contentType": "application/json"
-        }
-      },
-      "arguments": {},
-      "description": "Get test",
-      "name": "getTest",
-      "result_type": {
-        "name": "User",
-        "type": "named"
-      }
     }
-  ],
+  },
   "object_types": {
     "Album": {
       "fields": {
@@ -1249,8 +1249,8 @@
       }
     }
   },
-  "procedures": [
-    {
+  "procedures": {
+    "createPost": {
       "request": {
         "url": "/posts",
         "method": "post",
@@ -1285,33 +1285,15 @@
         "type": "named"
       }
     },
-    {
+    "deletePostById": {
       "request": {
         "url": "/posts/{id}",
-        "method": "put",
-        "requestBody": {
-          "contentType": "application/json"
-        },
+        "method": "delete",
         "response": {
           "contentType": "application/json"
         }
       },
       "arguments": {
-        "body": {
-          "description": "Post object that needs to be updated",
-          "type": {
-            "name": "Post",
-            "type": "named"
-          },
-          "rest": {
-            "in": "body",
-            "schema": {
-              "type": [
-                "object"
-              ]
-            }
-          }
-        },
         "id": {
           "description": "The ID of the post to retrieve",
           "type": {
@@ -1329,14 +1311,17 @@
           }
         }
       },
-      "description": "Update specific post",
-      "name": "updatePostById",
+      "description": "Delete specific post",
+      "name": "deletePostById",
       "result_type": {
-        "name": "Post",
-        "type": "named"
+        "type": "nullable",
+        "underlying_type": {
+          "name": "Boolean",
+          "type": "named"
+        }
       }
     },
-    {
+    "patchPostById": {
       "request": {
         "url": "/posts/{id}",
         "method": "patch",
@@ -1387,15 +1372,33 @@
         "type": "named"
       }
     },
-    {
+    "updatePostById": {
       "request": {
         "url": "/posts/{id}",
-        "method": "delete",
+        "method": "put",
+        "requestBody": {
+          "contentType": "application/json"
+        },
         "response": {
           "contentType": "application/json"
         }
       },
       "arguments": {
+        "body": {
+          "description": "Post object that needs to be updated",
+          "type": {
+            "name": "Post",
+            "type": "named"
+          },
+          "rest": {
+            "in": "body",
+            "schema": {
+              "type": [
+                "object"
+              ]
+            }
+          }
+        },
         "id": {
           "description": "The ID of the post to retrieve",
           "type": {
@@ -1413,17 +1416,14 @@
           }
         }
       },
-      "description": "Delete specific post",
-      "name": "deletePostById",
+      "description": "Update specific post",
+      "name": "updatePostById",
       "result_type": {
-        "type": "nullable",
-        "underlying_type": {
-          "name": "Boolean",
-          "type": "named"
-        }
+        "name": "Post",
+        "type": "named"
       }
     }
-  ],
+  },
   "scalar_types": {
     "Boolean": {
       "aggregate_functions": {},

@@ -10,6 +10,7 @@ import (
 
 	"github.com/hasura/ndc-rest/connector/internal"
 	"github.com/hasura/ndc-rest/ndc-rest-schema/command"
+	"github.com/hasura/ndc-rest/ndc-rest-schema/configuration"
 	rest "github.com/hasura/ndc-rest/ndc-rest-schema/schema"
 	restUtils "github.com/hasura/ndc-rest/ndc-rest-schema/utils"
 	"github.com/hasura/ndc-sdk-go/schema"
@@ -17,12 +18,12 @@ import (
 )
 
 // GetSchema gets the connector's schema.
-func (c *RESTConnector) GetSchema(ctx context.Context, configuration *Configuration, _ *State) (schema.SchemaResponseMarshaler, error) {
+func (c *RESTConnector) GetSchema(ctx context.Context, configuration *configuration.Configuration, _ *State) (schema.SchemaResponseMarshaler, error) {
 	return c.rawSchema, nil
 }
 
 // BuildSchemaFiles build NDC REST schema from file list
-func BuildSchemaFiles(configDir string, files []ConfigItem, logger *slog.Logger) ([]NDCRestSchemaWithName, map[string][]string) {
+func BuildSchemaFiles(configDir string, files []configuration.ConfigItem, logger *slog.Logger) ([]NDCRestSchemaWithName, map[string][]string) {
 	schemas := make([]NDCRestSchemaWithName, len(files))
 	errors := make(map[string][]string)
 	for i, file := range files {
@@ -45,7 +46,7 @@ func BuildSchemaFiles(configDir string, files []ConfigItem, logger *slog.Logger)
 	return schemas, errors
 }
 
-func buildSchemaFile(configDir string, conf *ConfigItem, logger *slog.Logger) (*rest.NDCRestSchema, error) {
+func buildSchemaFile(configDir string, conf *configuration.ConfigItem, logger *slog.Logger) (*rest.NDCRestSchema, error) {
 	if conf.ConvertConfig.File == "" {
 		return nil, errFilePathRequired
 	}
@@ -69,6 +70,8 @@ func (c *RESTConnector) ApplyNDCRestSchemas(schemas []NDCRestSchemaWithName) map
 	ndcSchema := &rest.NDCRestSchema{
 		ScalarTypes: make(schema.SchemaResponseScalarTypes),
 		ObjectTypes: make(map[string]rest.ObjectType),
+		Functions:   make(map[string]rest.OperationInfo),
+		Procedures:  make(map[string]rest.OperationInfo),
 	}
 	errors := make(map[string][]string)
 
@@ -149,10 +152,10 @@ func (c *RESTConnector) ApplyNDCRestSchemas(schemas []NDCRestSchemaWithName) map
 				settings.Servers[i] = server
 			}
 		}
-		meta := RESTMetadata{
-			settings:   settings,
-			functions:  map[string]rest.OperationInfo{},
-			procedures: map[string]rest.OperationInfo{},
+		meta := rest.NDCRestSchema{
+			Settings:   settings,
+			Functions:  map[string]rest.OperationInfo{},
+			Procedures: map[string]rest.OperationInfo{},
 		}
 		var errs []string
 
@@ -171,8 +174,6 @@ func (c *RESTConnector) ApplyNDCRestSchemas(schemas []NDCRestSchemaWithName) map
 			}
 		}
 
-		var functionSchemas []*rest.OperationInfo
-		var procedureSchemas []*rest.OperationInfo
 		for _, fnItem := range item.schema.Functions {
 			if fnItem.Request == nil || fnItem.Request.URL == "" {
 				continue
@@ -189,8 +190,8 @@ func (c *RESTConnector) ApplyNDCRestSchemas(schemas []NDCRestSchemaWithName) map
 				Name:        fnItem.Name,
 				ResultType:  fnItem.ResultType,
 			}
-			meta.functions[fnItem.Name] = fn
-			functionSchemas = append(functionSchemas, &fn)
+			meta.Functions[fnItem.Name] = fn
+			ndcSchema.Functions[fnItem.Name] = fn
 		}
 
 		for _, procItem := range item.schema.Procedures {
@@ -202,23 +203,20 @@ func (c *RESTConnector) ApplyNDCRestSchemas(schemas []NDCRestSchemaWithName) map
 				errs = append(errs, fmt.Sprintf("procedure %s: %s", procItem.Name, err))
 				continue
 			}
-			meta.procedures[procItem.Name] = rest.OperationInfo{
+			meta.Procedures[procItem.Name] = rest.OperationInfo{
 				Request:     req,
 				Name:        procItem.Name,
 				Arguments:   procItem.Arguments,
 				Description: procItem.Description,
 				ResultType:  procItem.ResultType,
 			}
-			procedureSchemas = append(procedureSchemas, procItem)
+			ndcSchema.Procedures[procItem.Name] = procItem
 		}
 
 		if len(errs) > 0 {
 			errors[item.name] = errs
 			continue
 		}
-		ndcSchema.Functions = append(ndcSchema.Functions, functionSchemas...)
-		ndcSchema.Procedures = append(ndcSchema.Procedures, procedureSchemas...)
-
 		c.metadata = append(c.metadata, meta)
 	}
 
@@ -254,7 +252,7 @@ func validateRequestSchema(req *rest.Request, defaultMethod string) (*rest.Reque
 	return req, nil
 }
 
-func buildRESTArguments(restSchema *rest.NDCRestSchema, conf *ConfigItem) {
+func buildRESTArguments(restSchema *rest.NDCRestSchema, conf *configuration.ConfigItem) {
 	if restSchema.Settings == nil || len(restSchema.Settings.Servers) < 2 {
 		return
 	}
@@ -274,7 +272,6 @@ func buildRESTArguments(restSchema *rest.NDCRestSchema, conf *ConfigItem) {
 	serverScalar.Representation = schema.NewTypeRepresentationEnum(serverIDs).Encode()
 
 	restSchema.ScalarTypes[internal.RESTServerIDScalarName] = *serverScalar
-
 	restSchema.ObjectTypes[internal.RESTSingleOptionsObjectName] = internal.SingleObjectType
 
 	restSingleOptionsArgument := rest.ArgumentInfo{
@@ -321,33 +318,33 @@ func buildRESTArguments(restSchema *rest.NDCRestSchema, conf *ConfigItem) {
 		},
 	}
 
-	functionsLen := len(restSchema.Functions)
-	for i := range functionsLen {
-		fn := restSchema.Functions[i]
+	functionKeys := utils.GetKeys(restSchema.Functions)
+	for _, key := range functionKeys {
+		fn := restSchema.Functions[key]
 		funcName := buildDistributedName(fn.Name)
-		distributedFn := &rest.OperationInfo{
+		distributedFn := rest.OperationInfo{
 			Request:     fn.Request,
 			Arguments:   cloneDistributedArguments(fn.Arguments),
 			Description: fn.Description,
 			Name:        funcName,
 			ResultType:  schema.NewNamedType(buildDistributedResultObjectType(restSchema, funcName, fn.ResultType)).Encode(),
 		}
-		restSchema.Functions = append(restSchema.Functions, distributedFn)
+		restSchema.Functions[funcName] = distributedFn
 	}
 
-	proceduresLen := len(restSchema.Procedures)
-	for i := range proceduresLen {
-		proc := restSchema.Procedures[i]
+	procedureKeys := utils.GetKeys(restSchema.Procedures)
+	for _, key := range procedureKeys {
+		proc := restSchema.Procedures[key]
 		procName := buildDistributedName(proc.Name)
 
-		distributedProc := &rest.OperationInfo{
+		distributedProc := rest.OperationInfo{
 			Request:     proc.Request,
 			Arguments:   cloneDistributedArguments(proc.Arguments),
 			Description: proc.Description,
 			Name:        procName,
 			ResultType:  schema.NewNamedType(buildDistributedResultObjectType(restSchema, procName, proc.ResultType)).Encode(),
 		}
-		restSchema.Procedures = append(restSchema.Procedures, distributedProc)
+		restSchema.Procedures[procName] = distributedProc
 	}
 }
 

@@ -4,12 +4,13 @@ import (
 	"context"
 
 	"github.com/hasura/ndc-rest/connector/internal"
+	"github.com/hasura/ndc-rest/ndc-rest-schema/configuration"
 	"github.com/hasura/ndc-sdk-go/schema"
 	"github.com/hasura/ndc-sdk-go/utils"
 )
 
 // Query executes a query.
-func (c *RESTConnector) Query(ctx context.Context, configuration *Configuration, state *State, request *schema.QueryRequest) (schema.QueryResponse, error) {
+func (c *RESTConnector) Query(ctx context.Context, configuration *configuration.Configuration, state *State, request *schema.QueryRequest) (schema.QueryResponse, error) {
 	valueField, err := utils.EvalFunctionSelectionFieldValue(request)
 	if err != nil {
 		return nil, schema.UnprocessableContentError(err.Error(), nil)

@@ -52,316 +52,8 @@
     ],
     "version": "1.0.19"
   },
-  "functions": [
-    {
-      "request": {
-        "url": "/pet/findByStatus",
-        "method": "get",
-        "security": [
-          {
-            "petstore_auth": [
-              "write:pets",
-              "read:pets"
-            ]
-          }
-        ],
-        "response": {
-          "contentType": "application/json"
-        }
-      },
-      "arguments": {
-        "status": {
-          "description": "Status values that need to be considered for filter",
-          "type": {
-            "type": "nullable",
-            "underlying_type": {
-              "name": "PetStatus",
-              "type": "named"
-            }
-          },
-          "rest": {
-            "explode": true,
-            "name": "status",
-            "in": "query",
-            "schema": {
-              "type": [
-                "string"
-              ]
-            }
-          }
-        }
-      },
-      "description": "Finds Pets by status",
-      "name": "findPetsByStatus",
-      "result_type": {
-        "element_type": {
-          "name": "Pet",
-          "type": "named"
-        },
-        "type": "array"
-      }
-    },
-    {
-      "request": {
-        "url": "/pet/findByTags",
-        "method": "get",
-        "security": [
-          {
-            "petstore_auth": [
-              "write:pets",
-              "read:pets"
-            ]
-          }
-        ],
-        "response": {
-          "contentType": "application/json"
-        }
-      },
-      "arguments": {
-        "tags": {
-          "description": "Tags to filter by",
-          "type": {
-            "type": "nullable",
-            "underlying_type": {
-              "element_type": {
-                "name": "String",
-                "type": "named"
-              },
-              "type": "array"
-            }
-          },
-          "rest": {
-            "explode": true,
-            "name": "tags",
-            "in": "query",
-            "schema": {
-              "type": [
-                "array"
-              ],
-              "items": {
-                "type": [
-                  "string"
-                ]
-              }
-            }
-          }
-        }
-      },
-      "description": "Finds Pets by tags",
-      "name": "findPetsByTags",
-      "result_type": {
-        "element_type": {
-          "name": "Pet",
-          "type": "named"
-        },
-        "type": "array"
-      }
-    },
-    {
-      "request": {
-        "url": "/pet/{petId}",
-        "method": "get",
-        "security": [
-          {
-            "api_key": []
-          },
-          {
-            "petstore_auth": [
-              "write:pets",
-              "read:pets"
-            ]
-          }
-        ],
-        "response": {
-          "contentType": "application/json"
-        }
-      },
-      "arguments": {
-        "petId": {
-          "description": "ID of pet to return",
-          "type": {
-            "name": "Int64",
-            "type": "named"
-          },
-          "rest": {
-            "name": "petId",
-            "in": "path",
-            "schema": {
-              "type": [
-                "integer"
-              ],
-              "format": "int64"
-            }
-          }
-        }
-      },
-      "description": "Find pet by ID",
-      "name": "getPetById",
-      "result_type": {
-        "name": "Pet",
-        "type": "named"
-      }
-    },
-    {
-      "request": {
-        "url": "/store/inventory",
-        "method": "get",
-        "security": [
-          {
-            "api_key": []
-          }
-        ],
-        "response": {
-          "contentType": "application/json"
-        }
-      },
-      "arguments": {},
-      "description": "Returns pet inventories by status",
-      "name": "getInventory",
-      "result_type": {
-        "name": "JSON",
-        "type": "named"
-      }
-    },
-    {
-      "request": {
-        "url": "/store/order/{orderId}",
-        "method": "get",
-        "response": {
-          "contentType": "application/json"
-        }
-      },
-      "arguments": {
-        "orderId": {
-          "description": "ID of order that needs to be fetched",
-          "type": {
-            "name": "Int64",
-            "type": "named"
-          },
-          "rest": {
-            "name": "orderId",
-            "in": "path",
-            "schema": {
-              "type": [
-                "integer"
-              ],
-              "format": "int64"
-            }
-          }
-        }
-      },
-      "description": "Find purchase order by ID",
-      "name": "getOrderById",
-      "result_type": {
-        "name": "Order",
-        "type": "named"
-      }
-    },
-    {
-      "request": {
-        "url": "/user/login",
-        "method": "get",
-        "response": {
-          "contentType": "application/json"
-        }
-      },
-      "arguments": {
-        "password": {
-          "description": "The password for login in clear text",
-          "type": {
-            "type": "nullable",
-            "underlying_type": {
-              "name": "String",
-              "type": "named"
-            }
-          },
-          "rest": {
-            "name": "password",
-            "in": "query",
-            "schema": {
-              "type": [
-                "string"
-              ]
-            }
-          }
-        },
-        "username": {
-          "description": "The user name for login",
-          "type": {
-            "type": "nullable",
-            "underlying_type": {
-              "name": "String",
-              "type": "named"
-            }
-          },
-          "rest": {
-            "name": "username",
-            "in": "query",
-            "schema": {
-              "type": [
-                "string"
-              ]
-            }
-          }
-        }
-      },
-      "description": "Logs user into the system",
-      "name": "loginUser",
-      "result_type": {
-        "name": "String",
-        "type": "named"
-      }
-    },
-    {
-      "request": {
-        "url": "/user/{username}",
-        "method": "get",
-        "response": {
-          "contentType": "application/json"
-        }
-      },
-      "arguments": {
-        "username": {
-          "description": "The name that needs to be fetched. Use user1 for testing. ",
-          "type": {
-            "name": "String",
-            "type": "named"
-          },
-          "rest": {
-            "name": "username",
-            "in": "path",
-            "schema": {
-              "type": [
-                "string"
-              ]
-            }
-          }
-        }
-      },
-      "description": "Get user by user name",
-      "name": "getUserByName",
-      "result_type": {
-        "name": "User",
-        "type": "named"
-      }
-    },
-    {
-      "request": {
-        "url": "/snake",
-        "method": "get",
-        "response": {
-          "contentType": "application/json"
-        }
-      },
-      "arguments": {},
-      "description": "Get snake object",
-      "name": "getSnake",
-      "result_type": {
-        "name": "SnakeObject",
-        "type": "named"
-      }
-    },
-    {
+  "functions": {
+    "GetInvoices": {
       "request": {
         "url": "/v1/invoices",
         "method": "get",
@@ -587,8 +279,316 @@
         "name": "GetInvoicesResult",
         "type": "named"
       }
+    },
+    "findPetsByStatus": {
+      "request": {
+        "url": "/pet/findByStatus",
+        "method": "get",
+        "security": [
+          {
+            "petstore_auth": [
+              "write:pets",
+              "read:pets"
+            ]
+          }
+        ],
+        "response": {
+          "contentType": "application/json"
+        }
+      },
+      "arguments": {
+        "status": {
+          "description": "Status values that need to be considered for filter",
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "PetStatus",
+              "type": "named"
+            }
+          },
+          "rest": {
+            "explode": true,
+            "name": "status",
+            "in": "query",
+            "schema": {
+              "type": [
+                "string"
+              ]
+            }
+          }
+        }
+      },
+      "description": "Finds Pets by status",
+      "name": "findPetsByStatus",
+      "result_type": {
+        "element_type": {
+          "name": "Pet",
+          "type": "named"
+        },
+        "type": "array"
+      }
+    },
+    "findPetsByTags": {
+      "request": {
+        "url": "/pet/findByTags",
+        "method": "get",
+        "security": [
+          {
+            "petstore_auth": [
+              "write:pets",
+              "read:pets"
+            ]
+          }
+        ],
+        "response": {
+          "contentType": "application/json"
+        }
+      },
+      "arguments": {
+        "tags": {
+          "description": "Tags to filter by",
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "element_type": {
+                "name": "String",
+                "type": "named"
+              },
+              "type": "array"
+            }
+          },
+          "rest": {
+            "explode": true,
+            "name": "tags",
+            "in": "query",
+            "schema": {
+              "type": [
+                "array"
+              ],
+              "items": {
+                "type": [
+                  "string"
+                ]
+              }
+            }
+          }
+        }
+      },
+      "description": "Finds Pets by tags",
+      "name": "findPetsByTags",
+      "result_type": {
+        "element_type": {
+          "name": "Pet",
+          "type": "named"
+        },
+        "type": "array"
+      }
+    },
+    "getInventory": {
+      "request": {
+        "url": "/store/inventory",
+        "method": "get",
+        "security": [
+          {
+            "api_key": []
+          }
+        ],
+        "response": {
+          "contentType": "application/json"
+        }
+      },
+      "arguments": {},
+      "description": "Returns pet inventories by status",
+      "name": "getInventory",
+      "result_type": {
+        "name": "JSON",
+        "type": "named"
+      }
+    },
+    "getOrderById": {
+      "request": {
+        "url": "/store/order/{orderId}",
+        "method": "get",
+        "response": {
+          "contentType": "application/json"
+        }
+      },
+      "arguments": {
+        "orderId": {
+          "description": "ID of order that needs to be fetched",
+          "type": {
+            "name": "Int64",
+            "type": "named"
+          },
+          "rest": {
+            "name": "orderId",
+            "in": "path",
+            "schema": {
+              "type": [
+                "integer"
+              ],
+              "format": "int64"
+            }
+          }
+        }
+      },
+      "description": "Find purchase order by ID",
+      "name": "getOrderById",
+      "result_type": {
+        "name": "Order",
+        "type": "named"
+      }
+    },
+    "getPetById": {
+      "request": {
+        "url": "/pet/{petId}",
+        "method": "get",
+        "security": [
+          {
+            "api_key": []
+          },
+          {
+            "petstore_auth": [
+              "write:pets",
+              "read:pets"
+            ]
+          }
+        ],
+        "response": {
+          "contentType": "application/json"
+        }
+      },
+      "arguments": {
+        "petId": {
+          "description": "ID of pet to return",
+          "type": {
+            "name": "Int64",
+            "type": "named"
+          },
+          "rest": {
+            "name": "petId",
+            "in": "path",
+            "schema": {
+              "type": [
+                "integer"
+              ],
+              "format": "int64"
+            }
+          }
+        }
+      },
+      "description": "Find pet by ID",
+      "name": "getPetById",
+      "result_type": {
+        "name": "Pet",
+        "type": "named"
+      }
+    },
+    "getSnake": {
+      "request": {
+        "url": "/snake",
+        "method": "get",
+        "response": {
+          "contentType": "application/json"
+        }
+      },
+      "arguments": {},
+      "description": "Get snake object",
+      "name": "getSnake",
+      "result_type": {
+        "name": "SnakeObject",
+        "type": "named"
+      }
+    },
+    "getUserByName": {
+      "request": {
+        "url": "/user/{username}",
+        "method": "get",
+        "response": {
+          "contentType": "application/json"
+        }
+      },
+      "arguments": {
+        "username": {
+          "description": "The name that needs to be fetched. Use user1 for testing. ",
+          "type": {
+            "name": "String",
+            "type": "named"
+          },
+          "rest": {
+            "name": "username",
+            "in": "path",
+            "schema": {
+              "type": [
+                "string"
+              ]
+            }
+          }
+        }
+      },
+      "description": "Get user by user name",
+      "name": "getUserByName",
+      "result_type": {
+        "name": "User",
+        "type": "named"
+      }
+    },
+    "loginUser": {
+      "request": {
+        "url": "/user/login",
+        "method": "get",
+        "response": {
+          "contentType": "application/json"
+        }
+      },
+      "arguments": {
+        "password": {
+          "description": "The password for login in clear text",
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "String",
+              "type": "named"
+            }
+          },
+          "rest": {
+            "name": "password",
+            "in": "query",
+            "schema": {
+              "type": [
+                "string"
+              ]
+            }
+          }
+        },
+        "username": {
+          "description": "The user name for login",
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "String",
+              "type": "named"
+            }
+          },
+          "rest": {
+            "name": "username",
+            "in": "query",
+            "schema": {
+              "type": [
+                "string"
+              ]
+            }
+          }
+        }
+      },
+      "description": "Logs user into the system",
+      "name": "loginUser",
+      "result_type": {
+        "name": "String",
+        "type": "named"
+      }
     }
-  ],
+  },
   "object_types": {
     "Address": {
       "fields": {
@@ -6201,591 +6201,8 @@
       }
     }
   },
-  "procedures": [
-    {
-      "request": {
-        "url": "/pet",
-        "method": "post",
-        "security": [
-          {
-            "petstore_auth": [
-              "write:pets",
-              "read:pets"
-            ]
-          }
-        ],
-        "requestBody": {
-          "contentType": "application/json"
-        },
-        "response": {
-          "contentType": "application/json"
-        }
-      },
-      "arguments": {
-        "body": {
-          "description": "Request body of POST /pet",
-          "type": {
-            "name": "Pet",
-            "type": "named"
-          },
-          "rest": {
-            "in": "body"
-          }
-        }
-      },
-      "description": "Add a new pet to the store",
-      "name": "addPet",
-      "result_type": {
-        "name": "Pet",
-        "type": "named"
-      }
-    },
-    {
-      "request": {
-        "url": "/pet",
-        "method": "put",
-        "security": [
-          {
-            "petstore_auth": [
-              "write:pets",
-              "read:pets"
-            ]
-          }
-        ],
-        "requestBody": {
-          "contentType": "application/json"
-        },
-        "response": {
-          "contentType": "application/json"
-        }
-      },
-      "arguments": {
-        "body": {
-          "description": "Request body of PUT /pet",
-          "type": {
-            "name": "Pet",
-            "type": "named"
-          },
-          "rest": {
-            "in": "body"
-          }
-        }
-      },
-      "description": "Update an existing pet",
-      "name": "updatePet",
-      "result_type": {
-        "name": "Pet",
-        "type": "named"
-      }
-    },
-    {
-      "request": {
-        "url": "/pet/{petId}",
-        "method": "post",
-        "security": [
-          {
-            "petstore_auth": [
-              "write:pets",
-              "read:pets"
-            ]
-          }
-        ],
-        "response": {
-          "contentType": "application/json"
-        }
-      },
-      "arguments": {
-        "name": {
-          "description": "Name of pet that needs to be updated",
-          "type": {
-            "type": "nullable",
-            "underlying_type": {
-              "name": "String",
-              "type": "named"
-            }
-          },
-          "rest": {
-            "name": "name",
-            "in": "query",
-            "schema": {
-              "type": [
-                "string"
-              ]
-            }
-          }
-        },
-        "petId": {
-          "description": "ID of pet that needs to be updated",
-          "type": {
-            "name": "Int64",
-            "type": "named"
-          },
-          "rest": {
-            "name": "petId",
-            "in": "path",
-            "schema": {
-              "type": [
-                "integer"
-              ],
-              "format": "int64"
-            }
-          }
-        },
-        "status": {
-          "description": "Status of pet that needs to be updated",
-          "type": {
-            "type": "nullable",
-            "underlying_type": {
-              "name": "String",
-              "type": "named"
-            }
-          },
-          "rest": {
-            "name": "status",
-            "in": "query",
-            "schema": {
-              "type": [
-                "string"
-              ]
-            }
-          }
-        }
-      },
-      "description": "Updates a pet in the store with form data",
-      "name": "updatePetWithForm",
-      "result_type": {
-        "type": "nullable",
-        "underlying_type": {
-          "name": "Boolean",
-          "type": "named"
-        }
-      }
-    },
-    {
-      "request": {
-        "url": "/pet/{petId}",
-        "method": "delete",
-        "security": [
-          {
-            "petstore_auth": [
-              "write:pets",
-              "read:pets"
-            ]
-          }
-        ],
-        "response": {
-          "contentType": "application/json"
-        }
-      },
-      "arguments": {
-        "api_key": {
-          "type": {
-            "type": "nullable",
-            "underlying_type": {
-              "name": "String",
-              "type": "named"
-            }
-          },
-          "rest": {
-            "name": "api_key",
-            "in": "header",
-            "schema": {
-              "type": [
-                "string"
-              ]
-            }
-          }
-        },
-        "petId": {
-          "description": "Pet id to delete",
-          "type": {
-            "name": "Int64",
-            "type": "named"
-          },
-          "rest": {
-            "name": "petId",
-            "in": "path",
-            "schema": {
-              "type": [
-                "integer"
-              ],
-              "format": "int64"
-            }
-          }
-        }
-      },
-      "description": "Deletes a pet",
-      "name": "deletePet",
-      "result_type": {
-        "type": "nullable",
-        "underlying_type": {
-          "name": "Boolean",
-          "type": "named"
-        }
-      }
-    },
-    {
-      "request": {
-        "url": "/pet/{petId}/uploadImage",
-        "method": "post",
-        "security": [
-          {
-            "petstore_auth": [
-              "write:pets",
-              "read:pets"
-            ]
-          }
-        ],
-        "requestBody": {
-          "contentType": "application/octet-stream"
-        },
-        "response": {
-          "contentType": "application/json"
-        }
-      },
-      "arguments": {
-        "additionalMetadata": {
-          "description": "Additional Metadata",
-          "type": {
-            "type": "nullable",
-            "underlying_type": {
-              "name": "String",
-              "type": "named"
-            }
-          },
-          "rest": {
-            "name": "additionalMetadata",
-            "in": "query",
-            "schema": {
-              "type": [
-                "string"
-              ]
-            }
-          }
-        },
-        "body": {
-          "description": "Request body of POST /pet/{petId}/uploadImage",
-          "type": {
-            "type": "nullable",
-            "underlying_type": {
-              "name": "Binary",
-              "type": "named"
-            }
-          },
-          "rest": {
-            "in": "body"
-          }
-        },
-        "petId": {
-          "description": "ID of pet to update",
-          "type": {
-            "name": "Int64",
-            "type": "named"
-          },
-          "rest": {
-            "name": "petId",
-            "in": "path",
-            "schema": {
-              "type": [
-                "integer"
-              ],
-              "format": "int64"
-            }
-          }
-        }
-      },
-      "description": "uploads an image",
-      "name": "uploadFile",
-      "result_type": {
-        "name": "ApiResponse",
-        "type": "named"
-      }
-    },
-    {
-      "request": {
-        "url": "/pet/multipart",
-        "method": "post",
-        "requestBody": {
-          "contentType": "multipart/form-data",
-          "encoding": {
-            "profileImage": {
-              "contentType": [
-                "image/png",
-                "image/jpeg"
-              ],
-              "headers": {
-                "X-Rate-Limit-Limit": {
-                  "explode": false,
-                  "argumentName": "headerXRateLimitLimit",
-                  "schema": {
-                    "type": [
-                      "integer"
-                    ]
-                  }
-                }
-              }
-            }
-          }
-        },
-        "response": {
-          "contentType": "application/json"
-        }
-      },
-      "arguments": {
-        "body": {
-          "description": "Request body of POST /pet/multipart",
-          "type": {
-            "type": "nullable",
-            "underlying_type": {
-              "name": "UploadPetMultipartBody",
-              "type": "named"
-            }
-          },
-          "rest": {
-            "in": "body"
-          }
-        },
-        "headerXRateLimitLimit": {
-          "description": "The number of allowed requests in the current period",
-          "type": {
-            "name": "Int32",
-            "type": "named"
-          },
-          "rest": {
-            "explode": false,
-            "argumentName": "headerXRateLimitLimit",
-            "schema": {
-              "type": [
-                "integer"
-              ]
-            }
-          }
-        }
-      },
-      "name": "uploadPetMultipart",
-      "result_type": {
-        "name": "ApiResponse",
-        "type": "named"
-      }
-    },
-    {
-      "request": {
-        "url": "/store/order",
-        "method": "post",
-        "requestBody": {
-          "contentType": "application/json"
-        },
-        "response": {
-          "contentType": "application/json"
-        }
-      },
-      "arguments": {
-        "body": {
-          "description": "Request body of POST /store/order",
-          "type": {
-            "type": "nullable",
-            "underlying_type": {
-              "name": "Order",
-              "type": "named"
-            }
-          },
-          "rest": {
-            "in": "body"
-          }
-        }
-      },
-      "description": "Place an order for a pet",
-      "name": "placeOrder",
-      "result_type": {
-        "name": "Order",
-        "type": "named"
-      }
-    },
-    {
-      "request": {
-        "url": "/store/order/{orderId}",
-        "method": "delete",
-        "response": {
-          "contentType": "application/json"
-        }
-      },
-      "arguments": {
-        "orderId": {
-          "description": "ID of the order that needs to be deleted",
-          "type": {
-            "name": "Int64",
-            "type": "named"
-          },
-          "rest": {
-            "name": "orderId",
-            "in": "path",
-            "schema": {
-              "type": [
-                "integer"
-              ],
-              "format": "int64"
-            }
-          }
-        }
-      },
-      "description": "Delete purchase order by ID",
-      "name": "deleteOrder",
-      "result_type": {
-        "type": "nullable",
-        "underlying_type": {
-          "name": "Boolean",
-          "type": "named"
-        }
-      }
-    },
-    {
-      "request": {
-        "url": "/user/createWithList",
-        "method": "post",
-        "requestBody": {
-          "contentType": "application/json"
-        },
-        "response": {
-          "contentType": "application/json"
-        }
-      },
-      "arguments": {
-        "body": {
-          "description": "Request body of POST /user/createWithList",
-          "type": {
-            "type": "nullable",
-            "underlying_type": {
-              "element_type": {
-                "name": "User",
-                "type": "named"
-              },
-              "type": "array"
-            }
-          },
-          "rest": {
-            "in": "body"
-          }
-        }
-      },
-      "description": "Creates list of users with given input array",
-      "name": "createUsersWithListInput",
-      "result_type": {
-        "name": "User",
-        "type": "named"
-      }
-    },
-    {
-      "request": {
-        "url": "/user/{username}",
-        "method": "delete",
-        "response": {
-          "contentType": "application/json"
-        }
-      },
-      "arguments": {
-        "username": {
-          "description": "The name that needs to be deleted",
-          "type": {
-            "name": "String",
-            "type": "named"
-          },
-          "rest": {
-            "name": "username",
-            "in": "path",
-            "schema": {
-              "type": [
-                "string"
-              ]
-            }
-          }
-        }
-      },
-      "description": "Delete user",
-      "name": "deleteUser",
-      "result_type": {
-        "type": "nullable",
-        "underlying_type": {
-          "name": "Boolean",
-          "type": "named"
-        }
-      }
-    },
-    {
-      "request": {
-        "url": "/snake",
-        "method": "post",
-        "response": {
-          "contentType": "application/json"
-        }
-      },
-      "arguments": {},
-      "description": "Add snake object",
-      "name": "addSnake",
-      "result_type": {
-        "name": "SnakeObject",
-        "type": "named"
-      }
-    },
-    {
-      "request": {
-        "url": "/test_helpers/treasury/inbound_transfers/{id}/fail",
-        "method": "post",
-        "requestBody": {
-          "contentType": "application/x-www-form-urlencoded",
-          "encoding": {
-            "expand": {
-              "style": "deepObject",
-              "explode": true
-            },
-            "failure_details": {
-              "style": "deepObject",
-              "explode": true
-            }
-          }
-        },
-        "response": {
-          "contentType": "application/json"
-        }
-      },
-      "arguments": {
-        "body": {
-          "description": "Request body of POST /test_helpers/treasury/inbound_transfers/{id}/fail",
-          "type": {
-            "type": "nullable",
-            "underlying_type": {
-              "name": "PostTestHelpersTreasuryInboundTransfersIdFailBody",
-              "type": "named"
-            }
-          },
-          "rest": {
-            "in": "body"
-          }
-        },
-        "id": {
-          "type": {
-            "name": "String",
-            "type": "named"
-          },
-          "rest": {
-            "style": "simple",
-            "name": "id",
-            "in": "path",
-            "schema": {
-              "type": [
-                "string"
-              ],
-              "maxLength": 5000
-            }
-          }
-        }
-      },
-      "name": "PostTestHelpersTreasuryInboundTransfersIdFail",
-      "result_type": {
-        "name": "TreasuryInboundTransfer",
-        "type": "named"
-      }
-    },
-    {
+  "procedures": {
+    "DeleteAccountsAccount": {
       "request": {
         "url": "/v1/accounts/{account}",
         "method": "delete",
@@ -6818,7 +6235,7 @@
         "type": "named"
       }
     },
-    {
+    "PostCheckoutSessions": {
       "request": {
         "url": "/v1/checkout/sessions",
         "method": "post",
@@ -6932,7 +6349,7 @@
         "type": "named"
       }
     },
-    {
+    "PostFiles": {
       "request": {
         "url": "/v1/files",
         "method": "post",
@@ -7009,7 +6426,120 @@
         "type": "named"
       }
     },
-    {
+    "PostTestHelpersTreasuryInboundTransfersIdFail": {
+      "request": {
+        "url": "/test_helpers/treasury/inbound_transfers/{id}/fail",
+        "method": "post",
+        "requestBody": {
+          "contentType": "application/x-www-form-urlencoded",
+          "encoding": {
+            "expand": {
+              "style": "deepObject",
+              "explode": true
+            },
+            "failure_details": {
+              "style": "deepObject",
+              "explode": true
+            }
+          }
+        },
+        "response": {
+          "contentType": "application/json"
+        }
+      },
+      "arguments": {
+        "body": {
+          "description": "Request body of POST /test_helpers/treasury/inbound_transfers/{id}/fail",
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "PostTestHelpersTreasuryInboundTransfersIdFailBody",
+              "type": "named"
+            }
+          },
+          "rest": {
+            "in": "body"
+          }
+        },
+        "id": {
+          "type": {
+            "name": "String",
+            "type": "named"
+          },
+          "rest": {
+            "style": "simple",
+            "name": "id",
+            "in": "path",
+            "schema": {
+              "type": [
+                "string"
+              ],
+              "maxLength": 5000
+            }
+          }
+        }
+      },
+      "name": "PostTestHelpersTreasuryInboundTransfersIdFail",
+      "result_type": {
+        "name": "TreasuryInboundTransfer",
+        "type": "named"
+      }
+    },
+    "addPet": {
+      "request": {
+        "url": "/pet",
+        "method": "post",
+        "security": [
+          {
+            "petstore_auth": [
+              "write:pets",
+              "read:pets"
+            ]
+          }
+        ],
+        "requestBody": {
+          "contentType": "application/json"
+        },
+        "response": {
+          "contentType": "application/json"
+        }
+      },
+      "arguments": {
+        "body": {
+          "description": "Request body of POST /pet",
+          "type": {
+            "name": "Pet",
+            "type": "named"
+          },
+          "rest": {
+            "in": "body"
+          }
+        }
+      },
+      "description": "Add a new pet to the store",
+      "name": "addPet",
+      "result_type": {
+        "name": "Pet",
+        "type": "named"
+      }
+    },
+    "addSnake": {
+      "request": {
+        "url": "/snake",
+        "method": "post",
+        "response": {
+          "contentType": "application/json"
+        }
+      },
+      "arguments": {},
+      "description": "Add snake object",
+      "name": "addSnake",
+      "result_type": {
+        "name": "SnakeObject",
+        "type": "named"
+      }
+    },
+    "createFineTuningJob": {
       "request": {
         "url": "/fine_tuning/jobs",
         "method": "post",
@@ -7037,8 +6567,478 @@
         "name": "CreateFineTuningJobRequest",
         "type": "named"
       }
+    },
+    "createUsersWithListInput": {
+      "request": {
+        "url": "/user/createWithList",
+        "method": "post",
+        "requestBody": {
+          "contentType": "application/json"
+        },
+        "response": {
+          "contentType": "application/json"
+        }
+      },
+      "arguments": {
+        "body": {
+          "description": "Request body of POST /user/createWithList",
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "element_type": {
+                "name": "User",
+                "type": "named"
+              },
+              "type": "array"
+            }
+          },
+          "rest": {
+            "in": "body"
+          }
+        }
+      },
+      "description": "Creates list of users with given input array",
+      "name": "createUsersWithListInput",
+      "result_type": {
+        "name": "User",
+        "type": "named"
+      }
+    },
+    "deleteOrder": {
+      "request": {
+        "url": "/store/order/{orderId}",
+        "method": "delete",
+        "response": {
+          "contentType": "application/json"
+        }
+      },
+      "arguments": {
+        "orderId": {
+          "description": "ID of the order that needs to be deleted",
+          "type": {
+            "name": "Int64",
+            "type": "named"
+          },
+          "rest": {
+            "name": "orderId",
+            "in": "path",
+            "schema": {
+              "type": [
+                "integer"
+              ],
+              "format": "int64"
+            }
+          }
+        }
+      },
+      "description": "Delete purchase order by ID",
+      "name": "deleteOrder",
+      "result_type": {
+        "type": "nullable",
+        "underlying_type": {
+          "name": "Boolean",
+          "type": "named"
+        }
+      }
+    },
+    "deletePet": {
+      "request": {
+        "url": "/pet/{petId}",
+        "method": "delete",
+        "security": [
+          {
+            "petstore_auth": [
+              "write:pets",
+              "read:pets"
+            ]
+          }
+        ],
+        "response": {
+          "contentType": "application/json"
+        }
+      },
+      "arguments": {
+        "api_key": {
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "String",
+              "type": "named"
+            }
+          },
+          "rest": {
+            "name": "api_key",
+            "in": "header",
+            "schema": {
+              "type": [
+                "string"
+              ]
+            }
+          }
+        },
+        "petId": {
+          "description": "Pet id to delete",
+          "type": {
+            "name": "Int64",
+            "type": "named"
+          },
+          "rest": {
+            "name": "petId",
+            "in": "path",
+            "schema": {
+              "type": [
+                "integer"
+              ],
+              "format": "int64"
+            }
+          }
+        }
+      },
+      "description": "Deletes a pet",
+      "name": "deletePet",
+      "result_type": {
+        "type": "nullable",
+        "underlying_type": {
+          "name": "Boolean",
+          "type": "named"
+        }
+      }
+    },
+    "deleteUser": {
+      "request": {
+        "url": "/user/{username}",
+        "method": "delete",
+        "response": {
+          "contentType": "application/json"
+        }
+      },
+      "arguments": {
+        "username": {
+          "description": "The name that needs to be deleted",
+          "type": {
+            "name": "String",
+            "type": "named"
+          },
+          "rest": {
+            "name": "username",
+            "in": "path",
+            "schema": {
+              "type": [
+                "string"
+              ]
+            }
+          }
+        }
+      },
+      "description": "Delete user",
+      "name": "deleteUser",
+      "result_type": {
+        "type": "nullable",
+        "underlying_type": {
+          "name": "Boolean",
+          "type": "named"
+        }
+      }
+    },
+    "placeOrder": {
+      "request": {
+        "url": "/store/order",
+        "method": "post",
+        "requestBody": {
+          "contentType": "application/json"
+        },
+        "response": {
+          "contentType": "application/json"
+        }
+      },
+      "arguments": {
+        "body": {
+          "description": "Request body of POST /store/order",
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "Order",
+              "type": "named"
+            }
+          },
+          "rest": {
+            "in": "body"
+          }
+        }
+      },
+      "description": "Place an order for a pet",
+      "name": "placeOrder",
+      "result_type": {
+        "name": "Order",
+        "type": "named"
+      }
+    },
+    "updatePet": {
+      "request": {
+        "url": "/pet",
+        "method": "put",
+        "security": [
+          {
+            "petstore_auth": [
+              "write:pets",
+              "read:pets"
+            ]
+          }
+        ],
+        "requestBody": {
+          "contentType": "application/json"
+        },
+        "response": {
+          "contentType": "application/json"
+        }
+      },
+      "arguments": {
+        "body": {
+          "description": "Request body of PUT /pet",
+          "type": {
+            "name": "Pet",
+            "type": "named"
+          },
+          "rest": {
+            "in": "body"
+          }
+        }
+      },
+      "description": "Update an existing pet",
+      "name": "updatePet",
+      "result_type": {
+        "name": "Pet",
+        "type": "named"
+      }
+    },
+    "updatePetWithForm": {
+      "request": {
+        "url": "/pet/{petId}",
+        "method": "post",
+        "security": [
+          {
+            "petstore_auth": [
+              "write:pets",
+              "read:pets"
+            ]
+          }
+        ],
+        "response": {
+          "contentType": "application/json"
+        }
+      },
+      "arguments": {
+        "name": {
+          "description": "Name of pet that needs to be updated",
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "String",
+              "type": "named"
+            }
+          },
+          "rest": {
+            "name": "name",
+            "in": "query",
+            "schema": {
+              "type": [
+                "string"
+              ]
+            }
+          }
+        },
+        "petId": {
+          "description": "ID of pet that needs to be updated",
+          "type": {
+            "name": "Int64",
+            "type": "named"
+          },
+          "rest": {
+            "name": "petId",
+            "in": "path",
+            "schema": {
+              "type": [
+                "integer"
+              ],
+              "format": "int64"
+            }
+          }
+        },
+        "status": {
+          "description": "Status of pet that needs to be updated",
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "String",
+              "type": "named"
+            }
+          },
+          "rest": {
+            "name": "status",
+            "in": "query",
+            "schema": {
+              "type": [
+                "string"
+              ]
+            }
+          }
+        }
+      },
+      "description": "Updates a pet in the store with form data",
+      "name": "updatePetWithForm",
+      "result_type": {
+        "type": "nullable",
+        "underlying_type": {
+          "name": "Boolean",
+          "type": "named"
+        }
+      }
+    },
+    "uploadFile": {
+      "request": {
+        "url": "/pet/{petId}/uploadImage",
+        "method": "post",
+        "security": [
+          {
+            "petstore_auth": [
+              "write:pets",
+              "read:pets"
+            ]
+          }
+        ],
+        "requestBody": {
+          "contentType": "application/octet-stream"
+        },
+        "response": {
+          "contentType": "application/json"
+        }
+      },
+      "arguments": {
+        "additionalMetadata": {
+          "description": "Additional Metadata",
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "String",
+              "type": "named"
+            }
+          },
+          "rest": {
+            "name": "additionalMetadata",
+            "in": "query",
+            "schema": {
+              "type": [
+                "string"
+              ]
+            }
+          }
+        },
+        "body": {
+          "description": "Request body of POST /pet/{petId}/uploadImage",
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "Binary",
+              "type": "named"
+            }
+          },
+          "rest": {
+            "in": "body"
+          }
+        },
+        "petId": {
+          "description": "ID of pet to update",
+          "type": {
+            "name": "Int64",
+            "type": "named"
+          },
+          "rest": {
+            "name": "petId",
+            "in": "path",
+            "schema": {
+              "type": [
+                "integer"
+              ],
+              "format": "int64"
+            }
+          }
+        }
+      },
+      "description": "uploads an image",
+      "name": "uploadFile",
+      "result_type": {
+        "name": "ApiResponse",
+        "type": "named"
+      }
+    },
+    "uploadPetMultipart": {
+      "request": {
+        "url": "/pet/multipart",
+        "method": "post",
+        "requestBody": {
+          "contentType": "multipart/form-data",
+          "encoding": {
+            "profileImage": {
+              "contentType": [
+                "image/png",
+                "image/jpeg"
+              ],
+              "headers": {
+                "X-Rate-Limit-Limit": {
+                  "explode": false,
+                  "argumentName": "headerXRateLimitLimit",
+                  "schema": {
+                    "type": [
+                      "integer"
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        },
+        "response": {
+          "contentType": "application/json"
+        }
+      },
+      "arguments": {
+        "body": {
+          "description": "Request body of POST /pet/multipart",
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "UploadPetMultipartBody",
+              "type": "named"
+            }
+          },
+          "rest": {
+            "in": "body"
+          }
+        },
+        "headerXRateLimitLimit": {
+          "description": "The number of allowed requests in the current period",
+          "type": {
+            "name": "Int32",
+            "type": "named"
+          },
+          "rest": {
+            "explode": false,
+            "argumentName": "headerXRateLimitLimit",
+            "schema": {
+              "type": [
+                "integer"
+              ]
+            }
+          }
+        }
+      },
+      "name": "uploadPetMultipart",
+      "result_type": {
+        "name": "ApiResponse",
+        "type": "named"
+      }
     }
-  ],
+  },
   "scalar_types": {
     "Binary": {
       "aggregate_functions": {},

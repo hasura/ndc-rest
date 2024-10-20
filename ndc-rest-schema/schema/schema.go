@@ -6,6 +6,7 @@ import (
 	"fmt"
 
 	"github.com/hasura/ndc-sdk-go/schema"
+	"github.com/hasura/ndc-sdk-go/utils"
 )
 
 // NDCRestSchema extends the [NDC SchemaResponse] with OpenAPI REST information
@@ -16,14 +17,14 @@ type NDCRestSchema struct {
 	Settings  *NDCRestSettings `json:"settings,omitempty" mapstructure:"settings" yaml:"settings,omitempty"`
 
 	// Functions (i.e. collections which return a single column and row)
-	Functions []*OperationInfo `json:"functions" mapstructure:"functions" yaml:"functions"`
+	Functions map[string]OperationInfo `json:"functions" mapstructure:"functions" yaml:"functions"`
 
 	// A list of object types which can be used as the types of arguments, or return
 	// types of procedures. Names should not overlap with scalar type names.
 	ObjectTypes map[string]ObjectType `json:"object_types" mapstructure:"object_types" yaml:"object_types"`
 
 	// Procedures which are available for execution as part of mutations
-	Procedures []*OperationInfo `json:"procedures" mapstructure:"procedures" yaml:"procedures"`
+	Procedures map[string]OperationInfo `json:"procedures" mapstructure:"procedures" yaml:"procedures"`
 
 	// A list of scalar types which will be used as the types of collection columns
 	ScalarTypes schema.SchemaResponseScalarTypes `json:"scalar_types" mapstructure:"scalar_types" yaml:"scalar_types"`
@@ -34,8 +35,8 @@ func NewNDCRestSchema() *NDCRestSchema {
 	return &NDCRestSchema{
 		SchemaRef:   "https://raw.githubusercontent.com/hasura/ndc-rest-schema/main/jsonschema/ndc-rest-schema.jsonschema",
 		Settings:    &NDCRestSettings{},
-		Functions:   []*OperationInfo{},
-		Procedures:  []*OperationInfo{},
+		Functions:   map[string]OperationInfo{},
+		Procedures:  map[string]OperationInfo{},
 		ObjectTypes: make(map[string]ObjectType),
 		ScalarTypes: make(schema.SchemaResponseScalarTypes),
 	}
@@ -43,12 +44,17 @@ func NewNDCRestSchema() *NDCRestSchema {
 
 // ToSchemaResponse converts the instance to NDC schema.SchemaResponse
 func (ndc NDCRestSchema) ToSchemaResponse() *schema.SchemaResponse {
-	functions := make([]schema.FunctionInfo, len(ndc.Functions))
-	for i, fn := range ndc.Functions {
+	functionKeys := utils.GetSortedKeys(ndc.Functions)
+	functions := make([]schema.FunctionInfo, len(functionKeys))
+	for i, key := range functionKeys {
+		fn := ndc.Functions[key]
 		functions[i] = fn.FunctionSchema()
 	}
-	procedures := make([]schema.ProcedureInfo, len(ndc.Procedures))
-	for i, proc := range ndc.Procedures {
+
+	procedureKeys := utils.GetSortedKeys(ndc.Procedures)
+	procedures := make([]schema.ProcedureInfo, len(procedureKeys))
+	for i, key := range procedureKeys {
+		proc := ndc.Procedures[key]
 		procedures[i] = proc.ProcedureSchema()
 	}
 	objectTypes := make(schema.SchemaResponseObjectTypes)
@@ -62,6 +68,26 @@ func (ndc NDCRestSchema) ToSchemaResponse() *schema.SchemaResponse {
 		Functions:   functions,
 		Procedures:  procedures,
 	}
+}
+
+// GetFunction gets the NDC function by name
+func (rm NDCRestSchema) GetFunction(name string) *OperationInfo {
+	fn, ok := rm.Functions[name]
+	if !ok {
+		return nil
+	}
+
+	return &fn
+}
+
+// GetProcedure gets the NDC procedure by name
+func (rm NDCRestSchema) GetProcedure(name string) *OperationInfo {
+	fn, ok := rm.Procedures[name]
+	if !ok {
+		return nil
+	}
+
+	return &fn
 }
 
 type Response struct {

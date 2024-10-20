@@ -28,8 +28,8 @@
     },
     "version": "1.2.2"
   },
-  "functions": [
-    {
+  "functions": {
+    "hasuraOneSignalGetNotifications": {
       "request": {
         "url": "/notifications",
         "method": "get",
@@ -124,7 +124,7 @@
         "type": "named"
       }
     }
-  ],
+  },
   "object_types": {
     "CreateNotificationSuccessResponse": {
       "fields": {
@@ -1021,8 +1021,8 @@
       }
     }
   },
-  "procedures": [
-    {
+  "procedures": {
+    "hasuraOneSignalCreateNotification": {
       "request": {
         "url": "/notifications",
         "method": "post",
@@ -1057,7 +1057,7 @@
         "type": "named"
       }
     }
-  ],
+  },
   "scalar_types": {
     "FilterRelation": {
       "aggregate_functions": {},

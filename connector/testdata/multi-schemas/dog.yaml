@@ -5,7 +5,8 @@ settings:
         pet: dog
 collections: []
 functions:
-  - request:
+  findDogs:
+    request:
       url: "/dog"
       method: get
       parameters: []

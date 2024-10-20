@@ -3,154 +3,6 @@
   "functions": [
     {
       "arguments": {
-        "status": {
-          "description": "Status values that need to be considered for filter",
-          "type": {
-            "type": "nullable",
-            "underlying_type": {
-              "name": "PetStatus",
-              "type": "named"
-            }
-          }
-        }
-      },
-      "description": "Finds Pets by status",
-      "name": "findPetsByStatus",
-      "result_type": {
-        "element_type": {
-          "name": "Pet",
-          "type": "named"
-        },
-        "type": "array"
-      }
-    },
-    {
-      "arguments": {
-        "tags": {
-          "description": "Tags to filter by",
-          "type": {
-            "type": "nullable",
-            "underlying_type": {
-              "element_type": {
-                "name": "String",
-                "type": "named"
-              },
-              "type": "array"
-            }
-          }
-        }
-      },
-      "description": "Finds Pets by tags",
-      "name": "findPetsByTags",
-      "result_type": {
-        "element_type": {
-          "name": "Pet",
-          "type": "named"
-        },
-        "type": "array"
-      }
-    },
-    {
-      "arguments": {
-        "petId": {
-          "description": "ID of pet to return",
-          "type": {
-            "name": "Int64",
-            "type": "named"
-          }
-        }
-      },
-      "description": "Find pet by ID",
-      "name": "getPetById",
-      "result_type": {
-        "name": "Pet",
-        "type": "named"
-      }
-    },
-    {
-      "arguments": {},
-      "description": "Returns pet inventories by status",
-      "name": "getInventory",
-      "result_type": {
-        "name": "JSON",
-        "type": "named"
-      }
-    },
-    {
-      "arguments": {
-        "orderId": {
-          "description": "ID of order that needs to be fetched",
-          "type": {
-            "name": "Int64",
-            "type": "named"
-          }
-        }
-      },
-      "description": "Find purchase order by ID",
-      "name": "getOrderById",
-      "result_type": {
-        "name": "Order",
-        "type": "named"
-      }
-    },
-    {
-      "arguments": {
-        "password": {
-          "description": "The password for login in clear text",
-          "type": {
-            "type": "nullable",
-            "underlying_type": {
-              "name": "String",
-              "type": "named"
-            }
-          }
-        },
-        "username": {
-          "description": "The user name for login",
-          "type": {
-            "type": "nullable",
-            "underlying_type": {
-              "name": "String",
-              "type": "named"
-            }
-          }
-        }
-      },
-      "description": "Logs user into the system",
-      "name": "loginUser",
-      "result_type": {
-        "name": "String",
-        "type": "named"
-      }
-    },
-    {
-      "arguments": {
-        "username": {
-          "description": "The name that needs to be fetched. Use user1 for testing. ",
-          "type": {
-            "name": "String",
-            "type": "named"
-          }
-        }
-      },
-      "description": "Get user by user name",
-      "name": "getUserByName",
-      "result_type": {
-        "name": "User",
-        "type": "named"
-      }
-    },
-    {
-      "arguments": {},
-      "description": "Get snake object",
-      "name": "getSnake",
-      "result_type": {
-        "name": "SnakeObject",
-        "type": "named"
-      }
-    },
-    {
-      "arguments": {
         "collection_method": {
           "description": "The collection method of the invoice to retrieve. Either `charge_automatically` or `send_invoice`.",
           "type": {
@@ -257,6 +109,154 @@
       "name": "GetInvoices",
       "result_type": {
         "name": "GetInvoicesResult",
+        "type": "named"
+      }
+    },
+    {
+      "arguments": {
+        "status": {
+          "description": "Status values that need to be considered for filter",
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "PetStatus",
+              "type": "named"
+            }
+          }
+        }
+      },
+      "description": "Finds Pets by status",
+      "name": "findPetsByStatus",
+      "result_type": {
+        "element_type": {
+          "name": "Pet",
+          "type": "named"
+        },
+        "type": "array"
+      }
+    },
+    {
+      "arguments": {
+        "tags": {
+          "description": "Tags to filter by",
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "element_type": {
+                "name": "String",
+                "type": "named"
+              },
+              "type": "array"
+            }
+          }
+        }
+      },
+      "description": "Finds Pets by tags",
+      "name": "findPetsByTags",
+      "result_type": {
+        "element_type": {
+          "name": "Pet",
+          "type": "named"
+        },
+        "type": "array"
+      }
+    },
+    {
+      "arguments": {},
+      "description": "Returns pet inventories by status",
+      "name": "getInventory",
+      "result_type": {
+        "name": "JSON",
+        "type": "named"
+      }
+    },
+    {
+      "arguments": {
+        "orderId": {
+          "description": "ID of order that needs to be fetched",
+          "type": {
+            "name": "Int64",
+            "type": "named"
+          }
+        }
+      },
+      "description": "Find purchase order by ID",
+      "name": "getOrderById",
+      "result_type": {
+        "name": "Order",
+        "type": "named"
+      }
+    },
+    {
+      "arguments": {
+        "petId": {
+          "description": "ID of pet to return",
+          "type": {
+            "name": "Int64",
+            "type": "named"
+          }
+        }
+      },
+      "description": "Find pet by ID",
+      "name": "getPetById",
+      "result_type": {
+        "name": "Pet",
+        "type": "named"
+      }
+    },
+    {
+      "arguments": {},
+      "description": "Get snake object",
+      "name": "getSnake",
+      "result_type": {
+        "name": "SnakeObject",
+        "type": "named"
+      }
+    },
+    {
+      "arguments": {
+        "username": {
+          "description": "The name that needs to be fetched. Use user1 for testing. ",
+          "type": {
+            "name": "String",
+            "type": "named"
+          }
+        }
+      },
+      "description": "Get user by user name",
+      "name": "getUserByName",
+      "result_type": {
+        "name": "User",
+        "type": "named"
+      }
+    },
+    {
+      "arguments": {
+        "password": {
+          "description": "The password for login in clear text",
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "String",
+              "type": "named"
+            }
+          }
+        },
+        "username": {
+          "description": "The user name for login",
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "String",
+              "type": "named"
+            }
+          }
+        }
+      },
+      "description": "Logs user into the system",
+      "name": "loginUser",
+      "result_type": {
+        "name": "String",
         "type": "named"
       }
     }
@@ -3879,6 +3879,87 @@
   "procedures": [
     {
       "arguments": {
+        "account": {
+          "type": {
+            "name": "String",
+            "type": "named"
+          }
+        }
+      },
+      "name": "DeleteAccountsAccount",
+      "result_type": {
+        "name": "TreasuryInboundTransfer",
+        "type": "named"
+      }
+    },
+    {
+      "arguments": {
+        "body": {
+          "description": "Request body of POST /v1/checkout/sessions",
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "PostCheckoutSessionsBody",
+              "type": "named"
+            }
+          }
+        }
+      },
+      "name": "PostCheckoutSessions",
+      "result_type": {
+        "name": "Order",
+        "type": "named"
+      }
+    },
+    {
+      "arguments": {
+        "body": {
+          "description": "Request body of POST /v1/files",
+          "type": {
+            "name": "PostFilesBody",
+            "type": "named"
+          }
+        },
+        "headerXRateLimitLimit": {
+          "type": {
+            "name": "Int32",
+            "type": "named"
+          }
+        }
+      },
+      "name": "PostFiles",
+      "result_type": {
+        "name": "ApiResponse",
+        "type": "named"
+      }
+    },
+    {
+      "arguments": {
+        "body": {
+          "description": "Request body of POST /test_helpers/treasury/inbound_transfers/{id}/fail",
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "PostTestHelpersTreasuryInboundTransfersIdFailBody",
+              "type": "named"
+            }
+          }
+        },
+        "id": {
+          "type": {
+            "name": "String",
+            "type": "named"
+          }
+        }
+      },
+      "name": "PostTestHelpersTreasuryInboundTransfersIdFail",
+      "result_type": {
+        "name": "TreasuryInboundTransfer",
+        "type": "named"
+      }
+    },
+    {
+      "arguments": {
         "body": {
           "description": "Request body of POST /pet",
           "type": {
@@ -3891,6 +3972,143 @@
       "name": "addPet",
       "result_type": {
         "name": "Pet",
+        "type": "named"
+      }
+    },
+    {
+      "arguments": {},
+      "description": "Add snake object",
+      "name": "addSnake",
+      "result_type": {
+        "name": "SnakeObject",
+        "type": "named"
+      }
+    },
+    {
+      "arguments": {
+        "body": {
+          "description": "Request body of POST /fine_tuning/jobs",
+          "type": {
+            "name": "CreateFineTuningJobRequest",
+            "type": "named"
+          }
+        }
+      },
+      "name": "createFineTuningJob",
+      "result_type": {
+        "name": "CreateFineTuningJobRequest",
+        "type": "named"
+      }
+    },
+    {
+      "arguments": {
+        "body": {
+          "description": "Request body of POST /user/createWithList",
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "element_type": {
+                "name": "User",
+                "type": "named"
+              },
+              "type": "array"
+            }
+          }
+        }
+      },
+      "description": "Creates list of users with given input array",
+      "name": "createUsersWithListInput",
+      "result_type": {
+        "name": "User",
+        "type": "named"
+      }
+    },
+    {
+      "arguments": {
+        "orderId": {
+          "description": "ID of the order that needs to be deleted",
+          "type": {
+            "name": "Int64",
+            "type": "named"
+          }
+        }
+      },
+      "description": "Delete purchase order by ID",
+      "name": "deleteOrder",
+      "result_type": {
+        "type": "nullable",
+        "underlying_type": {
+          "name": "Boolean",
+          "type": "named"
+        }
+      }
+    },
+    {
+      "arguments": {
+        "api_key": {
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "String",
+              "type": "named"
+            }
+          }
+        },
+        "petId": {
+          "description": "Pet id to delete",
+          "type": {
+            "name": "Int64",
+            "type": "named"
+          }
+        }
+      },
+      "description": "Deletes a pet",
+      "name": "deletePet",
+      "result_type": {
+        "type": "nullable",
+        "underlying_type": {
+          "name": "Boolean",
+          "type": "named"
+        }
+      }
+    },
+    {
+      "arguments": {
+        "username": {
+          "description": "The name that needs to be deleted",
+          "type": {
+            "name": "String",
+            "type": "named"
+          }
+        }
+      },
+      "description": "Delete user",
+      "name": "deleteUser",
+      "result_type": {
+        "type": "nullable",
+        "underlying_type": {
+          "name": "Boolean",
+          "type": "named"
+        }
+      }
+    },
+    {
+      "arguments": {
+        "body": {
+          "description": "Request body of POST /store/order",
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "Order",
+              "type": "named"
+            }
+          }
+        }
+      },
+      "description": "Place an order for a pet",
+      "name": "placeOrder",
+      "result_type": {
+        "name": "Order",
         "type": "named"
       }
     },
@@ -3943,35 +4161,6 @@
       },
       "description": "Updates a pet in the store with form data",
       "name": "updatePetWithForm",
-      "result_type": {
-        "type": "nullable",
-        "underlying_type": {
-          "name": "Boolean",
-          "type": "named"
-        }
-      }
-    },
-    {
-      "arguments": {
-        "api_key": {
-          "type": {
-            "type": "nullable",
-            "underlying_type": {
-              "name": "String",
-              "type": "named"
-            }
-          }
-        },
-        "petId": {
-          "description": "Pet id to delete",
-          "type": {
-            "name": "Int64",
-            "type": "named"
-          }
-        }
-      },
-      "description": "Deletes a pet",
-      "name": "deletePet",
       "result_type": {
         "type": "nullable",
         "underlying_type": {
@@ -4040,195 +4229,6 @@
       "name": "uploadPetMultipart",
       "result_type": {
         "name": "ApiResponse",
-        "type": "named"
-      }
-    },
-    {
-      "arguments": {
-        "body": {
-          "description": "Request body of POST /store/order",
-          "type": {
-            "type": "nullable",
-            "underlying_type": {
-              "name": "Order",
-              "type": "named"
-            }
-          }
-        }
-      },
-      "description": "Place an order for a pet",
-      "name": "placeOrder",
-      "result_type": {
-        "name": "Order",
-        "type": "named"
-      }
-    },
-    {
-      "arguments": {
-        "orderId": {
-          "description": "ID of the order that needs to be deleted",
-          "type": {
-            "name": "Int64",
-            "type": "named"
-          }
-        }
-      },
-      "description": "Delete purchase order by ID",
-      "name": "deleteOrder",
-      "result_type": {
-        "type": "nullable",
-        "underlying_type": {
-          "name": "Boolean",
-          "type": "named"
-        }
-      }
-    },
-    {
-      "arguments": {
-        "body": {
-          "description": "Request body of POST /user/createWithList",
-          "type": {
-            "type": "nullable",
-            "underlying_type": {
-              "element_type": {
-                "name": "User",
-                "type": "named"
-              },
-              "type": "array"
-            }
-          }
-        }
-      },
-      "description": "Creates list of users with given input array",
-      "name": "createUsersWithListInput",
-      "result_type": {
-        "name": "User",
-        "type": "named"
-      }
-    },
-    {
-      "arguments": {
-        "username": {
-          "description": "The name that needs to be deleted",
-          "type": {
-            "name": "String",
-            "type": "named"
-          }
-        }
-      },
-      "description": "Delete user",
-      "name": "deleteUser",
-      "result_type": {
-        "type": "nullable",
-        "underlying_type": {
-          "name": "Boolean",
-          "type": "named"
-        }
-      }
-    },
-    {
-      "arguments": {},
-      "description": "Add snake object",
-      "name": "addSnake",
-      "result_type": {
-        "name": "SnakeObject",
-        "type": "named"
-      }
-    },
-    {
-      "arguments": {
-        "body": {
-          "description": "Request body of POST /test_helpers/treasury/inbound_transfers/{id}/fail",
-          "type": {
-            "type": "nullable",
-            "underlying_type": {
-              "name": "PostTestHelpersTreasuryInboundTransfersIdFailBody",
-              "type": "named"
-            }
-          }
-        },
-        "id": {
-          "type": {
-            "name": "String",
-            "type": "named"
-          }
-        }
-      },
-      "name": "PostTestHelpersTreasuryInboundTransfersIdFail",
-      "result_type": {
-        "name": "TreasuryInboundTransfer",
-        "type": "named"
-      }
-    },
-    {
-      "arguments": {
-        "account": {
-          "type": {
-            "name": "String",
-            "type": "named"
-          }
-        }
-      },
-      "name": "DeleteAccountsAccount",
-      "result_type": {
-        "name": "TreasuryInboundTransfer",
-        "type": "named"
-      }
-    },
-    {
-      "arguments": {
-        "body": {
-          "description": "Request body of POST /v1/checkout/sessions",
-          "type": {
-            "type": "nullable",
-            "underlying_type": {
-              "name": "PostCheckoutSessionsBody",
-              "type": "named"
-            }
-          }
-        }
-      },
-      "name": "PostCheckoutSessions",
-      "result_type": {
-        "name": "Order",
-        "type": "named"
-      }
-    },
-    {
-      "arguments": {
-        "body": {
-          "description": "Request body of POST /v1/files",
-          "type": {
-            "name": "PostFilesBody",
-            "type": "named"
-          }
-        },
-        "headerXRateLimitLimit": {
-          "type": {
-            "name": "Int32",
-            "type": "named"
-          }
-        }
-      },
-      "name": "PostFiles",
-      "result_type": {
-        "name": "ApiResponse",
-        "type": "named"
-      }
-    },
-    {
-      "arguments": {
-        "body": {
-          "description": "Request body of POST /fine_tuning/jobs",
-          "type": {
-            "name": "CreateFineTuningJobRequest",
-            "type": "named"
-          }
-        }
-      },
-      "name": "createFineTuningJob",
-      "result_type": {
-        "name": "CreateFineTuningJobRequest",
         "type": "named"
       }
     }

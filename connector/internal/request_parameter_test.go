@@ -284,7 +284,7 @@ func TestEvalURLAndHeaderParameters(t *testing.T) {
 			var info *rest.OperationInfo
 			for _, f := range ndcSchema.Functions {
 				if f.Name == tc.name {
-					info = f
+					info = &f
 					break
 				}
 			}

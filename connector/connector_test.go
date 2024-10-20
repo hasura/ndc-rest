@@ -15,6 +15,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/hasura/ndc-rest/ndc-rest-schema/configuration"
 	"github.com/hasura/ndc-sdk-go/connector"
 	"github.com/hasura/ndc-sdk-go/schema"
 	"gotest.tools/v3/assert"
@@ -274,35 +275,35 @@ func TestRESTConnector_distribution(t *testing.T) {
 	}, connector.WithoutRecovery())
 	assert.NilError(t, err)
 
-	timeout, err := rc.metadata[0].settings.Servers[0].Timeout.Value()
+	timeout, err := rc.metadata[0].Settings.Servers[0].Timeout.Value()
 	assert.NilError(t, err)
 	assert.Equal(t, int64(30), *timeout)
 
-	retryTimes, err := rc.metadata[0].settings.Servers[0].Retry.Times.Value()
+	retryTimes, err := rc.metadata[0].Settings.Servers[0].Retry.Times.Value()
 	assert.NilError(t, err)
 	assert.Equal(t, int64(2), *retryTimes)
 
-	retryDelay, err := rc.metadata[0].settings.Servers[0].Retry.Delay.Value()
+	retryDelay, err := rc.metadata[0].Settings.Servers[0].Retry.Delay.Value()
 	assert.NilError(t, err)
 	assert.Equal(t, int64(1000), *retryDelay)
 
-	retryStatus, err := rc.metadata[0].settings.Servers[0].Retry.HTTPStatus.Value()
+	retryStatus, err := rc.metadata[0].Settings.Servers[0].Retry.HTTPStatus.Value()
 	assert.NilError(t, err)
 	assert.DeepEqual(t, []int64{429, 500}, retryStatus)
 
-	timeout1, err := rc.metadata[0].settings.Servers[1].Timeout.Value()
+	timeout1, err := rc.metadata[0].Settings.Servers[1].Timeout.Value()
 	assert.NilError(t, err)
 	assert.Equal(t, int64(10), *timeout1)
 
-	retryTimes1, err := rc.metadata[0].settings.Servers[1].Retry.Times.Value()
+	retryTimes1, err := rc.metadata[0].Settings.Servers[1].Retry.Times.Value()
 	assert.NilError(t, err)
 	assert.Equal(t, int64(1), *retryTimes1)
 
-	retryDelay1, err := rc.metadata[0].settings.Servers[1].Retry.Delay.Value()
+	retryDelay1, err := rc.metadata[0].Settings.Servers[1].Retry.Delay.Value()
 	assert.NilError(t, err)
 	assert.Equal(t, int64(500), *retryDelay1)
 
-	retryStatus1, err := rc.metadata[0].settings.Servers[1].Retry.HTTPStatus.Value()
+	retryStatus1, err := rc.metadata[0].Settings.Servers[1].Retry.HTTPStatus.Value()
 	assert.NilError(t, err)
 	assert.DeepEqual(t, []int64{429, 500, 501, 502}, retryStatus1)
 
@@ -738,7 +739,7 @@ func assertNdcOperations(t *testing.T, dir string, targetURL string) {
 	}
 }
 
-func test_createServer(t *testing.T, dir string) *connector.Server[Configuration, State] {
+func test_createServer(t *testing.T, dir string) *connector.Server[configuration.Configuration, State] {
 	t.Helper()
 	c := NewRESTConnector()
 	server, err := connector.NewServer(c, &connector.ServerOptions{

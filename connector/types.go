@@ -5,7 +5,6 @@ import (
 	"net/http"
 
 	"github.com/hasura/ndc-rest/connector/internal"
-	"github.com/hasura/ndc-rest/ndc-rest-schema/command"
 	rest "github.com/hasura/ndc-rest/ndc-rest-schema/schema"
 )
 
@@ -15,19 +14,6 @@ var (
 	errHTTPMethodRequired = errors.New("the HTTP method is required")
 	errFilePathRequired   = errors.New("file path is empty")
 )
-
-// ConfigItem extends the ConvertConfig with advanced options
-type ConfigItem struct {
-	command.ConvertConfig `yaml:",inline"`
-
-	// Distributed enables distributed schema
-	Distributed bool `json:"distributed" yaml:"distributed"`
-}
-
-// Configuration contains required settings for the connector.
-type Configuration struct {
-	Files []ConfigItem `json:"files" yaml:"files"`
-}
 
 // State is the global state which is shared for every connector request.
 type State struct {

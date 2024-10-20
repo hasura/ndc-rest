@@ -28,8 +28,60 @@
     },
     "version": "1.2.2"
   },
-  "functions": [
-    {
+  "functions": {
+    "get_notification": {
+      "request": {
+        "url": "/notifications/{notification_id}",
+        "method": "get",
+        "security": [
+          {
+            "app_key": []
+          }
+        ],
+        "response": {
+          "contentType": "application/json"
+        }
+      },
+      "arguments": {
+        "app_id": {
+          "type": {
+            "name": "String",
+            "type": "named"
+          },
+          "rest": {
+            "name": "app_id",
+            "in": "query",
+            "schema": {
+              "type": [
+                "string"
+              ]
+            }
+          }
+        },
+        "notification_id": {
+          "type": {
+            "name": "String",
+            "type": "named"
+          },
+          "rest": {
+            "name": "notification_id",
+            "in": "path",
+            "schema": {
+              "type": [
+                "string"
+              ]
+            }
+          }
+        }
+      },
+      "description": "View notification",
+      "name": "get_notification",
+      "result_type": {
+        "name": "NotificationWithMeta",
+        "type": "named"
+      }
+    },
+    "get_notifications": {
       "request": {
         "url": "/notifications",
         "method": "get",
@@ -123,60 +175,8 @@
         "name": "NotificationSlice",
         "type": "named"
       }
-    },
-    {
-      "request": {
-        "url": "/notifications/{notification_id}",
-        "method": "get",
-        "security": [
-          {
-            "app_key": []
-          }
-        ],
-        "response": {
-          "contentType": "application/json"
-        }
-      },
-      "arguments": {
-        "app_id": {
-          "type": {
-            "name": "String",
-            "type": "named"
-          },
-          "rest": {
-            "name": "app_id",
-            "in": "query",
-            "schema": {
-              "type": [
-                "string"
-              ]
-            }
-          }
-        },
-        "notification_id": {
-          "type": {
-            "name": "String",
-            "type": "named"
-          },
-          "rest": {
-            "name": "notification_id",
-            "in": "path",
-            "schema": {
-              "type": [
-                "string"
-              ]
-            }
-          }
-        }
-      },
-      "description": "View notification",
-      "name": "get_notification",
-      "result_type": {
-        "name": "NotificationWithMeta",
-        "type": "named"
-      }
     }
-  ],
+  },
   "object_types": {
     "CancelNotificationSuccessResponse": {
       "fields": {
@@ -1171,43 +1171,8 @@
       }
     }
   },
-  "procedures": [
-    {
-      "request": {
-        "url": "/notifications",
-        "method": "post",
-        "security": [
-          {
-            "app_key": []
-          }
-        ],
-        "requestBody": {
-          "contentType": "application/json"
-        },
-        "response": {
-          "contentType": "application/json"
-        }
-      },
-      "arguments": {
-        "body": {
-          "description": "Request body of POST /notifications",
-          "type": {
-            "name": "NotificationInput",
-            "type": "named"
-          },
-          "rest": {
-            "in": "body"
-          }
-        }
-      },
-      "description": "Create notification",
-      "name": "create_notification",
-      "result_type": {
-        "name": "CreateNotificationSuccessResponse",
-        "type": "named"
-      }
-    },
-    {
+  "procedures": {
+    "cancel_notification": {
       "request": {
         "url": "/notifications/{notification_id}",
         "method": "delete",
@@ -1259,7 +1224,42 @@
         "type": "named"
       }
     },
-    {
+    "create_notification": {
+      "request": {
+        "url": "/notifications",
+        "method": "post",
+        "security": [
+          {
+            "app_key": []
+          }
+        ],
+        "requestBody": {
+          "contentType": "application/json"
+        },
+        "response": {
+          "contentType": "application/json"
+        }
+      },
+      "arguments": {
+        "body": {
+          "description": "Request body of POST /notifications",
+          "type": {
+            "name": "NotificationInput",
+            "type": "named"
+          },
+          "rest": {
+            "in": "body"
+          }
+        }
+      },
+      "description": "Create notification",
+      "name": "create_notification",
+      "result_type": {
+        "name": "CreateNotificationSuccessResponse",
+        "type": "named"
+      }
+    },
+    "get_notification_history": {
       "request": {
         "url": "/notifications/{notification_id}/history",
         "method": "post",
@@ -1310,7 +1310,7 @@
         "type": "named"
       }
     }
-  ],
+  },
   "scalar_types": {
     "Boolean": {
       "aggregate_functions": {},

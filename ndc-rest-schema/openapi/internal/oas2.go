@@ -170,7 +170,7 @@ func (oc *OAS2Builder) pathToNDCOperations(pathItem orderedmap.Pair[string, *v2.
 		return err
 	}
 	if funcGet != nil {
-		oc.schema.Functions = append(oc.schema.Functions, funcGet)
+		oc.schema.Functions[funcGet.Name] = *funcGet
 	}
 
 	procPost, err := newOAS2OperationBuilder(oc).BuildProcedure(pathKey, "post", pathValue.Post)
@@ -178,7 +178,7 @@ func (oc *OAS2Builder) pathToNDCOperations(pathItem orderedmap.Pair[string, *v2.
 		return err
 	}
 	if procPost != nil {
-		oc.schema.Procedures = append(oc.schema.Procedures, procPost)
+		oc.schema.Procedures[procPost.Name] = *procPost
 	}
 
 	procPut, err := newOAS2OperationBuilder(oc).BuildProcedure(pathKey, "put", pathValue.Put)
@@ -186,7 +186,7 @@ func (oc *OAS2Builder) pathToNDCOperations(pathItem orderedmap.Pair[string, *v2.
 		return err
 	}
 	if procPut != nil {
-		oc.schema.Procedures = append(oc.schema.Procedures, procPut)
+		oc.schema.Procedures[procPut.Name] = *procPut
 	}
 
 	procPatch, err := newOAS2OperationBuilder(oc).BuildProcedure(pathKey, "patch", pathValue.Patch)
@@ -194,7 +194,7 @@ func (oc *OAS2Builder) pathToNDCOperations(pathItem orderedmap.Pair[string, *v2.
 		return err
 	}
 	if procPatch != nil {
-		oc.schema.Procedures = append(oc.schema.Procedures, procPatch)
+		oc.schema.Procedures[procPatch.Name] = *procPatch
 	}
 
 	procDelete, err := newOAS2OperationBuilder(oc).BuildProcedure(pathKey, "delete", pathValue.Delete)
@@ -202,7 +202,7 @@ func (oc *OAS2Builder) pathToNDCOperations(pathItem orderedmap.Pair[string, *v2.
 		return err
 	}
 	if procDelete != nil {
-		oc.schema.Procedures = append(oc.schema.Procedures, procDelete)
+		oc.schema.Procedures[procDelete.Name] = *procDelete
 	}
 	return nil
 }

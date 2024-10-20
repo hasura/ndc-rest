@@ -146,10 +146,10 @@
           "$ref": "#/$defs/NDCRestSettings"
         },
         "functions": {
-          "items": {
+          "additionalProperties": {
             "$ref": "#/$defs/OperationInfo"
           },
-          "type": "array",
+          "type": "object",
           "description": "Functions (i.e. collections which return a single column and row)"
         },
         "object_types": {
@@ -160,10 +160,10 @@
           "description": "A list of object types which can be used as the types of arguments, or return\ntypes of procedures. Names should not overlap with scalar type names."
         },
         "procedures": {
-          "items": {
+          "additionalProperties": {
             "$ref": "#/$defs/OperationInfo"
           },
-          "type": "array",
+          "type": "object",
           "description": "Procedures which are available for execution as part of mutations"
         },
         "scalar_types": {
@@ -757,12 +757,6 @@
         },
         "minLength": {
           "type": "integer"
-        },
-        "enum": {
-          "items": {
-            "type": "string"
-          },
-          "type": "array"
         },
         "items": {
           "$ref": "#/$defs/TypeSchema"

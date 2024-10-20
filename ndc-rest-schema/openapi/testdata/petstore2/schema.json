@@ -48,19 +48,11 @@
       }
     },
     {
-      "arguments": {
-        "petId": {
-          "description": "ID of pet to return",
-          "type": {
-            "name": "Int64",
-            "type": "named"
-          }
-        }
-      },
-      "description": "Find pet by ID",
-      "name": "getPetById",
+      "arguments": {},
+      "description": "Returns pet inventories by status",
+      "name": "getInventory",
       "result_type": {
-        "name": "Pet",
+        "name": "JSON",
         "type": "named"
       }
     },
@@ -82,11 +74,28 @@
       }
     },
     {
-      "arguments": {},
-      "description": "Returns pet inventories by status",
-      "name": "getInventory",
+      "arguments": {
+        "petId": {
+          "description": "ID of pet to return",
+          "type": {
+            "name": "Int64",
+            "type": "named"
+          }
+        }
+      },
+      "description": "Find pet by ID",
+      "name": "getPetById",
       "result_type": {
-        "name": "JSON",
+        "name": "Pet",
+        "type": "named"
+      }
+    },
+    {
+      "arguments": {},
+      "description": "Get snake",
+      "name": "getSnake",
+      "result_type": {
+        "name": "SnakeObject",
         "type": "named"
       }
     },
@@ -104,39 +113,6 @@
       "name": "getUserByName",
       "result_type": {
         "name": "User",
-        "type": "named"
-      }
-    },
-    {
-      "arguments": {
-        "password": {
-          "description": "The password for login in clear text",
-          "type": {
-            "name": "String",
-            "type": "named"
-          }
-        },
-        "username": {
-          "description": "The user name for login",
-          "type": {
-            "name": "String",
-            "type": "named"
-          }
-        }
-      },
-      "description": "Logs user into the system",
-      "name": "loginUser",
-      "result_type": {
-        "name": "String",
-        "type": "named"
-      }
-    },
-    {
-      "arguments": {},
-      "description": "Get snake",
-      "name": "getSnake",
-      "result_type": {
-        "name": "SnakeObject",
         "type": "named"
       }
     },
@@ -191,6 +167,30 @@
           "type": "named"
         },
         "type": "array"
+      }
+    },
+    {
+      "arguments": {
+        "password": {
+          "description": "The password for login in clear text",
+          "type": {
+            "name": "String",
+            "type": "named"
+          }
+        },
+        "username": {
+          "description": "The user name for login",
+          "type": {
+            "name": "String",
+            "type": "named"
+          }
+        }
+      },
+      "description": "Logs user into the system",
+      "name": "loginUser",
+      "result_type": {
+        "name": "String",
+        "type": "named"
       }
     }
   ],
@@ -603,30 +603,6 @@
     {
       "arguments": {
         "body": {
-          "description": "Form data of /pet/{petId}/uploadImage",
-          "type": {
-            "name": "UploadFileBody",
-            "type": "named"
-          }
-        },
-        "petId": {
-          "description": "ID of pet to update",
-          "type": {
-            "name": "Int64",
-            "type": "named"
-          }
-        }
-      },
-      "description": "uploads an image",
-      "name": "uploadFile",
-      "result_type": {
-        "name": "ApiResponse",
-        "type": "named"
-      }
-    },
-    {
-      "arguments": {
-        "body": {
           "description": "Pet object that needs to be added to the store",
           "type": {
             "name": "Pet",
@@ -642,6 +618,116 @@
           "name": "Boolean",
           "type": "named"
         }
+      }
+    },
+    {
+      "arguments": {},
+      "description": "Create snake",
+      "name": "addSnake",
+      "result_type": {
+        "name": "SnakeObject",
+        "type": "named"
+      }
+    },
+    {
+      "arguments": {
+        "orderId": {
+          "description": "ID of the order that needs to be deleted",
+          "type": {
+            "name": "Int64",
+            "type": "named"
+          }
+        }
+      },
+      "description": "Delete purchase order by ID",
+      "name": "deleteOrder",
+      "result_type": {
+        "type": "nullable",
+        "underlying_type": {
+          "name": "Boolean",
+          "type": "named"
+        }
+      }
+    },
+    {
+      "arguments": {
+        "api_key": {
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "String",
+              "type": "named"
+            }
+          }
+        },
+        "petId": {
+          "description": "Pet id to delete",
+          "type": {
+            "name": "Int64",
+            "type": "named"
+          }
+        }
+      },
+      "description": "Deletes a pet",
+      "name": "deletePet",
+      "result_type": {
+        "type": "nullable",
+        "underlying_type": {
+          "name": "Boolean",
+          "type": "named"
+        }
+      }
+    },
+    {
+      "arguments": {
+        "username": {
+          "description": "The name that needs to be deleted",
+          "type": {
+            "name": "String",
+            "type": "named"
+          }
+        }
+      },
+      "description": "Delete user",
+      "name": "deleteUser",
+      "result_type": {
+        "type": "nullable",
+        "underlying_type": {
+          "name": "Boolean",
+          "type": "named"
+        }
+      }
+    },
+    {
+      "arguments": {
+        "body": {
+          "type": {
+            "name": "OAuth2Client",
+            "type": "named"
+          }
+        }
+      },
+      "name": "dynamicClientRegistrationCreateOAuth2Client",
+      "result_type": {
+        "name": "OAuth2Client",
+        "type": "named"
+      }
+    },
+    {
+      "arguments": {
+        "body": {
+          "description": "order placed for purchasing the pet",
+          "type": {
+            "name": "Order",
+            "type": "named"
+          }
+        }
+      },
+      "description": "Place an order for a pet",
+      "name": "placeOrder",
+      "result_type": {
+        "name": "Order",
+        "type": "named"
       }
     },
     {
@@ -693,72 +779,6 @@
     },
     {
       "arguments": {
-        "api_key": {
-          "type": {
-            "type": "nullable",
-            "underlying_type": {
-              "name": "String",
-              "type": "named"
-            }
-          }
-        },
-        "petId": {
-          "description": "Pet id to delete",
-          "type": {
-            "name": "Int64",
-            "type": "named"
-          }
-        }
-      },
-      "description": "Deletes a pet",
-      "name": "deletePet",
-      "result_type": {
-        "type": "nullable",
-        "underlying_type": {
-          "name": "Boolean",
-          "type": "named"
-        }
-      }
-    },
-    {
-      "arguments": {
-        "body": {
-          "description": "order placed for purchasing the pet",
-          "type": {
-            "name": "Order",
-            "type": "named"
-          }
-        }
-      },
-      "description": "Place an order for a pet",
-      "name": "placeOrder",
-      "result_type": {
-        "name": "Order",
-        "type": "named"
-      }
-    },
-    {
-      "arguments": {
-        "orderId": {
-          "description": "ID of the order that needs to be deleted",
-          "type": {
-            "name": "Int64",
-            "type": "named"
-          }
-        }
-      },
-      "description": "Delete purchase order by ID",
-      "name": "deleteOrder",
-      "result_type": {
-        "type": "nullable",
-        "underlying_type": {
-          "name": "Boolean",
-          "type": "named"
-        }
-      }
-    },
-    {
-      "arguments": {
         "body": {
           "description": "Updated user object",
           "type": {
@@ -786,45 +806,25 @@
     },
     {
       "arguments": {
-        "username": {
-          "description": "The name that needs to be deleted",
-          "type": {
-            "name": "String",
-            "type": "named"
-          }
-        }
-      },
-      "description": "Delete user",
-      "name": "deleteUser",
-      "result_type": {
-        "type": "nullable",
-        "underlying_type": {
-          "name": "Boolean",
-          "type": "named"
-        }
-      }
-    },
-    {
-      "arguments": {},
-      "description": "Create snake",
-      "name": "addSnake",
-      "result_type": {
-        "name": "SnakeObject",
-        "type": "named"
-      }
-    },
-    {
-      "arguments": {
         "body": {
+          "description": "Form data of /pet/{petId}/uploadImage",
           "type": {
-            "name": "OAuth2Client",
+            "name": "UploadFileBody",
+            "type": "named"
+          }
+        },
+        "petId": {
+          "description": "ID of pet to update",
+          "type": {
+            "name": "Int64",
             "type": "named"
           }
         }
       },
-      "name": "dynamicClientRegistrationCreateOAuth2Client",
+      "description": "uploads an image",
+      "name": "uploadFile",
       "result_type": {
-        "name": "OAuth2Client",
+        "name": "ApiResponse",
         "type": "named"
       }
     }

@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://github.com/hasura/ndc-rest/ndc-rest-schema/command/convert-config",
+  "$id": "https://github.com/hasura/ndc-rest/ndc-rest-schema/configuration/convert-config",
   "$ref": "#/$defs/ConvertConfig",
   "$defs": {
     "ConvertConfig": {

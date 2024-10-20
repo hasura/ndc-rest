@@ -1,9 +1,9 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://github.com/hasura/ndc-rest/ndc-rest-schema/command/convert-config",
-  "$ref": "#/$defs/ConvertConfig",
+  "$id": "https://github.com/hasura/ndc-rest/ndc-rest-schema/configuration/configuration",
+  "$ref": "#/$defs/Configuration",
   "$defs": {
-    "ConvertConfig": {
+    "ConfigItem": {
       "properties": {
         "file": {
           "type": "string",
@@ -64,14 +64,38 @@
         "output": {
           "type": "string",
           "description": "The location where the ndc schema file will be generated. Print to stdout if not set"
+        },
+        "distributed": {
+          "type": "boolean",
+          "description": "Distributed enables distributed schema"
         }
       },
       "additionalProperties": false,
       "type": "object",
       "required": [
-        "file"
+        "file",
+        "distributed"
       ],
-      "description": "ConvertConfig represents the content of convert config file"
+      "description": "ConfigItem extends the ConvertConfig with advanced options"
+    },
+    "Configuration": {
+      "properties": {
+        "output": {
+          "type": "string"
+        },
+        "files": {
+          "items": {
+            "$ref": "#/$defs/ConfigItem"
+          },
+          "type": "array"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object",
+      "required": [
+        "files"
+      ],
+      "description": "Configuration contains required settings for the connector."
     },
     "PatchConfig": {
       "properties": {

@@ -30,7 +30,8 @@ settings:
   version: 1.0.18
 collections: []
 functions:
-  - request:
+  findPets:
+    request:
       url: "/pet"
       method: get
       parameters: []
@@ -43,7 +44,8 @@ functions:
         name: Pet
         type: named
       type: array
-  - request:
+  findPetsByStatus:
+    request:
       url: "/pet/findByStatus"
       method: get
       security:
@@ -71,7 +73,8 @@ functions:
         name: Pet
         type: named
       type: array
-  - request:
+  petRetry:
+    request:
       url: "/pet/retry"
       method: get
       parameters: []
@@ -84,7 +87,8 @@ functions:
         type: named
       type: array
 procedures:
-  - request:
+  addPet:
+    request:
       url: "/pet"
       method: post
       headers:
@@ -106,7 +110,8 @@ procedures:
     result_type:
       name: Pet
       type: named
-  - request:
+  createModel:
+    request:
       url: /model
       method: post
       requestBody:
