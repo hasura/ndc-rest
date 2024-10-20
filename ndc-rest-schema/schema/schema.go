@@ -250,7 +250,7 @@ func (j *OperationInfo) UnmarshalJSON(b []byte) error {
 
 	rawResultType, ok := raw["result_type"]
 	if !ok {
-		return fmt.Errorf("field result_type in ProcedureInfo: required")
+		return errors.New("field result_type in ProcedureInfo: required")
 	}
 	var resultType schema.Type
 	if err := json.Unmarshal(rawResultType, &resultType); err != nil {
