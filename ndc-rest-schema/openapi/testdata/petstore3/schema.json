@@ -106,6 +106,7 @@
           }
         }
       },
+      "description": "You can list all invoices, or list the invoices for a specific customer. The invoices are returned sorted by creation date, with the most recently created invoices appearing first.",
       "name": "GetInvoices",
       "result_type": {
         "name": "GetInvoicesResult",
@@ -3886,6 +3887,7 @@
           }
         }
       },
+      "description": "DELETE /v1/accounts/{account}",
       "name": "DeleteAccountsAccount",
       "result_type": {
         "name": "TreasuryInboundTransfer",
@@ -3905,6 +3907,7 @@
           }
         }
       },
+      "description": "Creates a Session object.",
       "name": "PostCheckoutSessions",
       "result_type": {
         "name": "Order",
@@ -3927,6 +3930,7 @@
           }
         }
       },
+      "description": "POST /v1/files",
       "name": "PostFiles",
       "result_type": {
         "name": "ApiResponse",
@@ -3952,6 +3956,7 @@
           }
         }
       },
+      "description": "Transitions a test mode created InboundTransfer to the failed status. The InboundTransfer must already be in the processing state.",
       "name": "PostTestHelpersTreasuryInboundTransfersIdFail",
       "result_type": {
         "name": "TreasuryInboundTransfer",
@@ -3994,6 +3999,7 @@
           }
         }
       },
+      "description": "POST /fine_tuning/jobs",
       "name": "createFineTuningJob",
       "result_type": {
         "name": "CreateFineTuningJobRequest",
@@ -4226,6 +4232,7 @@
           }
         }
       },
+      "description": "POST /pet/multipart",
       "name": "uploadPetMultipart",
       "result_type": {
         "name": "ApiResponse",

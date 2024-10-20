@@ -62,6 +62,7 @@ func (oc *oas3OperationBuilder) BuildFunction(itemGet *v3.Operation) (*rest.Oper
 		return nil, fmt.Errorf("%s: %w", funcName, err)
 	}
 
+	description := oc.getOperationDescription(itemGet)
 	function := rest.OperationInfo{
 		Request: &rest.Request{
 			URL:      oc.pathKey,
@@ -70,13 +71,10 @@ func (oc *oas3OperationBuilder) BuildFunction(itemGet *v3.Operation) (*rest.Oper
 			Servers:  oc.builder.convertServers(itemGet.Servers),
 			Response: *schemaResponse,
 		},
-		Name:       funcName,
-		Arguments:  oc.Arguments,
-		ResultType: resultType.Encode(),
-	}
-
-	if itemGet.Summary != "" {
-		function.Description = &itemGet.Summary
+		Name:        funcName,
+		Description: &description,
+		Arguments:   oc.Arguments,
+		ResultType:  resultType.Encode(),
 	}
 
 	return &function, nil
@@ -141,6 +139,7 @@ func (oc *oas3OperationBuilder) BuildProcedure(operation *v3.Operation) (*rest.O
 		}
 	}
 
+	description := oc.getOperationDescription(operation)
 	procedure := rest.OperationInfo{
 		Request: &rest.Request{
 			URL:         oc.pathKey,
@@ -150,9 +149,10 @@ func (oc *oas3OperationBuilder) BuildProcedure(operation *v3.Operation) (*rest.O
 			RequestBody: reqBody,
 			Response:    *schemaResponse,
 		},
-		Name:       procName,
-		Arguments:  oc.Arguments,
-		ResultType: resultType.Encode(),
+		Name:        procName,
+		Description: &description,
+		Arguments:   oc.Arguments,
+		ResultType:  resultType.Encode(),
 	}
 
 	if operation.Summary != "" {
@@ -413,4 +413,14 @@ func (oc *oas3OperationBuilder) convertResponse(responses *v3.Responses, apiPath
 	default:
 		return schemaType, schemaResponse, nil
 	}
+}
+
+func (oc *oas3OperationBuilder) getOperationDescription(operation *v3.Operation) string {
+	if operation.Summary != "" {
+		return utils.StripHTMLTags(operation.Summary)
+	}
+	if operation.Description != "" {
+		return utils.StripHTMLTags(operation.Description)
+	}
+	return strings.ToUpper(oc.method) + " " + oc.pathKey
 }

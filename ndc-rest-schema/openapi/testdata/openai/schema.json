@@ -716,6 +716,7 @@
           }
         }
       },
+      "description": "POST /api/create",
       "name": "createModel",
       "result_type": {
         "element_type": {

@@ -5,6 +5,7 @@ import (
 	"log/slog"
 	"slices"
 	"strconv"
+	"strings"
 
 	rest "github.com/hasura/ndc-rest/ndc-rest-schema/schema"
 	"github.com/hasura/ndc-rest/ndc-rest-schema/utils"
@@ -65,6 +66,7 @@ func (oc *oas2OperationBuilder) BuildFunction(pathKey string, operation *v2.Oper
 		return nil, fmt.Errorf("%s: %w", funcName, err)
 	}
 
+	description := oc.getOperationDescription(pathKey, "get", operation)
 	function := rest.OperationInfo{
 		Request: &rest.Request{
 			URL:         pathKey,
@@ -75,13 +77,10 @@ func (oc *oas2OperationBuilder) BuildFunction(pathKey string, operation *v2.Oper
 			},
 			Security: convertSecurities(operation.Security),
 		},
-		Name:       funcName,
-		Arguments:  oc.Arguments,
-		ResultType: resultType.Encode(),
-	}
-
-	if operation.Summary != "" {
-		function.Description = &operation.Summary
+		Name:        funcName,
+		Description: &description,
+		Arguments:   oc.Arguments,
+		ResultType:  resultType.Encode(),
 	}
 
 	return &function, nil
@@ -133,6 +132,7 @@ func (oc *oas2OperationBuilder) BuildProcedure(pathKey string, method string, op
 		return nil, fmt.Errorf("%s: %w", pathKey, err)
 	}
 
+	description := oc.getOperationDescription(pathKey, method, operation)
 	procedure := rest.OperationInfo{
 		Request: &rest.Request{
 			URL:         pathKey,
@@ -143,9 +143,10 @@ func (oc *oas2OperationBuilder) BuildProcedure(pathKey string, method string, op
 				ContentType: responseContentType,
 			},
 		},
-		Name:       procName,
-		Arguments:  oc.Arguments,
-		ResultType: resultType.Encode(),
+		Name:        procName,
+		Description: &description,
+		Arguments:   oc.Arguments,
+		ResultType:  resultType.Encode(),
 	}
 
 	if operation.Summary != "" {
@@ -350,4 +351,14 @@ func (oc *oas2OperationBuilder) getResponseContentTypeV2(contentTypes []string) 
 		}
 	}
 	return ""
+}
+
+func (oc *oas2OperationBuilder) getOperationDescription(pathKey string, method string, operation *v2.Operation) string {
+	if operation.Summary != "" {
+		return utils.StripHTMLTags(operation.Summary)
+	}
+	if operation.Description != "" {
+		return utils.StripHTMLTags(operation.Description)
+	}
+	return strings.ToUpper(method) + " " + pathKey
 }

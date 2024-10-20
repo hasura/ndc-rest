@@ -707,6 +707,7 @@
           }
         }
       },
+      "description": "POST /oauth2/register",
       "name": "dynamicClientRegistrationCreateOAuth2Client",
       "result_type": {
         "name": "OAuth2Client",
