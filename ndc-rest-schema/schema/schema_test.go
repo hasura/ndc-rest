@@ -5,6 +5,7 @@ import (
 	"testing"
 
 	"github.com/hasura/ndc-sdk-go/schema"
+	"github.com/hasura/ndc-sdk-go/utils"
 	"gotest.tools/v3/assert"
 )
 
@@ -32,8 +33,7 @@ func TestDecodeRESTProcedureInfo(t *testing.T) {
 					Method: "post",
 				},
 				Arguments:   map[string]ArgumentInfo{},
-				Description: toPtr("Create a pet"),
-				Name:        "createPets",
+				Description: utils.ToPtr("Create a pet"),
 				ResultType:  schema.NewNullableNamedType("Boolean").Encode(),
 			},
 		},
@@ -94,7 +94,7 @@ func TestDecodeRESTFunctionInfo(t *testing.T) {
 				Arguments: map[string]ArgumentInfo{
 					"limit": {
 						ArgumentInfo: schema.ArgumentInfo{
-							Description: toPtr("How many items to return at one time (max 100)"),
+							Description: utils.ToPtr("How many items to return at one time (max 100)"),
 							Type:        schema.NewNullableNamedType("Int").Encode(),
 						},
 						Rest: &RequestParameter{
@@ -102,14 +102,13 @@ func TestDecodeRESTFunctionInfo(t *testing.T) {
 							In:   "query",
 							Schema: &TypeSchema{
 								Type:    []string{"integer"},
-								Maximum: toPtr(float64(100)),
+								Maximum: utils.ToPtr(float64(100)),
 								Format:  "int32",
 							},
 						},
 					},
 				},
-				Description: toPtr("List all pets"),
-				Name:        "listPets",
+				Description: utils.ToPtr("List all pets"),
 				ResultType:  schema.NewArrayType(schema.NewNamedType("Pet")).Encode(),
 			},
 		},

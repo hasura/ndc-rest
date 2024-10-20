@@ -282,8 +282,8 @@ func TestEvalURLAndHeaderParameters(t *testing.T) {
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
 			var info *rest.OperationInfo
-			for _, f := range ndcSchema.Functions {
-				if f.Name == tc.name {
+			for key, f := range ndcSchema.Functions {
+				if key == tc.name {
 					info = &f
 					break
 				}

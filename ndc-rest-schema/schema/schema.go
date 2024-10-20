@@ -48,14 +48,14 @@ func (ndc NDCRestSchema) ToSchemaResponse() *schema.SchemaResponse {
 	functions := make([]schema.FunctionInfo, len(functionKeys))
 	for i, key := range functionKeys {
 		fn := ndc.Functions[key]
-		functions[i] = fn.FunctionSchema()
+		functions[i] = fn.FunctionSchema(key)
 	}
 
 	procedureKeys := utils.GetSortedKeys(ndc.Procedures)
 	procedures := make([]schema.ProcedureInfo, len(procedureKeys))
 	for i, key := range procedureKeys {
 		proc := ndc.Procedures[key]
-		procedures[i] = proc.ProcedureSchema()
+		procedures[i] = proc.ProcedureSchema(key)
 	}
 	objectTypes := make(schema.SchemaResponseObjectTypes)
 	for key, object := range ndc.ObjectTypes {
@@ -219,8 +219,6 @@ type OperationInfo struct {
 	Arguments map[string]ArgumentInfo `json:"arguments" mapstructure:"arguments" yaml:"arguments"`
 	// Column description
 	Description *string `json:"description,omitempty" mapstructure:"description,omitempty" yaml:"description,omitempty"`
-	// The name of the procedure
-	Name string `json:"name" mapstructure:"name" yaml:"name"`
 	// The name of the result type
 	ResultType schema.Type `json:"result_type" mapstructure:"result_type" yaml:"result_type"`
 }
@@ -250,27 +248,35 @@ func (j *OperationInfo) UnmarshalJSON(b []byte) error {
 		j.Arguments = arguments
 	}
 
-	delete(raw, "arguments")
+	rawResultType, ok := raw["result_type"]
+	if !ok {
+		return fmt.Errorf("field result_type in ProcedureInfo: required")
+	}
+	var resultType schema.Type
+	if err := json.Unmarshal(rawResultType, &resultType); err != nil {
+		return fmt.Errorf("field result_type in ProcedureInfo: %w", err)
+	}
+	j.ResultType = resultType
 
-	var procedure schema.ProcedureInfo
-	if err := procedure.UnmarshalJSONMap(raw); err != nil {
-		return err
+	if rawDescription, ok := raw["description"]; ok {
+		var description string
+		if err := json.Unmarshal(rawDescription, &description); err != nil {
+			return fmt.Errorf("field description in ProcedureInfo: %w", err)
+		}
+		j.Description = &description
 	}
 
-	j.Description = procedure.Description
-	j.Name = procedure.Name
-	j.ResultType = procedure.ResultType
 	return nil
 }
 
 // Schema returns the connector schema of the function
-func (j OperationInfo) FunctionSchema() schema.FunctionInfo {
+func (j OperationInfo) FunctionSchema(name string) schema.FunctionInfo {
 	arguments := make(schema.FunctionInfoArguments)
 	for key, argument := range j.Arguments {
 		arguments[key] = argument.ArgumentInfo
 	}
 	return schema.FunctionInfo{
-		Name:        j.Name,
+		Name:        name,
 		Arguments:   arguments,
 		Description: j.Description,
 		ResultType:  j.ResultType,
@@ -278,13 +284,13 @@ func (j OperationInfo) FunctionSchema() schema.FunctionInfo {
 }
 
 // Schema returns the connector schema of the function
-func (j OperationInfo) ProcedureSchema() schema.ProcedureInfo {
+func (j OperationInfo) ProcedureSchema(name string) schema.ProcedureInfo {
 	arguments := make(schema.ProcedureInfoArguments)
 	for key, argument := range j.Arguments {
 		arguments[key] = argument.ArgumentInfo
 	}
 	return schema.ProcedureInfo{
-		Name:        j.Name,
+		Name:        name,
 		Arguments:   arguments,
 		Description: j.Description,
 		ResultType:  j.ResultType,
@@ -406,10 +412,6 @@ func (j *ArgumentInfo) UnmarshalJSON(b []byte) error {
 	}
 
 	return nil
-}
-
-func toPtr[V any](value V) *V {
-	return &value
 }
 
 func toAnySlice[T any](values []T) []any {

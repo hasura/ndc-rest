@@ -174,43 +174,43 @@ func (c *RESTConnector) ApplyNDCRestSchemas(schemas []NDCRestSchemaWithName) map
 			}
 		}
 
-		for _, fnItem := range item.schema.Functions {
+		for fnName, fnItem := range item.schema.Functions {
 			if fnItem.Request == nil || fnItem.Request.URL == "" {
 				continue
 			}
 			req, err := validateRequestSchema(fnItem.Request, "get")
 			if err != nil {
-				errs = append(errs, fmt.Sprintf("function %s: %s", fnItem.Name, err))
+				errs = append(errs, fmt.Sprintf("function %s: %s", fnName, err))
 				continue
 			}
 			fn := rest.OperationInfo{
 				Request:     req,
 				Arguments:   fnItem.Arguments,
 				Description: fnItem.Description,
-				Name:        fnItem.Name,
 				ResultType:  fnItem.ResultType,
 			}
-			meta.Functions[fnItem.Name] = fn
-			ndcSchema.Functions[fnItem.Name] = fn
+			meta.Functions[fnName] = fn
+			ndcSchema.Functions[fnName] = fn
 		}
 
-		for _, procItem := range item.schema.Procedures {
+		for procName, procItem := range item.schema.Procedures {
 			if procItem.Request == nil || procItem.Request.URL == "" {
 				continue
 			}
 			req, err := validateRequestSchema(procItem.Request, "")
 			if err != nil {
-				errs = append(errs, fmt.Sprintf("procedure %s: %s", procItem.Name, err))
+				errs = append(errs, fmt.Sprintf("procedure %s: %s", procName, err))
 				continue
 			}
-			meta.Procedures[procItem.Name] = rest.OperationInfo{
+
+			proc := rest.OperationInfo{
 				Request:     req,
-				Name:        procItem.Name,
 				Arguments:   procItem.Arguments,
 				Description: procItem.Description,
 				ResultType:  procItem.ResultType,
 			}
-			ndcSchema.Procedures[procItem.Name] = procItem
+			meta.Procedures[procName] = proc
+			ndcSchema.Procedures[procName] = proc
 		}
 
 		if len(errs) > 0 {
@@ -321,12 +321,11 @@ func buildRESTArguments(restSchema *rest.NDCRestSchema, conf *configuration.Conf
 	functionKeys := utils.GetKeys(restSchema.Functions)
 	for _, key := range functionKeys {
 		fn := restSchema.Functions[key]
-		funcName := buildDistributedName(fn.Name)
+		funcName := buildDistributedName(key)
 		distributedFn := rest.OperationInfo{
 			Request:     fn.Request,
 			Arguments:   cloneDistributedArguments(fn.Arguments),
 			Description: fn.Description,
-			Name:        funcName,
 			ResultType:  schema.NewNamedType(buildDistributedResultObjectType(restSchema, funcName, fn.ResultType)).Encode(),
 		}
 		restSchema.Functions[funcName] = distributedFn
@@ -335,13 +334,12 @@ func buildRESTArguments(restSchema *rest.NDCRestSchema, conf *configuration.Conf
 	procedureKeys := utils.GetKeys(restSchema.Procedures)
 	for _, key := range procedureKeys {
 		proc := restSchema.Procedures[key]
-		procName := buildDistributedName(proc.Name)
+		procName := buildDistributedName(key)
 
 		distributedProc := rest.OperationInfo{
 			Request:     proc.Request,
 			Arguments:   cloneDistributedArguments(proc.Arguments),
 			Description: proc.Description,
-			Name:        procName,
 			ResultType:  schema.NewNamedType(buildDistributedResultObjectType(restSchema, procName, proc.ResultType)).Encode(),
 		}
 		restSchema.Procedures[procName] = distributedProc

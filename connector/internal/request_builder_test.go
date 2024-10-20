@@ -77,8 +77,8 @@ func TestCreateMultipartForm(t *testing.T) {
 	for _, tc := range testCases {
 		t.Run(tc.Name, func(t *testing.T) {
 			var info *rest.OperationInfo
-			for _, f := range ndcSchema.Procedures {
-				if f.Name == tc.Name {
+			for key, f := range ndcSchema.Procedures {
+				if key == tc.Name {
 					info = &f
 					break
 				}
@@ -564,8 +564,8 @@ func TestCreateFormURLEncoded(t *testing.T) {
 	for _, tc := range testCases {
 		t.Run(tc.Name, func(t *testing.T) {
 			var info *rest.OperationInfo
-			for _, f := range ndcSchema.Procedures {
-				if f.Name == tc.Name {
+			for key, f := range ndcSchema.Procedures {
+				if key == tc.Name {
 					info = &f
 					break
 				}

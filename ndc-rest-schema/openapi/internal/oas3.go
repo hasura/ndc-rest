@@ -200,45 +200,45 @@ func (oc *OAS3Builder) pathToNDCOperations(pathItem orderedmap.Pair[string, *v3.
 	pathValue := pathItem.Value()
 
 	if pathValue.Get != nil {
-		funcGet, err := newOAS3OperationBuilder(oc, pathKey, "get").BuildFunction(pathValue.Get)
+		funcGet, funcName, err := newOAS3OperationBuilder(oc, pathKey, "get").BuildFunction(pathValue.Get)
 		if err != nil {
 			return err
 		}
 		if funcGet != nil {
-			oc.schema.Functions[funcGet.Name] = *funcGet
+			oc.schema.Functions[funcName] = *funcGet
 		}
 	}
 
-	procPost, err := newOAS3OperationBuilder(oc, pathKey, "post").BuildProcedure(pathValue.Post)
+	procPost, procPostName, err := newOAS3OperationBuilder(oc, pathKey, "post").BuildProcedure(pathValue.Post)
 	if err != nil {
 		return err
 	}
 	if procPost != nil {
-		oc.schema.Procedures[procPost.Name] = *procPost
+		oc.schema.Procedures[procPostName] = *procPost
 	}
 
-	procPut, err := newOAS3OperationBuilder(oc, pathKey, "put").BuildProcedure(pathValue.Put)
+	procPut, procPutName, err := newOAS3OperationBuilder(oc, pathKey, "put").BuildProcedure(pathValue.Put)
 	if err != nil {
 		return err
 	}
 	if procPut != nil {
-		oc.schema.Procedures[procPut.Name] = *procPut
+		oc.schema.Procedures[procPutName] = *procPut
 	}
 
-	procPatch, err := newOAS3OperationBuilder(oc, pathKey, "patch").BuildProcedure(pathValue.Patch)
+	procPatch, procPutName, err := newOAS3OperationBuilder(oc, pathKey, "patch").BuildProcedure(pathValue.Patch)
 	if err != nil {
 		return err
 	}
 	if procPatch != nil {
-		oc.schema.Procedures[procPatch.Name] = *procPatch
+		oc.schema.Procedures[procPutName] = *procPatch
 	}
 
-	procDelete, err := newOAS3OperationBuilder(oc, pathKey, "delete").BuildProcedure(pathValue.Delete)
+	procDelete, procDeleteName, err := newOAS3OperationBuilder(oc, pathKey, "delete").BuildProcedure(pathValue.Delete)
 	if err != nil {
 		return err
 	}
 	if procDelete != nil {
-		oc.schema.Procedures[procDelete.Name] = *procDelete
+		oc.schema.Procedures[procDeleteName] = *procDelete
 	}
 	return nil
 }

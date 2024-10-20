@@ -6,6 +6,7 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/hasura/ndc-sdk-go/utils"
 	"gopkg.in/yaml.v3"
 	"gotest.tools/v3/assert"
 )
@@ -43,7 +44,7 @@ func TestEnvTemplate(t *testing.T) {
 			templates: []EnvTemplate{
 				{
 					Name:         "SERVER_URL",
-					DefaultValue: toPtr(""),
+					DefaultValue: utils.ToPtr(""),
 				},
 			},
 			templateStr: "{{SERVER_URL:-}}",
@@ -54,7 +55,7 @@ func TestEnvTemplate(t *testing.T) {
 			templates: []EnvTemplate{
 				{
 					Name:         "SERVER_URL",
-					DefaultValue: toPtr("http://localhost:8080"),
+					DefaultValue: utils.ToPtr("http://localhost:8080"),
 				},
 				{
 					Name: "SERVER_URL",
@@ -125,7 +126,7 @@ func TestEnvString(t *testing.T) {
 			input: `"{{FOO:-bar}}"`,
 			expected: *NewEnvStringTemplate(EnvTemplate{
 				Name:         "FOO",
-				DefaultValue: toPtr("bar"),
+				DefaultValue: utils.ToPtr("bar"),
 			}),
 		},
 		{
@@ -160,7 +161,7 @@ func TestEnvInt(t *testing.T) {
 	}{
 		{
 			input:    `400`,
-			expected: EnvInt{value: toPtr[int64](400)},
+			expected: EnvInt{value: utils.ToPtr[int64](400)},
 		},
 		{
 			input:    `"400"`,
@@ -169,10 +170,10 @@ func TestEnvInt(t *testing.T) {
 		{
 			input: `"{{FOO:-401}}"`,
 			expected: EnvInt{
-				value: toPtr(int64(401)),
+				value: utils.ToPtr(int64(401)),
 				EnvTemplate: EnvTemplate{
 					Name:         "FOO",
-					DefaultValue: toPtr("401"),
+					DefaultValue: utils.ToPtr("401"),
 				},
 			},
 		},
@@ -231,7 +232,7 @@ func TestEnvInts(t *testing.T) {
 				value: []int64{400, 401, 403},
 				EnvTemplate: EnvTemplate{
 					Name:         "FOO",
-					DefaultValue: toPtr("400, 401, 403"),
+					DefaultValue: utils.ToPtr("400, 401, 403"),
 				},
 			},
 			expectedYaml: `{{FOO:-400, 401, 403}}`,
@@ -281,10 +282,10 @@ func TestEnvBoolean(t *testing.T) {
 		{
 			input: `"{{FOO:-true}}"`,
 			expected: EnvBoolean{
-				value: toPtr(true),
+				value: utils.ToPtr(true),
 				EnvTemplate: EnvTemplate{
 					Name:         "FOO",
-					DefaultValue: toPtr("true"),
+					DefaultValue: utils.ToPtr("true"),
 				},
 			},
 		},
@@ -293,7 +294,7 @@ func TestEnvBoolean(t *testing.T) {
 				Name: "TEST_BOOL",
 			}).String()),
 			expected: EnvBoolean{
-				value: toPtr(false),
+				value: utils.ToPtr(false),
 				EnvTemplate: EnvTemplate{
 					Name: "TEST_BOOL",
 				},
@@ -367,7 +368,7 @@ func TestEnvStrings(t *testing.T) {
 				value: []string{"foo", "bar"},
 				EnvTemplate: EnvTemplate{
 					Name:         "FOO",
-					DefaultValue: toPtr("foo, bar"),
+					DefaultValue: utils.ToPtr("foo, bar"),
 				},
 			},
 			expectedYaml: `{{FOO:-foo, bar}}`,

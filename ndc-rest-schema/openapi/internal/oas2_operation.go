@@ -26,9 +26,9 @@ func newOAS2OperationBuilder(builder *OAS2Builder) *oas2OperationBuilder {
 }
 
 // BuildFunction build a REST NDC function information from OpenAPI v2 operation
-func (oc *oas2OperationBuilder) BuildFunction(pathKey string, operation *v2.Operation) (*rest.OperationInfo, error) {
+func (oc *oas2OperationBuilder) BuildFunction(pathKey string, operation *v2.Operation) (*rest.OperationInfo, string, error) {
 	if operation == nil {
-		return nil, nil
+		return nil, "", nil
 	}
 	funcName := operation.OperationId
 	if funcName == "" {
@@ -51,19 +51,19 @@ func (oc *oas2OperationBuilder) BuildFunction(pathKey string, operation *v2.Oper
 			slog.Any("produces", operation.Produces),
 			slog.Any("consumes", operation.Consumes),
 		)
-		return nil, nil
+		return nil, "", nil
 	}
 
 	resultType, err := oc.convertResponse(operation.Responses, pathKey, []string{funcName, "Result"})
 	if err != nil {
-		return nil, fmt.Errorf("%s: %w", pathKey, err)
+		return nil, "", fmt.Errorf("%s: %w", pathKey, err)
 	}
 	if resultType == nil {
-		return nil, nil
+		return nil, "", nil
 	}
 	reqBody, err := oc.convertParameters(operation, pathKey, []string{funcName})
 	if err != nil {
-		return nil, fmt.Errorf("%s: %w", funcName, err)
+		return nil, "", fmt.Errorf("%s: %w", funcName, err)
 	}
 
 	description := oc.getOperationDescription(pathKey, "get", operation)
@@ -77,19 +77,18 @@ func (oc *oas2OperationBuilder) BuildFunction(pathKey string, operation *v2.Oper
 			},
 			Security: convertSecurities(operation.Security),
 		},
-		Name:        funcName,
 		Description: &description,
 		Arguments:   oc.Arguments,
 		ResultType:  resultType.Encode(),
 	}
 
-	return &function, nil
+	return &function, funcName, nil
 }
 
 // BuildProcedure build a REST NDC function information from OpenAPI v2 operation
-func (oc *oas2OperationBuilder) BuildProcedure(pathKey string, method string, operation *v2.Operation) (*rest.OperationInfo, error) {
+func (oc *oas2OperationBuilder) BuildProcedure(pathKey string, method string, operation *v2.Operation) (*rest.OperationInfo, string, error) {
 	if operation == nil {
-		return nil, nil
+		return nil, "", nil
 	}
 
 	procName := operation.OperationId
@@ -115,21 +114,21 @@ func (oc *oas2OperationBuilder) BuildProcedure(pathKey string, method string, op
 			slog.Any("produces", operation.Produces),
 			slog.Any("consumes", operation.Consumes),
 		)
-		return nil, nil
+		return nil, "", nil
 	}
 
 	resultType, err := oc.convertResponse(operation.Responses, pathKey, []string{procName, "Result"})
 	if err != nil {
-		return nil, fmt.Errorf("%s: %w", pathKey, err)
+		return nil, "", fmt.Errorf("%s: %w", pathKey, err)
 	}
 
 	if resultType == nil {
-		return nil, nil
+		return nil, "", nil
 	}
 
 	reqBody, err := oc.convertParameters(operation, pathKey, []string{procName})
 	if err != nil {
-		return nil, fmt.Errorf("%s: %w", pathKey, err)
+		return nil, "", fmt.Errorf("%s: %w", pathKey, err)
 	}
 
 	description := oc.getOperationDescription(pathKey, method, operation)
@@ -143,17 +142,12 @@ func (oc *oas2OperationBuilder) BuildProcedure(pathKey string, method string, op
 				ContentType: responseContentType,
 			},
 		},
-		Name:        procName,
 		Description: &description,
 		Arguments:   oc.Arguments,
 		ResultType:  resultType.Encode(),
 	}
 
-	if operation.Summary != "" {
-		procedure.Description = &operation.Summary
-	}
-
-	return &procedure, nil
+	return &procedure, procName, nil
 }
 
 func (oc *oas2OperationBuilder) convertParameters(operation *v2.Operation, apiPath string, fieldPaths []string) (*rest.RequestBody, error) {

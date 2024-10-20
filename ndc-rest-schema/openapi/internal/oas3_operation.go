@@ -30,7 +30,7 @@ func newOAS3OperationBuilder(builder *OAS3Builder, pathKey string, method string
 }
 
 // BuildFunction build a REST NDC function information from OpenAPI v3 operation
-func (oc *oas3OperationBuilder) BuildFunction(itemGet *v3.Operation) (*rest.OperationInfo, error) {
+func (oc *oas3OperationBuilder) BuildFunction(itemGet *v3.Operation) (*rest.OperationInfo, string, error) {
 	start := time.Now()
 	funcName := itemGet.OperationId
 	if funcName == "" {
@@ -51,15 +51,15 @@ func (oc *oas3OperationBuilder) BuildFunction(itemGet *v3.Operation) (*rest.Oper
 
 	resultType, schemaResponse, err := oc.convertResponse(itemGet.Responses, oc.pathKey, []string{funcName, "Result"})
 	if err != nil {
-		return nil, fmt.Errorf("%s: %w", oc.pathKey, err)
+		return nil, "", fmt.Errorf("%s: %w", oc.pathKey, err)
 	}
 	if resultType == nil {
-		return nil, nil
+		return nil, "", nil
 	}
 
 	err = oc.convertParameters(itemGet.Parameters, oc.pathKey, []string{funcName})
 	if err != nil {
-		return nil, fmt.Errorf("%s: %w", funcName, err)
+		return nil, "", fmt.Errorf("%s: %w", funcName, err)
 	}
 
 	description := oc.getOperationDescription(itemGet)
@@ -71,18 +71,17 @@ func (oc *oas3OperationBuilder) BuildFunction(itemGet *v3.Operation) (*rest.Oper
 			Servers:  oc.builder.convertServers(itemGet.Servers),
 			Response: *schemaResponse,
 		},
-		Name:        funcName,
 		Description: &description,
 		Arguments:   oc.Arguments,
 		ResultType:  resultType.Encode(),
 	}
 
-	return &function, nil
+	return &function, funcName, nil
 }
 
-func (oc *oas3OperationBuilder) BuildProcedure(operation *v3.Operation) (*rest.OperationInfo, error) {
+func (oc *oas3OperationBuilder) BuildProcedure(operation *v3.Operation) (*rest.OperationInfo, string, error) {
 	if operation == nil {
-		return nil, nil
+		return nil, "", nil
 	}
 	start := time.Now()
 	procName := operation.OperationId
@@ -105,21 +104,21 @@ func (oc *oas3OperationBuilder) BuildProcedure(operation *v3.Operation) (*rest.O
 
 	resultType, schemaResponse, err := oc.convertResponse(operation.Responses, oc.pathKey, []string{procName, "Result"})
 	if err != nil {
-		return nil, fmt.Errorf("%s: %w", oc.pathKey, err)
+		return nil, "", fmt.Errorf("%s: %w", oc.pathKey, err)
 	}
 
 	if resultType == nil {
-		return nil, nil
+		return nil, "", nil
 	}
 
 	err = oc.convertParameters(operation.Parameters, oc.pathKey, []string{procName})
 	if err != nil {
-		return nil, fmt.Errorf("%s: %w", oc.pathKey, err)
+		return nil, "", fmt.Errorf("%s: %w", oc.pathKey, err)
 	}
 
 	reqBody, schemaType, err := oc.convertRequestBody(operation.RequestBody, oc.pathKey, []string{procName, "Body"})
 	if err != nil {
-		return nil, fmt.Errorf("%s: %w", oc.pathKey, err)
+		return nil, "", fmt.Errorf("%s: %w", oc.pathKey, err)
 	}
 	if reqBody != nil {
 		description := fmt.Sprintf("Request body of %s %s", strings.ToUpper(oc.method), oc.pathKey)
@@ -149,17 +148,12 @@ func (oc *oas3OperationBuilder) BuildProcedure(operation *v3.Operation) (*rest.O
 			RequestBody: reqBody,
 			Response:    *schemaResponse,
 		},
-		Name:        procName,
 		Description: &description,
 		Arguments:   oc.Arguments,
 		ResultType:  resultType.Encode(),
 	}
 
-	if operation.Summary != "" {
-		procedure.Description = &operation.Summary
-	}
-
-	return &procedure, nil
+	return &procedure, procName, nil
 }
 
 func (oc *oas3OperationBuilder) convertParameters(params []*v3.Parameter, apiPath string, fieldPaths []string) error {
