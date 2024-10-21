@@ -8,7 +8,7 @@ The connector can automatically transform OpenAPI 2.0 and 3.0 definitions to NDC
 Start the connector server at http://localhost:8080 using the [JSON Placeholder](https://jsonplaceholder.typicode.com/) APIs.
 
 ```go
-go run . serve --configuration ./rest/testdata/jsonplaceholder
+go run ./server serve --configuration ./connector/testdata/jsonplaceholder
 ```
 
 ## How it works
