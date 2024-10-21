@@ -50,7 +50,7 @@ func (client *HTTPClient) SetTracer(tracer *connector.Tracer) {
 
 // Send creates and executes the request and evaluate response selection
 func (client *HTTPClient) Send(ctx context.Context, request *RetryableRequest, selection schema.NestedField, resultType schema.Type, restOptions *RESTOptions) (any, error) {
-	requests, err := buildDistributedRequestsWithOptions(request, restOptions)
+	requests, err := BuildDistributedRequestsWithOptions(request, restOptions)
 	if err != nil {
 		return nil, err
 	}

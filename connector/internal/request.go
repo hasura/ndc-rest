@@ -80,14 +80,15 @@ func getHostFromServers(servers []rest.ServerConfig, serverIDs []string) (string
 	}
 }
 
-func buildDistributedRequestsWithOptions(request *RetryableRequest, restOptions *RESTOptions) ([]RetryableRequest, error) {
+// BuildDistributedRequestsWithOptions builds distributed requests with options
+func BuildDistributedRequestsWithOptions(request *RetryableRequest, restOptions *RESTOptions) ([]RetryableRequest, error) {
 	if strings.HasPrefix(request.URL, "http") {
 		return []RetryableRequest{*request}, nil
 	}
 
 	if !restOptions.Distributed || len(restOptions.Settings.Servers) == 1 {
 		host, serverID := getHostFromServers(restOptions.Settings.Servers, restOptions.Servers)
-		request.URL = fmt.Sprintf("%s%s", host, request.URL)
+		request.URL = host + request.URL
 		request.ServerID = serverID
 		if err := request.applySettings(restOptions.Settings); err != nil {
 			return nil, err
