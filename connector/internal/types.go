@@ -69,6 +69,7 @@ type RESTOptions struct {
 	Servers  []string `json:"servers"  yaml:"serverIds"`
 	Parallel bool     `json:"parallel" yaml:"parallel"`
 
+	Explain     bool                  `json:"-" yaml:"-"`
 	Distributed bool                  `json:"-" yaml:"-"`
 	Settings    *rest.NDCRestSettings `json:"-" yaml:"-"`
 }

@@ -90,7 +90,7 @@ func BuildDistributedRequestsWithOptions(request *RetryableRequest, restOptions 
 		host, serverID := getHostFromServers(restOptions.Settings.Servers, restOptions.Servers)
 		request.URL = host + request.URL
 		request.ServerID = serverID
-		if err := request.applySettings(restOptions.Settings); err != nil {
+		if err := request.applySettings(restOptions.Settings, restOptions.Explain); err != nil {
 			return nil, err
 		}
 		return []RetryableRequest{*request}, nil
@@ -126,7 +126,7 @@ func BuildDistributedRequestsWithOptions(request *RetryableRequest, restOptions 
 			Headers:     request.Headers.Clone(),
 			Body:        request.Body,
 		}
-		if err := req.applySettings(restOptions.Settings); err != nil {
+		if err := req.applySettings(restOptions.Settings, restOptions.Explain); err != nil {
 			return nil, err
 		}
 		if len(buf) > 0 {
@@ -153,7 +153,7 @@ func (req *RetryableRequest) getServerConfig(settings *rest.NDCRestSettings) *re
 	return nil
 }
 
-func (req *RetryableRequest) applySecurity(serverConfig *rest.ServerConfig) error {
+func (req *RetryableRequest) applySecurity(serverConfig *rest.ServerConfig, isExplain bool) error {
 	if serverConfig == nil {
 		return nil
 	}
@@ -203,7 +203,7 @@ func (req *RetryableRequest) applySecurity(serverConfig *rest.ServerConfig) erro
 		if securityScheme.Value != nil {
 			v := securityScheme.Value.Value()
 			if v != nil {
-				req.Headers.Set(headerName, fmt.Sprintf("%s %s", scheme, *v))
+				req.Headers.Set(headerName, fmt.Sprintf("%s %s", scheme, eitherMaskSecret(*v, isExplain)))
 			}
 		}
 	case rest.APIKeyScheme:
@@ -212,7 +212,7 @@ func (req *RetryableRequest) applySecurity(serverConfig *rest.ServerConfig) erro
 			if securityScheme.Value != nil {
 				value := securityScheme.Value.Value()
 				if value != nil {
-					req.Headers.Set(securityScheme.Name, *value)
+					req.Headers.Set(securityScheme.Name, eitherMaskSecret(*value, isExplain))
 				}
 			}
 		case rest.APIKeyInQuery:
@@ -224,7 +224,7 @@ func (req *RetryableRequest) applySecurity(serverConfig *rest.ServerConfig) erro
 				}
 
 				q := endpoint.Query()
-				q.Add(securityScheme.Name, *securityScheme.Value.Value())
+				q.Add(securityScheme.Name, eitherMaskSecret(*value, isExplain))
 				endpoint.RawQuery = q.Encode()
 				req.URL = endpoint.String()
 			}
@@ -232,7 +232,7 @@ func (req *RetryableRequest) applySecurity(serverConfig *rest.ServerConfig) erro
 			if securityScheme.Value != nil {
 				v := securityScheme.Value.Value()
 				if v != nil {
-					req.Headers.Set("Cookie", fmt.Sprintf("%s=%s", securityScheme.Name, *v))
+					req.Headers.Set("Cookie", fmt.Sprintf("%s=%s", securityScheme.Name, eitherMaskSecret(*v, isExplain)))
 				}
 			}
 		default:
@@ -245,7 +245,7 @@ func (req *RetryableRequest) applySecurity(serverConfig *rest.ServerConfig) erro
 	return nil
 }
 
-func (req *RetryableRequest) applySettings(settings *rest.NDCRestSettings) error {
+func (req *RetryableRequest) applySettings(settings *rest.NDCRestSettings, isExplain bool) error {
 	if req.Retry == nil {
 		req.Retry = &rest.RetryPolicy{}
 	}
@@ -256,7 +256,7 @@ func (req *RetryableRequest) applySettings(settings *rest.NDCRestSettings) error
 	if serverConfig == nil {
 		return nil
 	}
-	if err := req.applySecurity(serverConfig); err != nil {
+	if err := req.applySecurity(serverConfig, isExplain); err != nil {
 		return err
 	}
 

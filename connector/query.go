@@ -114,6 +114,7 @@ func serializeExplainResponse(httpRequest *internal.RetryableRequest, restOption
 	}
 
 	restOptions.Distributed = false
+	restOptions.Explain = true
 	requests, err := internal.BuildDistributedRequestsWithOptions(httpRequest, restOptions)
 	if err != nil {
 		return nil, err
