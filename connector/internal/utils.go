@@ -2,6 +2,7 @@ package internal
 
 import (
 	"fmt"
+	"strings"
 
 	"github.com/hasura/ndc-sdk-go/schema"
 )
@@ -19,5 +20,26 @@ func UnwrapNullableType(input schema.Type) (schema.TypeEncoder, bool, error) {
 		return ty, false, nil
 	default:
 		return nil, false, fmt.Errorf("invalid type %v", input)
+	}
+}
+
+// either masks the string value for security
+func eitherMaskSecret(input string, shouldMask bool) string {
+	if !shouldMask {
+		return input
+	}
+	return MaskString(input)
+}
+
+// MaskString masks the string value for security
+func MaskString(input string) string {
+	inputLength := len(input)
+	switch {
+	case inputLength < 6:
+		return strings.Repeat("*", inputLength)
+	case inputLength < 12:
+		return input[0:1] + strings.Repeat("*", inputLength-1)
+	default:
+		return input[0:3] + strings.Repeat("*", 7) + fmt.Sprintf("(%d)", inputLength)
 	}
 }

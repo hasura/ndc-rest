@@ -100,16 +100,6 @@ func (c *RESTConnector) GetCapabilities(configuration *configuration.Configurati
 	return c.capabilities
 }
 
-// QueryExplain explains a query by creating an execution plan.
-func (c *RESTConnector) QueryExplain(ctx context.Context, configuration *configuration.Configuration, state *State, request *schema.QueryRequest) (*schema.ExplainResponse, error) {
-	return nil, schema.NotSupportedError("query explain has not been supported yet", nil)
-}
-
-// MutationExplain explains a mutation by creating an execution plan.
-func (c *RESTConnector) MutationExplain(ctx context.Context, configuration *configuration.Configuration, state *State, request *schema.MutationRequest) (*schema.ExplainResponse, error) {
-	return nil, schema.NotSupportedError("mutation explain has not been supported yet", nil)
-}
-
 func parseConfiguration(configurationDir string) (*configuration.Configuration, error) {
 	var config configuration.Configuration
 	jsonBytes, err := os.ReadFile(configurationDir + "/config.json")

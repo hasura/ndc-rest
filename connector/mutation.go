@@ -7,6 +7,7 @@ import (
 
 	"github.com/hasura/ndc-rest/connector/internal"
 	"github.com/hasura/ndc-rest/ndc-rest-schema/configuration"
+	rest "github.com/hasura/ndc-rest/ndc-rest-schema/schema"
 	"github.com/hasura/ndc-sdk-go/schema"
 )
 
@@ -32,16 +33,37 @@ func (c *RESTConnector) Mutation(ctx context.Context, configuration *configurati
 	}, nil
 }
 
-func (c *RESTConnector) execProcedure(ctx context.Context, operation *schema.MutationOperation) (schema.MutationOperationResults, error) {
+// MutationExplain explains a mutation by creating an execution plan.
+func (c *RESTConnector) MutationExplain(ctx context.Context, configuration *configuration.Configuration, state *State, request *schema.MutationRequest) (*schema.ExplainResponse, error) {
+	if len(request.Operations) == 0 {
+		return &schema.ExplainResponse{
+			Details: schema.ExplainResponseDetails{},
+		}, nil
+	}
+	operation := request.Operations[0]
+	switch operation.Type {
+	case schema.MutationOperationProcedure:
+		httpRequest, _, restOptions, err := c.explainProcedure(&operation)
+		if err != nil {
+			return nil, err
+		}
+
+		return serializeExplainResponse(httpRequest, restOptions)
+	default:
+		return nil, schema.BadRequestError(fmt.Sprintf("invalid operation type: %s", operation.Type), nil)
+	}
+}
+
+func (c *RESTConnector) explainProcedure(operation *schema.MutationOperation) (*internal.RetryableRequest, *rest.OperationInfo, *internal.RESTOptions, error) {
 	procedure, settings, err := c.metadata.GetProcedure(operation.Name)
 	if err != nil {
-		return nil, err
+		return nil, nil, nil, err
 	}
 
 	// 1. resolve arguments, evaluate URL and query parameters
 	var rawArgs map[string]any
 	if err := json.Unmarshal(operation.Arguments, &rawArgs); err != nil {
-		return nil, schema.BadRequestError("failed to decode arguments", map[string]any{
+		return nil, nil, nil, schema.BadRequestError("failed to decode arguments", map[string]any{
 			"cause": err.Error(),
 		})
 	}
@@ -50,19 +72,26 @@ func (c *RESTConnector) execProcedure(ctx context.Context, operation *schema.Mut
 	builder := internal.NewRequestBuilder(c.schema, procedure, rawArgs)
 	httpRequest, err := builder.Build()
 	if err != nil {
-		return nil, err
+		return nil, nil, nil, err
 	}
 
 	restOptions, err := parseRESTOptionsFromArguments(procedure.Arguments, rawArgs[internal.RESTOptionsArgumentName])
 	if err != nil {
-		return nil, schema.UnprocessableContentError("invalid rest options", map[string]any{
+		return nil, nil, nil, schema.UnprocessableContentError("invalid rest options", map[string]any{
 			"cause": err.Error(),
 		})
 	}
 
 	restOptions.Settings = settings
+	return httpRequest, procedure, restOptions, nil
+}
 
-	// 3. execute the request and evaluate response selection
+func (c *RESTConnector) execProcedure(ctx context.Context, operation *schema.MutationOperation) (schema.MutationOperationResults, error) {
+	httpRequest, procedure, restOptions, err := c.explainProcedure(operation)
+	if err != nil {
+		return nil, err
+	}
+
 	result, err := c.client.Send(ctx, httpRequest, operation.Fields, procedure.ResultType, restOptions)
 	if err != nil {
 		return nil, err

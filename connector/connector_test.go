@@ -113,22 +113,33 @@ func TestRESTConnector_authentication(t *testing.T) {
 	testServer := connServer.BuildTestServer()
 	defer testServer.Close()
 
-	t.Run("auth_default", func(t *testing.T) {
-		reqBody := []byte(`{
-			"collection": "findPets",
-			"query": {
-				"fields": {
-					"__value": {
-						"type": "column",
-						"column": "__value"
-					}
+	findPetsBody := []byte(`{
+		"collection": "findPets",
+		"query": {
+			"fields": {
+				"__value": {
+					"type": "column",
+					"column": "__value"
 				}
-			},
-			"arguments": {},
-			"collection_relationships": {}
-		}`)
+			}
+		},
+		"arguments": {},
+		"collection_relationships": {}
+	}`)
 
-		res, err := http.Post(fmt.Sprintf("%s/query", testServer.URL), "application/json", bytes.NewBuffer(reqBody))
+	t.Run("auth_default_explain", func(t *testing.T) {
+		res, err := http.Post(fmt.Sprintf("%s/query/explain", testServer.URL), "application/json", bytes.NewBuffer(findPetsBody))
+		assert.NilError(t, err)
+		assertHTTPResponse(t, res, http.StatusOK, schema.ExplainResponse{
+			Details: schema.ExplainResponseDetails{
+				"url":     server.URL + "/pet",
+				"headers": `{"Api_key":["ran*******(14)"]}`,
+			},
+		})
+	})
+
+	t.Run("auth_default", func(t *testing.T) {
+		res, err := http.Post(fmt.Sprintf("%s/query", testServer.URL), "application/json", bytes.NewBuffer(findPetsBody))
 		assert.NilError(t, err)
 		assertHTTPResponse(t, res, http.StatusOK, schema.QueryResponse{
 			{
@@ -139,23 +150,35 @@ func TestRESTConnector_authentication(t *testing.T) {
 		})
 	})
 
-	t.Run("auth_api_key", func(t *testing.T) {
-		reqBody := []byte(`{
-			"operations": [
-				{
-					"type": "procedure",
-					"name": "addPet",
-					"arguments": {
-						"body": {
-							"name": "pet"
-						}
+	addPetBody := []byte(`{
+		"operations": [
+			{
+				"type": "procedure",
+				"name": "addPet",
+				"arguments": {
+					"body": {
+						"name": "pet"
 					}
 				}
-			],
-			"collection_relationships": {}
-		}`)
+			}
+		],
+		"collection_relationships": {}
+	}`)
 
-		res, err := http.Post(fmt.Sprintf("%s/mutation", testServer.URL), "application/json", bytes.NewBuffer(reqBody))
+	t.Run("auth_api_key_explain", func(t *testing.T) {
+		res, err := http.Post(fmt.Sprintf("%s/mutation/explain", testServer.URL), "application/json", bytes.NewBuffer(addPetBody))
+		assert.NilError(t, err)
+		assertHTTPResponse(t, res, http.StatusOK, schema.ExplainResponse{
+			Details: schema.ExplainResponseDetails{
+				"url":     server.URL + "/pet",
+				"headers": `{"Api_key":["ran*******(14)"],"Content-Type":["application/json"]}`,
+				"body":    `{"name":"pet"}`,
+			},
+		})
+	})
+
+	t.Run("auth_api_key", func(t *testing.T) {
+		res, err := http.Post(fmt.Sprintf("%s/mutation", testServer.URL), "application/json", bytes.NewBuffer(addPetBody))
 		assert.NilError(t, err)
 		assertHTTPResponse(t, res, http.StatusOK, schema.MutationResponse{
 			OperationResults: []schema.MutationOperationResults{
@@ -164,28 +187,39 @@ func TestRESTConnector_authentication(t *testing.T) {
 		})
 	})
 
-	t.Run("auth_bearer", func(t *testing.T) {
-		reqBody := []byte(`{
-			"collection": "findPetsByStatus",
-			"query": {
-				"fields": {
-					"__value": {
-						"type": "column",
-						"column": "__value"
-					}
+	authBearerBody := []byte(`{
+		"collection": "findPetsByStatus",
+		"query": {
+			"fields": {
+				"__value": {
+					"type": "column",
+					"column": "__value"
 				}
-			},
-			"arguments": {
-				"status": {
-					"type": "literal",
-					"value": "available"
-				}
-			},
-			"collection_relationships": {}
-		}`)
+			}
+		},
+		"arguments": {
+			"status": {
+				"type": "literal",
+				"value": "available"
+			}
+		},
+		"collection_relationships": {}
+	}`)
 
+	t.Run("auth_bearer_explain", func(t *testing.T) {
+		res, err := http.Post(fmt.Sprintf("%s/query/explain", testServer.URL), "application/json", bytes.NewBuffer(authBearerBody))
+		assert.NilError(t, err)
+		assertHTTPResponse(t, res, http.StatusOK, schema.ExplainResponse{
+			Details: schema.ExplainResponseDetails{
+				"url":     server.URL + "/pet/findByStatus?status=available",
+				"headers": `{"Authorization":["Bearer ran*******(19)"]}`,
+			},
+		})
+	})
+
+	t.Run("auth_bearer", func(t *testing.T) {
 		for i := 0; i < 2; i++ {
-			res, err := http.Post(fmt.Sprintf("%s/query", testServer.URL), "application/json", bytes.NewBuffer(reqBody))
+			res, err := http.Post(fmt.Sprintf("%s/query", testServer.URL), "application/json", bytes.NewBuffer(authBearerBody))
 			assert.NilError(t, err)
 			assertHTTPResponse(t, res, http.StatusOK, schema.QueryResponse{
 				{
