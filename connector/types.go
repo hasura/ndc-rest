@@ -16,9 +16,7 @@ var (
 )
 
 // State is the global state which is shared for every connector request.
-type State struct {
-	Schema *rest.NDCRestSchema
-}
+type State struct{}
 
 type options struct {
 	client internal.Doer
