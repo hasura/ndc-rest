@@ -11,7 +11,6 @@ mkdir -p $BUILD_DIR
 
 cp -r connector-definition $BUILD_DIR
 sed -i "s/{{VERSION}}/$VERSION/g" $BUILD_DIR/connector-definition/.hasura-connector/connector-metadata.yaml
-sed -i "s/{{VERSION}}/$VERSION/g" $BUILD_DIR/connector-definition/.hasura-connector/Dockerfile
 
 mkdir -p "${ROOT}/release"
 tar -czvf "${ROOT}/release/connector-definition.tgz" --directory $BUILD_DIR/connector-definition .
