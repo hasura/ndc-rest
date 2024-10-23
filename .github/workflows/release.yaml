@@ -50,6 +50,7 @@ jobs:
           push: true
           tags: ${{ steps.docker-metadata.outputs.tags }}
           labels: ${{ steps.docker-metadata.outputs.labels }}
+          platforms: linux/amd64,linux/arm64
 
   build-cli-and-manifests:
     name: Build the CLI binaries and manifests
@@ -64,6 +65,7 @@ jobs:
       - name: Build the CLI
         run: |
           VERSION="$GITHUB_REF_NAME" make ci-build-cli
+          .github/scripts/plugin-manifest.sh
           mkdir release
           mv _output/* release
 
