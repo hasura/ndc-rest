@@ -65,8 +65,8 @@ jobs:
       - name: Build the CLI
         run: |
           VERSION="$GITHUB_REF_NAME" make ci-build-cli
-          .github/scripts/plugin-manifest.sh
           mkdir release
+          .github/scripts/plugin-manifest.sh
           mv _output/* release
 
       - name: Get version from tag
