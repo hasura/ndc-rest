@@ -3,25 +3,26 @@
   "settings": {
     "servers": [
       {
-        "url": "{{SERVER_URL:-https://onesignal.com/api/v1}}"
+        "url": {
+          "env": "SERVER_URL",
+          "value": "https://onesignal.com/api/v1"
+        }
       }
     ],
-    "timeout": "{{TIMEOUT}}",
-    "retry": {
-      "times": "{{RETRY_TIMES}}",
-      "delay": "{{RETRY_DELAY}}",
-      "httpStatus": "{{RETRY_HTTP_STATUS}}"
-    },
     "securitySchemes": {
       "app_key": {
         "type": "http",
-        "value": "{{APP_KEY_TOKEN}}",
+        "value": {
+          "env": "APP_KEY_TOKEN"
+        },
         "header": "Authorization",
         "scheme": "bearer"
       },
       "user_key": {
         "type": "http",
-        "value": "{{USER_KEY_TOKEN}}",
+        "value": {
+          "env": "USER_KEY_TOKEN"
+        },
         "header": "Authorization",
         "scheme": "bearer"
       }
@@ -52,9 +53,7 @@
             "name": "app_id",
             "in": "query",
             "schema": {
-              "type": [
-                "string"
-              ]
+              "type": ["string"]
             }
           }
         },
@@ -67,9 +66,7 @@
             "name": "notification_id",
             "in": "path",
             "schema": {
-              "type": [
-                "string"
-              ]
+              "type": ["string"]
             }
           }
         }
@@ -105,9 +102,7 @@
             "name": "app_id",
             "in": "query",
             "schema": {
-              "type": [
-                "string"
-              ]
+              "type": ["string"]
             }
           }
         },
@@ -124,9 +119,7 @@
             "name": "kind",
             "in": "query",
             "schema": {
-              "type": [
-                "integer"
-              ]
+              "type": ["integer"]
             }
           }
         },
@@ -143,9 +136,7 @@
             "name": "limit",
             "in": "query",
             "schema": {
-              "type": [
-                "integer"
-              ]
+              "type": ["integer"]
             }
           }
         },
@@ -162,9 +153,7 @@
             "name": "offset",
             "in": "query",
             "schema": {
-              "type": [
-                "integer"
-              ]
+              "type": ["integer"]
             }
           }
         }
@@ -189,9 +178,7 @@
             }
           },
           "rest": {
-            "type": [
-              "boolean"
-            ]
+            "type": ["boolean"]
           }
         }
       }
@@ -219,9 +206,7 @@
             }
           },
           "rest": {
-            "type": [
-              "string"
-            ]
+            "type": ["string"]
           }
         },
         "id": {
@@ -233,9 +218,7 @@
             }
           },
           "rest": {
-            "type": [
-              "string"
-            ]
+            "type": ["string"]
           }
         },
         "recipients": {
@@ -247,9 +230,7 @@
             }
           },
           "rest": {
-            "type": [
-              "integer"
-            ]
+            "type": ["integer"]
           }
         }
       }
@@ -266,9 +247,7 @@
             }
           },
           "rest": {
-            "type": [
-              "integer"
-            ]
+            "type": ["integer"]
           }
         },
         "errored": {
@@ -281,9 +260,7 @@
             }
           },
           "rest": {
-            "type": [
-              "integer"
-            ]
+            "type": ["integer"]
           }
         },
         "failed": {
@@ -296,9 +273,7 @@
             }
           },
           "rest": {
-            "type": [
-              "integer"
-            ]
+            "type": ["integer"]
           }
         },
         "received": {
@@ -311,9 +286,7 @@
             }
           },
           "rest": {
-            "type": [
-              "integer"
-            ]
+            "type": ["integer"]
           }
         },
         "successful": {
@@ -326,9 +299,7 @@
             }
           },
           "rest": {
-            "type": [
-              "integer"
-            ]
+            "type": ["integer"]
           }
         }
       }
@@ -342,9 +313,7 @@
             "type": "named"
           },
           "rest": {
-            "type": [
-              "string"
-            ]
+            "type": ["string"]
           }
         },
         "key": {
@@ -357,9 +326,7 @@
             }
           },
           "rest": {
-            "type": [
-              "string"
-            ]
+            "type": ["string"]
           }
         },
         "relation": {
@@ -369,9 +336,7 @@
             "type": "named"
           },
           "rest": {
-            "type": [
-              "string"
-            ]
+            "type": ["string"]
           }
         },
         "value": {
@@ -384,9 +349,7 @@
             }
           },
           "rest": {
-            "type": [
-              "string"
-            ]
+            "type": ["string"]
           }
         }
       }
@@ -402,9 +365,7 @@
             }
           },
           "rest": {
-            "type": [
-              "string"
-            ]
+            "type": ["string"]
           }
         },
         "email": {
@@ -417,9 +378,7 @@
             }
           },
           "rest": {
-            "type": [
-              "string"
-            ]
+            "type": ["string"]
           }
         },
         "events": {
@@ -432,9 +391,7 @@
             }
           },
           "rest": {
-            "type": [
-              "string"
-            ]
+            "type": ["string"]
           }
         }
       }
@@ -450,9 +407,7 @@
             }
           },
           "rest": {
-            "type": [
-              "string"
-            ]
+            "type": ["string"]
           }
         },
         "success": {
@@ -464,9 +419,7 @@
             }
           },
           "rest": {
-            "type": [
-              "boolean"
-            ]
+            "type": ["boolean"]
           }
         }
       }
@@ -482,9 +435,7 @@
             }
           },
           "rest": {
-            "type": [
-              "object"
-            ]
+            "type": ["object"]
           }
         },
         "custom_data": {
@@ -496,9 +447,7 @@
             }
           },
           "rest": {
-            "type": [
-              "object"
-            ]
+            "type": ["object"]
           }
         },
         "data": {
@@ -511,9 +460,7 @@
             }
           },
           "rest": {
-            "type": [
-              "object"
-            ]
+            "type": ["object"]
           }
         },
         "filters": {
@@ -528,9 +475,7 @@
             }
           },
           "rest": {
-            "type": [
-              "array"
-            ]
+            "type": ["array"]
           }
         },
         "headings": {
@@ -542,9 +487,7 @@
             }
           },
           "rest": {
-            "type": [
-              "object"
-            ]
+            "type": ["object"]
           }
         },
         "id": {
@@ -556,9 +499,7 @@
             }
           },
           "rest": {
-            "type": [
-              "string"
-            ]
+            "type": ["string"]
           }
         },
         "send_after": {
@@ -570,9 +511,7 @@
             }
           },
           "rest": {
-            "type": [
-              "string"
-            ],
+            "type": ["string"],
             "format": "date-time"
           }
         },
@@ -585,9 +524,7 @@
             }
           },
           "rest": {
-            "type": [
-              "object"
-            ]
+            "type": ["object"]
           }
         }
       }
@@ -603,9 +540,7 @@
             }
           },
           "rest": {
-            "type": [
-              "integer"
-            ]
+            "type": ["integer"]
           }
         },
         "notifications": {
@@ -620,9 +555,7 @@
             }
           },
           "rest": {
-            "type": [
-              "array"
-            ]
+            "type": ["array"]
           }
         },
         "offset": {
@@ -634,9 +567,7 @@
             }
           },
           "rest": {
-            "type": [
-              "integer"
-            ]
+            "type": ["integer"]
           }
         },
         "total_count": {
@@ -648,9 +579,7 @@
             }
           },
           "rest": {
-            "type": [
-              "integer"
-            ]
+            "type": ["integer"]
           }
         }
       }
@@ -667,9 +596,7 @@
             }
           },
           "rest": {
-            "type": [
-              "integer"
-            ],
+            "type": ["integer"],
             "format": "int64"
           }
         },
@@ -682,9 +609,7 @@
             }
           },
           "rest": {
-            "type": [
-              "object"
-            ]
+            "type": ["object"]
           }
         },
         "converted": {
@@ -697,9 +622,7 @@
             }
           },
           "rest": {
-            "type": [
-              "integer"
-            ]
+            "type": ["integer"]
           }
         },
         "errored": {
@@ -712,9 +635,7 @@
             }
           },
           "rest": {
-            "type": [
-              "integer"
-            ]
+            "type": ["integer"]
           }
         },
         "excluded_segments": {
@@ -729,13 +650,9 @@
             }
           },
           "rest": {
-            "type": [
-              "array"
-            ],
+            "type": ["array"],
             "items": {
-              "type": [
-                "string"
-              ]
+              "type": ["string"]
             }
           }
         },
@@ -749,9 +666,7 @@
             }
           },
           "rest": {
-            "type": [
-              "integer"
-            ]
+            "type": ["integer"]
           }
         },
         "filters": {
@@ -766,9 +681,7 @@
             }
           },
           "rest": {
-            "type": [
-              "array"
-            ]
+            "type": ["array"]
           }
         },
         "headings": {
@@ -780,9 +693,7 @@
             }
           },
           "rest": {
-            "type": [
-              "object"
-            ]
+            "type": ["object"]
           }
         },
         "id": {
@@ -794,9 +705,7 @@
             }
           },
           "rest": {
-            "type": [
-              "string"
-            ]
+            "type": ["string"]
           }
         },
         "include_player_ids": {
@@ -811,13 +720,9 @@
             }
           },
           "rest": {
-            "type": [
-              "array"
-            ],
+            "type": ["array"],
             "items": {
-              "type": [
-                "string"
-              ]
+              "type": ["string"]
             }
           }
         },
@@ -833,13 +738,9 @@
             }
           },
           "rest": {
-            "type": [
-              "array"
-            ],
+            "type": ["array"],
             "items": {
-              "type": [
-                "string"
-              ]
+              "type": ["string"]
             }
           }
         },
@@ -855,9 +756,7 @@
             }
           },
           "rest": {
-            "type": [
-              "array"
-            ]
+            "type": ["array"]
           }
         },
         "platform_delivery_stats": {
@@ -870,9 +769,7 @@
             }
           },
           "rest": {
-            "type": [
-              "object"
-            ]
+            "type": ["object"]
           }
         },
         "queued_at": {
@@ -885,9 +782,7 @@
             }
           },
           "rest": {
-            "type": [
-              "integer"
-            ],
+            "type": ["integer"],
             "format": "int64"
           }
         },
@@ -901,9 +796,7 @@
             }
           },
           "rest": {
-            "type": [
-              "integer"
-            ]
+            "type": ["integer"]
           }
         },
         "remaining": {
@@ -916,9 +809,7 @@
             }
           },
           "rest": {
-            "type": [
-              "integer"
-            ]
+            "type": ["integer"]
           }
         },
         "send_after": {
@@ -931,9 +822,7 @@
             }
           },
           "rest": {
-            "type": [
-              "integer"
-            ],
+            "type": ["integer"],
             "format": "int64"
           }
         },
@@ -946,9 +835,7 @@
             }
           },
           "rest": {
-            "type": [
-              "object"
-            ]
+            "type": ["object"]
           }
         },
         "successful": {
@@ -961,9 +848,7 @@
             }
           },
           "rest": {
-            "type": [
-              "integer"
-            ]
+            "type": ["integer"]
           }
         },
         "target_channel": {
@@ -975,9 +860,7 @@
             }
           },
           "rest": {
-            "type": [
-              "string"
-            ]
+            "type": ["string"]
           }
         },
         "throttle_rate_per_minute": {
@@ -990,9 +873,7 @@
             }
           },
           "rest": {
-            "type": [
-              "integer"
-            ]
+            "type": ["integer"]
           }
         }
       }
@@ -1005,9 +886,7 @@
             "type": "named"
           },
           "rest": {
-            "type": [
-              "string"
-            ]
+            "type": ["string"]
           }
         },
         "id": {
@@ -1016,9 +895,7 @@
             "type": "named"
           },
           "rest": {
-            "type": [
-              "string"
-            ]
+            "type": ["string"]
           }
         },
         "value": {
@@ -1027,9 +904,7 @@
             "type": "named"
           },
           "rest": {
-            "type": [
-              "integer"
-            ]
+            "type": ["integer"]
           }
         }
       }
@@ -1046,9 +921,7 @@
             }
           },
           "rest": {
-            "type": [
-              "object"
-            ]
+            "type": ["object"]
           }
         },
         "chrome_web_push": {
@@ -1060,9 +933,7 @@
             }
           },
           "rest": {
-            "type": [
-              "object"
-            ]
+            "type": ["object"]
           }
         },
         "edge_web_push": {
@@ -1074,9 +945,7 @@
             }
           },
           "rest": {
-            "type": [
-              "object"
-            ]
+            "type": ["object"]
           }
         },
         "email": {
@@ -1088,9 +957,7 @@
             }
           },
           "rest": {
-            "type": [
-              "object"
-            ]
+            "type": ["object"]
           }
         },
         "firefox_web_push": {
@@ -1102,9 +969,7 @@
             }
           },
           "rest": {
-            "type": [
-              "object"
-            ]
+            "type": ["object"]
           }
         },
         "ios": {
@@ -1116,9 +981,7 @@
             }
           },
           "rest": {
-            "type": [
-              "object"
-            ]
+            "type": ["object"]
           }
         },
         "safari_web_push": {
@@ -1130,9 +993,7 @@
             }
           },
           "rest": {
-            "type": [
-              "object"
-            ]
+            "type": ["object"]
           }
         },
         "sms": {
@@ -1144,9 +1005,7 @@
             }
           },
           "rest": {
-            "type": [
-              "object"
-            ]
+            "type": ["object"]
           }
         }
       }
@@ -1163,9 +1022,7 @@
             }
           },
           "rest": {
-            "type": [
-              "string"
-            ]
+            "type": ["string"]
           }
         }
       }
@@ -1195,9 +1052,7 @@
             "name": "app_id",
             "in": "query",
             "schema": {
-              "type": [
-                "string"
-              ]
+              "type": ["string"]
             }
           }
         },
@@ -1210,9 +1065,7 @@
             "name": "notification_id",
             "in": "path",
             "schema": {
-              "type": [
-                "string"
-              ]
+              "type": ["string"]
             }
           }
         }
@@ -1296,9 +1149,7 @@
             "name": "notification_id",
             "in": "path",
             "schema": {
-              "type": [
-                "string"
-              ]
+              "type": ["string"]
             }
           }
         }
@@ -1368,10 +1219,7 @@
       "aggregate_functions": {},
       "comparison_operators": {},
       "representation": {
-        "one_of": [
-          "sent",
-          "clicked"
-        ],
+        "one_of": ["sent", "clicked"],
         "type": "enum"
       }
     },
@@ -1379,10 +1227,7 @@
       "aggregate_functions": {},
       "comparison_operators": {},
       "representation": {
-        "one_of": [
-          "sum",
-          "count"
-        ],
+        "one_of": ["sum", "count"],
         "type": "enum"
       }
     },
@@ -1390,11 +1235,7 @@
       "aggregate_functions": {},
       "comparison_operators": {},
       "representation": {
-        "one_of": [
-          "push",
-          "email",
-          "sms"
-        ],
+        "one_of": ["push", "email", "sms"],
         "type": "enum"
       }
     },

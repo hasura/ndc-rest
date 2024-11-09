@@ -24,8 +24,7 @@ type RetryableRequest struct {
 	ContentType string
 	Headers     http.Header
 	Body        io.ReadSeeker
-	Timeout     uint
-	Retry       *rest.RetryPolicy
+	Runtime     rest.RuntimeSettings
 }
 
 // CreateRequest creates an HTTP request with body copied
@@ -37,7 +36,7 @@ func (r *RetryableRequest) CreateRequest(ctx context.Context) (*http.Request, co
 		}
 	}
 
-	timeout := r.Timeout
+	timeout := r.Runtime.Timeout
 	if timeout == 0 {
 		timeout = defaultTimeoutSeconds
 	}
@@ -62,9 +61,9 @@ func getHostFromServers(servers []rest.ServerConfig, serverIDs []string) (string
 		if len(serverIDs) > 0 && !slices.Contains(serverIDs, server.ID) {
 			continue
 		}
-		hostPtr := server.URL.Value()
-		if hostPtr != nil && *hostPtr != "" {
-			results = append(results, *hostPtr)
+		hostPtr := server.GetURL()
+		if hostPtr != "" {
+			results = append(results, hostPtr)
 			selectedServerIDs = append(selectedServerIDs, server.ID)
 		}
 	}
@@ -119,7 +118,7 @@ func BuildDistributedRequestsWithOptions(request *RetryableRequest, restOptions 
 		}
 
 		req := RetryableRequest{
-			URL:         fmt.Sprintf("%s%s", host, request.URL),
+			URL:         host + request.URL,
 			ServerID:    serverID,
 			RawRequest:  request.RawRequest,
 			ContentType: request.ContentType,
@@ -177,7 +176,7 @@ func (req *RetryableRequest) applySecurity(serverConfig *rest.ServerConfig, isEx
 
 		securityScheme = &sc
 		if slices.Contains([]rest.SecuritySchemeType{rest.HTTPAuthScheme, rest.APIKeyScheme}, sc.Type) &&
-			sc.Value != nil && sc.Value.Value() != nil && *sc.Value.Value() != "" {
+			sc.Value != nil && sc.GetValue() != "" {
 			break
 		}
 	}
@@ -200,45 +199,40 @@ func (req *RetryableRequest) applySecurity(serverConfig *rest.ServerConfig, isEx
 		if scheme == "bearer" || scheme == "basic" {
 			scheme = utils.ToPascalCase(securityScheme.Scheme)
 		}
-		if securityScheme.Value != nil {
-			v := securityScheme.Value.Value()
-			if v != nil {
-				req.Headers.Set(headerName, fmt.Sprintf("%s %s", scheme, eitherMaskSecret(*v, isExplain)))
-			}
+		v := securityScheme.GetValue()
+		if v != "" {
+			req.Headers.Set(headerName, fmt.Sprintf("%s %s", scheme, eitherMaskSecret(v, isExplain)))
 		}
 	case rest.APIKeyScheme:
 		switch securityScheme.In {
 		case rest.APIKeyInHeader:
 			if securityScheme.Value != nil {
-				value := securityScheme.Value.Value()
-				if value != nil {
-					req.Headers.Set(securityScheme.Name, eitherMaskSecret(*value, isExplain))
+				value := securityScheme.GetValue()
+				if value != "" {
+					req.Headers.Set(securityScheme.Name, eitherMaskSecret(value, isExplain))
 				}
 			}
 		case rest.APIKeyInQuery:
-			value := securityScheme.Value.Value()
-			if value != nil {
+			value := securityScheme.GetValue()
+			if value != "" {
 				endpoint, err := url.Parse(req.URL)
 				if err != nil {
 					return err
 				}
 
 				q := endpoint.Query()
-				q.Add(securityScheme.Name, eitherMaskSecret(*value, isExplain))
+				q.Add(securityScheme.Name, eitherMaskSecret(value, isExplain))
 				endpoint.RawQuery = q.Encode()
 				req.URL = endpoint.String()
 			}
 		case rest.APIKeyInCookie:
-			if securityScheme.Value != nil {
-				v := securityScheme.Value.Value()
-				if v != nil {
-					req.Headers.Set("Cookie", fmt.Sprintf("%s=%s", securityScheme.Name, eitherMaskSecret(*v, isExplain)))
-				}
-			}
+			// Cookie header should be forwarded from Hasura engine
 		default:
 			return fmt.Errorf("unsupported location for apiKey scheme: %s", securityScheme.In)
 		}
 	// TODO: support OAuth and OIDC
+	// Authentication headers can be forwarded from Hasura engine
+	case rest.OAuth2Scheme, rest.OpenIDConnectScheme:
 	default:
 		return fmt.Errorf("unsupported security scheme: %s", securityScheme.Type)
 	}
@@ -246,9 +240,6 @@ func (req *RetryableRequest) applySecurity(serverConfig *rest.ServerConfig, isEx
 }
 
 func (req *RetryableRequest) applySettings(settings *rest.NDCRestSettings, isExplain bool) error {
-	if req.Retry == nil {
-		req.Retry = &rest.RetryPolicy{}
-	}
 	if settings == nil {
 		return nil
 	}
@@ -260,59 +251,19 @@ func (req *RetryableRequest) applySettings(settings *rest.NDCRestSettings, isExp
 		return err
 	}
 
-	if req.Timeout <= 0 && serverConfig.Timeout != nil {
-		timeout, err := serverConfig.Timeout.Value()
-		if err != nil {
-			return err
-		}
-		if timeout != nil && *timeout > 0 {
-			req.Timeout = uint(*timeout)
-		}
-	}
-	if req.Timeout == 0 {
-		req.Timeout = defaultTimeoutSeconds
-	}
-
-	if serverConfig.Retry != nil {
-		if req.Retry.Times <= 0 {
-			times, err := serverConfig.Retry.Times.Value()
-			if err == nil && times != nil && *times > 0 {
-				req.Retry.Times = uint(*times)
-			}
-		}
-		if req.Retry.Delay <= 0 {
-			delay, err := serverConfig.Retry.Delay.Value()
-			if err == nil && delay != nil && *delay > 0 {
-				req.Retry.Delay = uint(*delay)
-			} else {
-				req.Retry.Delay = defaultRetryDelays
-			}
-		}
-		if len(req.Retry.HTTPStatus) == 0 {
-			status, err := serverConfig.Retry.HTTPStatus.Value()
-			if err != nil || len(status) == 0 {
-				status = defaultRetryHTTPStatus
-			}
-			for _, st := range status {
-				req.Retry.HTTPStatus = append(req.Retry.HTTPStatus, int(st))
-			}
-		}
-	}
-
-	req.applyDefaultHeaders(serverConfig.Headers)
-	req.applyDefaultHeaders(settings.Headers)
+	req.applyDefaultHeaders(serverConfig.GetHeaders())
+	req.applyDefaultHeaders(settings.GetHeaders())
 
 	return nil
 }
 
-func (req *RetryableRequest) applyDefaultHeaders(defaultHeaders map[string]rest.EnvString) {
+func (req *RetryableRequest) applyDefaultHeaders(defaultHeaders map[string]string) {
 	for k, envValue := range defaultHeaders {
 		if req.Headers.Get(k) != "" {
 			continue
 		}
-		value := envValue.Value()
-		if value != nil && *value != "" {
-			req.Headers.Set(k, *value)
+		if envValue != "" {
+			req.Headers.Set(k, envValue)
 		}
 	}
 }

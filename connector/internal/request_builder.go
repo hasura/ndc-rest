@@ -21,14 +21,16 @@ type RequestBuilder struct {
 	Schema    *rest.NDCRestSchema
 	Operation *rest.OperationInfo
 	Arguments map[string]any
+	Runtime   rest.RuntimeSettings
 }
 
 // NewRequestBuilder creates a new RequestBuilder instance
-func NewRequestBuilder(restSchema *rest.NDCRestSchema, operation *rest.OperationInfo, arguments map[string]any) *RequestBuilder {
+func NewRequestBuilder(restSchema *rest.NDCRestSchema, operation *rest.OperationInfo, arguments map[string]any, runtime rest.RuntimeSettings) *RequestBuilder {
 	return &RequestBuilder{
 		Schema:    restSchema,
 		Operation: operation,
 		Arguments: arguments,
+		Runtime:   runtime,
 	}
 }
 
@@ -105,8 +107,22 @@ func (c *RequestBuilder) Build() (*RetryableRequest, error) {
 		ContentType: contentType,
 		Headers:     headers,
 		Body:        buffer,
-		Timeout:     rawRequest.Timeout,
-		Retry:       rawRequest.Retry,
+		Runtime:     c.Runtime,
+	}
+
+	if rawRequest.RuntimeSettings != nil {
+		if rawRequest.RuntimeSettings.Timeout > 0 {
+			request.Runtime.Timeout = rawRequest.RuntimeSettings.Timeout
+		}
+		if rawRequest.RuntimeSettings.Retry.Times > 0 {
+			request.Runtime.Retry.Times = rawRequest.RuntimeSettings.Retry.Times
+		}
+		if rawRequest.RuntimeSettings.Retry.Delay > 0 {
+			request.Runtime.Retry.Delay = rawRequest.RuntimeSettings.Retry.Delay
+		}
+		if rawRequest.RuntimeSettings.Retry.HTTPStatus != nil {
+			request.Runtime.Retry.HTTPStatus = rawRequest.RuntimeSettings.Retry.HTTPStatus
+		}
 	}
 
 	return request, nil

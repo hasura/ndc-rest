@@ -1,8 +1,11 @@
 package configuration
 
 import (
+	"encoding/json"
 	"errors"
+	"fmt"
 	"log/slog"
+	"os"
 	"path/filepath"
 
 	"github.com/hasura/ndc-rest/ndc-rest-schema/utils"
@@ -11,17 +14,12 @@ import (
 
 // UpdateRESTConfiguration validates and updates the REST configuration
 func UpdateRESTConfiguration(configurationDir string, logger *slog.Logger) error {
-	configFilePath := configurationDir + "/config.yaml"
-	rawConfig, err := utils.ReadFileFromPath(configFilePath)
+	config, err := ReadConfigurationFile(configurationDir)
 	if err != nil {
 		return err
 	}
-	var config Configuration
-	if err := yaml.Unmarshal(rawConfig, &config); err != nil {
-		return err
-	}
 
-	schemas, errs := BuildSchemaFiles(&config, configurationDir, logger)
+	schemas, errs := BuildSchemaFromConfig(config, configurationDir, logger)
 	if len(errs) > 0 {
 		printSchemaValidationError(logger, errs)
 		if config.Strict {
@@ -29,10 +27,10 @@ func UpdateRESTConfiguration(configurationDir string, logger *slog.Logger) error
 		}
 	}
 
-	validatedResults, _, errs := MergeNDCRestSchemas(schemas)
+	_, validatedSchemas, errs := MergeNDCRestSchemas(config, schemas)
 	if len(errs) > 0 {
 		printSchemaValidationError(logger, errs)
-		if validatedResults == nil || config.Strict {
+		if validatedSchemas == nil || config.Strict {
 			return errors.New("invalid rest schema")
 		}
 	}
@@ -47,4 +45,43 @@ func UpdateRESTConfiguration(configurationDir string, logger *slog.Logger) error
 
 func printSchemaValidationError(logger *slog.Logger, errors map[string][]string) {
 	logger.Error("errors happen when validating NDC REST schemas", slog.Any("errors", errors))
+}
+
+// ReadConfigurationFile reads and decodes the configuration file from the configuration directory
+func ReadConfigurationFile(configurationDir string) (*Configuration, error) {
+	var config Configuration
+	jsonBytes, err := os.ReadFile(configurationDir + "/config.json")
+	if err == nil {
+		if err = json.Unmarshal(jsonBytes, &config); err != nil {
+			return nil, err
+		}
+		return &config, nil
+	}
+
+	if !os.IsNotExist(err) {
+		return nil, err
+	}
+
+	// try to read and parse yaml file
+	yamlBytes, err := os.ReadFile(configurationDir + "/config.yaml")
+	if err != nil {
+		if !os.IsNotExist(err) {
+			return nil, err
+		}
+		yamlBytes, err = os.ReadFile(configurationDir + "/config.yml")
+	}
+
+	if err != nil {
+		if os.IsNotExist(err) {
+			return nil, fmt.Errorf("the config.{json,yaml,yml} file does not exist at %s", configurationDir)
+		} else {
+			return nil, err
+		}
+	}
+
+	if err = yaml.Unmarshal(yamlBytes, &config); err != nil {
+		return nil, err
+	}
+
+	return &config, nil
 }

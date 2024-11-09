@@ -2,8 +2,11 @@ package schema
 
 import (
 	"encoding/json"
+	"reflect"
 	"testing"
 
+	"github.com/google/go-cmp/cmp"
+	"github.com/hasura/ndc-sdk-go/utils"
 	"gotest.tools/v3/assert"
 )
 
@@ -18,16 +21,23 @@ func TestNDCRestSettings(t *testing.T) {
 			input: `{
 				"servers": [
 					{
-						"url": "{{PET_STORE_SERVER_URL:-https://petstore3.swagger.io/api/v3}}"
+						"url": {
+							"env": "PET_STORE_SERVER_URL",
+							"value": "https://petstore3.swagger.io/api/v3"
+						}
 					},
 					{
-						"url": "https://petstore3.swagger.io/api/v3.1"
+						"url": {
+							"value": "https://petstore3.swagger.io/api/v3.1"
+						}
 					}
 				],
 				"securitySchemes": {
 					"api_key": {
 						"type": "apiKey",
-						"value": "{{PET_STORE_API_KEY}}",
+						"value": {
+							"env": "PET_STORE_API_KEY"
+						},
 						"in": "header",
 						"name": "api_key"
 					},
@@ -44,12 +54,6 @@ func TestNDCRestSettings(t *testing.T) {
 						}
 					}
 				},
-				"timeout": "{{PET_STORE_TIMEOUT}}",
-				"retry": {
-					"times": "{{PET_STORE_RETRY_TIMES}}",
-					"delay": 1000,
-					"httpStatus": "{{PET_STORE_RETRY_HTTP_STATUS}}"
-				},
 				"security": [
 					{},
 					{
@@ -61,16 +65,16 @@ func TestNDCRestSettings(t *testing.T) {
 			expected: NDCRestSettings{
 				Servers: []ServerConfig{
 					{
-						URL: *NewEnvStringTemplate(NewEnvTemplateWithDefault("PET_STORE_SERVER_URL", "https://petstore3.swagger.io/api/v3")),
+						URL: utils.NewEnvString("PET_STORE_SERVER_URL", "https://petstore3.swagger.io/api/v3"),
 					},
 					{
-						URL: *EnvString{}.WithValue("https://petstore3.swagger.io/api/v3.1"),
+						URL: utils.NewEnvStringValue("https://petstore3.swagger.io/api/v3.1"),
 					},
 				},
 				SecuritySchemes: map[string]SecurityScheme{
 					"api_key": {
 						Type:  APIKeyScheme,
-						Value: NewEnvStringTemplate(NewEnvTemplate("PET_STORE_API_KEY")),
+						Value: utils.ToPtr(utils.NewEnvStringVariable("PET_STORE_API_KEY")),
 						APIKeyAuthConfig: &APIKeyAuthConfig{
 							In:   APIKeyInHeader,
 							Name: "api_key",
@@ -91,12 +95,6 @@ func TestNDCRestSettings(t *testing.T) {
 						},
 					},
 				},
-				Timeout: NewEnvIntTemplate(NewEnvTemplate("PET_STORE_TIMEOUT")),
-				Retry: &RetryPolicySetting{
-					Times:      *NewEnvIntTemplate(NewEnvTemplate("PET_STORE_RETRY_TIMES")),
-					Delay:      *NewEnvIntValue(1000),
-					HTTPStatus: *NewEnvIntsTemplate(NewEnvTemplate("PET_STORE_RETRY_HTTP_STATUS")),
-				},
 				Security: AuthSecurities{
 					AuthSecurity{},
 					NewAuthSecurity("petstore_auth", []string{"write:pets", "read:pets"}),
@@ -114,15 +112,12 @@ func TestNDCRestSettings(t *testing.T) {
 				t.FailNow()
 			}
 			for i, s := range tc.expected.Servers {
-				assert.DeepEqual(t, s.URL.String(), result.Servers[i].URL.String())
+				assert.DeepEqual(t, s.URL.Variable, result.Servers[i].URL.Variable)
+				assert.DeepEqual(t, s.URL.Value, result.Servers[i].URL.Value)
 			}
 			assert.DeepEqual(t, tc.expected.Headers, result.Headers)
-			assert.DeepEqual(t, tc.expected.Retry.Delay.String(), result.Retry.Delay.String())
-			assert.DeepEqual(t, tc.expected.Retry.Times.String(), result.Retry.Times.String())
-			assert.DeepEqual(t, tc.expected.Retry.HTTPStatus.String(), result.Retry.HTTPStatus.String())
 			assert.DeepEqual(t, tc.expected.Security, result.Security)
-			assert.DeepEqual(t, tc.expected.SecuritySchemes, result.SecuritySchemes)
-			assert.DeepEqual(t, tc.expected.Timeout, result.Timeout)
+			assert.DeepEqual(t, tc.expected.SecuritySchemes, result.SecuritySchemes, cmp.Exporter(func(t reflect.Type) bool { return true }))
 			assert.DeepEqual(t, tc.expected.Version, result.Version)
 
 			_, err := json.Marshal(tc.expected)

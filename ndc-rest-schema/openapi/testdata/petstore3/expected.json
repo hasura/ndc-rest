@@ -3,28 +3,32 @@
   "settings": {
     "servers": [
       {
-        "url": "{{PET_STORE_SERVER_URL:-https://petstore3.swagger.io/api/v3}}"
+        "url": {
+          "value": "https://petstore3.swagger.io/api/v3",
+          "env": "PET_STORE_SERVER_URL"
+        }
       },
       {
-        "url": "{{PET_STORE_SERVER_URL_2:-https://petstore3.swagger.io/api/v3.1}}"
+        "url": {
+          "value": "https://petstore3.swagger.io/api/v3.1",
+          "env": "PET_STORE_SERVER_URL_2"
+        }
       }
     ],
-    "timeout": "{{PET_STORE_TIMEOUT}}",
-    "retry": {
-      "times": "{{PET_STORE_RETRY_TIMES}}",
-      "delay": "{{PET_STORE_RETRY_DELAY}}",
-      "httpStatus": "{{PET_STORE_RETRY_HTTP_STATUS}}"
-    },
     "securitySchemes": {
       "api_key": {
         "type": "apiKey",
-        "value": "{{PET_STORE_API_KEY}}",
+        "value": {
+          "env": "PET_STORE_API_KEY"
+        },
         "in": "header",
         "name": "api_key"
       },
       "basic": {
         "type": "http",
-        "value": "{{PET_STORE_BASIC_TOKEN}}",
+        "value": {
+          "env": "PET_STORE_BASIC_TOKEN"
+        },
         "header": "Authorization",
         "scheme": "basic"
       },
@@ -275,7 +279,6 @@
         }
       },
       "description": "You can list all invoices, or list the invoices for a specific customer. The invoices are returned sorted by creation date, with the most recently created invoices appearing first.",
-      "name": "GetInvoices",
       "result_type": {
         "name": "GetInvoicesResult",
         "type": "named"
@@ -320,7 +323,6 @@
         }
       },
       "description": "Finds Pets by status",
-      "name": "findPetsByStatus",
       "result_type": {
         "element_type": {
           "name": "Pet",
@@ -376,7 +378,6 @@
         }
       },
       "description": "Finds Pets by tags",
-      "name": "findPetsByTags",
       "result_type": {
         "element_type": {
           "name": "Pet",
@@ -400,7 +401,6 @@
       },
       "arguments": {},
       "description": "Returns pet inventories by status",
-      "name": "getInventory",
       "result_type": {
         "name": "JSON",
         "type": "named"
@@ -434,7 +434,6 @@
         }
       },
       "description": "Find purchase order by ID",
-      "name": "getOrderById",
       "result_type": {
         "name": "Order",
         "type": "named"
@@ -479,7 +478,6 @@
         }
       },
       "description": "Find pet by ID",
-      "name": "getPetById",
       "result_type": {
         "name": "Pet",
         "type": "named"
@@ -495,7 +493,6 @@
       },
       "arguments": {},
       "description": "Get snake object",
-      "name": "getSnake",
       "result_type": {
         "name": "SnakeObject",
         "type": "named"
@@ -528,7 +525,6 @@
         }
       },
       "description": "Get user by user name",
-      "name": "getUserByName",
       "result_type": {
         "name": "User",
         "type": "named"
@@ -583,7 +579,6 @@
         }
       },
       "description": "Logs user into the system",
-      "name": "loginUser",
       "result_type": {
         "name": "String",
         "type": "named"
@@ -6231,7 +6226,6 @@
         }
       },
       "description": "DELETE /v1/accounts/{account}",
-      "name": "DeleteAccountsAccount",
       "result_type": {
         "name": "TreasuryInboundTransfer",
         "type": "named"
@@ -6346,7 +6340,6 @@
         }
       },
       "description": "Creates a Session object.",
-      "name": "PostCheckoutSessions",
       "result_type": {
         "name": "Order",
         "type": "named"
@@ -6358,7 +6351,10 @@
         "method": "post",
         "servers": [
           {
-            "url": "{{PET_STORE_SERVER_URL:-https://files.stripe.com/}}"
+            "url": {
+              "value": "https://files.stripe.com/",
+              "env": "PET_STORE_SERVER_URL"
+            }
           }
         ],
         "requestBody": {
@@ -6424,7 +6420,6 @@
         }
       },
       "description": "POST /v1/files",
-      "name": "PostFiles",
       "result_type": {
         "name": "ApiResponse",
         "type": "named"
@@ -6484,7 +6479,6 @@
         }
       },
       "description": "Transitions a test mode created InboundTransfer to the failed status. The InboundTransfer must already be in the processing state.",
-      "name": "PostTestHelpersTreasuryInboundTransfersIdFail",
       "result_type": {
         "name": "TreasuryInboundTransfer",
         "type": "named"
@@ -6522,7 +6516,6 @@
         }
       },
       "description": "Add a new pet to the store",
-      "name": "addPet",
       "result_type": {
         "name": "Pet",
         "type": "named"
@@ -6538,7 +6531,6 @@
       },
       "arguments": {},
       "description": "Add snake object",
-      "name": "addSnake",
       "result_type": {
         "name": "SnakeObject",
         "type": "named"
@@ -6568,7 +6560,6 @@
         }
       },
       "description": "POST /fine_tuning/jobs",
-      "name": "createFineTuningJob",
       "result_type": {
         "name": "CreateFineTuningJobRequest",
         "type": "named"
@@ -6604,7 +6595,6 @@
         }
       },
       "description": "Creates list of users with given input array",
-      "name": "createUsersWithListInput",
       "result_type": {
         "name": "User",
         "type": "named"
@@ -6638,7 +6628,6 @@
         }
       },
       "description": "Delete purchase order by ID",
-      "name": "deleteOrder",
       "result_type": {
         "type": "nullable",
         "underlying_type": {
@@ -6701,7 +6690,6 @@
         }
       },
       "description": "Deletes a pet",
-      "name": "deletePet",
       "result_type": {
         "type": "nullable",
         "underlying_type": {
@@ -6737,7 +6725,6 @@
         }
       },
       "description": "Delete user",
-      "name": "deleteUser",
       "result_type": {
         "type": "nullable",
         "underlying_type": {
@@ -6773,7 +6760,6 @@
         }
       },
       "description": "Place an order for a pet",
-      "name": "placeOrder",
       "result_type": {
         "name": "Order",
         "type": "named"
@@ -6811,7 +6797,6 @@
         }
       },
       "description": "Update an existing pet",
-      "name": "updatePet",
       "result_type": {
         "name": "Pet",
         "type": "named"
@@ -6891,7 +6876,6 @@
         }
       },
       "description": "Updates a pet in the store with form data",
-      "name": "updatePetWithForm",
       "result_type": {
         "type": "nullable",
         "underlying_type": {
@@ -6971,7 +6955,6 @@
         }
       },
       "description": "uploads an image",
-      "name": "uploadFile",
       "result_type": {
         "name": "ApiResponse",
         "type": "named"
@@ -7039,7 +7022,6 @@
         }
       },
       "description": "POST /pet/multipart",
-      "name": "uploadPetMultipart",
       "result_type": {
         "name": "ApiResponse",
         "type": "named"

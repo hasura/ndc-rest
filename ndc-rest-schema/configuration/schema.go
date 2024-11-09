@@ -15,32 +15,39 @@ import (
 	"github.com/hasura/ndc-sdk-go/utils"
 )
 
-// BuildSchemaFiles build NDC REST schema from file list
-func BuildSchemaFiles(config *Configuration, configDir string, logger *slog.Logger) ([]NDCRestSchemaWithName, map[string][]string) {
-	schemas := make([]NDCRestSchemaWithName, len(config.Files))
+// BuildSchemaFromConfig build NDC REST schema from the configuration
+func BuildSchemaFromConfig(config *Configuration, configDir string, logger *slog.Logger) ([]NDCRestRuntimeSchema, map[string][]string) {
+	schemas := make([]NDCRestRuntimeSchema, len(config.Files))
 	errors := make(map[string][]string)
 	for i, file := range config.Files {
-		var errs []string
-		schemaOutput, err := buildSchemaFile(configDir, &file, logger)
+		schemaOutput, err := buildSchemaFile(config, configDir, &file, logger)
 		if err != nil {
-			errs = append(errs, err.Error())
+			errors[file.File] = []string{err.Error()}
 		}
-		if schemaOutput != nil {
-			schemas[i] = NDCRestSchemaWithName{
-				Name:          file.File,
-				NDCRestSchema: schemaOutput,
-			}
+
+		if schemaOutput == nil {
+			continue
 		}
-		if len(errs) > 0 {
-			errors[file.File] = errs
+
+		ndcSchema := NDCRestRuntimeSchema{
+			Name:          file.File,
+			NDCRestSchema: schemaOutput,
 		}
+
+		runtime, err := file.GetRuntimeSettings()
+		if err != nil {
+			errors[file.File] = []string{err.Error()}
+		} else {
+			ndcSchema.Runtime = *runtime
+		}
+		schemas[i] = ndcSchema
 	}
 
 	return schemas, errors
 }
 
 // ReadSchemaOutputFile reads the schema output file in disk
-func ReadSchemaOutputFile(configDir string, filePath string, logger *slog.Logger) ([]NDCRestSchemaWithName, error) {
+func ReadSchemaOutputFile(configDir string, filePath string, logger *slog.Logger) ([]NDCRestRuntimeSchema, error) {
 	if filePath == "" {
 		return nil, nil
 	}
@@ -55,7 +62,7 @@ func ReadSchemaOutputFile(configDir string, filePath string, logger *slog.Logger
 		return nil, fmt.Errorf("failed to read the file at %s: %w", outputFilePath, err)
 	}
 
-	var result []NDCRestSchemaWithName
+	var result []NDCRestRuntimeSchema
 	if err := json.Unmarshal(rawBytes, &result); err != nil {
 		return nil, fmt.Errorf("failed to unmarshal the schema file at %s: %w", outputFilePath, err)
 	}
@@ -64,7 +71,7 @@ func ReadSchemaOutputFile(configDir string, filePath string, logger *slog.Logger
 }
 
 // MergeNDCRestSchemas merge REST schemas into a single schema object
-func MergeNDCRestSchemas(schemas []NDCRestSchemaWithName) (*rest.NDCRestSchema, []rest.NDCRestSchema, map[string][]string) {
+func MergeNDCRestSchemas(config *Configuration, schemas []NDCRestRuntimeSchema) (*rest.NDCRestSchema, []NDCRestRuntimeSchema, map[string][]string) {
 	ndcSchema := &rest.NDCRestSchema{
 		ScalarTypes: make(schema.SchemaResponseScalarTypes),
 		ObjectTypes: make(map[string]rest.ObjectType),
@@ -72,8 +79,7 @@ func MergeNDCRestSchemas(schemas []NDCRestSchemaWithName) (*rest.NDCRestSchema, 
 		Procedures:  make(map[string]rest.OperationInfo),
 	}
 
-	appliedSchemas := make([]rest.NDCRestSchema, len(schemas))
-
+	appliedSchemas := make([]NDCRestRuntimeSchema, len(schemas))
 	errors := make(map[string][]string)
 
 	for i, item := range schemas {
@@ -86,52 +92,6 @@ func MergeNDCRestSchemas(schemas []NDCRestSchemaWithName) (*rest.NDCRestSchema, 
 			settings = &rest.NDCRestSettings{}
 		} else {
 			for i, server := range settings.Servers {
-				if server.Retry == nil {
-					if settings.Retry != nil {
-						server.Retry = settings.Retry
-					}
-				} else if settings.Retry != nil {
-					delay, err := server.Retry.Delay.Value()
-					if err != nil {
-						errors[fmt.Sprintf("settings.servers[%d].retry.delay", i)] = []string{err.Error()}
-						return nil, nil, errors
-					}
-					if delay == nil || *delay <= 0 {
-						server.Retry.Delay = settings.Retry.Delay
-					}
-
-					times, err := server.Retry.Times.Value()
-					if err != nil {
-						errors[fmt.Sprintf("settings.servers[%d].retry.times", i)] = []string{err.Error()}
-						return nil, nil, errors
-					}
-					if times == nil || *times <= 0 {
-						server.Retry.Times = settings.Retry.Times
-					}
-
-					status, err := server.Retry.HTTPStatus.Value()
-					if err != nil {
-						errors[fmt.Sprintf("settings.servers[%d].retry.httpStatus", i)] = []string{err.Error()}
-						return nil, nil, errors
-					}
-					if len(status) == 0 {
-						server.Retry.HTTPStatus = settings.Retry.HTTPStatus
-					}
-				}
-
-				if server.Timeout == nil {
-					server.Timeout = settings.Timeout
-				} else {
-					timeout, err := server.Timeout.Value()
-					if err != nil {
-						errors[fmt.Sprintf("settings.servers[%d].timeout", i)] = []string{err.Error()}
-						return nil, nil, errors
-					}
-					if timeout == nil || *timeout <= 0 {
-						settings.Timeout = rest.NewEnvIntValue(*timeout)
-					}
-				}
-
 				if server.Security.IsEmpty() {
 					server.Security = settings.Security
 				}
@@ -146,7 +106,7 @@ func MergeNDCRestSchemas(schemas []NDCRestSchemaWithName) (*rest.NDCRestSchema, 
 				}
 
 				if server.Headers == nil {
-					server.Headers = make(map[string]rest.EnvString)
+					server.Headers = make(map[string]utils.EnvString)
 				}
 				for key, value := range settings.Headers {
 					_, ok := server.Headers[key]
@@ -158,10 +118,16 @@ func MergeNDCRestSchemas(schemas []NDCRestSchemaWithName) (*rest.NDCRestSchema, 
 			}
 		}
 
-		meta := rest.NDCRestSchema{
-			Settings:   settings,
-			Functions:  map[string]rest.OperationInfo{},
-			Procedures: map[string]rest.OperationInfo{},
+		meta := NDCRestRuntimeSchema{
+			Name:    item.Name,
+			Runtime: item.Runtime,
+			NDCRestSchema: &rest.NDCRestSchema{
+				Settings:    settings,
+				Functions:   map[string]rest.OperationInfo{},
+				Procedures:  map[string]rest.OperationInfo{},
+				ObjectTypes: item.ObjectTypes,
+				ScalarTypes: item.ScalarTypes,
+			},
 		}
 		var errs []string
 
@@ -189,6 +155,7 @@ func MergeNDCRestSchemas(schemas []NDCRestSchemaWithName) (*rest.NDCRestSchema, 
 				errs = append(errs, fmt.Sprintf("function %s: %s", fnName, err))
 				continue
 			}
+
 			fn := rest.OperationInfo{
 				Request:     req,
 				Arguments:   fnItem.Arguments,
@@ -229,26 +196,26 @@ func MergeNDCRestSchemas(schemas []NDCRestSchemaWithName) (*rest.NDCRestSchema, 
 	return ndcSchema, appliedSchemas, errors
 }
 
-func buildSchemaFile(configDir string, conf *ConfigItem, logger *slog.Logger) (*rest.NDCRestSchema, error) {
-	if conf.ConvertConfig.File == "" {
+func buildSchemaFile(config *Configuration, configDir string, configItem *ConfigItem, logger *slog.Logger) (*rest.NDCRestSchema, error) {
+	if configItem.ConvertConfig.File == "" {
 		return nil, errFilePathRequired
 	}
-	ResolveConvertConfigArguments(&conf.ConvertConfig, configDir, nil)
-	ndcSchema, err := ConvertToNDCSchema(&conf.ConvertConfig, logger)
+	ResolveConvertConfigArguments(&configItem.ConvertConfig, configDir, nil)
+	ndcSchema, err := ConvertToNDCSchema(&configItem.ConvertConfig, logger)
 	if err != nil {
 		return nil, err
 	}
 
 	if ndcSchema.Settings == nil || len(ndcSchema.Settings.Servers) == 0 {
-		return nil, fmt.Errorf("the servers setting of schema %s is empty", conf.ConvertConfig.File)
+		return nil, fmt.Errorf("the servers setting of schema %s is empty", configItem.ConvertConfig.File)
 	}
 
-	buildRESTArguments(ndcSchema, conf)
+	buildRESTArguments(config, ndcSchema, configItem)
 
 	return ndcSchema, nil
 }
 
-func buildRESTArguments(restSchema *rest.NDCRestSchema, conf *ConfigItem) {
+func buildRESTArguments(config *Configuration, restSchema *rest.NDCRestSchema, conf *ConfigItem) {
 	if restSchema.Settings == nil || len(restSchema.Settings.Servers) < 2 {
 		return
 	}
@@ -270,19 +237,12 @@ func buildRESTArguments(restSchema *rest.NDCRestSchema, conf *ConfigItem) {
 	restSchema.ScalarTypes[rest.RESTServerIDScalarName] = *serverScalar
 	restSchema.ObjectTypes[rest.RESTSingleOptionsObjectName] = singleObjectType
 
-	restSingleOptionsArgument := rest.ArgumentInfo{
-		ArgumentInfo: schema.ArgumentInfo{
-			Description: singleObjectType.Description,
-			Type:        schema.NewNullableNamedType(rest.RESTSingleOptionsObjectName).Encode(),
-		},
-	}
-
 	for _, fn := range restSchema.Functions {
-		fn.Arguments[rest.RESTOptionsArgumentName] = restSingleOptionsArgument
+		applyOperationInfo(config, &fn)
 	}
 
 	for _, proc := range restSchema.Procedures {
-		proc.Arguments[rest.RESTOptionsArgumentName] = restSingleOptionsArgument
+		applyOperationInfo(config, &proc)
 	}
 
 	if !conf.Distributed {
@@ -342,6 +302,13 @@ func buildRESTArguments(restSchema *rest.NDCRestSchema, conf *ConfigItem) {
 	}
 }
 
+func applyOperationInfo(config *Configuration, info *rest.OperationInfo) {
+	info.Arguments[rest.RESTOptionsArgumentName] = restSingleOptionsArgument
+	if config.ForwardHeaders.Enabled {
+		info.Arguments[config.ForwardHeaders.ArgumentName] = headersArguments
+	}
+}
+
 func cloneDistributedArguments(arguments map[string]rest.ArgumentInfo) map[string]rest.ArgumentInfo {
 	result := map[string]rest.ArgumentInfo{}
 	for k, v := range arguments {
@@ -355,6 +322,7 @@ func cloneDistributedArguments(arguments map[string]rest.ArgumentInfo) map[strin
 			Type:        schema.NewNullableNamedType(rest.RESTDistributedOptionsObjectName).Encode(),
 		},
 	}
+
 	return result
 }
 

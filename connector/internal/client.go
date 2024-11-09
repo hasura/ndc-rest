@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"io"
 	"log/slog"
+	"math"
 	"net/http"
 	"strings"
 	"sync"
@@ -149,8 +150,9 @@ func (client *HTTPClient) sendSingle(ctx context.Context, request *RetryableRequ
 		logger.Debug("sending request to remote server...", logAttrs...)
 	}
 
-	times := int(request.Retry.Times)
-	for i := 0; i <= times; i++ {
+	times := int(math.Max(float64(request.Runtime.Retry.Times), 1))
+	delayMs := int(math.Max(float64(request.Runtime.Retry.Delay), 100))
+	for i := range times {
 		req, cancel, reqError := request.CreateRequest(ctx)
 		if reqError != nil {
 			cancel()
@@ -195,7 +197,7 @@ func (client *HTTPClient) sendSingle(ctx context.Context, request *RetryableRequ
 			)
 		}
 
-		time.Sleep(time.Duration(request.Retry.Delay) * time.Millisecond)
+		time.Sleep(time.Duration(delayMs) * time.Millisecond)
 	}
 
 	if err != nil {

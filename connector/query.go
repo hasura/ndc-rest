@@ -58,7 +58,7 @@ func (c *RESTConnector) QueryExplain(ctx context.Context, configuration *configu
 }
 
 func (c *RESTConnector) explainQuery(request *schema.QueryRequest, variables map[string]any) (*internal.RetryableRequest, *rest.OperationInfo, *internal.RESTOptions, error) {
-	function, settings, err := c.metadata.GetFunction(request.Collection)
+	function, metadata, err := c.metadata.GetFunction(request.Collection)
 	if err != nil {
 		return nil, nil, nil, err
 	}
@@ -72,19 +72,25 @@ func (c *RESTConnector) explainQuery(request *schema.QueryRequest, variables map
 	}
 
 	// 2. build the request
-	req, err := internal.NewRequestBuilder(c.schema, function, rawArgs).Build()
+	req, err := internal.NewRequestBuilder(c.schema, function, rawArgs, metadata.Runtime).Build()
 	if err != nil {
 		return nil, nil, nil, err
 	}
 
-	restOptions, err := parseRESTOptionsFromArguments(function.Arguments, rawArgs[rest.RESTOptionsArgumentName])
+	if err := c.evalForwardedHeaders(req, rawArgs); err != nil {
+		return nil, nil, nil, schema.UnprocessableContentError("invalid forwarded headers", map[string]any{
+			"cause": err.Error(),
+		})
+	}
+
+	restOptions, err := c.parseRESTOptionsFromArguments(function.Arguments, rawArgs)
 	if err != nil {
 		return nil, nil, nil, schema.UnprocessableContentError("invalid rest options", map[string]any{
 			"cause": err.Error(),
 		})
 	}
 
-	restOptions.Settings = settings
+	restOptions.Settings = metadata.Settings
 
 	return req, function, restOptions, err
 }

@@ -28,9 +28,12 @@ func (c *RequestBuilder) evalURLAndHeaderParameters() (string, http.Header, erro
 	}
 	headers := http.Header{}
 	for k, h := range c.Operation.Request.Headers {
-		v := h.Value()
-		if v != nil && *v != "" {
-			headers.Add(k, *v)
+		v, err := h.Get()
+		if err != nil {
+			return "", nil, fmt.Errorf("invalid header value, key: %s, %w", k, err)
+		}
+		if v != "" {
+			headers.Add(k, v)
 		}
 	}
 

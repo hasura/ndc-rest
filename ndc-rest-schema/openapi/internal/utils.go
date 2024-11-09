@@ -287,23 +287,6 @@ func encodeHeaderArgumentName(name string) string {
 	return "header" + utils.ToPascalCase(name)
 }
 
-func setDefaultSettings(settings *rest.NDCRestSettings, opts *ConvertOptions) {
-	settings.Timeout = rest.NewEnvIntTemplate(rest.EnvTemplate{
-		Name: utils.StringSliceToConstantCase([]string{opts.EnvPrefix, "TIMEOUT"}),
-	})
-	settings.Retry = &rest.RetryPolicySetting{
-		Times: *rest.NewEnvIntTemplate(rest.EnvTemplate{
-			Name: utils.StringSliceToConstantCase([]string{opts.EnvPrefix, "RETRY_TIMES"}),
-		}),
-		Delay: *rest.NewEnvIntTemplate(rest.EnvTemplate{
-			Name: utils.StringSliceToConstantCase([]string{opts.EnvPrefix, "RETRY_DELAY"}),
-		}),
-		HTTPStatus: *rest.NewEnvIntsTemplate(rest.EnvTemplate{
-			Name: utils.StringSliceToConstantCase([]string{opts.EnvPrefix, "RETRY_HTTP_STATUS"}),
-		}),
-	}
-}
-
 // evaluate and filter invalid types in allOf, anyOf or oneOf schemas
 func evalSchemaProxiesSlice(schemaProxies []*base.SchemaProxy, location rest.ParameterLocation) ([]*base.SchemaProxy, *base.Schema, bool) {
 	var results []*base.SchemaProxy

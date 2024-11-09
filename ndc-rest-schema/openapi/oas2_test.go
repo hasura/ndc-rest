@@ -12,7 +12,6 @@ import (
 )
 
 func TestOpenAPIv2ToRESTSchema(t *testing.T) {
-
 	testCases := []struct {
 		Name     string
 		Source   string
@@ -100,5 +99,5 @@ func assertConnectorSchema(t *testing.T, schemaPath string, output *rest.NDCRest
 	var expectedSchema schema.SchemaResponse
 	assert.NilError(t, json.Unmarshal(schemaBytes, &expectedSchema))
 	outputSchema := output.ToSchemaResponse()
-	assert.DeepEqual(t, expectedSchema, *outputSchema)
+	assetDeepEqual(t, expectedSchema, *outputSchema)
 }

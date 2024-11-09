@@ -3,8 +3,10 @@ package rest
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"log/slog"
 
+	"github.com/go-viper/mapstructure/v2"
 	"github.com/hasura/ndc-rest/connector/internal"
 	"github.com/hasura/ndc-rest/ndc-rest-schema/configuration"
 	rest "github.com/hasura/ndc-rest/ndc-rest-schema/schema"
@@ -17,8 +19,8 @@ func (c *RESTConnector) GetSchema(ctx context.Context, configuration *configurat
 }
 
 // ApplyNDCRestSchemas applies slice of raw NDC REST schemas to the connector
-func (c *RESTConnector) ApplyNDCRestSchemas(config *configuration.Configuration, schemas []configuration.NDCRestSchemaWithName, logger *slog.Logger) error {
-	ndcSchema, metadata, errs := configuration.MergeNDCRestSchemas(schemas)
+func (c *RESTConnector) ApplyNDCRestSchemas(config *configuration.Configuration, schemas []configuration.NDCRestRuntimeSchema, logger *slog.Logger) error {
+	ndcSchema, metadata, errs := configuration.MergeNDCRestSchemas(config, schemas)
 	if len(errs) > 0 {
 		printSchemaValidationError(logger, errs)
 		if ndcSchema == nil || config.Strict {
@@ -45,16 +47,45 @@ func printSchemaValidationError(logger *slog.Logger, errors map[string][]string)
 	logger.Error("errors happen when validating NDC REST schemas", slog.Any("errors", errors))
 }
 
-func parseRESTOptionsFromArguments(arguments map[string]rest.ArgumentInfo, rawRestOptions any) (*internal.RESTOptions, error) {
+func (c *RESTConnector) parseRESTOptionsFromArguments(argumentsInfo map[string]rest.ArgumentInfo, rawArgs map[string]any) (*internal.RESTOptions, error) {
 	var result internal.RESTOptions
-	if err := result.FromValue(rawRestOptions); err != nil {
-		return nil, err
-	}
-	argInfo, ok := arguments[rest.RESTOptionsArgumentName]
+	argInfo, ok := argumentsInfo[rest.RESTOptionsArgumentName]
 	if !ok {
 		return &result, nil
 	}
+	rawRestOptions, ok := rawArgs[rest.RESTOptionsArgumentName]
+	if !ok {
+		return &result, nil
+	}
+	if err := result.FromValue(rawRestOptions); err != nil {
+		return nil, err
+	}
 	restOptionsNamedType := schema.GetUnderlyingNamedType(argInfo.Type)
 	result.Distributed = restOptionsNamedType != nil && restOptionsNamedType.Name == rest.RESTDistributedOptionsObjectName
+
 	return &result, nil
+}
+
+func (c *RESTConnector) evalForwardedHeaders(req *internal.RetryableRequest, rawArgs map[string]any) error {
+	if !c.config.ForwardHeaders.Enabled {
+		return nil
+	}
+	rawHeaders, ok := rawArgs[c.config.ForwardHeaders.ArgumentName]
+	if ok {
+		return nil
+	}
+
+	var headers map[string]string
+	if err := mapstructure.Decode(rawHeaders, &headers); err != nil {
+		return fmt.Errorf("arguments.%s: %w", c.config.ForwardHeaders.ArgumentName, err)
+	}
+
+	for key, value := range headers {
+		if req.Headers.Get(key) != "" {
+			continue
+		}
+		req.Headers.Set(key, value)
+	}
+
+	return nil
 }

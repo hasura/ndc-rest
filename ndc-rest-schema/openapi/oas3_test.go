@@ -4,8 +4,11 @@ import (
 	"encoding/json"
 	"errors"
 	"os"
+	"reflect"
 	"testing"
 
+	"github.com/google/go-cmp/cmp"
+	"github.com/google/go-cmp/cmp/cmpopts"
 	"github.com/hasura/ndc-rest/ndc-rest-schema/schema"
 	"gotest.tools/v3/assert"
 )
@@ -101,12 +104,33 @@ func TestOpenAPIv3ToRESTSchema(t *testing.T) {
 
 func assertRESTSchemaEqual(t *testing.T, expected *schema.NDCRestSchema, output *schema.NDCRestSchema) {
 	t.Helper()
-	assert.DeepEqual(t, expected.Settings, output.Settings)
-	assert.DeepEqual(t, expected.ScalarTypes, output.ScalarTypes)
+	assetDeepEqual(t, expected.Settings.Headers, output.Settings.Headers)
+	assetDeepEqual(t, expected.Settings.Security, output.Settings.Security)
+	assetDeepEqual(t, expected.Settings.SecuritySchemes, output.Settings.SecuritySchemes)
+	assetDeepEqual(t, expected.Settings.Version, output.Settings.Version)
+	for i, server := range expected.Settings.Servers {
+		sv := output.Settings.Servers[i]
+		assetDeepEqual(t, server.Headers, sv.Headers)
+		assetDeepEqual(t, server.ID, sv.ID)
+		assetDeepEqual(t, server.Security, sv.Security)
+		assetDeepEqual(t, server.SecuritySchemes, sv.SecuritySchemes)
+		assetDeepEqual(t, server.URL, sv.URL)
+		assetDeepEqual(t, server.TLS, sv.TLS)
+	}
+	assetDeepEqual(t, expected.ScalarTypes, output.ScalarTypes)
 	objectBs, _ := json.Marshal(output.ObjectTypes)
 	var objectTypes map[string]schema.ObjectType
 	assert.NilError(t, json.Unmarshal(objectBs, &objectTypes))
-	assert.DeepEqual(t, expected.ObjectTypes, objectTypes)
-	assert.DeepEqual(t, expected.Procedures, output.Procedures)
-	assert.DeepEqual(t, expected.Functions, output.Functions)
+	assetDeepEqual(t, expected.ObjectTypes, objectTypes)
+	assetDeepEqual(t, expected.Procedures, output.Procedures)
+	assetDeepEqual(t, expected.Functions, output.Functions)
+}
+
+func assetDeepEqual(t *testing.T, expected any, reality any) {
+	t.Helper()
+	assert.DeepEqual(t,
+		expected, reality,
+		cmpopts.IgnoreUnexported(schema.ServerConfig{}, schema.NDCRestSettings{}),
+		cmp.Exporter(func(t reflect.Type) bool { return true }),
+	)
 }

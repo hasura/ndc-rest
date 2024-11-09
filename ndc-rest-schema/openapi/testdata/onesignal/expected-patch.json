@@ -4,25 +4,26 @@
     "servers": [
       {
         "id": "foo",
-        "url": "{{FOO_SERVER_URL:-https://onesignal.com/api/v1}}"
+        "url": {
+          "env": "FOO_SERVER_URL",
+          "value": "https://onesignal.com/api/v1"
+        }
       }
     ],
-    "timeout": "{{TIMEOUT}}",
-    "retry": {
-      "times": "{{RETRY_TIMES}}",
-      "delay": "{{RETRY_DELAY}}",
-      "httpStatus": "{{RETRY_HTTP_STATUS}}"
-    },
     "securitySchemes": {
       "app_key": {
         "type": "http",
-        "value": "{{APP_KEY_TOKEN}}",
+        "value": {
+          "env": "APP_KEY_TOKEN"
+        },
         "header": "Authorization",
         "scheme": "bearer"
       },
       "user_key": {
         "type": "http",
-        "value": "{{USER_KEY_TOKEN}}",
+        "value": {
+          "env": "USER_KEY_TOKEN"
+        },
         "header": "Authorization",
         "scheme": "bearer"
       }

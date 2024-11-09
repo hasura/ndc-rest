@@ -55,7 +55,7 @@ func (c *RESTConnector) MutationExplain(ctx context.Context, configuration *conf
 }
 
 func (c *RESTConnector) explainProcedure(operation *schema.MutationOperation) (*internal.RetryableRequest, *rest.OperationInfo, *internal.RESTOptions, error) {
-	procedure, settings, err := c.metadata.GetProcedure(operation.Name)
+	procedure, metadata, err := c.metadata.GetProcedure(operation.Name)
 	if err != nil {
 		return nil, nil, nil, err
 	}
@@ -69,20 +69,26 @@ func (c *RESTConnector) explainProcedure(operation *schema.MutationOperation) (*
 	}
 
 	// 2. build the request
-	builder := internal.NewRequestBuilder(c.schema, procedure, rawArgs)
+	builder := internal.NewRequestBuilder(c.schema, procedure, rawArgs, metadata.Runtime)
 	httpRequest, err := builder.Build()
 	if err != nil {
 		return nil, nil, nil, err
 	}
 
-	restOptions, err := parseRESTOptionsFromArguments(procedure.Arguments, rawArgs[rest.RESTOptionsArgumentName])
+	if err := c.evalForwardedHeaders(httpRequest, rawArgs); err != nil {
+		return nil, nil, nil, schema.UnprocessableContentError("invalid forwarded headers", map[string]any{
+			"cause": err.Error(),
+		})
+	}
+
+	restOptions, err := c.parseRESTOptionsFromArguments(procedure.Arguments, rawArgs)
 	if err != nil {
 		return nil, nil, nil, schema.UnprocessableContentError("invalid rest options", map[string]any{
 			"cause": err.Error(),
 		})
 	}
 
-	restOptions.Settings = settings
+	restOptions.Settings = metadata.Settings
 	return httpRequest, procedure, restOptions, nil
 }
 
