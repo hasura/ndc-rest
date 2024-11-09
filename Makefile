@@ -43,6 +43,6 @@ ci-build-cli: clean
 	cd ./ndc-rest-schema && \
 	go get github.com/mitchellh/gox && \
 	go run github.com/mitchellh/gox -ldflags '-X github.com/hasura/ndc-rest/ndc-rest-schema/version.BuildVersion=$(VERSION) -s -w -extldflags "-static"' \
-		-osarch="linux/amd64 darwin/amd64 windows/amd64 darwin/arm64" \
+		-osarch="linux/amd64 darwin/amd64 windows/amd64 darwin/arm64 linux/arm64" \
 		-output="../$(OUTPUT_DIR)/ndc-rest-schema-{{.OS}}-{{.Arch}}" \
 		.
