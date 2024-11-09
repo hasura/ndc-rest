@@ -8,9 +8,8 @@ import (
 )
 
 var (
-	errInvalidSchema      = errors.New("failed to validate NDC REST schema")
-	errBuildSchemaFailed  = errors.New("failed to build NDC REST schema")
-	errHTTPMethodRequired = errors.New("the HTTP method is required")
+	errInvalidSchema     = errors.New("failed to validate NDC REST schema")
+	errBuildSchemaFailed = errors.New("failed to build NDC REST schema")
 )
 
 // State is the global state which is shared for every connector request.

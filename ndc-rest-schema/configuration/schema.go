@@ -41,7 +41,6 @@ func BuildSchemaFiles(config *Configuration, configDir string, logger *slog.Logg
 
 // ReadSchemaOutputFile reads the schema output file in disk
 func ReadSchemaOutputFile(configDir string, filePath string, logger *slog.Logger) ([]NDCRestSchemaWithName, error) {
-
 	if filePath == "" {
 		return nil, nil
 	}
