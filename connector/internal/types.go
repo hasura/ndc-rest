@@ -22,7 +22,7 @@ var (
 	errRequestBodyTypeRequired = errors.New("failed to decode request body, empty body type")
 )
 
-var defaultRetryHTTPStatus = []int64{429, 500, 502, 503}
+var defaultRetryHTTPStatus = []int{429, 500, 502, 503}
 
 // RESTOptions represent execution options for REST requests
 type RESTOptions struct {

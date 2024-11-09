@@ -124,6 +124,9 @@ func (c *RequestBuilder) Build() (*RetryableRequest, error) {
 			request.Runtime.Retry.HTTPStatus = rawRequest.RuntimeSettings.Retry.HTTPStatus
 		}
 	}
+	if request.Runtime.Retry.HTTPStatus == nil {
+		request.Runtime.Retry.HTTPStatus = defaultRetryHTTPStatus
+	}
 
 	return request, nil
 }
