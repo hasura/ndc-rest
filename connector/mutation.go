@@ -75,7 +75,7 @@ func (c *RESTConnector) explainProcedure(operation *schema.MutationOperation) (*
 		return nil, nil, nil, err
 	}
 
-	restOptions, err := parseRESTOptionsFromArguments(procedure.Arguments, rawArgs[internal.RESTOptionsArgumentName])
+	restOptions, err := parseRESTOptionsFromArguments(procedure.Arguments, rawArgs[rest.RESTOptionsArgumentName])
 	if err != nil {
 		return nil, nil, nil, schema.UnprocessableContentError("invalid rest options", map[string]any{
 			"cause": err.Error(),

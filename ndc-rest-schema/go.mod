@@ -7,7 +7,7 @@ toolchain go1.23.1
 require (
 	github.com/alecthomas/kong v1.2.1
 	github.com/evanphx/json-patch v0.5.2
-	github.com/hasura/ndc-sdk-go v1.5.2-0.20241020093415-b752942bd505
+	github.com/hasura/ndc-sdk-go v1.6.2
 	github.com/invopop/jsonschema v0.12.0
 	github.com/lmittmann/tint v1.0.5
 	github.com/pb33f/libopenapi v0.18.3
@@ -25,8 +25,11 @@ require (
 	github.com/google/uuid v1.6.0 // indirect
 	github.com/mailru/easyjson v0.7.7 // indirect
 	github.com/pkg/errors v0.9.1 // indirect
+	github.com/prometheus/client_model v0.6.1 // indirect
+	github.com/prometheus/common v0.59.1 // indirect
 	github.com/sergi/go-diff v1.3.1 // indirect
 	github.com/vmware-labs/yaml-jsonpath v0.3.2 // indirect
 	go.opentelemetry.io/otel v1.31.0 // indirect
 	golang.org/x/net v0.30.0 // indirect
+	google.golang.org/protobuf v1.34.2 // indirect
 )

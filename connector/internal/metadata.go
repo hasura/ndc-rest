@@ -27,5 +27,5 @@ func (rms MetadataCollection) GetProcedure(name string) (*rest.OperationInfo, *r
 			return fn, rm.Settings, nil
 		}
 	}
-	return nil, nil, schema.UnprocessableContentError("unsupported query: "+name, nil)
+	return nil, nil, schema.UnprocessableContentError("unsupported mutation: "+name, nil)
 }

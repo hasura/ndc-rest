@@ -59,14 +59,21 @@ func (c *RESTConnector) ParseConfiguration(ctx context.Context, configurationDir
 	}
 
 	logger := connector.GetLogger(ctx)
-	schemas, errs := BuildSchemaFiles(configurationDir, config.Files, logger)
-	if len(errs) > 0 {
-		printSchemaValidationError(logger, errs)
-		return nil, errBuildSchemaFailed
+	schemas, err := configuration.ReadSchemaOutputFile(configurationDir, config.Output, logger)
+	if err != nil {
+		return nil, err
 	}
 
-	if errs := c.ApplyNDCRestSchemas(schemas); len(errs) > 0 {
-		printSchemaValidationError(logger, errs)
+	var errs map[string][]string
+	if schemas == nil {
+		schemas, errs = configuration.BuildSchemaFiles(config, configurationDir, logger)
+		if len(errs) > 0 {
+			printSchemaValidationError(logger, errs)
+			return nil, errBuildSchemaFailed
+		}
+	}
+
+	if err := c.ApplyNDCRestSchemas(config, schemas, logger); err != nil {
 		return nil, errInvalidSchema
 	}
 

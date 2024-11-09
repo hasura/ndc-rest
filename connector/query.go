@@ -77,7 +77,7 @@ func (c *RESTConnector) explainQuery(request *schema.QueryRequest, variables map
 		return nil, nil, nil, err
 	}
 
-	restOptions, err := parseRESTOptionsFromArguments(function.Arguments, rawArgs[internal.RESTOptionsArgumentName])
+	restOptions, err := parseRESTOptionsFromArguments(function.Arguments, rawArgs[rest.RESTOptionsArgumentName])
 	if err != nil {
 		return nil, nil, nil, schema.UnprocessableContentError("invalid rest options", map[string]any{
 			"cause": err.Error(),

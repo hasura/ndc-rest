@@ -30,8 +30,8 @@
     "version": "1.2.2"
   },
   "collections": [],
-  "procedures": [
-    {
+  "procedures": {
+    "create_notification": {
       "request": {
         "url": "/notifications",
         "method": "post",
@@ -56,6 +56,9 @@
           "type": {
             "name": "NotificationInput",
             "type": "named"
+          },
+          "rest": {
+            "in": "body"
           }
         }
       },
@@ -66,7 +69,7 @@
         "type": "named"
       }
     },
-    {
+    "cancel_notification": {
       "request": {
         "url": "/notifications/{notification_id}",
         "method": "delete",
@@ -100,12 +103,26 @@
           "type": {
             "name": "String",
             "type": "named"
+          },
+          "rest": {
+            "name": "app_id",
+            "in": "query",
+            "schema": {
+              "type": ["string"]
+            }
           }
         },
         "notification_id": {
           "type": {
             "name": "String",
             "type": "named"
+          },
+          "rest": {
+            "name": "notification_id",
+            "in": "path",
+            "schema": {
+              "type": ["string"]
+            }
           }
         }
       },
@@ -116,7 +133,7 @@
         "type": "named"
       }
     }
-  ],
+  },
   "scalar_types": {
     "Boolean": {
       "aggregate_functions": {},

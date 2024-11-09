@@ -1,7 +1,6 @@
 package command
 
 import (
-	"encoding/json"
 	"errors"
 	"fmt"
 	"log/slog"
@@ -10,32 +9,13 @@ import (
 	"time"
 
 	"github.com/hasura/ndc-rest/ndc-rest-schema/configuration"
-	"github.com/hasura/ndc-rest/ndc-rest-schema/openapi"
 	"github.com/hasura/ndc-rest/ndc-rest-schema/schema"
 	"github.com/hasura/ndc-rest/ndc-rest-schema/utils"
 	"gopkg.in/yaml.v3"
 )
 
-// ConvertCommandArguments represent available command arguments for the convert command
-type ConvertCommandArguments struct {
-	File                string            `help:"File path needs to be converted."                                                     short:"f"`
-	Config              string            `help:"Path of the config file."                                                             short:"c"`
-	Output              string            `help:"The location where the ndc schema file will be generated. Print to stdout if not set" short:"o"`
-	Spec                string            `help:"The API specification of the file, is one of oas3 (openapi3), oas2 (openapi2)"`
-	Format              string            `default:"json"                                                                              help:"The output format, is one of json, yaml. If the output is set, automatically detect the format in the output file extension"`
-	Strict              bool              `default:"false"                                                                             help:"Require strict validation"`
-	Pure                bool              `default:"false"                                                                             help:"Return the pure NDC schema only"`
-	Prefix              string            `help:"Add a prefix to the function and procedure names"`
-	TrimPrefix          string            `help:"Trim the prefix in URL, e.g. /v1"`
-	EnvPrefix           string            `help:"The environment variable prefix for security values, e.g. PET_STORE"`
-	MethodAlias         map[string]string `help:"Alias names for HTTP method. Used for prefix renaming, e.g. getUsers, postUser"`
-	AllowedContentTypes []string          `help:"Allowed content types. All content types are allowed by default"`
-	PatchBefore         []string          `help:"Patch files to be applied into the input file before converting"`
-	PatchAfter          []string          `help:"Patch files to be applied into the input file after converting"`
-}
-
 // ConvertToNDCSchema converts to NDC REST schema from file
-func CommandConvertToNDCSchema(args *ConvertCommandArguments, logger *slog.Logger) error {
+func CommandConvertToNDCSchema(args *configuration.ConvertCommandArguments, logger *slog.Logger) error {
 	start := time.Now()
 	logger.Debug(
 		"converting the document to NDC REST schema",
@@ -80,8 +60,8 @@ func CommandConvertToNDCSchema(args *ConvertCommandArguments, logger *slog.Logge
 		configDir = filepath.Dir(args.Config)
 	}
 
-	ResolveConvertConfigArguments(&config, configDir, args)
-	result, err := ConvertToNDCSchema(&config, logger)
+	configuration.ResolveConvertConfigArguments(&config, configDir, args)
+	result, err := configuration.ConvertToNDCSchema(&config, logger)
 
 	if err != nil {
 		logger.Error(err.Error())
@@ -126,122 +106,4 @@ func CommandConvertToNDCSchema(args *ConvertCommandArguments, logger *slog.Logge
 
 	fmt.Print(string(resultBytes))
 	return nil
-}
-
-// ConvertToNDCSchema converts to NDC REST schema from config
-func ConvertToNDCSchema(config *configuration.ConvertConfig, logger *slog.Logger) (*schema.NDCRestSchema, error) {
-	rawContent, err := utils.ReadFileFromPath(config.File)
-	if err != nil {
-		return nil, err
-	}
-
-	rawContent, err = utils.ApplyPatch(rawContent, config.PatchBefore)
-	if err != nil {
-		return nil, err
-	}
-
-	var result *schema.NDCRestSchema
-	var errs []error
-	options := openapi.ConvertOptions{
-		MethodAlias:         config.MethodAlias,
-		Prefix:              config.Prefix,
-		TrimPrefix:          config.TrimPrefix,
-		EnvPrefix:           config.EnvPrefix,
-		AllowedContentTypes: config.AllowedContentTypes,
-		Strict:              config.Strict,
-		Logger:              logger,
-	}
-	switch config.Spec {
-	case schema.OpenAPIv3Spec, schema.OAS3Spec:
-		result, errs = openapi.OpenAPIv3ToNDCSchema(rawContent, options)
-	case schema.OpenAPIv2Spec, (schema.OAS2Spec):
-		result, errs = openapi.OpenAPIv2ToNDCSchema(rawContent, options)
-	case schema.NDCSpec:
-		if err := json.Unmarshal(rawContent, &result); err != nil {
-			return nil, err
-		}
-	default:
-		return nil, fmt.Errorf("invalid spec %s, expected %+v", config.Spec, []schema.SchemaSpecType{schema.OpenAPIv3Spec, schema.OpenAPIv2Spec})
-	}
-
-	if result == nil {
-		return nil, errors.Join(errs...)
-	} else if len(errs) > 0 {
-		logger.Error(errors.Join(errs...).Error())
-	}
-
-	return utils.ApplyPatchToRestSchema(result, config.PatchAfter)
-}
-
-// ResolveConvertConfigArguments resolves convert config arguments
-func ResolveConvertConfigArguments(config *configuration.ConvertConfig, configDir string, args *ConvertCommandArguments) {
-	if args != nil {
-		if args.Spec != "" {
-			config.Spec = schema.SchemaSpecType(args.Spec)
-		}
-		if len(args.MethodAlias) > 0 {
-			config.MethodAlias = args.MethodAlias
-		}
-		if args.Prefix != "" {
-			config.Prefix = args.Prefix
-		}
-		if args.TrimPrefix != "" {
-			config.TrimPrefix = args.TrimPrefix
-		}
-		if args.EnvPrefix != "" {
-			config.EnvPrefix = args.EnvPrefix
-		}
-		if args.Pure {
-			config.Pure = args.Pure
-		}
-		if args.Strict {
-			config.Strict = args.Strict
-		}
-		if len(args.AllowedContentTypes) > 0 {
-			config.AllowedContentTypes = args.AllowedContentTypes
-		}
-	}
-	if config.Spec == "" {
-		config.Spec = schema.OAS3Spec
-	}
-
-	if args != nil && args.File != "" {
-		config.File = args.File
-	} else if config.File != "" {
-		config.File = utils.ResolveFilePath(configDir, config.File)
-	}
-
-	if args != nil && args.Output != "" {
-		config.Output = args.Output
-	} else if config.Output != "" {
-		config.Output = utils.ResolveFilePath(configDir, config.Output)
-	}
-
-	if args != nil && len(args.PatchBefore) > 0 {
-		config.PatchBefore = make([]utils.PatchConfig, len(args.PatchBefore))
-		for i, p := range args.PatchBefore {
-			config.PatchBefore[i] = utils.PatchConfig{
-				Path: p,
-			}
-		}
-	} else {
-		for i, p := range config.PatchBefore {
-			p.Path = utils.ResolveFilePath(configDir, p.Path)
-			config.PatchBefore[i] = p
-		}
-	}
-
-	if args != nil && len(args.PatchAfter) > 0 {
-		config.PatchAfter = make([]utils.PatchConfig, len(args.PatchAfter))
-		for i, p := range args.PatchAfter {
-			config.PatchAfter[i] = utils.PatchConfig{
-				Path: p,
-			}
-		}
-	} else {
-		for i, p := range config.PatchAfter {
-			p.Path = utils.ResolveFilePath(configDir, p.Path)
-			config.PatchAfter[i] = p
-		}
-	}
 }

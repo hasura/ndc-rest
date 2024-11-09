@@ -7,8 +7,7 @@ toolchain go1.23.1
 require (
 	github.com/google/uuid v1.6.0
 	github.com/hasura/ndc-rest/ndc-rest-schema v0.2.5
-	github.com/hasura/ndc-sdk-go v1.5.2-0.20241020093415-b752942bd505
-	github.com/lmittmann/tint v1.0.5
+	github.com/hasura/ndc-sdk-go v1.6.2
 	go.opentelemetry.io/otel v1.31.0
 	go.opentelemetry.io/otel/trace v1.31.0
 	gopkg.in/yaml.v3 v3.0.1

@@ -233,7 +233,7 @@ func encodeScalarParameterReflectionValues(reflectValue reflect.Value, scalar *s
 		}
 		return []ParameterItem{NewParameterItem([]Key{}, []string{value})}, nil
 	case *schema.TypeRepresentationDate:
-		value, err := utils.DecodeDateReflection(reflectValue)
+		value, err := utils.DecodeDateTimeReflection(reflectValue)
 		if err != nil {
 			return nil, fmt.Errorf("%s: %w", strings.Join(fieldPaths, ""), err)
 		}
