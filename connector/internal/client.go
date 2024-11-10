@@ -22,6 +22,7 @@ import (
 	"go.opentelemetry.io/otel/codes"
 	"go.opentelemetry.io/otel/propagation"
 	"go.opentelemetry.io/otel/trace"
+	"golang.org/x/sync/errgroup"
 )
 
 // Doer abstracts a HTTP client with Do method
@@ -50,32 +51,39 @@ func (client *HTTPClient) SetTracer(tracer *connector.Tracer) {
 }
 
 // Send creates and executes the request and evaluate response selection
-func (client *HTTPClient) Send(ctx context.Context, request *RetryableRequest, selection schema.NestedField, resultType schema.Type, restOptions *RESTOptions) (any, error) {
+func (client *HTTPClient) Send(ctx context.Context, request *RetryableRequest, selection schema.NestedField, resultType schema.Type, restOptions *RESTOptions) (any, http.Header, error) {
 	requests, err := BuildDistributedRequestsWithOptions(request, restOptions)
 	if err != nil {
-		return nil, err
-	}
-	if !restOptions.Distributed {
-		result, err := client.sendSingle(ctx, &requests[0], selection, resultType)
-		if err != nil {
-			return nil, err
-		}
-		return result, nil
-	}
-	if !restOptions.Parallel {
-		results := client.sendSequence(ctx, requests, selection, resultType)
-		return results, nil
+		return nil, nil, err
 	}
 
-	results := client.sendParallel(ctx, requests, selection, resultType)
-	return results, nil
+	if !restOptions.Distributed {
+		result, headers, err := client.sendSingle(ctx, &requests[0], selection, resultType)
+		if err != nil {
+			return nil, nil, err
+		}
+
+		return result, headers, nil
+	}
+
+	if !restOptions.Parallel || restOptions.Concurrency <= 1 {
+		results, headers := client.sendSequence(ctx, requests, selection, resultType)
+
+		return results, headers, nil
+	}
+
+	results, headers := client.sendParallel(ctx, requests, selection, resultType, restOptions)
+
+	return results, headers, nil
 }
 
 // execute a request to a list of remote servers in sequence
-func (client *HTTPClient) sendSequence(ctx context.Context, requests []RetryableRequest, selection schema.NestedField, resultType schema.Type) *DistributedResponse[any] {
+func (client *HTTPClient) sendSequence(ctx context.Context, requests []RetryableRequest, selection schema.NestedField, resultType schema.Type) (*DistributedResponse[any], http.Header) {
 	results := NewDistributedResponse[any]()
+	var firstHeaders http.Header
+
 	for _, req := range requests {
-		result, err := client.sendSingle(ctx, &req, selection, resultType)
+		result, headers, err := client.sendSingle(ctx, &req, selection, resultType)
 		if err != nil {
 			results.Errors = append(results.Errors, DistributedError{
 				Server:         req.ServerID,
@@ -86,45 +94,61 @@ func (client *HTTPClient) sendSequence(ctx context.Context, requests []Retryable
 				Server: req.ServerID,
 				Data:   result,
 			})
+
+			if firstHeaders == nil {
+				firstHeaders = headers
+			}
 		}
 	}
 
-	return results
+	return results, firstHeaders
 }
 
 // execute a request to a list of remote servers in parallel
-func (client *HTTPClient) sendParallel(ctx context.Context, requests []RetryableRequest, selection schema.NestedField, resultType schema.Type) *DistributedResponse[any] {
+func (client *HTTPClient) sendParallel(ctx context.Context, requests []RetryableRequest, selection schema.NestedField, resultType schema.Type, restOptions *RESTOptions) (*DistributedResponse[any], http.Header) {
 	results := NewDistributedResponse[any]()
-	var wg sync.WaitGroup
-	wg.Add(len(requests))
+	var firstHeaders http.Header
 	var lock sync.Mutex
+	eg, ctx := errgroup.WithContext(ctx)
+	if restOptions.Concurrency > 0 {
+		eg.SetLimit(int(restOptions.Concurrency))
+	}
+
 	sendFunc := func(req RetryableRequest) {
-		defer wg.Done()
-		result, err := client.sendSingle(ctx, &req, selection, resultType)
-		lock.Lock()
-		defer lock.Unlock()
-		if err != nil {
-			results.Errors = append(results.Errors, DistributedError{
-				Server:         req.ServerID,
-				ConnectorError: *err,
-			})
-		} else {
-			results.Results = append(results.Results, DistributedResult[any]{
-				Server: req.ServerID,
-				Data:   result,
-			})
-		}
+		eg.Go(func() error {
+			result, headers, err := client.sendSingle(ctx, &req, selection, resultType)
+			lock.Lock()
+			defer lock.Unlock()
+			if err != nil {
+				results.Errors = append(results.Errors, DistributedError{
+					Server:         req.ServerID,
+					ConnectorError: *err,
+				})
+			} else {
+				results.Results = append(results.Results, DistributedResult[any]{
+					Server: req.ServerID,
+					Data:   result,
+				})
+				if firstHeaders == nil {
+					firstHeaders = headers
+				}
+			}
+
+			return nil
+		})
 	}
 
 	for _, req := range requests {
-		go sendFunc(req)
+		sendFunc(req)
 	}
-	wg.Wait()
-	return results
+
+	_ = eg.Wait()
+
+	return results, firstHeaders
 }
 
 // execute a request to the remote server with retries
-func (client *HTTPClient) sendSingle(ctx context.Context, request *RetryableRequest, selection schema.NestedField, resultType schema.Type) (any, *schema.ConnectorError) {
+func (client *HTTPClient) sendSingle(ctx context.Context, request *RetryableRequest, selection schema.NestedField, resultType schema.Type) (any, http.Header, *schema.ConnectorError) {
 	ctx, span := client.tracer.Start(ctx, "request_remote_server")
 	defer span.End()
 	span.SetAttributes(
@@ -158,7 +182,7 @@ func (client *HTTPClient) sendSingle(ctx context.Context, request *RetryableRequ
 			cancel()
 			span.SetStatus(codes.Error, "error happened when creating request")
 			span.RecordError(err)
-			return nil, schema.NewConnectorError(http.StatusInternalServerError, err.Error(), nil)
+			return nil, nil, schema.NewConnectorError(http.StatusInternalServerError, err.Error(), nil)
 		}
 		resp, err = client.client.Do(req)
 		if (err == nil && resp.StatusCode >= 200 && resp.StatusCode < 299) || i >= times {
@@ -203,7 +227,7 @@ func (client *HTTPClient) sendSingle(ctx context.Context, request *RetryableRequ
 	if err != nil {
 		span.SetStatus(codes.Error, "error happened when creating request")
 		span.RecordError(err)
-		return nil, schema.NewConnectorError(http.StatusInternalServerError, err.Error(), nil)
+		return nil, nil, schema.NewConnectorError(http.StatusInternalServerError, err.Error(), nil)
 	}
 
 	span.SetAttributes(attribute.Int("http_status", resp.StatusCode))
@@ -211,7 +235,7 @@ func (client *HTTPClient) sendSingle(ctx context.Context, request *RetryableRequ
 	return evalHTTPResponse(ctx, span, resp, selection, resultType)
 }
 
-func evalHTTPResponse(ctx context.Context, span trace.Span, resp *http.Response, selection schema.NestedField, resultType schema.Type) (any, *schema.ConnectorError) {
+func evalHTTPResponse(ctx context.Context, span trace.Span, resp *http.Response, selection schema.NestedField, resultType schema.Type) (any, http.Header, *schema.ConnectorError) {
 	logger := connector.GetLogger(ctx)
 	contentType := parseContentType(resp.Header.Get(contentTypeHeader))
 	if resp.StatusCode >= 400 {
@@ -224,7 +248,7 @@ func evalHTTPResponse(ctx context.Context, span trace.Span, resp *http.Response,
 			if err != nil {
 				span.SetStatus(codes.Error, "error happened when reading response body")
 				span.RecordError(err)
-				return nil, schema.NewConnectorError(http.StatusInternalServerError, resp.Status, map[string]any{
+				return nil, nil, schema.NewConnectorError(http.StatusInternalServerError, resp.Status, map[string]any{
 					"error": err,
 				})
 			}
@@ -238,7 +262,7 @@ func evalHTTPResponse(ctx context.Context, span trace.Span, resp *http.Response,
 
 		span.SetAttributes(attribute.String("response_error", string(respBody)))
 		span.SetStatus(codes.Error, "received error from remote server")
-		return nil, schema.NewConnectorError(resp.StatusCode, resp.Status, details)
+		return nil, nil, schema.NewConnectorError(resp.StatusCode, resp.Status, details)
 	}
 
 	if logger.Enabled(ctx, slog.LevelDebug) {
@@ -252,7 +276,7 @@ func evalHTTPResponse(ctx context.Context, span trace.Span, resp *http.Response,
 			if readErr != nil {
 				span.SetStatus(codes.Error, "error happened when reading response body")
 				span.RecordError(readErr)
-				return nil, schema.NewConnectorError(http.StatusInternalServerError, "error happened when reading response body", map[string]any{
+				return nil, nil, schema.NewConnectorError(http.StatusInternalServerError, "error happened when reading response body", map[string]any{
 					"error": readErr.Error(),
 				})
 			}
@@ -263,11 +287,11 @@ func evalHTTPResponse(ctx context.Context, span trace.Span, resp *http.Response,
 	}
 
 	if resp.StatusCode == http.StatusNoContent {
-		return true, nil
+		return true, resp.Header, nil
 	}
 
 	if resp.Body == nil {
-		return nil, nil
+		return nil, resp.Header, nil
 	}
 
 	defer func() {
@@ -278,18 +302,18 @@ func evalHTTPResponse(ctx context.Context, span trace.Span, resp *http.Response,
 	case "":
 		respBody, err := io.ReadAll(resp.Body)
 		if err != nil {
-			return nil, schema.NewConnectorError(http.StatusInternalServerError, err.Error(), nil)
+			return nil, nil, schema.NewConnectorError(http.StatusInternalServerError, err.Error(), nil)
 		}
 		if len(respBody) == 0 {
-			return nil, nil
+			return nil, resp.Header, nil
 		}
-		return string(respBody), nil
+		return string(respBody), resp.Header, nil
 	case "text/plain", "text/html":
 		respBody, err := io.ReadAll(resp.Body)
 		if err != nil {
-			return nil, schema.NewConnectorError(http.StatusInternalServerError, err.Error(), nil)
+			return nil, nil, schema.NewConnectorError(http.StatusInternalServerError, err.Error(), nil)
 		}
-		return string(respBody), nil
+		return string(respBody), resp.Header, nil
 	case rest.ContentTypeJSON:
 		if len(resultType) > 0 {
 			namedType, err := resultType.AsNamed()
@@ -297,7 +321,7 @@ func evalHTTPResponse(ctx context.Context, span trace.Span, resp *http.Response,
 				respBytes, err := io.ReadAll(resp.Body)
 				_ = resp.Body.Close()
 				if err != nil {
-					return nil, schema.NewConnectorError(http.StatusInternalServerError, "failed to read response", map[string]any{
+					return nil, nil, schema.NewConnectorError(http.StatusInternalServerError, "failed to read response", map[string]any{
 						"reason": err.Error(),
 					})
 				}
@@ -305,9 +329,9 @@ func evalHTTPResponse(ctx context.Context, span trace.Span, resp *http.Response,
 				var strResult string
 				if err := json.Unmarshal(respBytes, &strResult); err != nil {
 					// fallback to raw string response if the result type is String
-					return string(respBytes), nil
+					return string(respBytes), resp.Header, nil
 				}
-				return strResult, nil
+				return strResult, resp.Header, nil
 			}
 		}
 
@@ -315,17 +339,17 @@ func evalHTTPResponse(ctx context.Context, span trace.Span, resp *http.Response,
 		err := json.NewDecoder(resp.Body).Decode(&result)
 		_ = resp.Body.Close()
 		if err != nil {
-			return nil, schema.NewConnectorError(http.StatusInternalServerError, err.Error(), nil)
+			return nil, nil, schema.NewConnectorError(http.StatusInternalServerError, err.Error(), nil)
 		}
 		if selection == nil || selection.IsNil() {
-			return result, nil
+			return result, resp.Header, nil
 		}
 
 		result, err = utils.EvalNestedColumnFields(selection, result)
 		if err != nil {
-			return nil, schema.InternalServerError(err.Error(), nil)
+			return nil, nil, schema.InternalServerError(err.Error(), nil)
 		}
-		return result, nil
+		return result, resp.Header, nil
 	case rest.ContentTypeNdJSON:
 		var results []any
 		decoder := json.NewDecoder(resp.Body)
@@ -333,21 +357,21 @@ func evalHTTPResponse(ctx context.Context, span trace.Span, resp *http.Response,
 			var r any
 			err := decoder.Decode(&r)
 			if err != nil {
-				return nil, schema.NewConnectorError(http.StatusInternalServerError, err.Error(), nil)
+				return nil, nil, schema.NewConnectorError(http.StatusInternalServerError, err.Error(), nil)
 			}
 			results = append(results, r)
 		}
 		if selection == nil || selection.IsNil() {
-			return results, nil
+			return results, resp.Header, nil
 		}
 
 		result, err := utils.EvalNestedColumnFields(selection, any(results))
 		if err != nil {
-			return nil, schema.InternalServerError(err.Error(), nil)
+			return nil, nil, schema.InternalServerError(err.Error(), nil)
 		}
-		return result, nil
+		return result, resp.Header, nil
 	default:
-		return nil, schema.NewConnectorError(http.StatusInternalServerError, "failed to evaluate response", map[string]any{
+		return nil, nil, schema.NewConnectorError(http.StatusInternalServerError, "failed to evaluate response", map[string]any{
 			"cause": "unsupported content type " + contentType,
 		})
 	}

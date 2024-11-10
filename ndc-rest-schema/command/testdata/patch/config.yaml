@@ -4,8 +4,14 @@ strict: true
 forwardHeaders:
   enabled: true
   argumentField: headers
-  responseHeadersField: null
-  responseResultField: null
+  responseHeaders:
+    headersField: headers
+    resultField: response
+    forwardHeaders: []
+concurrency:
+  query: 1
+  mutation: 1
+  rest: 0
 files:
   - file: ../auth/schema.yaml
     spec: ndc

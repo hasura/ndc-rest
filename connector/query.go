@@ -3,6 +3,7 @@ package rest
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"io"
 
 	"github.com/hasura/ndc-rest/connector/internal"
@@ -10,6 +11,8 @@ import (
 	rest "github.com/hasura/ndc-rest/ndc-rest-schema/schema"
 	"github.com/hasura/ndc-sdk-go/schema"
 	"github.com/hasura/ndc-sdk-go/utils"
+	"go.opentelemetry.io/otel/codes"
+	"golang.org/x/sync/errgroup"
 )
 
 // Query executes a query.
@@ -23,23 +26,11 @@ func (c *RESTConnector) Query(ctx context.Context, configuration *configuration.
 		requestVars = []schema.QueryRequestVariablesElem{make(schema.QueryRequestVariablesElem)}
 	}
 
-	rowSets := make([]schema.RowSet, len(requestVars))
-	for i, requestVar := range requestVars {
-		result, err := c.execQuery(ctx, request, valueField, requestVar)
-		if err != nil {
-			return nil, err
-		}
-		rowSets[i] = schema.RowSet{
-			Aggregates: schema.RowSetAggregates{},
-			Rows: []map[string]any{
-				{
-					"__value": result,
-				},
-			},
-		}
+	if len(requestVars) == 1 || c.config.Concurrency.Query <= 1 {
+		return c.execQuerySync(ctx, state, request, valueField, requestVars)
 	}
 
-	return rowSets, nil
+	return c.execQueryAsync(ctx, state, request, valueField, requestVars)
 }
 
 // QueryExplain explains a query by creating an execution plan.
@@ -95,13 +86,82 @@ func (c *RESTConnector) explainQuery(request *schema.QueryRequest, variables map
 	return req, function, restOptions, err
 }
 
-func (c *RESTConnector) execQuery(ctx context.Context, request *schema.QueryRequest, queryFields schema.NestedField, variables map[string]any) (any, error) {
-	httpRequest, function, restOptions, err := c.explainQuery(request, variables)
-	if err != nil {
+func (c *RESTConnector) execQuerySync(ctx context.Context, state *State, request *schema.QueryRequest, valueField schema.NestedField, requestVars []schema.QueryRequestVariablesElem) ([]schema.RowSet, error) {
+	rowSets := make([]schema.RowSet, len(requestVars))
+
+	for i, requestVar := range requestVars {
+		result, err := c.execQuery(ctx, state, request, valueField, requestVar, i)
+		if err != nil {
+			return nil, err
+		}
+		rowSets[i] = schema.RowSet{
+			Aggregates: schema.RowSetAggregates{},
+			Rows: []map[string]any{
+				{
+					"__value": result,
+				},
+			},
+		}
+	}
+
+	return rowSets, nil
+}
+
+func (c *RESTConnector) execQueryAsync(ctx context.Context, state *State, request *schema.QueryRequest, valueField schema.NestedField, requestVars []schema.QueryRequestVariablesElem) ([]schema.RowSet, error) {
+	rowSets := make([]schema.RowSet, len(requestVars))
+
+	eg, ctx := errgroup.WithContext(ctx)
+	eg.SetLimit(int(c.config.Concurrency.Query))
+
+	for i, requestVar := range requestVars {
+		func(index int, vars schema.QueryRequestVariablesElem) {
+			eg.Go(func() error {
+				result, err := c.execQuery(ctx, state, request, valueField, requestVar, i)
+				if err != nil {
+					return err
+				}
+				rowSets[index] = schema.RowSet{
+					Aggregates: schema.RowSetAggregates{},
+					Rows: []map[string]any{
+						{
+							"__value": result,
+						},
+					},
+				}
+
+				return nil
+			})
+		}(i, requestVar)
+	}
+
+	if err := eg.Wait(); err != nil {
 		return nil, err
 	}
 
-	return c.client.Send(ctx, httpRequest, queryFields, function.ResultType, restOptions)
+	return rowSets, nil
+}
+
+func (c *RESTConnector) execQuery(ctx context.Context, state *State, request *schema.QueryRequest, queryFields schema.NestedField, variables map[string]any, index int) (any, error) {
+	ctx, span := state.Tracer.Start(ctx, fmt.Sprintf("Execute Query %d", index))
+	defer span.End()
+
+	httpRequest, function, restOptions, err := c.explainQuery(request, variables)
+	if err != nil {
+		span.SetStatus(codes.Error, "failed to explain query")
+		span.RecordError(err)
+		return nil, err
+	}
+
+	restOptions.Concurrency = c.config.Concurrency.REST
+	result, headers, err := c.client.Send(ctx, httpRequest, queryFields, function.ResultType, restOptions)
+	if err != nil {
+		span.SetStatus(codes.Error, "failed to execute the http request")
+		span.RecordError(err)
+
+		return nil, err
+	}
+
+	return c.createHeaderForwardingResponse(result, headers), nil
 }
 
 func serializeExplainResponse(httpRequest *internal.RetryableRequest, restOptions *internal.RESTOptions) (*schema.ExplainResponse, error) {

@@ -4,8 +4,18 @@ strict: true
 forwardHeaders:
   enabled: false
   argumentField: headers
-  responseHeadersField: null
-  responseResultField: null
+  responseHeaders: null
+concurrency:
+  query: 1
+  mutation: 1
+  rest: 5
 files:
   - file: https://raw.githubusercontent.com/hasura/ndc-rest/main/connector/testdata/jsonplaceholder/swagger.json
     spec: openapi2
+    timeout:
+      value: 30
+    retry:
+      times:
+        value: 1
+      delay:
+        value: 500

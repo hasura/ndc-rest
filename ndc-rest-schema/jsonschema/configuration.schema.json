@@ -3,6 +3,30 @@
   "$id": "https://github.com/hasura/ndc-rest/ndc-rest-schema/configuration/configuration",
   "$ref": "#/$defs/Configuration",
   "$defs": {
+    "ConcurrencySettings": {
+      "properties": {
+        "query": {
+          "type": "integer",
+          "description": "Maximum number of concurrent executions if there are many query variables. Zero means unlimited."
+        },
+        "mutation": {
+          "type": "integer",
+          "description": "Maximum number of concurrent executions if there are many mutation operations. Zero means unlimited."
+        },
+        "rest": {
+          "type": "integer",
+          "description": "Maximum number of concurrent requests to remote servers (distribution mode). Zero means unlimited."
+        }
+      },
+      "additionalProperties": false,
+      "type": "object",
+      "required": [
+        "query",
+        "mutation",
+        "rest"
+      ],
+      "description": "ConcurrencySettings represent settings for concurrent webhook executions to remote servers."
+    },
     "ConfigItem": {
       "properties": {
         "file": {
@@ -96,6 +120,9 @@
         "forwardHeaders": {
           "$ref": "#/$defs/ForwardHeadersSettings"
         },
+        "concurrency": {
+          "$ref": "#/$defs/ConcurrencySettings"
+        },
         "files": {
           "items": {
             "$ref": "#/$defs/ConfigItem"
@@ -108,6 +135,7 @@
       "required": [
         "strict",
         "forwardHeaders",
+        "concurrency",
         "files"
       ],
       "description": "Configuration contains required settings for the connector."
@@ -141,7 +169,8 @@
     "ForwardHeadersSettings": {
       "properties": {
         "enabled": {
-          "type": "boolean"
+          "type": "boolean",
+          "description": "Enable headers forwarding."
         },
         "argumentField": {
           "oneOf": [
@@ -151,22 +180,14 @@
             {
               "type": "null"
             }
-          ]
+          ],
+          "description": "The argument field name to be added for headers forwarding."
         },
-        "responseHeadersField": {
+        "responseHeaders": {
           "oneOf": [
             {
-              "type": "string"
-            },
-            {
-              "type": "null"
-            }
-          ]
-        },
-        "responseResultField": {
-          "oneOf": [
-            {
-              "type": "string"
+              "$ref": "#/$defs/ForwardResponseHeadersSettings",
+              "description": "HTTP response headers to be forwarded from a data connector to the client."
             },
             {
               "type": "null"
@@ -179,10 +200,38 @@
       "required": [
         "enabled",
         "argumentField",
-        "responseHeadersField",
-        "responseResultField"
+        "responseHeaders"
       ],
-      "description": "ForwardHeadersSettings hold settings of header forwarding from Hasura engine"
+      "description": "ForwardHeadersSettings hold settings of header forwarding from and to Hasura engine"
+    },
+    "ForwardResponseHeadersSettings": {
+      "properties": {
+        "headersField": {
+          "type": "string",
+          "pattern": "^[a-zA-Z_]\\w+$",
+          "description": "Name of the field in the NDC function/procedure's result which contains the response headers."
+        },
+        "resultField": {
+          "type": "string",
+          "pattern": "^[a-zA-Z_]\\w+$",
+          "description": "Name of the field in the NDC function/procedure's result which contains the result."
+        },
+        "forwardHeaders": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array",
+          "description": "List of actual HTTP response headers from the data connector to be set as response headers. Returns all headers if empty."
+        }
+      },
+      "additionalProperties": false,
+      "type": "object",
+      "required": [
+        "headersField",
+        "resultField",
+        "forwardHeaders"
+      ],
+      "description": "ForwardHeadersSettings hold settings of header forwarding from http response to Hasura engine."
     },
     "PatchConfig": {
       "properties": {

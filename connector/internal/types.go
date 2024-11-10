@@ -26,11 +26,12 @@ var defaultRetryHTTPStatus = []int{429, 500, 502, 503}
 
 // RESTOptions represent execution options for REST requests
 type RESTOptions struct {
-	Servers  []string `json:"servers"  yaml:"serverIds"`
+	Servers  []string `json:"serverIds"  yaml:"serverIds"`
 	Parallel bool     `json:"parallel" yaml:"parallel"`
 
 	Explain     bool                  `json:"-" yaml:"-"`
 	Distributed bool                  `json:"-" yaml:"-"`
+	Concurrency uint                  `json:"-" yaml:"-"`
 	Settings    *rest.NDCRestSettings `json:"-" yaml:"-"`
 }
 

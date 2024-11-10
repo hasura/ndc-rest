@@ -144,7 +144,14 @@ func TestRESTConnector_authentication(t *testing.T) {
 		assertHTTPResponse(t, res, http.StatusOK, schema.QueryResponse{
 			{
 				Rows: []map[string]any{
-					{"__value": map[string]any{}},
+					{
+						"__value": map[string]any{
+							"headers": map[string]any{
+								"Content-Type": string("application/json"),
+							},
+							"response": map[string]any{},
+						},
+					},
 				},
 			},
 		})
@@ -182,7 +189,12 @@ func TestRESTConnector_authentication(t *testing.T) {
 		assert.NilError(t, err)
 		assertHTTPResponse(t, res, http.StatusOK, schema.MutationResponse{
 			OperationResults: []schema.MutationOperationResults{
-				schema.NewProcedureResult(map[string]any{}).Encode(),
+				schema.NewProcedureResult(map[string]any{
+					"headers": map[string]any{
+						"Content-Type": string("application/json"),
+					},
+					"response": map[string]any{},
+				}).Encode(),
 			},
 		})
 	})
@@ -230,7 +242,12 @@ func TestRESTConnector_authentication(t *testing.T) {
 			assertHTTPResponse(t, res, http.StatusOK, schema.QueryResponse{
 				{
 					Rows: []map[string]any{
-						{"__value": map[string]any{}},
+						{
+							"__value": map[string]any{
+								"headers":  map[string]any{"Content-Type": string("application/json")},
+								"response": map[string]any{},
+							},
+						},
 					},
 				},
 			})
@@ -293,9 +310,12 @@ func TestRESTConnector_authentication(t *testing.T) {
 		assert.NilError(t, err)
 		assertHTTPResponse(t, res, http.StatusOK, schema.MutationResponse{
 			OperationResults: []schema.MutationOperationResults{
-				schema.NewProcedureResult([]any{
-					map[string]any{"completed": float64(1), "status": string("OK")},
-					map[string]any{"completed": float64(0), "status": string("FAILED")},
+				schema.NewProcedureResult(map[string]any{
+					"headers": map[string]any{"Content-Type": string("application/x-ndjson")},
+					"response": []any{
+						map[string]any{"completed": float64(1), "status": string("OK")},
+						map[string]any{"completed": float64(0), "status": string("FAILED")},
+					},
 				}).Encode(),
 			},
 		})

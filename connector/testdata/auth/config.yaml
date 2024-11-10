@@ -1,6 +1,18 @@
+# yaml-language-server: $schema=../../../ndc-rest-schema/jsonschema/configuration.schema.json
+strict: true
 forwardHeaders:
   enabled: true
   argumentField: headers
+  responseHeaders:
+    headersField: "headers"
+    resultField: "response"
+    forwardHeaders:
+      - Content-Type
+      - X-Custom-Header
+concurrency:
+  query: 1
+  mutation: 1
+  rest: 0
 files:
   - file: schema.yaml
     spec: ndc

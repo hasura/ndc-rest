@@ -25,15 +25,28 @@ type Configuration struct {
 	// Require strict validation
 	Strict         bool                   `json:"strict" yaml:"strict"`
 	ForwardHeaders ForwardHeadersSettings `json:"forwardHeaders" yaml:"forwardHeaders"`
+	Concurrency    ConcurrencySettings    `json:"concurrency" yaml:"concurrency"`
 	Files          []ConfigItem           `json:"files" yaml:"files"`
 }
 
-// ForwardHeadersSettings hold settings of header forwarding from Hasura engine
+// ConcurrencySettings represent settings for concurrent webhook executions to remote servers.
+type ConcurrencySettings struct {
+	// Maximum number of concurrent executions if there are many query variables.
+	Query uint `json:"query" yaml:"query"`
+	// Maximum number of concurrent executions if there are many mutation operations.
+	Mutation uint `json:"mutation" yaml:"mutation"`
+	// Maximum number of concurrent requests to remote servers (distribution mode).
+	REST uint `json:"rest" yaml:"rest"`
+}
+
+// ForwardHeadersSettings hold settings of header forwarding from and to Hasura engine
 type ForwardHeadersSettings struct {
-	Enabled              bool    `json:"enabled" yaml:"enabled"`
-	ArgumentField        *string `json:"argumentField" yaml:"argumentField" jsonschema:"oneof_type=string;null,pattern=^[a-zA-Z_]\\w+$"`
-	ResponseHeadersField *string `json:"responseHeadersField" yaml:"responseHeadersField" jsonschema:"oneof_type=string;null,pattern=^[a-zA-Z_]\\w+$"`
-	ResponseResultField  *string `json:"responseResultField" yaml:"responseResultField" jsonschema:"oneof_type=string;null,pattern=^[a-zA-Z_]\\w+$"`
+	// Enable headers forwarding.
+	Enabled bool `json:"enabled" yaml:"enabled"`
+	// The argument field name to be added for headers forwarding.
+	ArgumentField *string `json:"argumentField" yaml:"argumentField" jsonschema:"oneof_type=string;null,pattern=^[a-zA-Z_]\\w+$"`
+	// HTTP response headers to be forwarded from a data connector to the client.
+	ResponseHeaders *ForwardResponseHeadersSettings `json:"responseHeaders" yaml:"responseHeaders" jsonschema:"nullable"`
 }
 
 // UnmarshalJSON implements json.Unmarshaler.
@@ -44,25 +57,46 @@ func (j *ForwardHeadersSettings) UnmarshalJSON(b []byte) error {
 		return err
 	}
 
-	if rawResult.Enabled {
-		if rawResult.ArgumentField != nil && !fieldNameRegex.MatchString(*rawResult.ArgumentField) {
-			return fmt.Errorf("invalid forwardHeaders.argumentField name format: %s", *rawResult.ArgumentField)
-		}
-		if rawResult.ResponseHeadersField != nil && !fieldNameRegex.MatchString(*rawResult.ResponseHeadersField) {
-			return fmt.Errorf("invalid forwardHeaders.responseHeadersField name format: %s", *rawResult.ResponseHeadersField)
-		}
-		if rawResult.ResponseResultField != nil && !fieldNameRegex.MatchString(*rawResult.ResponseResultField) {
-			return fmt.Errorf("invalid forwardHeaders.responseResultField name format: %s", *rawResult.ResponseResultField)
-		}
-		if rawResult.ResponseHeadersField != nil && rawResult.ResponseResultField == nil {
-			return errors.New("forwardHeaders: responseResultField is required if responseHeadersField is set")
-		}
-		if rawResult.ResponseHeadersField == nil && rawResult.ResponseResultField != nil {
-			return errors.New("forwardHeaders: responseHeadersField is required if responseResultField is set")
+	if !rawResult.Enabled {
+		*j = ForwardHeadersSettings(rawResult)
+
+		return nil
+	}
+
+	if rawResult.ArgumentField != nil && !fieldNameRegex.MatchString(*rawResult.ArgumentField) {
+		return fmt.Errorf("invalid forwardHeaders.argumentField name format: %s", *rawResult.ArgumentField)
+	}
+
+	if rawResult.ResponseHeaders != nil {
+		if err := rawResult.ResponseHeaders.Validate(); err != nil {
+			return fmt.Errorf("responseHeaders: %w", err)
 		}
 	}
 
 	*j = ForwardHeadersSettings(rawResult)
+	return nil
+}
+
+// ForwardHeadersSettings hold settings of header forwarding from http response to Hasura engine.
+type ForwardResponseHeadersSettings struct {
+	// Name of the field in the NDC function/procedure's result which contains the response headers.
+	HeadersField string `json:"headersField" yaml:"headersField" jsonschema:"pattern=^[a-zA-Z_]\\w+$"`
+	// Name of the field in the NDC function/procedure's result which contains the result.
+	ResultField string `json:"resultField" yaml:"resultField" jsonschema:"pattern=^[a-zA-Z_]\\w+$"`
+	// List of actual HTTP response headers from the data connector to be set as response headers. Returns all headers if empty.
+	ForwardHeaders []string `json:"forwardHeaders" yaml:"forwardHeaders"`
+}
+
+// Validate checks if the setting is valid.
+func (j ForwardResponseHeadersSettings) Validate() error {
+	if !fieldNameRegex.MatchString(j.HeadersField) {
+		return fmt.Errorf("invalid format in headersField: %s", j.HeadersField)
+	}
+
+	if !fieldNameRegex.MatchString(j.ResultField) {
+		return fmt.Errorf("invalid format in resultField: %s", j.ResultField)
+	}
+
 	return nil
 }
 

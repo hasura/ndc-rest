@@ -211,6 +211,7 @@ func buildSchemaFile(config *Configuration, configDir string, configItem *Config
 	}
 
 	buildRESTArguments(config, ndcSchema, configItem)
+	buildHeadersForwardingResponse(config, ndcSchema)
 
 	return ndcSchema, nil
 }
@@ -302,6 +303,21 @@ func buildRESTArguments(config *Configuration, restSchema *rest.NDCRestSchema, c
 	}
 }
 
+func buildHeadersForwardingResponse(config *Configuration, restSchema *rest.NDCRestSchema) {
+	if config.ForwardHeaders.ResponseHeaders == nil {
+		return
+	}
+
+	for name, op := range restSchema.Functions {
+		op.ResultType = createHeaderForwardingResponseTypes(restSchema, name, op.ResultType, config.ForwardHeaders.ResponseHeaders)
+		restSchema.Functions[name] = op
+	}
+	for name, op := range restSchema.Procedures {
+		op.ResultType = createHeaderForwardingResponseTypes(restSchema, name, op.ResultType, config.ForwardHeaders.ResponseHeaders)
+		restSchema.Procedures[name] = op
+	}
+}
+
 func applyOperationInfo(config *Configuration, info *rest.OperationInfo) {
 	info.Arguments[rest.RESTOptionsArgumentName] = restSingleOptionsArgument
 	if config.ForwardHeaders.Enabled {
@@ -386,4 +402,26 @@ func validateRequestSchema(req *rest.Request, defaultMethod string) (*rest.Reque
 	}
 
 	return req, nil
+}
+
+func createHeaderForwardingResponseTypes(restSchema *rest.NDCRestSchema, operationName string, resultType schema.Type, settings *ForwardResponseHeadersSettings) schema.Type {
+	objectName := restUtils.ToPascalCase(operationName) + "HeadersResponse"
+	objectType := rest.ObjectType{
+		Fields: map[string]rest.ObjectField{
+			settings.HeadersField: {
+				ObjectField: schema.ObjectField{
+					Type: schema.NewNullableNamedType(string(rest.ScalarJSON)).Encode(),
+				},
+			},
+			settings.ResultField: {
+				ObjectField: schema.ObjectField{
+					Type: resultType,
+				},
+			},
+		},
+	}
+
+	restSchema.ObjectTypes[objectName] = objectType
+
+	return schema.NewNamedType(objectName).Encode()
 }

@@ -121,11 +121,8 @@
         },
         "description": "Finds Pets",
         "result_type": {
-          "element_type": {
-            "name": "Pet",
-            "type": "named"
-          },
-          "type": "array"
+          "name": "FindPetsHeadersResponse",
+          "type": "named"
         }
       },
       "findPetsByStatus": {
@@ -182,11 +179,8 @@
         },
         "description": "Finds Pets by status",
         "result_type": {
-          "element_type": {
-            "name": "Pet",
-            "type": "named"
-          },
-          "type": "array"
+          "name": "FindPetsByStatusHeadersResponse",
+          "type": "named"
         }
       },
       "findPetsByStatusDistributed": {
@@ -243,7 +237,7 @@
         },
         "description": "Finds Pets by status",
         "result_type": {
-          "name": "FindPetsByStatusDistributedResult",
+          "name": "FindPetsByStatusDistributedHeadersResponse",
           "type": "named"
         }
       },
@@ -280,7 +274,7 @@
         },
         "description": "Finds Pets",
         "result_type": {
-          "name": "FindPetsDistributedResult",
+          "name": "FindPetsDistributedHeadersResponse",
           "type": "named"
         }
       },
@@ -316,11 +310,8 @@
           }
         },
         "result_type": {
-          "element_type": {
-            "name": "Pet",
-            "type": "named"
-          },
-          "type": "array"
+          "name": "PetRetryHeadersResponse",
+          "type": "named"
         }
       },
       "petRetryDistributed": {
@@ -355,12 +346,31 @@
           }
         },
         "result_type": {
-          "name": "PetRetryDistributedResult",
+          "name": "PetRetryDistributedHeadersResponse",
           "type": "named"
         }
       }
     },
     "object_types": {
+      "AddPetDistributedHeadersResponse": {
+        "fields": {
+          "headers": {
+            "type": {
+              "type": "nullable",
+              "underlying_type": {
+                "name": "JSON",
+                "type": "named"
+              }
+            }
+          },
+          "response": {
+            "type": {
+              "name": "AddPetDistributedResult",
+              "type": "named"
+            }
+          }
+        }
+      },
       "AddPetDistributedResult": {
         "description": "Distributed responses of addPetDistributed",
         "fields": {
@@ -400,6 +410,44 @@
             "description": "Identity of the remote server",
             "type": {
               "name": "RestServerId",
+              "type": "named"
+            }
+          }
+        }
+      },
+      "AddPetHeadersResponse": {
+        "fields": {
+          "headers": {
+            "type": {
+              "type": "nullable",
+              "underlying_type": {
+                "name": "JSON",
+                "type": "named"
+              }
+            }
+          },
+          "response": {
+            "type": {
+              "name": "Pet",
+              "type": "named"
+            }
+          }
+        }
+      },
+      "CreateModelDistributedHeadersResponse": {
+        "fields": {
+          "headers": {
+            "type": {
+              "type": "nullable",
+              "underlying_type": {
+                "name": "JSON",
+                "type": "named"
+              }
+            }
+          },
+          "response": {
+            "type": {
+              "name": "CreateModelDistributedResult",
               "type": "named"
             }
           }
@@ -452,6 +500,28 @@
           }
         }
       },
+      "CreateModelHeadersResponse": {
+        "fields": {
+          "headers": {
+            "type": {
+              "type": "nullable",
+              "underlying_type": {
+                "name": "JSON",
+                "type": "named"
+              }
+            }
+          },
+          "response": {
+            "type": {
+              "element_type": {
+                "name": "ProgressResponse",
+                "type": "named"
+              },
+              "type": "array"
+            }
+          }
+        }
+      },
       "CreateModelRequest": {
         "fields": {
           "model": {
@@ -493,6 +563,25 @@
             "description": "Identity of the remote server",
             "type": {
               "name": "RestServerId",
+              "type": "named"
+            }
+          }
+        }
+      },
+      "FindPetsByStatusDistributedHeadersResponse": {
+        "fields": {
+          "headers": {
+            "type": {
+              "type": "nullable",
+              "underlying_type": {
+                "name": "JSON",
+                "type": "named"
+              }
+            }
+          },
+          "response": {
+            "type": {
+              "name": "FindPetsByStatusDistributedResult",
               "type": "named"
             }
           }
@@ -545,6 +634,47 @@
           }
         }
       },
+      "FindPetsByStatusHeadersResponse": {
+        "fields": {
+          "headers": {
+            "type": {
+              "type": "nullable",
+              "underlying_type": {
+                "name": "JSON",
+                "type": "named"
+              }
+            }
+          },
+          "response": {
+            "type": {
+              "element_type": {
+                "name": "Pet",
+                "type": "named"
+              },
+              "type": "array"
+            }
+          }
+        }
+      },
+      "FindPetsDistributedHeadersResponse": {
+        "fields": {
+          "headers": {
+            "type": {
+              "type": "nullable",
+              "underlying_type": {
+                "name": "JSON",
+                "type": "named"
+              }
+            }
+          },
+          "response": {
+            "type": {
+              "name": "FindPetsDistributedResult",
+              "type": "named"
+            }
+          }
+        }
+      },
       "FindPetsDistributedResult": {
         "description": "Distributed responses of findPetsDistributed",
         "fields": {
@@ -592,6 +722,28 @@
           }
         }
       },
+      "FindPetsHeadersResponse": {
+        "fields": {
+          "headers": {
+            "type": {
+              "type": "nullable",
+              "underlying_type": {
+                "name": "JSON",
+                "type": "named"
+              }
+            }
+          },
+          "response": {
+            "type": {
+              "element_type": {
+                "name": "Pet",
+                "type": "named"
+              },
+              "type": "array"
+            }
+          }
+        }
+      },
       "Pet": {
         "fields": {
           "id": {
@@ -606,6 +758,25 @@
           "name": {
             "type": {
               "name": "String",
+              "type": "named"
+            }
+          }
+        }
+      },
+      "PetRetryDistributedHeadersResponse": {
+        "fields": {
+          "headers": {
+            "type": {
+              "type": "nullable",
+              "underlying_type": {
+                "name": "JSON",
+                "type": "named"
+              }
+            }
+          },
+          "response": {
+            "type": {
+              "name": "PetRetryDistributedResult",
               "type": "named"
             }
           }
@@ -654,6 +825,28 @@
             "type": {
               "name": "RestServerId",
               "type": "named"
+            }
+          }
+        }
+      },
+      "PetRetryHeadersResponse": {
+        "fields": {
+          "headers": {
+            "type": {
+              "type": "nullable",
+              "underlying_type": {
+                "name": "JSON",
+                "type": "named"
+              }
+            }
+          },
+          "response": {
+            "type": {
+              "element_type": {
+                "name": "Pet",
+                "type": "named"
+              },
+              "type": "array"
             }
           }
         }
@@ -786,7 +979,7 @@
         },
         "description": "Add a new pet to the store",
         "result_type": {
-          "name": "Pet",
+          "name": "AddPetHeadersResponse",
           "type": "named"
         }
       },
@@ -846,7 +1039,7 @@
         },
         "description": "Add a new pet to the store",
         "result_type": {
-          "name": "AddPetDistributedResult",
+          "name": "AddPetDistributedHeadersResponse",
           "type": "named"
         }
       },
@@ -892,11 +1085,8 @@
           }
         },
         "result_type": {
-          "element_type": {
-            "name": "ProgressResponse",
-            "type": "named"
-          },
-          "type": "array"
+          "name": "CreateModelHeadersResponse",
+          "type": "named"
         }
       },
       "createModelDistributed": {
@@ -941,7 +1131,7 @@
           }
         },
         "result_type": {
-          "name": "CreateModelDistributedResult",
+          "name": "CreateModelDistributedHeadersResponse",
           "type": "named"
         }
       }

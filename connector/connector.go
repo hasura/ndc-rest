@@ -90,7 +90,10 @@ func (c *RESTConnector) ParseConfiguration(ctx context.Context, configurationDir
 // connector-specific metrics with the metrics registry.
 func (c *RESTConnector) TryInitState(ctx context.Context, configuration *configuration.Configuration, metrics *connector.TelemetryState) (*State, error) {
 	c.client.SetTracer(metrics.Tracer)
-	return &State{}, nil
+
+	return &State{
+		Tracer: metrics.Tracer,
+	}, nil
 }
 
 // HealthCheck checks the health of the connector.

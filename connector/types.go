@@ -5,6 +5,7 @@ import (
 	"net/http"
 
 	"github.com/hasura/ndc-rest/connector/internal"
+	"go.opentelemetry.io/otel/trace"
 )
 
 var (
@@ -13,7 +14,9 @@ var (
 )
 
 // State is the global state which is shared for every connector request.
-type State struct{}
+type State struct {
+	Tracer trace.Tracer
+}
 
 type options struct {
 	client internal.Doer
