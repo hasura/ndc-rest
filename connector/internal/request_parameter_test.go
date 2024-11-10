@@ -301,7 +301,7 @@ func TestEvalURLAndHeaderParameters(t *testing.T) {
 				assert.ErrorContains(t, err, tc.errorMsg)
 			} else {
 				assert.NilError(t, err)
-				decodedValue, err := url.QueryUnescape(result)
+				decodedValue, err := url.QueryUnescape(result.String())
 				assert.NilError(t, err)
 				assert.Equal(t, tc.expectedURL, decodedValue)
 				for k, v := range tc.headers {

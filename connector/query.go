@@ -149,6 +149,7 @@ func (c *RESTConnector) execQuery(ctx context.Context, state *State, request *sc
 	if err != nil {
 		span.SetStatus(codes.Error, "failed to explain query")
 		span.RecordError(err)
+
 		return nil, err
 	}
 
@@ -185,7 +186,7 @@ func serializeExplainResponse(httpRequest *internal.RetryableRequest, restOption
 	if err != nil {
 		return nil, err
 	}
-	explainResp.Details["url"] = requests[0].URL
+	explainResp.Details["url"] = requests[0].URL.String()
 
 	if httpRequest.Body != nil {
 		bodyBytes, err := io.ReadAll(httpRequest.Body)

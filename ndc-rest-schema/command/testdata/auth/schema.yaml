@@ -171,12 +171,15 @@ scalar_types:
   Boolean:
     aggregate_functions: {}
     comparison_operators: {}
+    representation:
+      type: boolean
   Int:
     aggregate_functions: {}
     comparison_operators: {}
-  JSON:
-    aggregate_functions: {}
-    comparison_operators: {}
+    representation:
+      type: int32
   String:
     aggregate_functions: {}
     comparison_operators: {}
+    representation:
+      type: string

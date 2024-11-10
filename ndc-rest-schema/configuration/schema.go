@@ -28,7 +28,6 @@ func BuildSchemaFromConfig(config *Configuration, configDir string, logger *slog
 		if schemaOutput == nil {
 			continue
 		}
-
 		ndcSchema := NDCRestRuntimeSchema{
 			Name:          file.File,
 			NDCRestSchema: schemaOutput,
@@ -40,6 +39,7 @@ func BuildSchemaFromConfig(config *Configuration, configDir string, logger *slog
 		} else {
 			ndcSchema.Runtime = *runtime
 		}
+
 		schemas[i] = ndcSchema
 	}
 
@@ -304,6 +304,18 @@ func buildRESTArguments(config *Configuration, restSchema *rest.NDCRestSchema, c
 }
 
 func buildHeadersForwardingResponse(config *Configuration, restSchema *rest.NDCRestSchema) {
+	if !config.ForwardHeaders.Enabled {
+		return
+	}
+
+	if _, ok := restSchema.ScalarTypes[string(rest.ScalarJSON)]; !ok {
+		restSchema.ScalarTypes[string(rest.ScalarJSON)] = schema.ScalarType{
+			AggregateFunctions:  schema.ScalarTypeAggregateFunctions{},
+			ComparisonOperators: map[string]schema.ComparisonOperatorDefinition{},
+			Representation:      schema.NewTypeRepresentationJSON().Encode(),
+		}
+	}
+
 	if config.ForwardHeaders.ResponseHeaders == nil {
 		return
 	}
@@ -320,7 +332,7 @@ func buildHeadersForwardingResponse(config *Configuration, restSchema *rest.NDCR
 
 func applyOperationInfo(config *Configuration, info *rest.OperationInfo) {
 	info.Arguments[rest.RESTOptionsArgumentName] = restSingleOptionsArgument
-	if config.ForwardHeaders.Enabled {
+	if config.ForwardHeaders.Enabled && config.ForwardHeaders.ArgumentField != nil {
 		info.Arguments[*config.ForwardHeaders.ArgumentField] = headersArguments
 	}
 }

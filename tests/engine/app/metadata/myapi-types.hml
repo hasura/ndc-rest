@@ -1,0 +1,114 @@
+---
+kind: ScalarType
+version: v1
+definition:
+  name: Int32
+  graphql:
+    typeName: Int32
+
+---
+kind: BooleanExpressionType
+version: v1
+definition:
+  name: Int32_bool_exp
+  operand:
+    scalar:
+      type: Int32
+      comparisonOperators: []
+      dataConnectorOperatorMapping:
+        - dataConnectorName: myapi
+          dataConnectorScalarType: Int32
+          operatorMapping: {}
+  logicalOperators:
+    enable: true
+  isNull:
+    enable: true
+  graphql:
+    typeName: Int32_bool_exp
+
+---
+kind: DataConnectorScalarRepresentation
+version: v1
+definition:
+  dataConnectorName: myapi
+  dataConnectorScalarType: Int32
+  representation: Int32
+  graphql:
+    comparisonExpressionTypeName: Int32_comparison_exp
+
+---
+kind: ScalarType
+version: v1
+definition:
+  name: Int64
+  graphql:
+    typeName: Int64
+
+---
+kind: BooleanExpressionType
+version: v1
+definition:
+  name: Int64_bool_exp
+  operand:
+    scalar:
+      type: Int64
+      comparisonOperators: []
+      dataConnectorOperatorMapping:
+        - dataConnectorName: myapi
+          dataConnectorScalarType: Int64
+          operatorMapping: {}
+  logicalOperators:
+    enable: true
+  isNull:
+    enable: true
+  graphql:
+    typeName: Int64_bool_exp
+
+---
+kind: DataConnectorScalarRepresentation
+version: v1
+definition:
+  dataConnectorName: myapi
+  dataConnectorScalarType: Int64
+  representation: Int64
+  graphql:
+    comparisonExpressionTypeName: Int64_comparison_exp
+
+---
+kind: ScalarType
+version: v1
+definition:
+  name: URI
+  graphql:
+    typeName: URI
+
+---
+kind: BooleanExpressionType
+version: v1
+definition:
+  name: URI_bool_exp
+  operand:
+    scalar:
+      type: URI
+      comparisonOperators: []
+      dataConnectorOperatorMapping:
+        - dataConnectorName: myapi
+          dataConnectorScalarType: URI
+          operatorMapping: {}
+  logicalOperators:
+    enable: true
+  isNull:
+    enable: true
+  graphql:
+    typeName: URI_bool_exp
+
+---
+kind: DataConnectorScalarRepresentation
+version: v1
+definition:
+  dataConnectorName: myapi
+  dataConnectorScalarType: URI
+  representation: URI
+  graphql:
+    comparisonExpressionTypeName: URI_comparison_exp
+

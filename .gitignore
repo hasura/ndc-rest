@@ -28,3 +28,4 @@ go.work.sum
 # Release directory
 release/
 _output/
+schema.output.json

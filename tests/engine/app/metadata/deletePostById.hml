@@ -1,0 +1,28 @@
+---
+kind: Command
+version: v1
+definition:
+  name: deletePostById
+  outputType: Boolean
+  arguments:
+    - name: id
+      type: Int32!
+      description: The ID of the post to retrieve
+  source:
+    dataConnectorName: myapi
+    dataConnectorCommand:
+      procedure: deletePostById
+  graphql:
+    rootFieldName: deletePostById
+    rootFieldKind: Mutation
+  description: Delete specific post
+
+---
+kind: CommandPermissions
+version: v1
+definition:
+  commandName: deletePostById
+  permissions:
+    - role: admin
+      allowExecution: true
+

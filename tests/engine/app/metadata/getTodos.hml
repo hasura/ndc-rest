@@ -1,0 +1,31 @@
+---
+kind: Command
+version: v1
+definition:
+  name: getTodos
+  outputType: "[Todo!]!"
+  arguments:
+    - name: id
+      type: Int32
+      description: Filter by todo ID
+    - name: userId
+      type: Int32
+      description: Filter by user ID
+  source:
+    dataConnectorName: myapi
+    dataConnectorCommand:
+      function: getTodos
+  graphql:
+    rootFieldName: getTodos
+    rootFieldKind: Query
+  description: Get all available todos
+
+---
+kind: CommandPermissions
+version: v1
+definition:
+  commandName: getTodos
+  permissions:
+    - role: admin
+      allowExecution: true
+

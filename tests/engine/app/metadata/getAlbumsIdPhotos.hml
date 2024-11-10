@@ -1,0 +1,66 @@
+---
+kind: ObjectType
+version: v1
+definition:
+  name: Photo
+  fields:
+    - name: albumId
+      type: Int64
+    - name: id
+      type: Int64
+    - name: thumbnailUrl
+      type: URI
+    - name: title
+      type: String
+    - name: url
+      type: URI
+  graphql:
+    typeName: Photo
+    inputTypeName: Photo_input
+  dataConnectorTypeMapping:
+    - dataConnectorName: myapi
+      dataConnectorObjectType: Photo
+
+---
+kind: TypePermissions
+version: v1
+definition:
+  typeName: Photo
+  permissions:
+    - role: admin
+      output:
+        allowedFields:
+          - albumId
+          - id
+          - thumbnailUrl
+          - title
+          - url
+
+---
+kind: Command
+version: v1
+definition:
+  name: getAlbumsIdPhotos
+  outputType: "[Photo!]!"
+  arguments:
+    - name: id
+      type: Int32!
+      description: post id
+  source:
+    dataConnectorName: myapi
+    dataConnectorCommand:
+      function: getAlbumsIdPhotos
+  graphql:
+    rootFieldName: getAlbumsIdPhotos
+    rootFieldKind: Query
+  description: Get photos for a specific album
+
+---
+kind: CommandPermissions
+version: v1
+definition:
+  commandName: getAlbumsIdPhotos
+  permissions:
+    - role: admin
+      allowExecution: true
+

@@ -1139,15 +1139,24 @@
     "scalar_types": {
       "Boolean": {
         "aggregate_functions": {},
-        "comparison_operators": {}
+        "comparison_operators": {},
+        "representation": {
+          "type": "boolean"
+        }
       },
       "Int": {
         "aggregate_functions": {},
-        "comparison_operators": {}
+        "comparison_operators": {},
+        "representation": {
+          "type": "int32"
+        }
       },
       "JSON": {
         "aggregate_functions": {},
-        "comparison_operators": {}
+        "comparison_operators": {},
+        "representation": {
+          "type": "json"
+        }
       },
       "RestServerId": {
         "aggregate_functions": {},
@@ -1159,7 +1168,10 @@
       },
       "String": {
         "aggregate_functions": {},
-        "comparison_operators": {}
+        "comparison_operators": {},
+        "representation": {
+          "type": "string"
+        }
       }
     }
   }

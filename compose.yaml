@@ -1,0 +1,15 @@
+include:
+  - tests/engine/compose.yaml
+services:
+  ndc-rest:
+    build:
+      context: .
+    ports:
+      - 8080:8080
+    volumes:
+      - ./tests/configuration:/etc/connector:ro
+    extra_hosts:
+      - local.hasura.dev=host-gateway
+    environment:
+      OTEL_EXPORTER_OTLP_ENDPOINT: http://local.hasura.dev:4317
+      HASURA_LOG_LEVEL: debug

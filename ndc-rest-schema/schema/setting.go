@@ -79,7 +79,7 @@ type ServerConfig struct {
 	TLS             *TLSConfig                 `json:"tls,omitempty"             mapstructure:"tls"             yaml:"tls,omitempty"`
 
 	// cached values that are loaded from environment variables
-	url     *string
+	url     *url.URL
 	headers map[string]string
 }
 
@@ -102,20 +102,21 @@ func (j *ServerConfig) UnmarshalJSON(b []byte) error {
 
 // Validate if the current instance is valid
 func (ss *ServerConfig) Validate() error {
-	urlValue, err := ss.URL.Get()
+	rawURL, err := ss.URL.Get()
 	if err != nil {
 		return fmt.Errorf("server url: %w", err)
 	}
 
-	if urlValue == "" {
+	if rawURL == "" {
 		return errors.New("url is required for server")
 	}
 
-	if _, err := parseHttpURL(urlValue); err != nil {
+	urlValue, err := parseHttpURL(rawURL)
+	if err != nil {
 		return fmt.Errorf("server url: %w", err)
 	}
 
-	ss.url = &urlValue
+	ss.url = urlValue
 
 	headers, err := getHeadersFromEnv(ss.Headers)
 	if err != nil {
@@ -127,14 +128,21 @@ func (ss *ServerConfig) Validate() error {
 }
 
 // Validate if the current instance is valid
-func (ss ServerConfig) GetURL() string {
+func (ss ServerConfig) GetURL() (url.URL, error) {
 	if ss.url != nil {
-		return *ss.url
+		return *ss.url, nil
 	}
 
-	result, _ := ss.URL.Get()
+	rawURL, err := ss.URL.Get()
+	if err != nil {
+		return url.URL{}, err
+	}
+	urlValue, err := parseHttpURL(rawURL)
+	if err != nil {
+		return url.URL{}, fmt.Errorf("server url: %w", err)
+	}
 
-	return result
+	return *urlValue, nil
 }
 
 // Validate if the current instance is valid

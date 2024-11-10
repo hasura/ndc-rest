@@ -46,3 +46,23 @@ ci-build-cli: clean
 		-osarch="linux/amd64 darwin/amd64 windows/amd64 darwin/arm64 linux/arm64" \
 		-output="../$(OUTPUT_DIR)/ndc-rest-schema-{{.OS}}-{{.Arch}}" \
 		.
+
+.PHONY: generate-test-config
+generate-test-config:
+	go run ./ndc-rest-schema update -d ./tests/configuration
+
+.PHONY: start-ddn
+start-ddn:
+	HASURA_DDN_PAT=$$(ddn auth print-pat) docker compose --env-file tests/engine/.env up --build -d
+
+.PHONY: stop-ddn
+stop-ddn:
+	docker compose down --remove-orphans
+
+.PHONY: build-supergraph-test
+build-supergraph-test:
+	docker compose up -d --build ndc-rest
+	cd tests/engine && \
+		ddn connector-link update myapi --add-all-resources --subgraph ./app/subgraph.yaml && \
+		ddn supergraph build local
+	make start-ddn

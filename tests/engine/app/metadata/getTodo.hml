@@ -1,0 +1,63 @@
+---
+kind: ObjectType
+version: v1
+definition:
+  name: Todo
+  fields:
+    - name: completed
+      type: Boolean
+    - name: id
+      type: Int64
+    - name: title
+      type: String
+    - name: userId
+      type: Int64
+  graphql:
+    typeName: Todo
+    inputTypeName: Todo_input
+  dataConnectorTypeMapping:
+    - dataConnectorName: myapi
+      dataConnectorObjectType: Todo
+
+---
+kind: TypePermissions
+version: v1
+definition:
+  typeName: Todo
+  permissions:
+    - role: admin
+      output:
+        allowedFields:
+          - completed
+          - id
+          - title
+          - userId
+
+---
+kind: Command
+version: v1
+definition:
+  name: getTodo
+  outputType: Todo!
+  arguments:
+    - name: id
+      type: Int32!
+      description: The ID of the todo to retrieve
+  source:
+    dataConnectorName: myapi
+    dataConnectorCommand:
+      function: getTodo
+  graphql:
+    rootFieldName: getTodo
+    rootFieldKind: Query
+  description: Get specific todo
+
+---
+kind: CommandPermissions
+version: v1
+definition:
+  commandName: getTodo
+  permissions:
+    - role: admin
+      allowExecution: true
+

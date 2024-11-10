@@ -11,7 +11,7 @@ concurrency:
   rest: 5
 files:
   - file: https://raw.githubusercontent.com/hasura/ndc-rest/main/connector/testdata/jsonplaceholder/swagger.json
-    spec: openapi2
+    spec: oas2
     timeout:
       value: 30
     retry:

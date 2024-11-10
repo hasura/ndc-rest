@@ -14,8 +14,7 @@ import (
 	"gotest.tools/v3/assert"
 )
 
-func TestOpenAPIv3ToRESTSchema(t *testing.T) {
-
+func TestUpdateCommand(t *testing.T) {
 	testCases := []struct {
 		Argument UpdateCommandArguments
 		Expected string
@@ -26,6 +25,13 @@ func TestOpenAPIv3ToRESTSchema(t *testing.T) {
 				Dir: "testdata/patch",
 			},
 			Expected: "testdata/patch/expected.json",
+		},
+		// go run ./ndc-rest-schema update -d ./ndc-rest-schema/command/testdata/auth
+		{
+			Argument: UpdateCommandArguments{
+				Dir: "testdata/auth",
+			},
+			Expected: "testdata/auth/expected.json",
 		},
 	}
 

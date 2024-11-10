@@ -4,8 +4,8 @@
     "servers": [
       {
         "url": {
-          "env": "SERVER_URL",
-          "value": "https://jsonplaceholder.typicode.com"
+          "value": "https://jsonplaceholder.typicode.com",
+          "env": "SERVER_URL"
         }
       }
     ],
@@ -34,7 +34,9 @@
             "name": "id",
             "in": "query",
             "schema": {
-              "type": ["integer"]
+              "type": [
+                "integer"
+              ]
             }
           }
         },
@@ -51,13 +53,14 @@
             "name": "userId",
             "in": "query",
             "schema": {
-              "type": ["integer"]
+              "type": [
+                "integer"
+              ]
             }
           }
         }
       },
       "description": "Get all available albums",
-      "name": "getAlbums",
       "result_type": {
         "element_type": {
           "name": "Album",
@@ -85,13 +88,14 @@
             "name": "id",
             "in": "path",
             "schema": {
-              "type": ["integer"]
+              "type": [
+                "integer"
+              ]
             }
           }
         }
       },
       "description": "Get specific album",
-      "name": "getAlbumsId",
       "result_type": {
         "name": "Album",
         "type": "named"
@@ -116,13 +120,14 @@
             "name": "id",
             "in": "path",
             "schema": {
-              "type": ["integer"]
+              "type": [
+                "integer"
+              ]
             }
           }
         }
       },
       "description": "Get photos for a specific album",
-      "name": "getAlbumsIdPhotos",
       "result_type": {
         "element_type": {
           "name": "Photo",
@@ -150,13 +155,14 @@
             "name": "id",
             "in": "path",
             "schema": {
-              "type": ["integer"]
+              "type": [
+                "integer"
+              ]
             }
           }
         }
       },
       "description": "Get specific comment",
-      "name": "getComment",
       "result_type": {
         "name": "Comment",
         "type": "named"
@@ -184,7 +190,9 @@
             "name": "id",
             "in": "query",
             "schema": {
-              "type": ["integer"]
+              "type": [
+                "integer"
+              ]
             }
           }
         },
@@ -201,13 +209,14 @@
             "name": "postId",
             "in": "query",
             "schema": {
-              "type": ["integer"]
+              "type": [
+                "integer"
+              ]
             }
           }
         }
       },
       "description": "Get all available comments",
-      "name": "getComments",
       "result_type": {
         "element_type": {
           "name": "Comment",
@@ -235,13 +244,14 @@
             "name": "id",
             "in": "path",
             "schema": {
-              "type": ["integer"]
+              "type": [
+                "integer"
+              ]
             }
           }
         }
       },
       "description": "Get specific photo",
-      "name": "getPhoto",
       "result_type": {
         "name": "Photo",
         "type": "named"
@@ -269,7 +279,9 @@
             "name": "albumId",
             "in": "query",
             "schema": {
-              "type": ["integer"]
+              "type": [
+                "integer"
+              ]
             }
           }
         },
@@ -286,13 +298,14 @@
             "name": "id",
             "in": "query",
             "schema": {
-              "type": ["integer"]
+              "type": [
+                "integer"
+              ]
             }
           }
         }
       },
       "description": "Get all available photos",
-      "name": "getPhotos",
       "result_type": {
         "element_type": {
           "name": "Photo",
@@ -320,13 +333,14 @@
             "name": "id",
             "in": "path",
             "schema": {
-              "type": ["integer"]
+              "type": [
+                "integer"
+              ]
             }
           }
         }
       },
       "description": "Get specific post",
-      "name": "getPostById",
       "result_type": {
         "name": "Post",
         "type": "named"
@@ -354,7 +368,9 @@
             "name": "id",
             "in": "query",
             "schema": {
-              "type": ["integer"]
+              "type": [
+                "integer"
+              ]
             }
           }
         },
@@ -371,13 +387,14 @@
             "name": "userId",
             "in": "query",
             "schema": {
-              "type": ["integer"]
+              "type": [
+                "integer"
+              ]
             }
           }
         }
       },
       "description": "Get all available posts",
-      "name": "getPosts",
       "result_type": {
         "element_type": {
           "name": "Post",
@@ -405,13 +422,14 @@
             "name": "id",
             "in": "path",
             "schema": {
-              "type": ["integer"]
+              "type": [
+                "integer"
+              ]
             }
           }
         }
       },
       "description": "Get comments for a specific post",
-      "name": "getPostsIdComments",
       "result_type": {
         "element_type": {
           "name": "Comment",
@@ -430,7 +448,6 @@
       },
       "arguments": {},
       "description": "Get test",
-      "name": "getTest",
       "result_type": {
         "name": "User",
         "type": "named"
@@ -455,13 +472,14 @@
             "name": "id",
             "in": "path",
             "schema": {
-              "type": ["integer"]
+              "type": [
+                "integer"
+              ]
             }
           }
         }
       },
       "description": "Get specific todo",
-      "name": "getTodo",
       "result_type": {
         "name": "Todo",
         "type": "named"
@@ -489,7 +507,9 @@
             "name": "id",
             "in": "query",
             "schema": {
-              "type": ["integer"]
+              "type": [
+                "integer"
+              ]
             }
           }
         },
@@ -506,13 +526,14 @@
             "name": "userId",
             "in": "query",
             "schema": {
-              "type": ["integer"]
+              "type": [
+                "integer"
+              ]
             }
           }
         }
       },
       "description": "Get all available todos",
-      "name": "getTodos",
       "result_type": {
         "element_type": {
           "name": "Todo",
@@ -540,13 +561,14 @@
             "name": "id",
             "in": "path",
             "schema": {
-              "type": ["integer"]
+              "type": [
+                "integer"
+              ]
             }
           }
         }
       },
       "description": "Get specific user",
-      "name": "getUser",
       "result_type": {
         "name": "User",
         "type": "named"
@@ -574,7 +596,9 @@
             "name": "email",
             "in": "query",
             "schema": {
-              "type": ["integer"]
+              "type": [
+                "integer"
+              ]
             }
           }
         },
@@ -591,13 +615,14 @@
             "name": "id",
             "in": "query",
             "schema": {
-              "type": ["integer"]
+              "type": [
+                "integer"
+              ]
             }
           }
         }
       },
       "description": "Get all available users",
-      "name": "getUsers",
       "result_type": {
         "element_type": {
           "name": "User",
@@ -619,7 +644,9 @@
             }
           },
           "rest": {
-            "type": ["integer"],
+            "type": [
+              "integer"
+            ],
             "format": "int64"
           }
         },
@@ -632,7 +659,9 @@
             }
           },
           "rest": {
-            "type": ["string"]
+            "type": [
+              "string"
+            ]
           }
         },
         "userId": {
@@ -644,7 +673,9 @@
             }
           },
           "rest": {
-            "type": ["integer"],
+            "type": [
+              "integer"
+            ],
             "format": "int64"
           }
         }
@@ -661,7 +692,9 @@
             }
           },
           "rest": {
-            "type": ["string"]
+            "type": [
+              "string"
+            ]
           }
         },
         "email": {
@@ -673,7 +706,9 @@
             }
           },
           "rest": {
-            "type": ["string"],
+            "type": [
+              "string"
+            ],
             "format": "email"
           }
         },
@@ -686,7 +721,9 @@
             }
           },
           "rest": {
-            "type": ["integer"],
+            "type": [
+              "integer"
+            ],
             "format": "int64"
           }
         },
@@ -699,7 +736,9 @@
             }
           },
           "rest": {
-            "type": ["string"]
+            "type": [
+              "string"
+            ]
           }
         },
         "postId": {
@@ -711,7 +750,9 @@
             }
           },
           "rest": {
-            "type": ["integer"],
+            "type": [
+              "integer"
+            ],
             "format": "int64"
           }
         }
@@ -728,7 +769,9 @@
             }
           },
           "rest": {
-            "type": ["integer"],
+            "type": [
+              "integer"
+            ],
             "format": "int64"
           }
         },
@@ -741,7 +784,9 @@
             }
           },
           "rest": {
-            "type": ["integer"],
+            "type": [
+              "integer"
+            ],
             "format": "int64"
           }
         },
@@ -754,7 +799,9 @@
             }
           },
           "rest": {
-            "type": ["string"],
+            "type": [
+              "string"
+            ],
             "format": "uri"
           }
         },
@@ -767,7 +814,9 @@
             }
           },
           "rest": {
-            "type": ["string"]
+            "type": [
+              "string"
+            ]
           }
         },
         "url": {
@@ -779,7 +828,9 @@
             }
           },
           "rest": {
-            "type": ["string"],
+            "type": [
+              "string"
+            ],
             "format": "uri"
           }
         }
@@ -796,7 +847,9 @@
             }
           },
           "rest": {
-            "type": ["string"]
+            "type": [
+              "string"
+            ]
           }
         },
         "id": {
@@ -808,7 +861,9 @@
             }
           },
           "rest": {
-            "type": ["integer"],
+            "type": [
+              "integer"
+            ],
             "format": "int64"
           }
         },
@@ -821,7 +876,9 @@
             }
           },
           "rest": {
-            "type": ["string"]
+            "type": [
+              "string"
+            ]
           }
         },
         "userId": {
@@ -833,7 +890,9 @@
             }
           },
           "rest": {
-            "type": ["integer"],
+            "type": [
+              "integer"
+            ],
             "format": "int64"
           }
         }
@@ -850,7 +909,9 @@
             }
           },
           "rest": {
-            "type": ["boolean"]
+            "type": [
+              "boolean"
+            ]
           }
         },
         "id": {
@@ -862,7 +923,9 @@
             }
           },
           "rest": {
-            "type": ["integer"],
+            "type": [
+              "integer"
+            ],
             "format": "int64"
           }
         },
@@ -875,7 +938,9 @@
             }
           },
           "rest": {
-            "type": ["string"]
+            "type": [
+              "string"
+            ]
           }
         },
         "userId": {
@@ -887,7 +952,9 @@
             }
           },
           "rest": {
-            "type": ["integer"],
+            "type": [
+              "integer"
+            ],
             "format": "int64"
           }
         }
@@ -904,7 +971,9 @@
             }
           },
           "rest": {
-            "type": ["object"]
+            "type": [
+              "object"
+            ]
           }
         },
         "company": {
@@ -916,7 +985,9 @@
             }
           },
           "rest": {
-            "type": ["object"]
+            "type": [
+              "object"
+            ]
           }
         },
         "email": {
@@ -928,7 +999,9 @@
             }
           },
           "rest": {
-            "type": ["string"],
+            "type": [
+              "string"
+            ],
             "format": "email"
           }
         },
@@ -941,7 +1014,9 @@
             }
           },
           "rest": {
-            "type": ["integer"],
+            "type": [
+              "integer"
+            ],
             "format": "int64"
           }
         },
@@ -954,7 +1029,9 @@
             }
           },
           "rest": {
-            "type": ["string"]
+            "type": [
+              "string"
+            ]
           }
         },
         "phone": {
@@ -966,7 +1043,9 @@
             }
           },
           "rest": {
-            "type": ["string"]
+            "type": [
+              "string"
+            ]
           }
         },
         "username": {
@@ -978,7 +1057,9 @@
             }
           },
           "rest": {
-            "type": ["string"]
+            "type": [
+              "string"
+            ]
           }
         },
         "website": {
@@ -990,7 +1071,9 @@
             }
           },
           "rest": {
-            "type": ["string"]
+            "type": [
+              "string"
+            ]
           }
         }
       }
@@ -1006,7 +1089,9 @@
             }
           },
           "rest": {
-            "type": ["string"]
+            "type": [
+              "string"
+            ]
           }
         },
         "geo": {
@@ -1018,7 +1103,9 @@
             }
           },
           "rest": {
-            "type": ["object"]
+            "type": [
+              "object"
+            ]
           }
         },
         "street": {
@@ -1030,7 +1117,9 @@
             }
           },
           "rest": {
-            "type": ["string"]
+            "type": [
+              "string"
+            ]
           }
         },
         "suite": {
@@ -1042,7 +1131,9 @@
             }
           },
           "rest": {
-            "type": ["string"]
+            "type": [
+              "string"
+            ]
           }
         },
         "zipcode": {
@@ -1054,7 +1145,9 @@
             }
           },
           "rest": {
-            "type": ["string"]
+            "type": [
+              "string"
+            ]
           }
         }
       }
@@ -1070,7 +1163,9 @@
             }
           },
           "rest": {
-            "type": ["string"]
+            "type": [
+              "string"
+            ]
           }
         },
         "lng": {
@@ -1082,7 +1177,9 @@
             }
           },
           "rest": {
-            "type": ["string"]
+            "type": [
+              "string"
+            ]
           }
         }
       }
@@ -1098,7 +1195,9 @@
             }
           },
           "rest": {
-            "type": ["string"]
+            "type": [
+              "string"
+            ]
           }
         },
         "catchPhrase": {
@@ -1110,7 +1209,9 @@
             }
           },
           "rest": {
-            "type": ["string"]
+            "type": [
+              "string"
+            ]
           }
         },
         "name": {
@@ -1122,7 +1223,9 @@
             }
           },
           "rest": {
-            "type": ["string"]
+            "type": [
+              "string"
+            ]
           }
         }
       }
@@ -1150,13 +1253,14 @@
           "rest": {
             "in": "body",
             "schema": {
-              "type": ["object"]
+              "type": [
+                "object"
+              ]
             }
           }
         }
       },
       "description": "Create a post",
-      "name": "createPost",
       "result_type": {
         "name": "Post",
         "type": "named"
@@ -1181,13 +1285,14 @@
             "name": "id",
             "in": "path",
             "schema": {
-              "type": ["integer"]
+              "type": [
+                "integer"
+              ]
             }
           }
         }
       },
       "description": "Delete specific post",
-      "name": "deletePostById",
       "result_type": {
         "type": "nullable",
         "underlying_type": {
@@ -1217,7 +1322,9 @@
           "rest": {
             "in": "body",
             "schema": {
-              "type": ["object"]
+              "type": [
+                "object"
+              ]
             }
           }
         },
@@ -1231,13 +1338,14 @@
             "name": "id",
             "in": "path",
             "schema": {
-              "type": ["integer"]
+              "type": [
+                "integer"
+              ]
             }
           }
         }
       },
       "description": "patch specific post",
-      "name": "patchPostById",
       "result_type": {
         "name": "Post",
         "type": "named"
@@ -1264,7 +1372,9 @@
           "rest": {
             "in": "body",
             "schema": {
-              "type": ["object"]
+              "type": [
+                "object"
+              ]
             }
           }
         },
@@ -1278,13 +1388,14 @@
             "name": "id",
             "in": "path",
             "schema": {
-              "type": ["integer"]
+              "type": [
+                "integer"
+              ]
             }
           }
         }
       },
       "description": "Update specific post",
-      "name": "updatePostById",
       "result_type": {
         "name": "Post",
         "type": "named"

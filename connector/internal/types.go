@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"regexp"
 
 	rest "github.com/hasura/ndc-rest/ndc-rest-schema/schema"
 	"github.com/hasura/ndc-sdk-go/schema"
@@ -23,6 +24,7 @@ var (
 )
 
 var defaultRetryHTTPStatus = []int{429, 500, 502, 503}
+var sensitiveHeaderRegex = regexp.MustCompile(`auth|key|secret|token`)
 
 // RESTOptions represent execution options for REST requests
 type RESTOptions struct {

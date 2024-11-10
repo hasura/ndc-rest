@@ -39,6 +39,8 @@ files:
 
 The config of each element follows the [config schema](https://github.com/hasura/ndc-rest/ndc-rest-schema/blob/main/config.example.yaml) of `ndc-rest-schema`.
 
+You can add many OpenAPI files into the same connector.
+
 > [!IMPORTANT]
 > Conflicted object and scalar types will be ignored. Only the type of the first file is kept in the schema.
 
@@ -64,29 +66,67 @@ ndc-rest-schema convert -f ./rest/testdata/jsonplaceholder/swagger.json -o ./res
 - `text/*`
 - Upload file content types, e.g.`image/*` from `base64` arguments.
 
-### Environment variable template
+### Authentication
 
-The connector can replaces `{{xxx}}` templates with environment variables. The converter automatically renders variables for API keys and tokens when converting OpenAPI documents. However, you can add your custom variables as well.
+The current version supports API key and Auth token authentication schemes. The configuration is inspired from `securitySchemes` [with env variables](https://github.com/hasura/ndc-rest/ndc-rest-schema#authentication). The connector supports the following authentication strategies:
+
+- API Key
+- Bearer Auth
+- Cookies
+- OAuth 2.0
+
+The configuration automatically generates environment variables for the api key and Bearer token.
+
+For Cookie authentication and OAuth 2.0, you need to enable headers forwarding from the Hasura engine to the connector.
+
+### Header Forwarding
+
+Enable `forwardHeaders` in the configuration file.
+
+```yaml
+# ...
+forwardHeaders:
+  enabled: true
+  argumentField: headers
+```
+
+And configure in the connector link metadata.
+
+```yaml
+kind: DataConnectorLink
+version: v1
+definition:
+  name: my_api
+  # ...
+  argumentPresets:
+    - argument: headers
+      value:
+        httpHeaders:
+          forward:
+            - Cookie
+          additional: {}
+```
+
+See the configuration example in [Hasura docs](https://hasura.io/docs/3.0/recipes/business-logic/http-header-forwarding/#step-2-update-the-metadata-1).
 
 ### Timeout and retry
 
-The global timeout and retry strategy can be configured in the `settings` object.
+The global timeout and retry strategy can be configured in each file:
 
 ```yaml
-settings:
-  timeout: 30
-  retry:
-    times: 2
-    # delay between each retry in milliseconds
-    delay: 1000
-    httpStatus: [429, 500, 502, 503]
+files:
+  - file: swagger.json
+    spec: oas2
+    timeout:
+      value: 30
+    retry:
+      times:
+        value: 1
+      delay:
+        # delay between each retry in milliseconds
+        value: 500
+      httpStatus: [429, 500, 502, 503]
 ```
-
-### Authentication
-
-The current version supports API key and Auth token authentication schemes. The configuration is inspired from `securitySchemes` [with env variables](https://github.com/hasura/ndc-rest/ndc-rest-schema#authentication)
-
-See [this example](rest/testdata/auth/schema.yaml) for more context.
 
 ## Distributed execution
 

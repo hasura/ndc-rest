@@ -1,0 +1,28 @@
+---
+kind: Command
+version: v1
+definition:
+  name: getPhoto
+  outputType: Photo!
+  arguments:
+    - name: id
+      type: Int32!
+      description: The ID of the photo to retrieve
+  source:
+    dataConnectorName: myapi
+    dataConnectorCommand:
+      function: getPhoto
+  graphql:
+    rootFieldName: getPhoto
+    rootFieldKind: Query
+  description: Get specific photo
+
+---
+kind: CommandPermissions
+version: v1
+definition:
+  commandName: getPhoto
+  permissions:
+    - role: admin
+      allowExecution: true
+

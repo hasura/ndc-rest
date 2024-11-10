@@ -1,0 +1,174 @@
+---
+kind: ObjectType
+version: v1
+definition:
+  name: UserAddressGeo
+  fields:
+    - name: lat
+      type: String
+    - name: lng
+      type: String
+  graphql:
+    typeName: UserAddressGeo
+    inputTypeName: UserAddressGeo_input
+  dataConnectorTypeMapping:
+    - dataConnectorName: myapi
+      dataConnectorObjectType: UserAddressGeo
+
+---
+kind: TypePermissions
+version: v1
+definition:
+  typeName: UserAddressGeo
+  permissions:
+    - role: admin
+      output:
+        allowedFields:
+          - lat
+          - lng
+
+---
+kind: ObjectType
+version: v1
+definition:
+  name: UserAddress
+  fields:
+    - name: city
+      type: String
+    - name: geo
+      type: UserAddressGeo
+    - name: street
+      type: String
+    - name: suite
+      type: String
+    - name: zipcode
+      type: String
+  graphql:
+    typeName: UserAddress
+    inputTypeName: UserAddress_input
+  dataConnectorTypeMapping:
+    - dataConnectorName: myapi
+      dataConnectorObjectType: UserAddress
+
+---
+kind: TypePermissions
+version: v1
+definition:
+  typeName: UserAddress
+  permissions:
+    - role: admin
+      output:
+        allowedFields:
+          - city
+          - geo
+          - street
+          - suite
+          - zipcode
+
+---
+kind: ObjectType
+version: v1
+definition:
+  name: UserCompany
+  fields:
+    - name: bs
+      type: String
+    - name: catchPhrase
+      type: String
+    - name: name
+      type: String
+  graphql:
+    typeName: UserCompany
+    inputTypeName: UserCompany_input
+  dataConnectorTypeMapping:
+    - dataConnectorName: myapi
+      dataConnectorObjectType: UserCompany
+
+---
+kind: TypePermissions
+version: v1
+definition:
+  typeName: UserCompany
+  permissions:
+    - role: admin
+      output:
+        allowedFields:
+          - bs
+          - catchPhrase
+          - name
+
+---
+kind: ObjectType
+version: v1
+definition:
+  name: User
+  fields:
+    - name: address
+      type: UserAddress
+    - name: company
+      type: UserCompany
+    - name: email
+      type: String
+    - name: id
+      type: Int64
+    - name: name
+      type: String
+    - name: phone
+      type: String
+    - name: username
+      type: String
+    - name: website
+      type: String
+  graphql:
+    typeName: User
+    inputTypeName: User_input
+  dataConnectorTypeMapping:
+    - dataConnectorName: myapi
+      dataConnectorObjectType: User
+
+---
+kind: TypePermissions
+version: v1
+definition:
+  typeName: User
+  permissions:
+    - role: admin
+      output:
+        allowedFields:
+          - address
+          - company
+          - email
+          - id
+          - name
+          - phone
+          - username
+          - website
+
+---
+kind: Command
+version: v1
+definition:
+  name: getUser
+  outputType: User!
+  arguments:
+    - name: id
+      type: Int32!
+      description: The ID of the user to retrieve
+  source:
+    dataConnectorName: myapi
+    dataConnectorCommand:
+      function: getUser
+  graphql:
+    rootFieldName: getUser
+    rootFieldKind: Query
+  description: Get specific user
+
+---
+kind: CommandPermissions
+version: v1
+definition:
+  commandName: getUser
+  permissions:
+    - role: admin
+      allowExecution: true
+

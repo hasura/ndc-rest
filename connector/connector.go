@@ -42,8 +42,11 @@ func (c *RESTConnector) ParseConfiguration(ctx context.Context, configurationDir
 			Query: schema.QueryCapabilities{
 				Variables:    schema.LeafCapability{},
 				NestedFields: schema.NestedFieldCapabilities{},
+				Explain:      schema.LeafCapability{},
 			},
-			Mutation: schema.MutationCapabilities{},
+			Mutation: schema.MutationCapabilities{
+				Explain: schema.LeafCapability{},
+			},
 		},
 	}
 	rawCapabilities, err := json.Marshal(restCapabilities)

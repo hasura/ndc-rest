@@ -18,13 +18,14 @@ import (
 
 // RetryableRequest wraps the raw request with retryable
 type RetryableRequest struct {
-	RawRequest  *rest.Request
-	URL         string
-	ServerID    string
-	ContentType string
-	Headers     http.Header
-	Body        io.ReadSeeker
-	Runtime     rest.RuntimeSettings
+	RawRequest    *rest.Request
+	URL           url.URL
+	ServerID      string
+	ContentType   string
+	ContentLength int64
+	Headers       http.Header
+	Body          io.ReadSeeker
+	Runtime       rest.RuntimeSettings
 }
 
 // CreateRequest creates an HTTP request with body copied
@@ -40,10 +41,12 @@ func (r *RetryableRequest) CreateRequest(ctx context.Context) (*http.Request, co
 	if timeout == 0 {
 		timeout = defaultTimeoutSeconds
 	}
+
 	ctxR, cancel := context.WithTimeout(ctx, time.Duration(timeout)*time.Second)
-	request, err := http.NewRequestWithContext(ctxR, strings.ToUpper(r.RawRequest.Method), r.URL, r.Body)
+	request, err := http.NewRequestWithContext(ctxR, strings.ToUpper(r.RawRequest.Method), r.URL.String(), r.Body)
 	if err != nil {
 		cancel()
+
 		return nil, nil, err
 	}
 	for key, header := range r.Headers {
@@ -54,15 +57,15 @@ func (r *RetryableRequest) CreateRequest(ctx context.Context) (*http.Request, co
 	return request, cancel, nil
 }
 
-func getHostFromServers(servers []rest.ServerConfig, serverIDs []string) (string, string) {
-	var results []string
+func getBaseURLFromServers(servers []rest.ServerConfig, serverIDs []string) (*url.URL, string) {
+	var results []url.URL
 	var selectedServerIDs []string
 	for _, server := range servers {
 		if len(serverIDs) > 0 && !slices.Contains(serverIDs, server.ID) {
 			continue
 		}
-		hostPtr := server.GetURL()
-		if hostPtr != "" {
+		hostPtr, err := server.GetURL()
+		if err == nil {
 			results = append(results, hostPtr)
 			selectedServerIDs = append(selectedServerIDs, server.ID)
 		}
@@ -70,24 +73,28 @@ func getHostFromServers(servers []rest.ServerConfig, serverIDs []string) (string
 
 	switch len(results) {
 	case 0:
-		return "", ""
+		return nil, ""
 	case 1:
-		return results[0], selectedServerIDs[0]
+		result := results[0]
+		return &result, selectedServerIDs[0]
 	default:
 		index := rand.IntN(len(results) - 1)
-		return results[index], selectedServerIDs[index]
+		host := results[index]
+		return &host, selectedServerIDs[index]
 	}
 }
 
 // BuildDistributedRequestsWithOptions builds distributed requests with options
 func BuildDistributedRequestsWithOptions(request *RetryableRequest, restOptions *RESTOptions) ([]RetryableRequest, error) {
-	if strings.HasPrefix(request.URL, "http") {
+	if strings.HasPrefix(request.URL.Scheme, "http") {
 		return []RetryableRequest{*request}, nil
 	}
 
 	if !restOptions.Distributed || len(restOptions.Settings.Servers) == 1 {
-		host, serverID := getHostFromServers(restOptions.Settings.Servers, restOptions.Servers)
-		request.URL = host + request.URL
+		baseURL, serverID := getBaseURLFromServers(restOptions.Settings.Servers, restOptions.Servers)
+		request.URL.Scheme = baseURL.Scheme
+		request.URL.Host = baseURL.Host
+		request.URL.Path = baseURL.Path + request.URL.Path
 		request.ServerID = serverID
 		if err := request.applySettings(restOptions.Settings, restOptions.Explain); err != nil {
 			return nil, err
@@ -112,13 +119,15 @@ func BuildDistributedRequestsWithOptions(request *RetryableRequest, restOptions 
 		}
 	}
 	for _, serverID := range serverIDs {
-		host, serverID := getHostFromServers(restOptions.Settings.Servers, []string{serverID})
-		if host == "" {
+		baseURL, serverID := getBaseURLFromServers(restOptions.Settings.Servers, []string{serverID})
+		if baseURL == nil {
 			continue
 		}
-
+		baseURL.Path += request.URL.Path
+		baseURL.RawQuery = request.URL.RawQuery
+		baseURL.Fragment = request.URL.Fragment
 		req := RetryableRequest{
-			URL:         host + request.URL,
+			URL:         *baseURL,
 			ServerID:    serverID,
 			RawRequest:  request.RawRequest,
 			ContentType: request.ContentType,
@@ -215,15 +224,11 @@ func (req *RetryableRequest) applySecurity(serverConfig *rest.ServerConfig, isEx
 		case rest.APIKeyInQuery:
 			value := securityScheme.GetValue()
 			if value != "" {
-				endpoint, err := url.Parse(req.URL)
-				if err != nil {
-					return err
-				}
-
+				endpoint := req.URL
 				q := endpoint.Query()
 				q.Add(securityScheme.Name, eitherMaskSecret(value, isExplain))
 				endpoint.RawQuery = q.Encode()
-				req.URL = endpoint.String()
+				req.URL = endpoint
 			}
 		case rest.APIKeyInCookie:
 			// Cookie header should be forwarded from Hasura engine
