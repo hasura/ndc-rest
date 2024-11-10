@@ -152,7 +152,7 @@ func (client *HTTPClient) sendParallel(ctx context.Context, requests []Retryable
 
 // execute a request to the remote server with retries
 func (client *HTTPClient) sendSingle(ctx context.Context, request *RetryableRequest, selection schema.NestedField, resultType schema.Type, serverID string, mode string) (any, http.Header, *schema.ConnectorError) {
-	ctx, span := client.tracer.Start(ctx, fmt.Sprintf("Send Request to Server %s", serverID))
+	ctx, span := client.tracer.Start(ctx, "Send Request to Server "+serverID)
 	defer span.End()
 
 	span.SetAttributes(attribute.String("execution.mode", mode))
