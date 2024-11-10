@@ -1,4 +1,4 @@
-# yaml-language-server: $schema=https://raw.githubusercontent.com/hasura/ndc-rest-schema/main/jsonschema/configuration.schema.json
+# yaml-language-server: $schema=https://raw.githubusercontent.com/hasura/ndc-rest/refs/heads/main/ndc-rest-schema/jsonschema/configuration.schema.json
 output: schema.output.json
 strict: true
 forwardHeaders:
