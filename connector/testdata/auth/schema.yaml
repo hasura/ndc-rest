@@ -1,16 +1,19 @@
 ---
 settings:
   servers:
-    - url: "{{PET_STORE_URL}}"
+    - url:
+        env: PET_STORE_URL
   securitySchemes:
     api_key:
       type: apiKey
-      value: "{{PET_STORE_API_KEY}}"
+      value:
+        env: PET_STORE_API_KEY
       in: header
       name: api_key
     bearer:
       type: http
-      value: "{{PET_STORE_BEARER_TOKEN}}"
+      value:
+        env: PET_STORE_BEARER_TOKEN
       scheme: bearer
     petstore_auth:
       type: oauth2
@@ -20,11 +23,6 @@ settings:
           scopes:
             read:pets: read your pets
             write:pets: modify pets in your account
-  timeout: 10
-  retry:
-    times: 1
-    delay: 500
-    httpStatus: [429, 500, 501, 502]
   security:
     - api_key: []
   version: 1.0.18
@@ -92,19 +90,20 @@ procedures:
       url: "/pet"
       method: post
       headers:
-        Content-Type: application/json
+        Content-Type:
+          value: application/json
       security:
         - api_key: []
       requestBody:
         contentType: application/json
-        schema:
-          type": Pet
     arguments:
       body:
         description: Request body of /pet
         type:
           name: Pet
           type: named
+        rest:
+          in: body
     description: Add a new pet to the store
     name: addPet
     result_type:
@@ -116,8 +115,6 @@ procedures:
       method: post
       requestBody:
         contentType: application/json
-        schema:
-          type: CreateModelRequest
       response:
         contentType: application/x-ndjson
     arguments:

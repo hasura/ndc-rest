@@ -1,0 +1,31 @@
+---
+kind: Command
+version: v1
+definition:
+  name: patchPostById
+  outputType: Post!
+  arguments:
+    - name: body
+      type: Post!
+      description: Post object that needs to be updated
+    - name: id
+      type: Int32!
+      description: The ID of the post to retrieve
+  source:
+    dataConnectorName: myapi
+    dataConnectorCommand:
+      procedure: patchPostById
+  graphql:
+    rootFieldName: patchPostById
+    rootFieldKind: Mutation
+  description: patch specific post
+
+---
+kind: CommandPermissions
+version: v1
+definition:
+  commandName: patchPostById
+  permissions:
+    - role: admin
+      allowExecution: true
+

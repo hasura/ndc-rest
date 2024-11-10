@@ -144,7 +144,14 @@ func TestRESTConnector_authentication(t *testing.T) {
 		assertHTTPResponse(t, res, http.StatusOK, schema.QueryResponse{
 			{
 				Rows: []map[string]any{
-					{"__value": map[string]any{}},
+					{
+						"__value": map[string]any{
+							"headers": map[string]any{
+								"Content-Type": string("application/json"),
+							},
+							"response": map[string]any{},
+						},
+					},
 				},
 			},
 		})
@@ -182,7 +189,12 @@ func TestRESTConnector_authentication(t *testing.T) {
 		assert.NilError(t, err)
 		assertHTTPResponse(t, res, http.StatusOK, schema.MutationResponse{
 			OperationResults: []schema.MutationOperationResults{
-				schema.NewProcedureResult(map[string]any{}).Encode(),
+				schema.NewProcedureResult(map[string]any{
+					"headers": map[string]any{
+						"Content-Type": string("application/json"),
+					},
+					"response": map[string]any{},
+				}).Encode(),
 			},
 		})
 	})
@@ -198,6 +210,12 @@ func TestRESTConnector_authentication(t *testing.T) {
 			}
 		},
 		"arguments": {
+			"headers": {
+				"type": "literal",
+				"value": {
+					"X-Custom-Header": "This is a test"
+				}
+			},
 			"status": {
 				"type": "literal",
 				"value": "available"
@@ -212,7 +230,7 @@ func TestRESTConnector_authentication(t *testing.T) {
 		assertHTTPResponse(t, res, http.StatusOK, schema.ExplainResponse{
 			Details: schema.ExplainResponseDetails{
 				"url":     server.URL + "/pet/findByStatus?status=available",
-				"headers": `{"Authorization":["Bearer ran*******(19)"]}`,
+				"headers": `{"Authorization":["Bearer ran*******(19)"],"X-Custom-Header":["This is a test"]}`,
 			},
 		})
 	})
@@ -224,7 +242,12 @@ func TestRESTConnector_authentication(t *testing.T) {
 			assertHTTPResponse(t, res, http.StatusOK, schema.QueryResponse{
 				{
 					Rows: []map[string]any{
-						{"__value": map[string]any{}},
+						{
+							"__value": map[string]any{
+								"headers":  map[string]any{"Content-Type": string("application/json")},
+								"response": map[string]any{},
+							},
+						},
 					},
 				},
 			})
@@ -287,9 +310,12 @@ func TestRESTConnector_authentication(t *testing.T) {
 		assert.NilError(t, err)
 		assertHTTPResponse(t, res, http.StatusOK, schema.MutationResponse{
 			OperationResults: []schema.MutationOperationResults{
-				schema.NewProcedureResult([]any{
-					map[string]any{"completed": float64(1), "status": string("OK")},
-					map[string]any{"completed": float64(0), "status": string("FAILED")},
+				schema.NewProcedureResult(map[string]any{
+					"headers": map[string]any{"Content-Type": string("application/x-ndjson")},
+					"response": []any{
+						map[string]any{"completed": float64(1), "status": string("OK")},
+						map[string]any{"completed": float64(0), "status": string("FAILED")},
+					},
 				}).Encode(),
 			},
 		})
@@ -303,46 +329,6 @@ func TestRESTConnector_distribution(t *testing.T) {
 
 	t.Setenv("PET_STORE_API_KEY", apiKey)
 	t.Setenv("PET_STORE_BEARER_TOKEN", bearerToken)
-	rc := NewRESTConnector()
-	connServer, err := connector.NewServer(rc, &connector.ServerOptions{
-		Configuration: "testdata/patch",
-	}, connector.WithoutRecovery())
-	assert.NilError(t, err)
-
-	timeout, err := rc.metadata[0].Settings.Servers[0].Timeout.Value()
-	assert.NilError(t, err)
-	assert.Equal(t, int64(30), *timeout)
-
-	retryTimes, err := rc.metadata[0].Settings.Servers[0].Retry.Times.Value()
-	assert.NilError(t, err)
-	assert.Equal(t, int64(2), *retryTimes)
-
-	retryDelay, err := rc.metadata[0].Settings.Servers[0].Retry.Delay.Value()
-	assert.NilError(t, err)
-	assert.Equal(t, int64(1000), *retryDelay)
-
-	retryStatus, err := rc.metadata[0].Settings.Servers[0].Retry.HTTPStatus.Value()
-	assert.NilError(t, err)
-	assert.DeepEqual(t, []int64{429, 500}, retryStatus)
-
-	timeout1, err := rc.metadata[0].Settings.Servers[1].Timeout.Value()
-	assert.NilError(t, err)
-	assert.Equal(t, int64(10), *timeout1)
-
-	retryTimes1, err := rc.metadata[0].Settings.Servers[1].Retry.Times.Value()
-	assert.NilError(t, err)
-	assert.Equal(t, int64(1), *retryTimes1)
-
-	retryDelay1, err := rc.metadata[0].Settings.Servers[1].Retry.Delay.Value()
-	assert.NilError(t, err)
-	assert.Equal(t, int64(500), *retryDelay1)
-
-	retryStatus1, err := rc.metadata[0].Settings.Servers[1].Retry.HTTPStatus.Value()
-	assert.NilError(t, err)
-	assert.DeepEqual(t, []int64{429, 500, 501, 502}, retryStatus1)
-
-	testServer := connServer.BuildTestServer()
-	defer testServer.Close()
 
 	t.Run("distributed_sequence", func(t *testing.T) {
 		mock := mockDistributedServer{}
@@ -351,6 +337,21 @@ func TestRESTConnector_distribution(t *testing.T) {
 
 		t.Setenv("PET_STORE_DOG_URL", fmt.Sprintf("%s/dog", server.URL))
 		t.Setenv("PET_STORE_CAT_URL", fmt.Sprintf("%s/cat", server.URL))
+
+		rc := NewRESTConnector()
+		connServer, err := connector.NewServer(rc, &connector.ServerOptions{
+			Configuration: "testdata/patch",
+		}, connector.WithoutRecovery())
+		assert.NilError(t, err)
+
+		testServer := connServer.BuildTestServer()
+		defer testServer.Close()
+
+		assert.Equal(t, uint(30), rc.metadata[0].Runtime.Timeout)
+		assert.Equal(t, uint(2), rc.metadata[0].Runtime.Retry.Times)
+		assert.Equal(t, uint(1000), rc.metadata[0].Runtime.Retry.Delay)
+		assert.Equal(t, uint(1000), rc.metadata[0].Runtime.Retry.Delay)
+		assert.DeepEqual(t, []int{429, 500}, rc.metadata[0].Runtime.Retry.HTTPStatus)
 
 		reqBody := []byte(`{
 			"collection": "findPetsDistributed",
@@ -403,6 +404,14 @@ func TestRESTConnector_distribution(t *testing.T) {
 
 		t.Setenv("PET_STORE_DOG_URL", fmt.Sprintf("%s/dog", server.URL))
 		t.Setenv("PET_STORE_CAT_URL", fmt.Sprintf("%s/cat", server.URL))
+		rc := NewRESTConnector()
+		connServer, err := connector.NewServer(rc, &connector.ServerOptions{
+			Configuration: "testdata/patch",
+		}, connector.WithoutRecovery())
+		assert.NilError(t, err)
+
+		testServer := connServer.BuildTestServer()
+		defer testServer.Close()
 
 		reqBody := []byte(`{
 			"operations": [
@@ -457,6 +466,15 @@ func TestRESTConnector_distribution(t *testing.T) {
 		t.Setenv("PET_STORE_DOG_URL", fmt.Sprintf("%s/dog", server.URL))
 		t.Setenv("PET_STORE_CAT_URL", fmt.Sprintf("%s/cat", server.URL))
 
+		rc := NewRESTConnector()
+		connServer, err := connector.NewServer(rc, &connector.ServerOptions{
+			Configuration: "testdata/patch",
+		}, connector.WithoutRecovery())
+		assert.NilError(t, err)
+
+		testServer := connServer.BuildTestServer()
+		defer testServer.Close()
+
 		reqBody := []byte(`{
 			"collection": "findPetsDistributed",
 			"query": {
@@ -504,19 +522,19 @@ func TestRESTConnector_distribution(t *testing.T) {
 }
 
 func TestRESTConnector_multiSchemas(t *testing.T) {
-	connServer, err := connector.NewServer(NewRESTConnector(), &connector.ServerOptions{
-		Configuration: "testdata/multi-schemas",
-	}, connector.WithoutRecovery())
-	assert.NilError(t, err)
-	testServer := connServer.BuildTestServer()
-	defer testServer.Close()
-
 	mock := mockMultiSchemaServer{}
 	server := mock.createServer()
 	defer server.Close()
 
 	t.Setenv("CAT_STORE_URL", fmt.Sprintf("%s/cat", server.URL))
 	t.Setenv("DOG_STORE_URL", fmt.Sprintf("%s/dog", server.URL))
+
+	connServer, err := connector.NewServer(NewRESTConnector(), &connector.ServerOptions{
+		Configuration: "testdata/multi-schemas",
+	}, connector.WithoutRecovery())
+	assert.NilError(t, err)
+	testServer := connServer.BuildTestServer()
+	defer testServer.Close()
 
 	reqBody := []byte(`{
 			"collection": "findCats",
@@ -608,6 +626,11 @@ func createMockServer(t *testing.T, apiKey string, bearerToken string) *httptest
 				t.Fatalf("invalid bearer token, expected %s, got %s", bearerToken, r.Header.Get("Authorization"))
 				return
 			}
+			if r.Header.Get("X-Custom-Header") != "This is a test" {
+				t.Fatalf("invalid X-Custom-Header, expected `This is a test`, got %s", r.Header.Get("X-Custom-Header"))
+				return
+			}
+
 			if r.URL.Query().Encode() != "status=available" {
 				t.Fatalf("expected query param: status=available, got: %s", r.URL.Query().Encode())
 				return

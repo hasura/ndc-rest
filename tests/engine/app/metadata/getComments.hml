@@ -1,0 +1,31 @@
+---
+kind: Command
+version: v1
+definition:
+  name: getComments
+  outputType: "[Comment!]!"
+  arguments:
+    - name: id
+      type: Int32
+      description: Filter by comment ID
+    - name: postId
+      type: Int32
+      description: Filter by post ID
+  source:
+    dataConnectorName: myapi
+    dataConnectorCommand:
+      function: getComments
+  graphql:
+    rootFieldName: getComments
+    rootFieldKind: Query
+  description: Get all available comments
+
+---
+kind: CommandPermissions
+version: v1
+definition:
+  commandName: getComments
+  permissions:
+    - role: admin
+      allowExecution: true
+

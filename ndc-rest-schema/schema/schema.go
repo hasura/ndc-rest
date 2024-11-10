@@ -94,34 +94,38 @@ type Response struct {
 	ContentType string `json:"contentType" mapstructure:"contentType" yaml:"contentType"`
 }
 
+// RuntimeSettings contain runtime settings for a server
+type RuntimeSettings struct { // configure the request timeout in seconds, default 30s
+	Timeout uint        `json:"timeout,omitempty"     mapstructure:"timeout"     yaml:"timeout,omitempty"`
+	Retry   RetryPolicy `json:"retry,omitempty"       mapstructure:"retry"       yaml:"retry,omitempty"`
+}
+
 // Request represents the HTTP request information of the webhook
 type Request struct {
-	URL      string               `json:"url,omitempty"      mapstructure:"url"                                              yaml:"url,omitempty"`
-	Method   string               `json:"method,omitempty"   jsonschema:"enum=get,enum=post,enum=put,enum=patch,enum=delete" mapstructure:"method"     yaml:"method,omitempty"`
-	Type     RequestType          `json:"type,omitempty"     mapstructure:"type"                                             yaml:"type,omitempty"`
-	Headers  map[string]EnvString `json:"headers,omitempty"  mapstructure:"headers"                                          yaml:"headers,omitempty"`
-	Security AuthSecurities       `json:"security,omitempty" mapstructure:"security"                                         yaml:"security,omitempty"`
-	// configure the request timeout in seconds, default 30s
-	Timeout     uint           `json:"timeout,omitempty"     mapstructure:"timeout"     yaml:"timeout,omitempty"`
-	Servers     []ServerConfig `json:"servers,omitempty"     mapstructure:"servers"     yaml:"servers,omitempty"`
-	RequestBody *RequestBody   `json:"requestBody,omitempty" mapstructure:"requestBody" yaml:"requestBody,omitempty"`
-	Response    Response       `json:"response"              mapstructure:"response"    yaml:"response"`
-	Retry       *RetryPolicy   `json:"retry,omitempty"       mapstructure:"retry"       yaml:"retry,omitempty"`
+	URL         string                     `json:"url,omitempty"      mapstructure:"url"                                              yaml:"url,omitempty"`
+	Method      string                     `json:"method,omitempty"   jsonschema:"enum=get,enum=post,enum=put,enum=patch,enum=delete" mapstructure:"method"     yaml:"method,omitempty"`
+	Type        RequestType                `json:"type,omitempty"     mapstructure:"type"                                             yaml:"type,omitempty"`
+	Headers     map[string]utils.EnvString `json:"headers,omitempty"  mapstructure:"headers"                                          yaml:"headers,omitempty"`
+	Security    AuthSecurities             `json:"security,omitempty" mapstructure:"security"                                         yaml:"security,omitempty"`
+	Servers     []ServerConfig             `json:"servers,omitempty"     mapstructure:"servers"     yaml:"servers,omitempty"`
+	RequestBody *RequestBody               `json:"requestBody,omitempty" mapstructure:"requestBody" yaml:"requestBody,omitempty"`
+	Response    Response                   `json:"response"              mapstructure:"response"    yaml:"response"`
+
+	*RuntimeSettings `yaml:",inline"`
 }
 
 // Clone copies this instance to a new one
 func (r Request) Clone() *Request {
 	return &Request{
-		URL:         r.URL,
-		Method:      r.Method,
-		Type:        r.Type,
-		Headers:     r.Headers,
-		Timeout:     r.Timeout,
-		Retry:       r.Retry,
-		Security:    r.Security,
-		Servers:     r.Servers,
-		RequestBody: r.RequestBody,
-		Response:    r.Response,
+		URL:             r.URL,
+		Method:          r.Method,
+		Type:            r.Type,
+		Headers:         r.Headers,
+		Security:        r.Security,
+		Servers:         r.Servers,
+		RequestBody:     r.RequestBody,
+		Response:        r.Response,
+		RuntimeSettings: r.RuntimeSettings,
 	}
 }
 

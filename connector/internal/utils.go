@@ -2,9 +2,12 @@ package internal
 
 import (
 	"fmt"
+	"net/http"
 	"strings"
 
 	"github.com/hasura/ndc-sdk-go/schema"
+	"go.opentelemetry.io/otel/attribute"
+	"go.opentelemetry.io/otel/trace"
 )
 
 // UnwrapNullableType unwraps the underlying type of the nullable type
@@ -41,5 +44,21 @@ func MaskString(input string) string {
 		return input[0:1] + strings.Repeat("*", inputLength-1)
 	default:
 		return input[0:3] + strings.Repeat("*", 7) + fmt.Sprintf("(%d)", inputLength)
+	}
+}
+
+func setHeaderAttributes(span trace.Span, prefix string, httpHeaders http.Header) {
+	for key, headers := range httpHeaders {
+		if len(headers) == 0 {
+			continue
+		}
+		values := headers
+		if sensitiveHeaderRegex.MatchString(strings.ToLower(key)) {
+			values = make([]string, len(headers))
+			for i, header := range headers {
+				values[i] = MaskString(header)
+			}
+		}
+		span.SetAttributes(attribute.StringSlice(prefix+strings.ToLower(key), values))
 	}
 }

@@ -4,25 +4,26 @@
     "servers": [
       {
         "id": "foo",
-        "url": "{{FOO_SERVER_URL:-https://onesignal.com/api/v1}}"
+        "url": {
+          "env": "FOO_SERVER_URL",
+          "value": "https://onesignal.com/api/v1"
+        }
       }
     ],
-    "timeout": "{{TIMEOUT}}",
-    "retry": {
-      "times": "{{RETRY_TIMES}}",
-      "delay": "{{RETRY_DELAY}}",
-      "httpStatus": "{{RETRY_HTTP_STATUS}}"
-    },
     "securitySchemes": {
       "app_key": {
         "type": "http",
-        "value": "{{APP_KEY_TOKEN}}",
+        "value": {
+          "env": "APP_KEY_TOKEN"
+        },
         "header": "Authorization",
         "scheme": "bearer"
       },
       "user_key": {
         "type": "http",
-        "value": "{{USER_KEY_TOKEN}}",
+        "value": {
+          "env": "USER_KEY_TOKEN"
+        },
         "header": "Authorization",
         "scheme": "bearer"
       }
@@ -30,8 +31,8 @@
     "version": "1.2.2"
   },
   "collections": [],
-  "procedures": [
-    {
+  "procedures": {
+    "create_notification": {
       "request": {
         "url": "/notifications",
         "method": "post",
@@ -56,6 +57,9 @@
           "type": {
             "name": "NotificationInput",
             "type": "named"
+          },
+          "rest": {
+            "in": "body"
           }
         }
       },
@@ -66,7 +70,7 @@
         "type": "named"
       }
     },
-    {
+    "cancel_notification": {
       "request": {
         "url": "/notifications/{notification_id}",
         "method": "delete",
@@ -100,12 +104,26 @@
           "type": {
             "name": "String",
             "type": "named"
+          },
+          "rest": {
+            "name": "app_id",
+            "in": "query",
+            "schema": {
+              "type": ["string"]
+            }
           }
         },
         "notification_id": {
           "type": {
             "name": "String",
             "type": "named"
+          },
+          "rest": {
+            "name": "notification_id",
+            "in": "path",
+            "schema": {
+              "type": ["string"]
+            }
           }
         }
       },
@@ -116,7 +134,7 @@
         "type": "named"
       }
     }
-  ],
+  },
   "scalar_types": {
     "Boolean": {
       "aggregate_functions": {},

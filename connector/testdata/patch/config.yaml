@@ -2,6 +2,14 @@ files:
   - file: ../auth/schema.yaml
     spec: ndc
     distributed: true
+    timeout:
+      value: 30
+    retry:
+      times:
+        value: 2
+      delay:
+        value: 1000
+      httpStatus: [429, 500]
     patchBefore:
       - path: patch-before.yaml
         strategy: merge

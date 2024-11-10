@@ -3,15 +3,12 @@
   "settings": {
     "servers": [
       {
-        "url": "{{SERVER_URL:-https://jsonplaceholder.typicode.com}}"
+        "url": {
+          "env": "SERVER_URL",
+          "value": "https://jsonplaceholder.typicode.com"
+        }
       }
     ],
-    "timeout": "{{TIMEOUT}}",
-    "retry": {
-      "times": "{{RETRY_TIMES}}",
-      "delay": "{{RETRY_DELAY}}",
-      "httpStatus": "{{RETRY_HTTP_STATUS}}"
-    },
     "version": "1.0.0"
   },
   "functions": {
@@ -37,9 +34,7 @@
             "name": "id",
             "in": "query",
             "schema": {
-              "type": [
-                "integer"
-              ]
+              "type": ["integer"]
             }
           }
         },
@@ -56,9 +51,7 @@
             "name": "userId",
             "in": "query",
             "schema": {
-              "type": [
-                "integer"
-              ]
+              "type": ["integer"]
             }
           }
         }
@@ -86,9 +79,7 @@
             }
           },
           "rest": {
-            "type": [
-              "string"
-            ]
+            "type": ["string"]
           }
         },
         "id": {
@@ -100,9 +91,7 @@
             }
           },
           "rest": {
-            "type": [
-              "integer"
-            ],
+            "type": ["integer"],
             "format": "int64"
           }
         },
@@ -115,9 +104,7 @@
             }
           },
           "rest": {
-            "type": [
-              "string"
-            ]
+            "type": ["string"]
           }
         },
         "userId": {
@@ -129,9 +116,7 @@
             }
           },
           "rest": {
-            "type": [
-              "integer"
-            ],
+            "type": ["integer"],
             "format": "int64"
           }
         }
@@ -160,9 +145,7 @@
           "rest": {
             "in": "body",
             "schema": {
-              "type": [
-                "object"
-              ]
+              "type": ["object"]
             }
           }
         }

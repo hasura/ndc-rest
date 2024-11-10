@@ -92,7 +92,8 @@ The URL can be a relative path or an absolute URL. If the URL is relative, there
 ```yaml
 settings:
   servers:
-    - url: http://petstore.swagger.io/v1
+    - url:
+        value: http://petstore.swagger.io/v1
 ```
 
 `parameters` include the list of URL and query parameters so the connector can replace values from request arguments.
@@ -121,14 +122,17 @@ Environment variable template which is in `{{CONSTANT_CASE}}` or `{{CONSTANT_CAS
 ```yaml
 settings:
   servers:
-    - url: "{{PET_STORE_SERVER_URL:-https://petstore3.swagger.io/api/v3}}"
+    - url:
+        env: PET_STORE_SERVER_URL
+        value: https://petstore3.swagger.io/api/v3
   timeout: 30
   headers:
     foo: bar
   securitySchemes:
     api_key:
       type: apiKey
-      value: "{{PET_STORE_API_KEY}}"
+      value:
+        env: PET_STORE_API_KEY
       in: header
       name: api_key
     petstore_auth:
@@ -257,7 +261,9 @@ There is an extra `value` field with the environment variable template to be rep
   "securitySchemes": {
     "api_key": {
       "type": "apiKey",
-      "value": "{{API_KEY}}", // the constant case of api_key
+      "value": {
+        "env": "API_KEY" // the constant case of api_key
+      },
       "in": "header",
       "name": "api_key"
     }
@@ -277,7 +283,9 @@ This is the general authentication for [Basic](https://swagger.io/docs/specifica
     "bearer_auth": {
       "type": "http",
       "scheme": "bearer",
-      "value": "{{BEARER_AUTH_TOKEN}}", // the constant case of bearer_auth + _TOKEN suffix
+      "value": {
+        "env": "BEARER_AUTH_TOKEN" // the constant case of bearer_auth + _TOKEN suffix
+      },
       "header": "Authentication"
     }
   }

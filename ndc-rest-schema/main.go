@@ -8,15 +8,17 @@ import (
 
 	"github.com/alecthomas/kong"
 	"github.com/hasura/ndc-rest/ndc-rest-schema/command"
+	"github.com/hasura/ndc-rest/ndc-rest-schema/configuration"
 	"github.com/hasura/ndc-rest/ndc-rest-schema/version"
 	"github.com/lmittmann/tint"
 )
 
 var cli struct {
-	LogLevel  string                            `default:"info" enum:"debug,info,warn,error"                                                                                    help:"Log level."`
-	Convert   command.ConvertCommandArguments   `cmd:""         help:"Convert API spec to NDC schema. For example:\n ndc-rest-schema convert -f petstore.yaml -o petstore.json"`
-	Json2Yaml command.Json2YamlCommandArguments `cmd:""         help:"Convert JSON file to YAML. For example:\n ndc-rest-schema json2yaml -f petstore.json -o petstore.yaml"    name:"json2yaml"`
-	Version   struct{}                          `cmd:""         help:"Print the CLI version."`
+	LogLevel  string                                `default:"info" enum:"debug,info,warn,error"                                                                                    help:"Log level."`
+	Update    command.UpdateCommandArguments        `cmd:""         help:"Update REST connector configuration"`
+	Convert   configuration.ConvertCommandArguments `cmd:""         help:"Convert API spec to NDC schema. For example:\n ndc-rest-schema convert -f petstore.yaml -o petstore.json"`
+	Json2Yaml command.Json2YamlCommandArguments     `cmd:""         help:"Convert JSON file to YAML. For example:\n ndc-rest-schema json2yaml -f petstore.json -o petstore.yaml"    name:"json2yaml"`
+	Version   struct{}                              `cmd:""         help:"Print the CLI version."`
 }
 
 func main() {
@@ -29,6 +31,8 @@ func main() {
 	}
 
 	switch cmd.Command() {
+	case "update":
+		err = command.UpdateConfiguration(&cli.Update, logger)
 	case "convert":
 		err = command.CommandConvertToNDCSchema(&cli.Convert, logger)
 	case "json2yaml":

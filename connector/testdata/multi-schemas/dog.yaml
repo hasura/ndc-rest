@@ -1,8 +1,10 @@
 settings:
   servers:
-    - url: "{{DOG_STORE_URL}}"
+    - url:
+        env: DOG_STORE_URL
       headers:
-        pet: dog
+        pet:
+          value: dog
 collections: []
 functions:
   findDogs:

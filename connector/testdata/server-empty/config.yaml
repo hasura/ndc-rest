@@ -1,3 +1,11 @@
 files:
   - file: schema.yaml
     spec: ndc
+    timeout:
+      value: 10
+    retry:
+      times:
+        value: 1
+      delay:
+        value: 500
+      httpStatus: [429, 500, 501, 502]

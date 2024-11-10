@@ -1,0 +1,31 @@
+---
+kind: Command
+version: v1
+definition:
+  name: getPosts
+  outputType: "[Post!]!"
+  arguments:
+    - name: id
+      type: Int32
+      description: Filter by post ID
+    - name: userId
+      type: Int32
+      description: Filter by user ID
+  source:
+    dataConnectorName: myapi
+    dataConnectorCommand:
+      function: getPosts
+  graphql:
+    rootFieldName: getPosts
+    rootFieldKind: Query
+  description: Get all available posts
+
+---
+kind: CommandPermissions
+version: v1
+definition:
+  commandName: getPosts
+  permissions:
+    - role: admin
+      allowExecution: true
+

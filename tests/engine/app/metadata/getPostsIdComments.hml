@@ -1,0 +1,28 @@
+---
+kind: Command
+version: v1
+definition:
+  name: getPostsIdComments
+  outputType: "[Comment!]!"
+  arguments:
+    - name: id
+      type: Int32!
+      description: post id
+  source:
+    dataConnectorName: myapi
+    dataConnectorCommand:
+      function: getPostsIdComments
+  graphql:
+    rootFieldName: getPostsIdComments
+    rootFieldKind: Query
+  description: Get comments for a specific post
+
+---
+kind: CommandPermissions
+version: v1
+definition:
+  commandName: getPostsIdComments
+  permissions:
+    - role: admin
+      allowExecution: true
+

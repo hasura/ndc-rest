@@ -8,6 +8,7 @@ import (
 	rest "github.com/hasura/ndc-rest/ndc-rest-schema/schema"
 	"github.com/hasura/ndc-rest/ndc-rest-schema/utils"
 	"github.com/hasura/ndc-sdk-go/schema"
+	sdkUtils "github.com/hasura/ndc-sdk-go/utils"
 	"github.com/pb33f/libopenapi"
 	"github.com/pb33f/libopenapi/datamodel/high/base"
 	v3 "github.com/pb33f/libopenapi/datamodel/high/v3"
@@ -43,7 +44,6 @@ func NewOAS3Builder(schema *rest.NDCRestSchema, options ConvertOptions) *OAS3Bui
 		ConvertOptions:   applyConvertOptions(options),
 	}
 
-	setDefaultSettings(builder.schema.Settings, builder.ConvertOptions)
 	return builder
 }
 
@@ -122,7 +122,7 @@ func (oc *OAS3Builder) convertServers(servers []*v3.Server) []rest.ServerConfig 
 
 			conf := rest.ServerConfig{
 				ID:  serverID,
-				URL: *rest.NewEnvStringTemplate(rest.NewEnvTemplateWithDefault(envName, serverURL)),
+				URL: sdkUtils.NewEnvString(envName, serverURL),
 			}
 			results = append(results, conf)
 		}
@@ -154,14 +154,17 @@ func (oc *OAS3Builder) convertSecuritySchemes(scheme orderedmap.Pair[string, *v3
 			In:   inLocation,
 			Name: security.Name,
 		}
-		result.Value = rest.NewEnvStringTemplate(rest.NewEnvTemplate(utils.StringSliceToConstantCase([]string{oc.EnvPrefix, key})))
+		valueEnv := sdkUtils.NewEnvStringVariable(utils.StringSliceToConstantCase([]string{oc.EnvPrefix, key}))
+		result.Value = &valueEnv
 		result.APIKeyAuthConfig = &apiConfig
 	case rest.HTTPAuthScheme:
 		httpConfig := rest.HTTPAuthConfig{
 			Scheme: security.Scheme,
 			Header: "Authorization",
 		}
-		result.Value = rest.NewEnvStringTemplate(rest.NewEnvTemplate(utils.StringSliceToConstantCase([]string{oc.EnvPrefix, key, "TOKEN"})))
+
+		valueEnv := sdkUtils.NewEnvStringVariable(utils.StringSliceToConstantCase([]string{oc.EnvPrefix, key, "TOKEN"}))
+		result.Value = &valueEnv
 		result.HTTPAuthConfig = &httpConfig
 	case rest.OAuth2Scheme:
 		if security.Flows == nil {

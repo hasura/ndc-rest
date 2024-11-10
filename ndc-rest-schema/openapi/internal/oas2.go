@@ -10,6 +10,7 @@ import (
 	rest "github.com/hasura/ndc-rest/ndc-rest-schema/schema"
 	"github.com/hasura/ndc-rest/ndc-rest-schema/utils"
 	"github.com/hasura/ndc-sdk-go/schema"
+	sdkUtils "github.com/hasura/ndc-sdk-go/utils"
 	"github.com/pb33f/libopenapi"
 	"github.com/pb33f/libopenapi/datamodel/high/base"
 	v2 "github.com/pb33f/libopenapi/datamodel/high/v2"
@@ -32,7 +33,6 @@ func NewOAS2Builder(schema *rest.NDCRestSchema, options ConvertOptions) *OAS2Bui
 		ConvertOptions:   applyConvertOptions(options),
 	}
 
-	setDefaultSettings(builder.schema.Settings, builder.ConvertOptions)
 	return builder
 }
 
@@ -57,7 +57,7 @@ func (oc *OAS2Builder) BuildDocumentModel(docModel *libopenapi.DocumentModel[v2.
 		envName := utils.StringSliceToConstantCase([]string{oc.EnvPrefix, "SERVER_URL"})
 		serverURL := fmt.Sprintf("%s://%s%s", scheme, docModel.Model.Host, docModel.Model.BasePath)
 		oc.schema.Settings.Servers = append(oc.schema.Settings.Servers, rest.ServerConfig{
-			URL: *rest.NewEnvStringTemplate(rest.NewEnvTemplateWithDefault(envName, serverURL)),
+			URL: sdkUtils.NewEnvString(envName, serverURL),
 		})
 	}
 
@@ -109,9 +109,8 @@ func (oc *OAS2Builder) convertSecuritySchemes(scheme orderedmap.Pair[string, *v2
 			In:   inLocation,
 			Name: security.Name,
 		}
-		result.Value = rest.NewEnvStringTemplate(rest.EnvTemplate{
-			Name: utils.StringSliceToConstantCase([]string{oc.EnvPrefix, key}),
-		})
+		valueEnv := sdkUtils.NewEnvStringVariable(utils.StringSliceToConstantCase([]string{oc.EnvPrefix, key}))
+		result.Value = &valueEnv
 		result.APIKeyAuthConfig = &apiConfig
 	case "basic":
 		result.Type = rest.HTTPAuthScheme
@@ -119,9 +118,8 @@ func (oc *OAS2Builder) convertSecuritySchemes(scheme orderedmap.Pair[string, *v2
 			Scheme: "Basic",
 			Header: "Authorization",
 		}
-		result.Value = rest.NewEnvStringTemplate(rest.EnvTemplate{
-			Name: utils.StringSliceToConstantCase([]string{oc.EnvPrefix, key, "TOKEN"}),
-		})
+		valueEnv := sdkUtils.NewEnvStringVariable(utils.StringSliceToConstantCase([]string{oc.EnvPrefix, key, "TOKEN"}))
+		result.Value = &valueEnv
 		result.HTTPAuthConfig = &httpConfig
 	case "oauth2":
 		var flowType rest.OAuthFlowType

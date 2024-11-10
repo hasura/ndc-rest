@@ -1,0 +1,588 @@
+kind: DataConnectorLink
+version: v1
+definition:
+  name: myapi
+  url:
+    readWriteUrls:
+      read:
+        valueFromEnv: APP_MYAPI_READ_URL
+      write:
+        valueFromEnv: APP_MYAPI_WRITE_URL
+  headers:
+    X-Test-Header:
+      value: test
+  schema:
+    version: v0.1
+    schema:
+      scalar_types:
+        Boolean:
+          representation:
+            type: boolean
+          aggregate_functions: {}
+          comparison_operators: {}
+        Int32:
+          representation:
+            type: int32
+          aggregate_functions: {}
+          comparison_operators: {}
+        Int64:
+          representation:
+            type: int64
+          aggregate_functions: {}
+          comparison_operators: {}
+        String:
+          representation:
+            type: string
+          aggregate_functions: {}
+          comparison_operators: {}
+        URI:
+          representation:
+            type: string
+          aggregate_functions: {}
+          comparison_operators: {}
+      object_types:
+        Album:
+          fields:
+            id:
+              type:
+                type: nullable
+                underlying_type:
+                  type: named
+                  name: Int64
+            title:
+              type:
+                type: nullable
+                underlying_type:
+                  type: named
+                  name: String
+            userId:
+              type:
+                type: nullable
+                underlying_type:
+                  type: named
+                  name: Int64
+        Comment:
+          fields:
+            body:
+              type:
+                type: nullable
+                underlying_type:
+                  type: named
+                  name: String
+            email:
+              type:
+                type: nullable
+                underlying_type:
+                  type: named
+                  name: String
+            id:
+              type:
+                type: nullable
+                underlying_type:
+                  type: named
+                  name: Int64
+            name:
+              type:
+                type: nullable
+                underlying_type:
+                  type: named
+                  name: String
+            postId:
+              type:
+                type: nullable
+                underlying_type:
+                  type: named
+                  name: Int64
+        Photo:
+          fields:
+            albumId:
+              type:
+                type: nullable
+                underlying_type:
+                  type: named
+                  name: Int64
+            id:
+              type:
+                type: nullable
+                underlying_type:
+                  type: named
+                  name: Int64
+            thumbnailUrl:
+              type:
+                type: nullable
+                underlying_type:
+                  type: named
+                  name: URI
+            title:
+              type:
+                type: nullable
+                underlying_type:
+                  type: named
+                  name: String
+            url:
+              type:
+                type: nullable
+                underlying_type:
+                  type: named
+                  name: URI
+        Post:
+          fields:
+            body:
+              type:
+                type: nullable
+                underlying_type:
+                  type: named
+                  name: String
+            id:
+              type:
+                type: nullable
+                underlying_type:
+                  type: named
+                  name: Int64
+            title:
+              type:
+                type: nullable
+                underlying_type:
+                  type: named
+                  name: String
+            userId:
+              type:
+                type: nullable
+                underlying_type:
+                  type: named
+                  name: Int64
+        Todo:
+          fields:
+            completed:
+              type:
+                type: nullable
+                underlying_type:
+                  type: named
+                  name: Boolean
+            id:
+              type:
+                type: nullable
+                underlying_type:
+                  type: named
+                  name: Int64
+            title:
+              type:
+                type: nullable
+                underlying_type:
+                  type: named
+                  name: String
+            userId:
+              type:
+                type: nullable
+                underlying_type:
+                  type: named
+                  name: Int64
+        User:
+          fields:
+            address:
+              type:
+                type: nullable
+                underlying_type:
+                  type: named
+                  name: UserAddress
+            company:
+              type:
+                type: nullable
+                underlying_type:
+                  type: named
+                  name: UserCompany
+            email:
+              type:
+                type: nullable
+                underlying_type:
+                  type: named
+                  name: String
+            id:
+              type:
+                type: nullable
+                underlying_type:
+                  type: named
+                  name: Int64
+            name:
+              type:
+                type: nullable
+                underlying_type:
+                  type: named
+                  name: String
+            phone:
+              type:
+                type: nullable
+                underlying_type:
+                  type: named
+                  name: String
+            username:
+              type:
+                type: nullable
+                underlying_type:
+                  type: named
+                  name: String
+            website:
+              type:
+                type: nullable
+                underlying_type:
+                  type: named
+                  name: String
+        UserAddress:
+          fields:
+            city:
+              type:
+                type: nullable
+                underlying_type:
+                  type: named
+                  name: String
+            geo:
+              type:
+                type: nullable
+                underlying_type:
+                  type: named
+                  name: UserAddressGeo
+            street:
+              type:
+                type: nullable
+                underlying_type:
+                  type: named
+                  name: String
+            suite:
+              type:
+                type: nullable
+                underlying_type:
+                  type: named
+                  name: String
+            zipcode:
+              type:
+                type: nullable
+                underlying_type:
+                  type: named
+                  name: String
+        UserAddressGeo:
+          fields:
+            lat:
+              type:
+                type: nullable
+                underlying_type:
+                  type: named
+                  name: String
+            lng:
+              type:
+                type: nullable
+                underlying_type:
+                  type: named
+                  name: String
+        UserCompany:
+          fields:
+            bs:
+              type:
+                type: nullable
+                underlying_type:
+                  type: named
+                  name: String
+            catchPhrase:
+              type:
+                type: nullable
+                underlying_type:
+                  type: named
+                  name: String
+            name:
+              type:
+                type: nullable
+                underlying_type:
+                  type: named
+                  name: String
+      collections: []
+      functions:
+        - name: getAlbums
+          description: Get all available albums
+          arguments:
+            id:
+              description: Filter by album ID
+              type:
+                type: nullable
+                underlying_type:
+                  type: named
+                  name: Int32
+            userId:
+              description: Filter by user ID
+              type:
+                type: nullable
+                underlying_type:
+                  type: named
+                  name: Int32
+          result_type:
+            type: array
+            element_type:
+              type: named
+              name: Album
+        - name: getAlbumsId
+          description: Get specific album
+          arguments:
+            id:
+              description: The ID of the album to retrieve
+              type:
+                type: named
+                name: Int32
+          result_type:
+            type: named
+            name: Album
+        - name: getAlbumsIdPhotos
+          description: Get photos for a specific album
+          arguments:
+            id:
+              description: post id
+              type:
+                type: named
+                name: Int32
+          result_type:
+            type: array
+            element_type:
+              type: named
+              name: Photo
+        - name: getComment
+          description: Get specific comment
+          arguments:
+            id:
+              description: The ID of the comment to retrieve
+              type:
+                type: named
+                name: Int32
+          result_type:
+            type: named
+            name: Comment
+        - name: getComments
+          description: Get all available comments
+          arguments:
+            id:
+              description: Filter by comment ID
+              type:
+                type: nullable
+                underlying_type:
+                  type: named
+                  name: Int32
+            postId:
+              description: Filter by post ID
+              type:
+                type: nullable
+                underlying_type:
+                  type: named
+                  name: Int32
+          result_type:
+            type: array
+            element_type:
+              type: named
+              name: Comment
+        - name: getPhoto
+          description: Get specific photo
+          arguments:
+            id:
+              description: The ID of the photo to retrieve
+              type:
+                type: named
+                name: Int32
+          result_type:
+            type: named
+            name: Photo
+        - name: getPhotos
+          description: Get all available photos
+          arguments:
+            albumId:
+              description: Filter by album ID
+              type:
+                type: nullable
+                underlying_type:
+                  type: named
+                  name: Int32
+            id:
+              description: Filter by photo ID
+              type:
+                type: nullable
+                underlying_type:
+                  type: named
+                  name: Int32
+          result_type:
+            type: array
+            element_type:
+              type: named
+              name: Photo
+        - name: getPostById
+          description: Get specific post
+          arguments:
+            id:
+              description: The ID of the post to retrieve
+              type:
+                type: named
+                name: Int32
+          result_type:
+            type: named
+            name: Post
+        - name: getPosts
+          description: Get all available posts
+          arguments:
+            id:
+              description: Filter by post ID
+              type:
+                type: nullable
+                underlying_type:
+                  type: named
+                  name: Int32
+            userId:
+              description: Filter by user ID
+              type:
+                type: nullable
+                underlying_type:
+                  type: named
+                  name: Int32
+          result_type:
+            type: array
+            element_type:
+              type: named
+              name: Post
+        - name: getPostsIdComments
+          description: Get comments for a specific post
+          arguments:
+            id:
+              description: post id
+              type:
+                type: named
+                name: Int32
+          result_type:
+            type: array
+            element_type:
+              type: named
+              name: Comment
+        - name: getTodo
+          description: Get specific todo
+          arguments:
+            id:
+              description: The ID of the todo to retrieve
+              type:
+                type: named
+                name: Int32
+          result_type:
+            type: named
+            name: Todo
+        - name: getTodos
+          description: Get all available todos
+          arguments:
+            id:
+              description: Filter by todo ID
+              type:
+                type: nullable
+                underlying_type:
+                  type: named
+                  name: Int32
+            userId:
+              description: Filter by user ID
+              type:
+                type: nullable
+                underlying_type:
+                  type: named
+                  name: Int32
+          result_type:
+            type: array
+            element_type:
+              type: named
+              name: Todo
+        - name: getUser
+          description: Get specific user
+          arguments:
+            id:
+              description: The ID of the user to retrieve
+              type:
+                type: named
+                name: Int32
+          result_type:
+            type: named
+            name: User
+        - name: getUsers
+          description: Get all available users
+          arguments:
+            email:
+              description: Filter by user email address
+              type:
+                type: nullable
+                underlying_type:
+                  type: named
+                  name: Int32
+            id:
+              description: Filter by user ID
+              type:
+                type: nullable
+                underlying_type:
+                  type: named
+                  name: Int32
+          result_type:
+            type: array
+            element_type:
+              type: named
+              name: User
+      procedures:
+        - name: createPost
+          description: Create a post
+          arguments:
+            body:
+              description: Post object that needs to be added
+              type:
+                type: named
+                name: Post
+          result_type:
+            type: named
+            name: Post
+        - name: deletePostById
+          description: Delete specific post
+          arguments:
+            id:
+              description: The ID of the post to retrieve
+              type:
+                type: named
+                name: Int32
+          result_type:
+            type: nullable
+            underlying_type:
+              type: named
+              name: Boolean
+        - name: patchPostById
+          description: patch specific post
+          arguments:
+            body:
+              description: Post object that needs to be updated
+              type:
+                type: named
+                name: Post
+            id:
+              description: The ID of the post to retrieve
+              type:
+                type: named
+                name: Int32
+          result_type:
+            type: named
+            name: Post
+        - name: updatePostById
+          description: Update specific post
+          arguments:
+            body:
+              description: Post object that needs to be updated
+              type:
+                type: named
+                name: Post
+            id:
+              description: The ID of the post to retrieve
+              type:
+                type: named
+                name: Int32
+          result_type:
+            type: named
+            name: Post
+    capabilities:
+      version: 0.1.6
+      capabilities:
+        query:
+          variables: {}
+          explain: {}
+          nested_fields: {}
+          exists: {}
+        mutation:
+          explain: {}

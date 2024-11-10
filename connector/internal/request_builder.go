@@ -21,14 +21,16 @@ type RequestBuilder struct {
 	Schema    *rest.NDCRestSchema
 	Operation *rest.OperationInfo
 	Arguments map[string]any
+	Runtime   rest.RuntimeSettings
 }
 
 // NewRequestBuilder creates a new RequestBuilder instance
-func NewRequestBuilder(restSchema *rest.NDCRestSchema, operation *rest.OperationInfo, arguments map[string]any) *RequestBuilder {
+func NewRequestBuilder(restSchema *rest.NDCRestSchema, operation *rest.OperationInfo, arguments map[string]any, runtime rest.RuntimeSettings) *RequestBuilder {
 	return &RequestBuilder{
 		Schema:    restSchema,
 		Operation: operation,
 		Arguments: arguments,
+		Runtime:   runtime,
 	}
 }
 
@@ -41,10 +43,15 @@ func (c *RequestBuilder) Build() (*RetryableRequest, error) {
 		})
 	}
 
-	var buffer io.ReadSeeker
-
 	rawRequest := c.Operation.Request
 	contentType := rest.ContentTypeJSON
+
+	request := &RetryableRequest{
+		URL:        *endpoint,
+		RawRequest: rawRequest,
+		Headers:    headers,
+		Runtime:    c.Runtime,
+	}
 
 	if rawRequest.RequestBody != nil {
 		contentType = rawRequest.RequestBody.ContentType
@@ -62,28 +69,37 @@ func (c *RequestBuilder) Build() (*RetryableRequest, error) {
 				if err != nil {
 					return nil, err
 				}
-				buffer = bytes.NewReader([]byte(dataURI.Data))
+				r := bytes.NewReader([]byte(dataURI.Data))
+				request.ContentLength = r.Size()
+				request.Body = r
 			} else if strings.HasPrefix(contentType, "text/") {
-				buffer = bytes.NewReader([]byte(fmt.Sprint(bodyData)))
+				r := bytes.NewReader([]byte(fmt.Sprint(bodyData)))
+				request.ContentLength = r.Size()
+				request.Body = r
 			} else if strings.HasPrefix(contentType, "multipart/") {
-				buffer, contentType, err = c.createMultipartForm(bodyData)
+				var r *bytes.Reader
+				r, contentType, err = c.createMultipartForm(bodyData)
 				if err != nil {
 					return nil, err
 				}
+				request.ContentLength = r.Size()
+				request.Body = r
 			} else {
 				switch contentType {
 				case rest.ContentTypeFormURLEncoded:
-					buffer, err = c.createFormURLEncoded(&bodyInfo, bodyData)
+					r, err := c.createFormURLEncoded(&bodyInfo, bodyData)
 					if err != nil {
 						return nil, err
 					}
+					request.Body = r
 				case rest.ContentTypeJSON, "":
 					bodyBytes, err := json.Marshal(bodyData)
 					if err != nil {
 						return nil, err
 					}
 
-					buffer = bytes.NewReader(bodyBytes)
+					request.ContentLength = int64(len(bodyBytes))
+					request.Body = bytes.NewReader(bodyBytes)
 				default:
 					return nil, fmt.Errorf("unsupported content type %s", contentType)
 				}
@@ -99,14 +115,24 @@ func (c *RequestBuilder) Build() (*RetryableRequest, error) {
 		}
 	}
 
-	request := &RetryableRequest{
-		URL:         endpoint,
-		RawRequest:  rawRequest,
-		ContentType: contentType,
-		Headers:     headers,
-		Body:        buffer,
-		Timeout:     rawRequest.Timeout,
-		Retry:       rawRequest.Retry,
+	request.ContentType = contentType
+
+	if rawRequest.RuntimeSettings != nil {
+		if rawRequest.RuntimeSettings.Timeout > 0 {
+			request.Runtime.Timeout = rawRequest.RuntimeSettings.Timeout
+		}
+		if rawRequest.RuntimeSettings.Retry.Times > 0 {
+			request.Runtime.Retry.Times = rawRequest.RuntimeSettings.Retry.Times
+		}
+		if rawRequest.RuntimeSettings.Retry.Delay > 0 {
+			request.Runtime.Retry.Delay = rawRequest.RuntimeSettings.Retry.Delay
+		}
+		if rawRequest.RuntimeSettings.Retry.HTTPStatus != nil {
+			request.Runtime.Retry.HTTPStatus = rawRequest.RuntimeSettings.Retry.HTTPStatus
+		}
+	}
+	if request.Runtime.Retry.HTTPStatus == nil {
+		request.Runtime.Retry.HTTPStatus = defaultRetryHTTPStatus
 	}
 
 	return request, nil
@@ -136,7 +162,7 @@ func (c *RequestBuilder) createFormURLEncoded(bodyInfo *rest.ArgumentInfo, bodyD
 	return bytes.NewReader([]byte(rawQuery)), nil
 }
 
-func (c *RequestBuilder) createMultipartForm(bodyData any) (io.ReadSeeker, string, error) {
+func (c *RequestBuilder) createMultipartForm(bodyData any) (*bytes.Reader, string, error) {
 	bodyInfo, ok := c.Operation.Arguments[rest.BodyKey]
 	if !ok {
 		return nil, "", errRequestBodyTypeRequired

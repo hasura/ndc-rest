@@ -1,0 +1,63 @@
+---
+kind: ObjectType
+version: v1
+definition:
+  name: Album
+  fields:
+    - name: id
+      type: Int64
+    - name: title
+      type: String
+    - name: userId
+      type: Int64
+  graphql:
+    typeName: Album
+    inputTypeName: Album_input
+  dataConnectorTypeMapping:
+    - dataConnectorName: myapi
+      dataConnectorObjectType: Album
+
+---
+kind: TypePermissions
+version: v1
+definition:
+  typeName: Album
+  permissions:
+    - role: admin
+      output:
+        allowedFields:
+          - id
+          - title
+          - userId
+
+---
+kind: Command
+version: v1
+definition:
+  name: getAlbums
+  outputType: "[Album!]!"
+  arguments:
+    - name: id
+      type: Int32
+      description: Filter by album ID
+    - name: userId
+      type: Int32
+      description: Filter by user ID
+  source:
+    dataConnectorName: myapi
+    dataConnectorCommand:
+      function: getAlbums
+  graphql:
+    rootFieldName: getAlbums
+    rootFieldKind: Query
+  description: Get all available albums
+
+---
+kind: CommandPermissions
+version: v1
+definition:
+  commandName: getAlbums
+  permissions:
+    - role: admin
+      allowExecution: true
+

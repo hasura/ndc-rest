@@ -4,18 +4,17 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"os"
 
 	"github.com/hasura/ndc-rest/connector/internal"
 	"github.com/hasura/ndc-rest/ndc-rest-schema/configuration"
 	rest "github.com/hasura/ndc-rest/ndc-rest-schema/schema"
 	"github.com/hasura/ndc-sdk-go/connector"
 	"github.com/hasura/ndc-sdk-go/schema"
-	"gopkg.in/yaml.v3"
 )
 
 // RESTConnector implements the SDK interface of NDC specification
 type RESTConnector struct {
+	config       *configuration.Configuration
 	metadata     internal.MetadataCollection
 	capabilities *schema.RawCapabilitiesResponse
 	rawSchema    *schema.RawSchemaResponse
@@ -43,8 +42,11 @@ func (c *RESTConnector) ParseConfiguration(ctx context.Context, configurationDir
 			Query: schema.QueryCapabilities{
 				Variables:    schema.LeafCapability{},
 				NestedFields: schema.NestedFieldCapabilities{},
+				Explain:      schema.LeafCapability{},
 			},
-			Mutation: schema.MutationCapabilities{},
+			Mutation: schema.MutationCapabilities{
+				Explain: schema.LeafCapability{},
+			},
 		},
 	}
 	rawCapabilities, err := json.Marshal(restCapabilities)
@@ -53,22 +55,31 @@ func (c *RESTConnector) ParseConfiguration(ctx context.Context, configurationDir
 	}
 	c.capabilities = schema.NewRawCapabilitiesResponseUnsafe(rawCapabilities)
 
-	config, err := parseConfiguration(configurationDir)
+	config, err := configuration.ReadConfigurationFile(configurationDir)
 	if err != nil {
 		return nil, err
 	}
 
 	logger := connector.GetLogger(ctx)
-	schemas, errs := BuildSchemaFiles(configurationDir, config.Files, logger)
-	if len(errs) > 0 {
-		printSchemaValidationError(logger, errs)
-		return nil, errBuildSchemaFailed
+	schemas, err := configuration.ReadSchemaOutputFile(configurationDir, config.Output, logger)
+	if err != nil {
+		return nil, err
 	}
 
-	if errs := c.ApplyNDCRestSchemas(schemas); len(errs) > 0 {
-		printSchemaValidationError(logger, errs)
+	var errs map[string][]string
+	if schemas == nil {
+		schemas, errs = configuration.BuildSchemaFromConfig(config, configurationDir, logger)
+		if len(errs) > 0 {
+			printSchemaValidationError(logger, errs)
+			return nil, errBuildSchemaFailed
+		}
+	}
+
+	if err := c.ApplyNDCRestSchemas(config, schemas, logger); err != nil {
 		return nil, errInvalidSchema
 	}
+
+	c.config = config
 
 	return config, nil
 }
@@ -82,7 +93,10 @@ func (c *RESTConnector) ParseConfiguration(ctx context.Context, configurationDir
 // connector-specific metrics with the metrics registry.
 func (c *RESTConnector) TryInitState(ctx context.Context, configuration *configuration.Configuration, metrics *connector.TelemetryState) (*State, error) {
 	c.client.SetTracer(metrics.Tracer)
-	return &State{}, nil
+
+	return &State{
+		Tracer: metrics.Tracer,
+	}, nil
 }
 
 // HealthCheck checks the health of the connector.
@@ -98,42 +112,4 @@ func (c *RESTConnector) HealthCheck(ctx context.Context, configuration *configur
 // GetCapabilities get the connector's capabilities.
 func (c *RESTConnector) GetCapabilities(configuration *configuration.Configuration) schema.CapabilitiesResponseMarshaler {
 	return c.capabilities
-}
-
-func parseConfiguration(configurationDir string) (*configuration.Configuration, error) {
-	var config configuration.Configuration
-	jsonBytes, err := os.ReadFile(configurationDir + "/config.json")
-	if err == nil {
-		if err = json.Unmarshal(jsonBytes, &config); err != nil {
-			return nil, err
-		}
-		return &config, nil
-	}
-
-	if !os.IsNotExist(err) {
-		return nil, err
-	}
-
-	// try to read and parse yaml file
-	yamlBytes, err := os.ReadFile(configurationDir + "/config.yaml")
-	if err != nil {
-		if !os.IsNotExist(err) {
-			return nil, err
-		}
-		yamlBytes, err = os.ReadFile(configurationDir + "/config.yml")
-	}
-
-	if err != nil {
-		if os.IsNotExist(err) {
-			return nil, fmt.Errorf("the config.{json,yaml,yml} file does not exist at %s", configurationDir)
-		} else {
-			return nil, err
-		}
-	}
-
-	if err = yaml.Unmarshal(yamlBytes, &config); err != nil {
-		return nil, err
-	}
-
-	return &config, nil
 }

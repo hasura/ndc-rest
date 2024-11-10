@@ -1,0 +1,14 @@
+kind: Subgraph
+version: v2
+definition:
+  name: app
+  generator:
+    rootPath: .
+    namingConvention: none
+  includePaths:
+    - metadata
+  envMapping:
+    APP_MYAPI_READ_URL:
+      fromEnv: APP_MYAPI_READ_URL
+    APP_MYAPI_WRITE_URL:
+      fromEnv: APP_MYAPI_WRITE_URL

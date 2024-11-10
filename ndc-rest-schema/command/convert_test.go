@@ -8,6 +8,7 @@ import (
 	"os"
 	"testing"
 
+	"github.com/hasura/ndc-rest/ndc-rest-schema/configuration"
 	"github.com/hasura/ndc-rest/ndc-rest-schema/schema"
 	"gotest.tools/v3/assert"
 )
@@ -92,7 +93,7 @@ func TestConvertToNDCSchema(t *testing.T) {
 				tempDir := t.TempDir()
 				outputFilePath = fmt.Sprintf("%s/output.json", tempDir)
 			}
-			args := &ConvertCommandArguments{
+			args := &configuration.ConvertCommandArguments{
 				File:                tc.filePath,
 				Output:              outputFilePath,
 				Pure:                tc.pure,
@@ -103,7 +104,7 @@ func TestConvertToNDCSchema(t *testing.T) {
 				AllowedContentTypes: tc.allowedContentTypes,
 			}
 			if tc.config != "" {
-				args = &ConvertCommandArguments{
+				args = &configuration.ConvertCommandArguments{
 					Config:     tc.config,
 					Output:     outputFilePath,
 					EnvPrefix:  "",
@@ -127,12 +128,12 @@ func TestConvertToNDCSchema(t *testing.T) {
 			}
 			outputBytes, err := os.ReadFile(outputFilePath)
 			if err != nil {
-				t.Errorf("cannot read the output file at %s", outputFilePath)
+				t.Errorf("cannot read the output file at %s, %s", outputFilePath, err)
 				t.FailNow()
 			}
 			var output schema.NDCRestSchema
 			if err := json.Unmarshal(outputBytes, &output); err != nil {
-				t.Errorf("cannot decode the output file json at %s", outputFilePath)
+				t.Errorf("cannot decode the output file json at %s: %s", outputFilePath, err)
 				t.FailNow()
 			}
 			if tc.expected == "" {
@@ -141,12 +142,12 @@ func TestConvertToNDCSchema(t *testing.T) {
 
 			expectedBytes, err := os.ReadFile(tc.expected)
 			if err != nil {
-				t.Errorf("cannot read the expected file at %s", outputFilePath)
+				t.Errorf("cannot read the expected file at %s: %s", outputFilePath, err)
 				t.FailNow()
 			}
 			var expectedSchema schema.NDCRestSchema
 			if err := json.Unmarshal(expectedBytes, &expectedSchema); err != nil {
-				t.Errorf("cannot decode the output file json at %s", tc.expected)
+				t.Errorf("cannot decode the output file json at %s: %s", tc.expected, err)
 				t.FailNow()
 			}
 			assert.DeepEqual(t, expectedSchema.Settings, output.Settings)

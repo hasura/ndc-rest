@@ -1,0 +1,31 @@
+---
+kind: Command
+version: v1
+definition:
+  name: getPhotos
+  outputType: "[Photo!]!"
+  arguments:
+    - name: albumId
+      type: Int32
+      description: Filter by album ID
+    - name: id
+      type: Int32
+      description: Filter by photo ID
+  source:
+    dataConnectorName: myapi
+    dataConnectorCommand:
+      function: getPhotos
+  graphql:
+    rootFieldName: getPhotos
+    rootFieldKind: Query
+  description: Get all available photos
+
+---
+kind: CommandPermissions
+version: v1
+definition:
+  commandName: getPhotos
+  permissions:
+    - role: admin
+      allowExecution: true
+

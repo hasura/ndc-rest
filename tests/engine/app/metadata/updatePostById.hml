@@ -1,0 +1,31 @@
+---
+kind: Command
+version: v1
+definition:
+  name: updatePostById
+  outputType: Post!
+  arguments:
+    - name: body
+      type: Post!
+      description: Post object that needs to be updated
+    - name: id
+      type: Int32!
+      description: The ID of the post to retrieve
+  source:
+    dataConnectorName: myapi
+    dataConnectorCommand:
+      procedure: updatePostById
+  graphql:
+    rootFieldName: updatePostById
+    rootFieldKind: Mutation
+  description: Update specific post
+
+---
+kind: CommandPermissions
+version: v1
+definition:
+  commandName: updatePostById
+  permissions:
+    - role: admin
+      allowExecution: true
+

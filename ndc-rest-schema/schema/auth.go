@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"slices"
 
+	"github.com/hasura/ndc-sdk-go/utils"
 	"github.com/invopop/jsonschema"
 	orderedmap "github.com/wk8/go-ordered-map/v2"
 )
@@ -112,11 +113,13 @@ func ParseAPIKeyLocation(value string) (APIKeyLocation, error) {
 // [OpenAPI 3]: https://swagger.io/docs/specification/authentication
 type SecurityScheme struct {
 	Type              SecuritySchemeType `json:"type"            mapstructure:"type"  yaml:"type"`
-	Value             *EnvString         `json:"value,omitempty" mapstructure:"value" yaml:"value,omitempty"`
+	Value             *utils.EnvString   `json:"value,omitempty" mapstructure:"value" yaml:"value,omitempty"`
 	*APIKeyAuthConfig `yaml:",inline"`
 	*HTTPAuthConfig   `yaml:",inline"`
 	*OAuth2Config     `yaml:",inline"`
 	*OpenIDConfig     `yaml:",inline"`
+
+	value *string
 }
 
 // JSONSchema is used to generate a custom jsonschema
@@ -213,7 +216,7 @@ func (j *SecurityScheme) UnmarshalJSON(b []byte) error {
 }
 
 // Validate if the current instance is valid
-func (ss SecurityScheme) Validate() error {
+func (ss *SecurityScheme) Validate() error {
 	if _, err := ParseSecuritySchemeType(string(ss.Type)); err != nil {
 		return err
 	}
@@ -239,7 +242,32 @@ func (ss SecurityScheme) Validate() error {
 		}
 		return ss.OpenIDConfig.Validate()
 	}
+
+	if ss.Value != nil {
+		value, err := ss.Value.Get()
+		if err != nil {
+			return fmt.Errorf("SecurityScheme.Value: %w", err)
+		}
+		if value != "" {
+			ss.value = &value
+		}
+	}
+
 	return nil
+}
+
+// GetValue get the authentication credential value
+func (ss SecurityScheme) GetValue() string {
+	if ss.value != nil {
+		return *ss.value
+	}
+
+	if ss.Value != nil {
+		value, _ := ss.Value.Get()
+		return value
+	}
+
+	return ""
 }
 
 // APIKeyAuthConfig contains configurations for [apiKey authentication]

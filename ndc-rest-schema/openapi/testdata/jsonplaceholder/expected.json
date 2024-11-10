@@ -3,15 +3,12 @@
   "settings": {
     "servers": [
       {
-        "url": "{{SERVER_URL:-https://jsonplaceholder.typicode.com}}"
+        "url": {
+          "value": "https://jsonplaceholder.typicode.com",
+          "env": "SERVER_URL"
+        }
       }
     ],
-    "timeout": "{{TIMEOUT}}",
-    "retry": {
-      "times": "{{RETRY_TIMES}}",
-      "delay": "{{RETRY_DELAY}}",
-      "httpStatus": "{{RETRY_HTTP_STATUS}}"
-    },
     "version": "1.0.0"
   },
   "functions": {
@@ -64,7 +61,6 @@
         }
       },
       "description": "Get all available albums",
-      "name": "getAlbums",
       "result_type": {
         "element_type": {
           "name": "Album",
@@ -100,7 +96,6 @@
         }
       },
       "description": "Get specific album",
-      "name": "getAlbumsId",
       "result_type": {
         "name": "Album",
         "type": "named"
@@ -133,7 +128,6 @@
         }
       },
       "description": "Get photos for a specific album",
-      "name": "getAlbumsIdPhotos",
       "result_type": {
         "element_type": {
           "name": "Photo",
@@ -169,7 +163,6 @@
         }
       },
       "description": "Get specific comment",
-      "name": "getComment",
       "result_type": {
         "name": "Comment",
         "type": "named"
@@ -224,7 +217,6 @@
         }
       },
       "description": "Get all available comments",
-      "name": "getComments",
       "result_type": {
         "element_type": {
           "name": "Comment",
@@ -260,7 +252,6 @@
         }
       },
       "description": "Get specific photo",
-      "name": "getPhoto",
       "result_type": {
         "name": "Photo",
         "type": "named"
@@ -315,7 +306,6 @@
         }
       },
       "description": "Get all available photos",
-      "name": "getPhotos",
       "result_type": {
         "element_type": {
           "name": "Photo",
@@ -351,7 +341,6 @@
         }
       },
       "description": "Get specific post",
-      "name": "getPostById",
       "result_type": {
         "name": "Post",
         "type": "named"
@@ -406,7 +395,6 @@
         }
       },
       "description": "Get all available posts",
-      "name": "getPosts",
       "result_type": {
         "element_type": {
           "name": "Post",
@@ -442,7 +430,6 @@
         }
       },
       "description": "Get comments for a specific post",
-      "name": "getPostsIdComments",
       "result_type": {
         "element_type": {
           "name": "Comment",
@@ -461,7 +448,6 @@
       },
       "arguments": {},
       "description": "Get test",
-      "name": "getTest",
       "result_type": {
         "name": "User",
         "type": "named"
@@ -494,7 +480,6 @@
         }
       },
       "description": "Get specific todo",
-      "name": "getTodo",
       "result_type": {
         "name": "Todo",
         "type": "named"
@@ -549,7 +534,6 @@
         }
       },
       "description": "Get all available todos",
-      "name": "getTodos",
       "result_type": {
         "element_type": {
           "name": "Todo",
@@ -585,7 +569,6 @@
         }
       },
       "description": "Get specific user",
-      "name": "getUser",
       "result_type": {
         "name": "User",
         "type": "named"
@@ -640,7 +623,6 @@
         }
       },
       "description": "Get all available users",
-      "name": "getUsers",
       "result_type": {
         "element_type": {
           "name": "User",
@@ -1279,7 +1261,6 @@
         }
       },
       "description": "Create a post",
-      "name": "createPost",
       "result_type": {
         "name": "Post",
         "type": "named"
@@ -1312,7 +1293,6 @@
         }
       },
       "description": "Delete specific post",
-      "name": "deletePostById",
       "result_type": {
         "type": "nullable",
         "underlying_type": {
@@ -1366,7 +1346,6 @@
         }
       },
       "description": "patch specific post",
-      "name": "patchPostById",
       "result_type": {
         "name": "Post",
         "type": "named"
@@ -1417,7 +1396,6 @@
         }
       },
       "description": "Update specific post",
-      "name": "updatePostById",
       "result_type": {
         "name": "Post",
         "type": "named"

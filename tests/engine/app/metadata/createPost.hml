@@ -1,0 +1,28 @@
+---
+kind: Command
+version: v1
+definition:
+  name: createPost
+  outputType: Post!
+  arguments:
+    - name: body
+      type: Post!
+      description: Post object that needs to be added
+  source:
+    dataConnectorName: myapi
+    dataConnectorCommand:
+      procedure: createPost
+  graphql:
+    rootFieldName: createPost
+    rootFieldKind: Mutation
+  description: Create a post
+
+---
+kind: CommandPermissions
+version: v1
+definition:
+  commandName: createPost
+  permissions:
+    - role: admin
+      allowExecution: true
+

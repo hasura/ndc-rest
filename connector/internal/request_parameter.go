@@ -21,16 +21,19 @@ import (
 var urlAndHeaderLocations = []rest.ParameterLocation{rest.InPath, rest.InQuery, rest.InHeader}
 
 // evaluate URL and header parameters
-func (c *RequestBuilder) evalURLAndHeaderParameters() (string, http.Header, error) {
+func (c *RequestBuilder) evalURLAndHeaderParameters() (*url.URL, http.Header, error) {
 	endpoint, err := url.Parse(c.Operation.Request.URL)
 	if err != nil {
-		return "", nil, err
+		return nil, nil, err
 	}
 	headers := http.Header{}
 	for k, h := range c.Operation.Request.Headers {
-		v := h.Value()
-		if v != nil && *v != "" {
-			headers.Add(k, *v)
+		v, err := h.Get()
+		if err != nil {
+			return nil, nil, fmt.Errorf("invalid header value, key: %s, %w", k, err)
+		}
+		if v != "" {
+			headers.Add(k, v)
 		}
 	}
 
@@ -39,10 +42,10 @@ func (c *RequestBuilder) evalURLAndHeaderParameters() (string, http.Header, erro
 			continue
 		}
 		if err := c.evalURLAndHeaderParameterBySchema(endpoint, &headers, argumentKey, &argumentInfo, c.Arguments[argumentKey]); err != nil {
-			return "", nil, fmt.Errorf("%s: %w", argumentKey, err)
+			return nil, nil, fmt.Errorf("%s: %w", argumentKey, err)
 		}
 	}
-	return endpoint.String(), headers, nil
+	return endpoint, headers, nil
 }
 
 // the query parameters serialization follows [OAS 3.1 spec]
@@ -233,7 +236,7 @@ func encodeScalarParameterReflectionValues(reflectValue reflect.Value, scalar *s
 		}
 		return []ParameterItem{NewParameterItem([]Key{}, []string{value})}, nil
 	case *schema.TypeRepresentationDate:
-		value, err := utils.DecodeDateReflection(reflectValue)
+		value, err := utils.DecodeDateTimeReflection(reflectValue)
 		if err != nil {
 			return nil, fmt.Errorf("%s: %w", strings.Join(fieldPaths, ""), err)
 		}

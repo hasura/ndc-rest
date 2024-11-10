@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"regexp"
 
 	rest "github.com/hasura/ndc-rest/ndc-rest-schema/schema"
 	"github.com/hasura/ndc-sdk-go/schema"
@@ -22,55 +23,17 @@ var (
 	errRequestBodyTypeRequired = errors.New("failed to decode request body, empty body type")
 )
 
-var defaultRetryHTTPStatus = []int64{429, 500, 502, 503}
-
-const (
-	RESTOptionsArgumentName          string = "restOptions"
-	RESTSingleOptionsObjectName      string = "RestSingleOptions"
-	RESTDistributedOptionsObjectName string = "RestDistributedOptions"
-	RESTServerIDScalarName           string = "RestServerId"
-	DistributedErrorObjectName       string = "DistributedError"
-)
-
-// SingleObjectType represents the object type of REST execution options for single server
-var SingleObjectType rest.ObjectType = rest.ObjectType{
-	Description: utils.ToPtr("Execution options for REST requests to a single server"),
-	Fields: map[string]rest.ObjectField{
-		"servers": {
-			ObjectField: schema.ObjectField{
-				Description: utils.ToPtr("Specify remote servers to receive the request. If there are many server IDs the server is selected randomly"),
-				Type:        schema.NewNullableType(schema.NewArrayType(schema.NewNamedType(RESTServerIDScalarName))).Encode(),
-			},
-		},
-	},
-}
-
-// DistributedObjectType represents the object type of REST execution options for distributed servers
-var DistributedObjectType rest.ObjectType = rest.ObjectType{
-	Description: utils.ToPtr("Distributed execution options for REST requests to multiple servers"),
-	Fields: map[string]rest.ObjectField{
-		"servers": {
-			ObjectField: schema.ObjectField{
-				Description: utils.ToPtr("Specify remote servers to receive the request"),
-				Type:        schema.NewNullableType(schema.NewArrayType(schema.NewNamedType(RESTServerIDScalarName))).Encode(),
-			},
-		},
-		"parallel": {
-			ObjectField: schema.ObjectField{
-				Description: utils.ToPtr("Execute requests to remote servers in parallel"),
-				Type:        schema.NewNullableNamedType(string(rest.ScalarBoolean)).Encode(),
-			},
-		},
-	},
-}
+var defaultRetryHTTPStatus = []int{429, 500, 502, 503}
+var sensitiveHeaderRegex = regexp.MustCompile(`auth|key|secret|token`)
 
 // RESTOptions represent execution options for REST requests
 type RESTOptions struct {
-	Servers  []string `json:"servers"  yaml:"serverIds"`
+	Servers  []string `json:"serverIds"  yaml:"serverIds"`
 	Parallel bool     `json:"parallel" yaml:"parallel"`
 
 	Explain     bool                  `json:"-" yaml:"-"`
 	Distributed bool                  `json:"-" yaml:"-"`
+	Concurrency uint                  `json:"-" yaml:"-"`
 	Settings    *rest.NDCRestSettings `json:"-" yaml:"-"`
 }
 

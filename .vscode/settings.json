@@ -1,0 +1,6 @@
+{
+  "yaml.schemas": {
+    "file:///home/hgiasac/.vscode/extensions/docsmsft.docs-yaml-1.0.4/dist/toc.schema.json": "/toc\\.yml/i",
+    "file:///home/hgiasac/projects/hasura/src/ndc-rest/ndc-rest-schema/jsonschema/configuration.schema.json": "file:///home/hgiasac/projects/hasura/src/ndc-rest/ndc-rest-schema/command/testdata/auth/config.yaml"
+  }
+}
