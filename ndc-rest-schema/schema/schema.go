@@ -33,7 +33,7 @@ type NDCRestSchema struct {
 // NewNDCRestSchema creates a NDCRestSchema instance
 func NewNDCRestSchema() *NDCRestSchema {
 	return &NDCRestSchema{
-		SchemaRef:   "https://raw.githubusercontent.com/hasura/ndc-rest-schema/main/jsonschema/ndc-rest-schema.jsonschema",
+		SchemaRef:   "https://raw.githubusercontent.com/hasura/ndc-rest/refs/heads/main/ndc-rest-schema/jsonschema/ndc-rest-schema.schema.json",
 		Settings:    &NDCRestSettings{},
 		Functions:   map[string]OperationInfo{},
 		Procedures:  map[string]OperationInfo{},
