@@ -1,10 +1,5 @@
 ---
-settings:
-  timeout: 10
-  retry:
-    times: 1
-    delay: 500
-    httpStatus: [429, 500, 501, 502]
+settings: {}
 collections: []
 functions:
   findPets:

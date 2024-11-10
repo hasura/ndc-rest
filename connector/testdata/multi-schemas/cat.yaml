@@ -1,8 +1,10 @@
 settings:
   servers:
-    - url: "{{CAT_STORE_URL}}"
+    - url:
+        env: CAT_STORE_URL
       headers:
-        pet: cat
+        pet:
+          value: cat
 collections: []
 functions:
   findCats:

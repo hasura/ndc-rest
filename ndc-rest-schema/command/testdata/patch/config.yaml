@@ -1,3 +1,11 @@
+# yaml-language-server: $schema=../../../jsonschema/configuration.schema.json
+output: schema.output.json
+strict: true
+forwardHeaders:
+  enabled: true
+  argumentField: headers
+  responseHeadersField: null
+  responseResultField: null
 files:
   - file: ../auth/schema.yaml
     spec: ndc

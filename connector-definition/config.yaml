@@ -3,7 +3,9 @@ output: schema.output.json
 strict: true
 forwardHeaders:
   enabled: false
-  argumentName: headers
+  argumentField: headers
+  responseHeadersField: null
+  responseResultField: null
 files:
   - file: https://raw.githubusercontent.com/hasura/ndc-rest/main/connector/testdata/jsonplaceholder/swagger.json
     spec: openapi2

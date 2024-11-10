@@ -1,0 +1,976 @@
+[
+  {
+    "name": "testdata/auth/schema.yaml",
+    "settings": {
+      "servers": [
+        {
+          "url": {
+            "env": "PET_STORE_DOG_URL"
+          },
+          "id": "dog",
+          "securitySchemes": {
+            "api_key": {
+              "type": "apiKey",
+              "value": {
+                "value": "dog-secret"
+              },
+              "in": "header",
+              "name": "api_key"
+            },
+            "bearer": {
+              "type": "http",
+              "value": {
+                "env": "PET_STORE_BEARER_TOKEN"
+              },
+              "header": "",
+              "scheme": "bearer"
+            }
+          },
+          "security": [
+            {
+              "api_key": []
+            }
+          ]
+        },
+        {
+          "url": {
+            "env": "PET_STORE_CAT_URL"
+          },
+          "id": "cat",
+          "securitySchemes": {
+            "api_key": {
+              "type": "apiKey",
+              "value": {
+                "value": "cat-secret"
+              },
+              "in": "header",
+              "name": "api_key"
+            },
+            "bearer": {
+              "type": "http",
+              "value": {
+                "env": "PET_STORE_BEARER_TOKEN"
+              },
+              "header": "",
+              "scheme": "bearer"
+            }
+          },
+          "security": [
+            {
+              "api_key": []
+            }
+          ]
+        }
+      ],
+      "securitySchemes": {
+        "api_key": {
+          "type": "apiKey",
+          "value": {
+            "env": "PET_STORE_API_KEY"
+          },
+          "in": "header",
+          "name": "api_key"
+        },
+        "bearer": {
+          "type": "http",
+          "value": {
+            "env": "PET_STORE_BEARER_TOKEN"
+          },
+          "header": "",
+          "scheme": "bearer"
+        }
+      },
+      "security": [
+        {
+          "api_key": []
+        }
+      ],
+      "version": "1.0.18"
+    },
+    "functions": {
+      "findPets": {
+        "request": {
+          "url": "/pet",
+          "method": "get",
+          "type": "rest",
+          "response": {
+            "contentType": ""
+          }
+        },
+        "arguments": {
+          "headers": {
+            "description": "Headers forwarded from the Hasura engine",
+            "type": {
+              "type": "nullable",
+              "underlying_type": {
+                "name": "JSON",
+                "type": "named"
+              }
+            }
+          },
+          "restOptions": {
+            "description": "Execution options for REST requests to a single server",
+            "type": {
+              "type": "nullable",
+              "underlying_type": {
+                "name": "RestSingleOptions",
+                "type": "named"
+              }
+            }
+          }
+        },
+        "description": "Finds Pets",
+        "result_type": {
+          "element_type": {
+            "name": "Pet",
+            "type": "named"
+          },
+          "type": "array"
+        }
+      },
+      "findPetsByStatus": {
+        "request": {
+          "url": "/pet/findByStatus",
+          "method": "get",
+          "type": "rest",
+          "security": [
+            {
+              "bearer": []
+            }
+          ],
+          "response": {
+            "contentType": ""
+          }
+        },
+        "arguments": {
+          "headers": {
+            "description": "Headers forwarded from the Hasura engine",
+            "type": {
+              "type": "nullable",
+              "underlying_type": {
+                "name": "JSON",
+                "type": "named"
+              }
+            }
+          },
+          "restOptions": {
+            "description": "Execution options for REST requests to a single server",
+            "type": {
+              "type": "nullable",
+              "underlying_type": {
+                "name": "RestSingleOptions",
+                "type": "named"
+              }
+            }
+          },
+          "status": {
+            "description": "Status values that need to be considered for filter",
+            "type": {
+              "type": "nullable",
+              "underlying_type": {
+                "name": "String",
+                "type": "named"
+              }
+            },
+            "rest": {
+              "in": "query",
+              "schema": {
+                "type": ["string"]
+              }
+            }
+          }
+        },
+        "description": "Finds Pets by status",
+        "result_type": {
+          "element_type": {
+            "name": "Pet",
+            "type": "named"
+          },
+          "type": "array"
+        }
+      },
+      "findPetsByStatusDistributed": {
+        "request": {
+          "url": "/pet/findByStatus",
+          "method": "get",
+          "type": "rest",
+          "security": [
+            {
+              "bearer": []
+            }
+          ],
+          "response": {
+            "contentType": ""
+          }
+        },
+        "arguments": {
+          "headers": {
+            "description": "Headers forwarded from the Hasura engine",
+            "type": {
+              "type": "nullable",
+              "underlying_type": {
+                "name": "JSON",
+                "type": "named"
+              }
+            }
+          },
+          "restOptions": {
+            "description": "Distributed execution options for REST requests to multiple servers",
+            "type": {
+              "type": "nullable",
+              "underlying_type": {
+                "name": "RestDistributedOptions",
+                "type": "named"
+              }
+            }
+          },
+          "status": {
+            "description": "Status values that need to be considered for filter",
+            "type": {
+              "type": "nullable",
+              "underlying_type": {
+                "name": "String",
+                "type": "named"
+              }
+            },
+            "rest": {
+              "in": "query",
+              "schema": {
+                "type": ["string"]
+              }
+            }
+          }
+        },
+        "description": "Finds Pets by status",
+        "result_type": {
+          "name": "FindPetsByStatusDistributedResult",
+          "type": "named"
+        }
+      },
+      "findPetsDistributed": {
+        "request": {
+          "url": "/pet",
+          "method": "get",
+          "type": "rest",
+          "response": {
+            "contentType": ""
+          }
+        },
+        "arguments": {
+          "headers": {
+            "description": "Headers forwarded from the Hasura engine",
+            "type": {
+              "type": "nullable",
+              "underlying_type": {
+                "name": "JSON",
+                "type": "named"
+              }
+            }
+          },
+          "restOptions": {
+            "description": "Distributed execution options for REST requests to multiple servers",
+            "type": {
+              "type": "nullable",
+              "underlying_type": {
+                "name": "RestDistributedOptions",
+                "type": "named"
+              }
+            }
+          }
+        },
+        "description": "Finds Pets",
+        "result_type": {
+          "name": "FindPetsDistributedResult",
+          "type": "named"
+        }
+      },
+      "petRetry": {
+        "request": {
+          "url": "/pet/retry",
+          "method": "get",
+          "type": "rest",
+          "response": {
+            "contentType": ""
+          }
+        },
+        "arguments": {
+          "headers": {
+            "description": "Headers forwarded from the Hasura engine",
+            "type": {
+              "type": "nullable",
+              "underlying_type": {
+                "name": "JSON",
+                "type": "named"
+              }
+            }
+          },
+          "restOptions": {
+            "description": "Execution options for REST requests to a single server",
+            "type": {
+              "type": "nullable",
+              "underlying_type": {
+                "name": "RestSingleOptions",
+                "type": "named"
+              }
+            }
+          }
+        },
+        "result_type": {
+          "element_type": {
+            "name": "Pet",
+            "type": "named"
+          },
+          "type": "array"
+        }
+      },
+      "petRetryDistributed": {
+        "request": {
+          "url": "/pet/retry",
+          "method": "get",
+          "type": "rest",
+          "response": {
+            "contentType": ""
+          }
+        },
+        "arguments": {
+          "headers": {
+            "description": "Headers forwarded from the Hasura engine",
+            "type": {
+              "type": "nullable",
+              "underlying_type": {
+                "name": "JSON",
+                "type": "named"
+              }
+            }
+          },
+          "restOptions": {
+            "description": "Distributed execution options for REST requests to multiple servers",
+            "type": {
+              "type": "nullable",
+              "underlying_type": {
+                "name": "RestDistributedOptions",
+                "type": "named"
+              }
+            }
+          }
+        },
+        "result_type": {
+          "name": "PetRetryDistributedResult",
+          "type": "named"
+        }
+      }
+    },
+    "object_types": {
+      "AddPetDistributedResult": {
+        "description": "Distributed responses of addPetDistributed",
+        "fields": {
+          "errors": {
+            "description": "Error responses of addPetDistributed",
+            "type": {
+              "element_type": {
+                "name": "DistributedError",
+                "type": "named"
+              },
+              "type": "array"
+            }
+          },
+          "results": {
+            "description": "Results of addPetDistributed",
+            "type": {
+              "element_type": {
+                "name": "AddPetDistributedResultData",
+                "type": "named"
+              },
+              "type": "array"
+            }
+          }
+        }
+      },
+      "AddPetDistributedResultData": {
+        "description": "Distributed response data of addPetDistributed",
+        "fields": {
+          "data": {
+            "description": "A result of addPetDistributed",
+            "type": {
+              "name": "Pet",
+              "type": "named"
+            }
+          },
+          "server": {
+            "description": "Identity of the remote server",
+            "type": {
+              "name": "RestServerId",
+              "type": "named"
+            }
+          }
+        }
+      },
+      "CreateModelDistributedResult": {
+        "description": "Distributed responses of createModelDistributed",
+        "fields": {
+          "errors": {
+            "description": "Error responses of createModelDistributed",
+            "type": {
+              "element_type": {
+                "name": "DistributedError",
+                "type": "named"
+              },
+              "type": "array"
+            }
+          },
+          "results": {
+            "description": "Results of createModelDistributed",
+            "type": {
+              "element_type": {
+                "name": "CreateModelDistributedResultData",
+                "type": "named"
+              },
+              "type": "array"
+            }
+          }
+        }
+      },
+      "CreateModelDistributedResultData": {
+        "description": "Distributed response data of createModelDistributed",
+        "fields": {
+          "data": {
+            "description": "A result of createModelDistributed",
+            "type": {
+              "element_type": {
+                "name": "ProgressResponse",
+                "type": "named"
+              },
+              "type": "array"
+            }
+          },
+          "server": {
+            "description": "Identity of the remote server",
+            "type": {
+              "name": "RestServerId",
+              "type": "named"
+            }
+          }
+        }
+      },
+      "CreateModelRequest": {
+        "fields": {
+          "model": {
+            "description": "The name of the model to create",
+            "type": {
+              "type": "nullable",
+              "underlying_type": {
+                "name": "String",
+                "type": "named"
+              }
+            }
+          }
+        }
+      },
+      "DistributedError": {
+        "description": "The error response of the remote request",
+        "fields": {
+          "details": {
+            "description": "Any additional structured information about the error",
+            "type": {
+              "type": "nullable",
+              "underlying_type": {
+                "name": "JSON",
+                "type": "named"
+              }
+            }
+          },
+          "message": {
+            "description": "An optional human-readable summary of the error",
+            "type": {
+              "type": "nullable",
+              "underlying_type": {
+                "name": "String",
+                "type": "named"
+              }
+            }
+          },
+          "server": {
+            "description": "Identity of the remote server",
+            "type": {
+              "name": "RestServerId",
+              "type": "named"
+            }
+          }
+        }
+      },
+      "FindPetsByStatusDistributedResult": {
+        "description": "Distributed responses of findPetsByStatusDistributed",
+        "fields": {
+          "errors": {
+            "description": "Error responses of findPetsByStatusDistributed",
+            "type": {
+              "element_type": {
+                "name": "DistributedError",
+                "type": "named"
+              },
+              "type": "array"
+            }
+          },
+          "results": {
+            "description": "Results of findPetsByStatusDistributed",
+            "type": {
+              "element_type": {
+                "name": "FindPetsByStatusDistributedResultData",
+                "type": "named"
+              },
+              "type": "array"
+            }
+          }
+        }
+      },
+      "FindPetsByStatusDistributedResultData": {
+        "description": "Distributed response data of findPetsByStatusDistributed",
+        "fields": {
+          "data": {
+            "description": "A result of findPetsByStatusDistributed",
+            "type": {
+              "element_type": {
+                "name": "Pet",
+                "type": "named"
+              },
+              "type": "array"
+            }
+          },
+          "server": {
+            "description": "Identity of the remote server",
+            "type": {
+              "name": "RestServerId",
+              "type": "named"
+            }
+          }
+        }
+      },
+      "FindPetsDistributedResult": {
+        "description": "Distributed responses of findPetsDistributed",
+        "fields": {
+          "errors": {
+            "description": "Error responses of findPetsDistributed",
+            "type": {
+              "element_type": {
+                "name": "DistributedError",
+                "type": "named"
+              },
+              "type": "array"
+            }
+          },
+          "results": {
+            "description": "Results of findPetsDistributed",
+            "type": {
+              "element_type": {
+                "name": "FindPetsDistributedResultData",
+                "type": "named"
+              },
+              "type": "array"
+            }
+          }
+        }
+      },
+      "FindPetsDistributedResultData": {
+        "description": "Distributed response data of findPetsDistributed",
+        "fields": {
+          "data": {
+            "description": "A result of findPetsDistributed",
+            "type": {
+              "element_type": {
+                "name": "Pet",
+                "type": "named"
+              },
+              "type": "array"
+            }
+          },
+          "server": {
+            "description": "Identity of the remote server",
+            "type": {
+              "name": "RestServerId",
+              "type": "named"
+            }
+          }
+        }
+      },
+      "Pet": {
+        "fields": {
+          "id": {
+            "type": {
+              "type": "nullable",
+              "underlying_type": {
+                "name": "Int",
+                "type": "named"
+              }
+            }
+          },
+          "name": {
+            "type": {
+              "name": "String",
+              "type": "named"
+            }
+          }
+        }
+      },
+      "PetRetryDistributedResult": {
+        "description": "Distributed responses of petRetryDistributed",
+        "fields": {
+          "errors": {
+            "description": "Error responses of petRetryDistributed",
+            "type": {
+              "element_type": {
+                "name": "DistributedError",
+                "type": "named"
+              },
+              "type": "array"
+            }
+          },
+          "results": {
+            "description": "Results of petRetryDistributed",
+            "type": {
+              "element_type": {
+                "name": "PetRetryDistributedResultData",
+                "type": "named"
+              },
+              "type": "array"
+            }
+          }
+        }
+      },
+      "PetRetryDistributedResultData": {
+        "description": "Distributed response data of petRetryDistributed",
+        "fields": {
+          "data": {
+            "description": "A result of petRetryDistributed",
+            "type": {
+              "element_type": {
+                "name": "Pet",
+                "type": "named"
+              },
+              "type": "array"
+            }
+          },
+          "server": {
+            "description": "Identity of the remote server",
+            "type": {
+              "name": "RestServerId",
+              "type": "named"
+            }
+          }
+        }
+      },
+      "ProgressResponse": {
+        "fields": {
+          "completed": {
+            "description": "The completed size of the task",
+            "type": {
+              "type": "nullable",
+              "underlying_type": {
+                "name": "Int32",
+                "type": "named"
+              }
+            }
+          },
+          "status": {
+            "description": "The status of the request",
+            "type": {
+              "type": "nullable",
+              "underlying_type": {
+                "name": "String",
+                "type": "named"
+              }
+            }
+          }
+        }
+      },
+      "RestDistributedOptions": {
+        "description": "Distributed execution options for REST requests to multiple servers",
+        "fields": {
+          "parallel": {
+            "description": "Execute requests to remote servers in parallel",
+            "type": {
+              "type": "nullable",
+              "underlying_type": {
+                "name": "Boolean",
+                "type": "named"
+              }
+            }
+          },
+          "servers": {
+            "description": "Specify remote servers to receive the request",
+            "type": {
+              "type": "nullable",
+              "underlying_type": {
+                "element_type": {
+                  "name": "RestServerId",
+                  "type": "named"
+                },
+                "type": "array"
+              }
+            }
+          }
+        }
+      },
+      "RestSingleOptions": {
+        "description": "Execution options for REST requests to a single server",
+        "fields": {
+          "servers": {
+            "description": "Specify remote servers to receive the request. If there are many server IDs the server is selected randomly",
+            "type": {
+              "type": "nullable",
+              "underlying_type": {
+                "element_type": {
+                  "name": "RestServerId",
+                  "type": "named"
+                },
+                "type": "array"
+              }
+            }
+          }
+        }
+      }
+    },
+    "procedures": {
+      "addPet": {
+        "request": {
+          "url": "/pet",
+          "method": "post",
+          "type": "rest",
+          "headers": {
+            "Content-Type": {
+              "value": "application/json"
+            }
+          },
+          "security": [
+            {
+              "api_key": []
+            }
+          ],
+          "requestBody": {
+            "contentType": "application/json"
+          },
+          "response": {
+            "contentType": ""
+          }
+        },
+        "arguments": {
+          "body": {
+            "description": "Request body of /pet",
+            "type": {
+              "name": "Pet",
+              "type": "named"
+            },
+            "rest": {
+              "in": "body"
+            }
+          },
+          "headers": {
+            "description": "Headers forwarded from the Hasura engine",
+            "type": {
+              "type": "nullable",
+              "underlying_type": {
+                "name": "JSON",
+                "type": "named"
+              }
+            }
+          },
+          "restOptions": {
+            "description": "Execution options for REST requests to a single server",
+            "type": {
+              "type": "nullable",
+              "underlying_type": {
+                "name": "RestSingleOptions",
+                "type": "named"
+              }
+            }
+          }
+        },
+        "description": "Add a new pet to the store",
+        "result_type": {
+          "name": "Pet",
+          "type": "named"
+        }
+      },
+      "addPetDistributed": {
+        "request": {
+          "url": "/pet",
+          "method": "post",
+          "type": "rest",
+          "headers": {
+            "Content-Type": {
+              "value": "application/json"
+            }
+          },
+          "security": [
+            {
+              "api_key": []
+            }
+          ],
+          "requestBody": {
+            "contentType": "application/json"
+          },
+          "response": {
+            "contentType": ""
+          }
+        },
+        "arguments": {
+          "body": {
+            "description": "Request body of /pet",
+            "type": {
+              "name": "Pet",
+              "type": "named"
+            },
+            "rest": {
+              "in": "body"
+            }
+          },
+          "headers": {
+            "description": "Headers forwarded from the Hasura engine",
+            "type": {
+              "type": "nullable",
+              "underlying_type": {
+                "name": "JSON",
+                "type": "named"
+              }
+            }
+          },
+          "restOptions": {
+            "description": "Distributed execution options for REST requests to multiple servers",
+            "type": {
+              "type": "nullable",
+              "underlying_type": {
+                "name": "RestDistributedOptions",
+                "type": "named"
+              }
+            }
+          }
+        },
+        "description": "Add a new pet to the store",
+        "result_type": {
+          "name": "AddPetDistributedResult",
+          "type": "named"
+        }
+      },
+      "createModel": {
+        "request": {
+          "url": "/model",
+          "method": "post",
+          "type": "rest",
+          "requestBody": {
+            "contentType": "application/json"
+          },
+          "response": {
+            "contentType": "application/x-ndjson"
+          }
+        },
+        "arguments": {
+          "body": {
+            "description": "Request body of POST /api/create",
+            "type": {
+              "name": "CreateModelRequest",
+              "type": "named"
+            }
+          },
+          "headers": {
+            "description": "Headers forwarded from the Hasura engine",
+            "type": {
+              "type": "nullable",
+              "underlying_type": {
+                "name": "JSON",
+                "type": "named"
+              }
+            }
+          },
+          "restOptions": {
+            "description": "Execution options for REST requests to a single server",
+            "type": {
+              "type": "nullable",
+              "underlying_type": {
+                "name": "RestSingleOptions",
+                "type": "named"
+              }
+            }
+          }
+        },
+        "result_type": {
+          "element_type": {
+            "name": "ProgressResponse",
+            "type": "named"
+          },
+          "type": "array"
+        }
+      },
+      "createModelDistributed": {
+        "request": {
+          "url": "/model",
+          "method": "post",
+          "type": "rest",
+          "requestBody": {
+            "contentType": "application/json"
+          },
+          "response": {
+            "contentType": "application/x-ndjson"
+          }
+        },
+        "arguments": {
+          "body": {
+            "description": "Request body of POST /api/create",
+            "type": {
+              "name": "CreateModelRequest",
+              "type": "named"
+            }
+          },
+          "headers": {
+            "description": "Headers forwarded from the Hasura engine",
+            "type": {
+              "type": "nullable",
+              "underlying_type": {
+                "name": "JSON",
+                "type": "named"
+              }
+            }
+          },
+          "restOptions": {
+            "description": "Distributed execution options for REST requests to multiple servers",
+            "type": {
+              "type": "nullable",
+              "underlying_type": {
+                "name": "RestDistributedOptions",
+                "type": "named"
+              }
+            }
+          }
+        },
+        "result_type": {
+          "name": "CreateModelDistributedResult",
+          "type": "named"
+        }
+      }
+    },
+    "scalar_types": {
+      "Boolean": {
+        "aggregate_functions": {},
+        "comparison_operators": {}
+      },
+      "Int": {
+        "aggregate_functions": {},
+        "comparison_operators": {}
+      },
+      "JSON": {
+        "aggregate_functions": {},
+        "comparison_operators": {}
+      },
+      "RestServerId": {
+        "aggregate_functions": {},
+        "comparison_operators": {},
+        "representation": {
+          "one_of": ["dog", "cat"],
+          "type": "enum"
+        }
+      },
+      "String": {
+        "aggregate_functions": {},
+        "comparison_operators": {}
+      }
+    }
+  }
+]

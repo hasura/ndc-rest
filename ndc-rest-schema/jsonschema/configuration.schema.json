@@ -68,13 +68,19 @@
         "distributed": {
           "type": "boolean",
           "description": "Distributed enables distributed schema"
+        },
+        "timeout": {
+          "$ref": "#/$defs/EnvInt",
+          "description": "configure the request timeout in seconds."
+        },
+        "retry": {
+          "$ref": "#/$defs/RetryPolicySetting"
         }
       },
       "additionalProperties": false,
       "type": "object",
       "required": [
-        "file",
-        "distributed"
+        "file"
       ],
       "description": "ConfigItem extends the ConvertConfig with advanced options"
     },
@@ -82,6 +88,13 @@
       "properties": {
         "output": {
           "type": "string"
+        },
+        "strict": {
+          "type": "boolean",
+          "description": "Require strict validation"
+        },
+        "forwardHeaders": {
+          "$ref": "#/$defs/ForwardHeadersSettings"
         },
         "files": {
           "items": {
@@ -93,9 +106,83 @@
       "additionalProperties": false,
       "type": "object",
       "required": [
+        "strict",
+        "forwardHeaders",
         "files"
       ],
       "description": "Configuration contains required settings for the connector."
+    },
+    "EnvInt": {
+      "anyOf": [
+        {
+          "required": [
+            "value"
+          ],
+          "title": "value"
+        },
+        {
+          "required": [
+            "env"
+          ],
+          "title": "env"
+        }
+      ],
+      "properties": {
+        "value": {
+          "type": "integer"
+        },
+        "env": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object"
+    },
+    "ForwardHeadersSettings": {
+      "properties": {
+        "enabled": {
+          "type": "boolean"
+        },
+        "argumentField": {
+          "oneOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "responseHeadersField": {
+          "oneOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "responseResultField": {
+          "oneOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "additionalProperties": false,
+      "type": "object",
+      "required": [
+        "enabled",
+        "argumentField",
+        "responseHeadersField",
+        "responseResultField"
+      ],
+      "description": "ForwardHeadersSettings hold settings of header forwarding from Hasura engine"
     },
     "PatchConfig": {
       "properties": {
@@ -116,6 +203,28 @@
         "path",
         "strategy"
       ]
+    },
+    "RetryPolicySetting": {
+      "properties": {
+        "times": {
+          "$ref": "#/$defs/EnvInt",
+          "description": "Number of retry times"
+        },
+        "delay": {
+          "$ref": "#/$defs/EnvInt",
+          "description": "Delay retry delay in milliseconds"
+        },
+        "httpStatus": {
+          "items": {
+            "type": "integer"
+          },
+          "type": "array",
+          "description": "HTTPStatus retries if the remote service returns one of these http status"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object",
+      "description": "RetryPolicySetting represents retry policy settings"
     },
     "SchemaSpecType": {
       "type": "string",

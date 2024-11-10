@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"regexp"
 
 	rest "github.com/hasura/ndc-rest/ndc-rest-schema/schema"
 	restUtils "github.com/hasura/ndc-rest/ndc-rest-schema/utils"
@@ -16,6 +17,8 @@ var (
 	errHTTPMethodRequired = errors.New("the HTTP method is required")
 )
 
+var fieldNameRegex = regexp.MustCompile(`^[a-zA-Z_]\w+$`)
+
 // Configuration contains required settings for the connector.
 type Configuration struct {
 	Output string `json:"output,omitempty" yaml:"output,omitempty"`
@@ -27,8 +30,10 @@ type Configuration struct {
 
 // ForwardHeadersSettings hold settings of header forwarding from Hasura engine
 type ForwardHeadersSettings struct {
-	Enabled      bool   `json:"enabled" yaml:"enabled"`
-	ArgumentName string `json:"argumentName" yaml:"argumentName"`
+	Enabled              bool    `json:"enabled" yaml:"enabled"`
+	ArgumentField        *string `json:"argumentField" yaml:"argumentField" jsonschema:"oneof_type=string;null,pattern=^[a-zA-Z_]\\w+$"`
+	ResponseHeadersField *string `json:"responseHeadersField" yaml:"responseHeadersField" jsonschema:"oneof_type=string;null,pattern=^[a-zA-Z_]\\w+$"`
+	ResponseResultField  *string `json:"responseResultField" yaml:"responseResultField" jsonschema:"oneof_type=string;null,pattern=^[a-zA-Z_]\\w+$"`
 }
 
 // UnmarshalJSON implements json.Unmarshaler.
@@ -39,8 +44,22 @@ func (j *ForwardHeadersSettings) UnmarshalJSON(b []byte) error {
 		return err
 	}
 
-	if rawResult.Enabled && rawResult.ArgumentName == "" {
-		return errors.New("forwardHeaders.argumentName must not be empty if enabled")
+	if rawResult.Enabled {
+		if rawResult.ArgumentField != nil && !fieldNameRegex.MatchString(*rawResult.ArgumentField) {
+			return fmt.Errorf("invalid forwardHeaders.argumentField name format: %s", *rawResult.ArgumentField)
+		}
+		if rawResult.ResponseHeadersField != nil && !fieldNameRegex.MatchString(*rawResult.ResponseHeadersField) {
+			return fmt.Errorf("invalid forwardHeaders.responseHeadersField name format: %s", *rawResult.ResponseHeadersField)
+		}
+		if rawResult.ResponseResultField != nil && !fieldNameRegex.MatchString(*rawResult.ResponseResultField) {
+			return fmt.Errorf("invalid forwardHeaders.responseResultField name format: %s", *rawResult.ResponseResultField)
+		}
+		if rawResult.ResponseHeadersField != nil && rawResult.ResponseResultField == nil {
+			return errors.New("forwardHeaders: responseResultField is required if responseHeadersField is set")
+		}
+		if rawResult.ResponseHeadersField == nil && rawResult.ResponseResultField != nil {
+			return errors.New("forwardHeaders: responseHeadersField is required if responseResultField is set")
+		}
 	}
 
 	*j = ForwardHeadersSettings(rawResult)
@@ -59,33 +78,38 @@ type RetryPolicySetting struct {
 
 // Validate if the current instance is valid
 func (rs RetryPolicySetting) Validate() (*rest.RetryPolicy, error) {
+	var errs []error
 	times, err := rs.Times.Get()
 	if err != nil {
-		return nil, err
-	}
-	if times < 0 {
-		return nil, errors.New("retry policy times must be positive")
+		errs = append(errs, err)
+	} else if times < 0 {
+		errs = append(errs, errors.New("retry policy times must be positive"))
 	}
 
 	delay, err := rs.Delay.Get()
 	if err != nil {
-		return nil, err
-	}
-	if delay < 0 {
-		return nil, errors.New("retry delay must be larger than 0")
+		errs = append(errs, err)
+	} else if delay < 0 {
+		errs = append(errs, errors.New("retry delay must be larger than 0"))
 	}
 
 	for _, status := range rs.HTTPStatus {
 		if status < 400 || status >= 600 {
-			return nil, errors.New("retry http status must be in between 400 and 599")
+			errs = append(errs, errors.New("retry http status must be in between 400 and 599"))
+			break
 		}
 	}
 
-	return &rest.RetryPolicy{
+	result := &rest.RetryPolicy{
 		Times:      uint(times),
 		Delay:      uint(delay),
 		HTTPStatus: rs.HTTPStatus,
-	}, nil
+	}
+
+	if len(errs) > 0 {
+		return result, errors.Join(errs...)
+	}
+	return result, nil
 }
 
 // ConfigItem extends the ConvertConfig with advanced options
@@ -93,33 +117,42 @@ type ConfigItem struct {
 	ConvertConfig `yaml:",inline"`
 
 	// Distributed enables distributed schema
-	Distributed bool `json:"distributed" yaml:"distributed"`
+	Distributed *bool `json:"distributed,omitempty" yaml:"distributed,omitempty"`
 	// configure the request timeout in seconds.
 	Timeout *utils.EnvInt       `json:"timeout,omitempty"         mapstructure:"timeout"         yaml:"timeout,omitempty"`
 	Retry   *RetryPolicySetting `json:"retry,omitempty"           mapstructure:"retry"           yaml:"retry,omitempty"`
 }
 
+// IsDistributed checks if the distributed option is enabled
+func (ci ConfigItem) IsDistributed() bool {
+	return ci.Distributed != nil && *ci.Distributed
+}
+
 // GetRuntimeSettings validate and get runtime settings
 func (ci ConfigItem) GetRuntimeSettings() (*rest.RuntimeSettings, error) {
 	result := &rest.RuntimeSettings{}
-
+	var errs []error
 	if ci.Timeout != nil {
 		timeout, err := ci.Timeout.Get()
 		if err != nil {
-			return nil, fmt.Errorf("timeout: %w", err)
+			errs = append(errs, fmt.Errorf("timeout: %w", err))
+		} else if timeout < 0 {
+			errs = append(errs, fmt.Errorf("timeout must be positive, got: %d", timeout))
+		} else {
+			result.Timeout = uint(timeout)
 		}
-		if timeout < 0 {
-			return nil, fmt.Errorf("timeout must be positive, got: %d", timeout)
-		}
-		result.Timeout = uint(timeout)
 	}
 
 	if ci.Retry != nil {
 		retryPolicy, err := ci.Retry.Validate()
 		if err != nil {
-			return nil, fmt.Errorf("ConfigItem.retry: %w", err)
+			errs = append(errs, fmt.Errorf("ConfigItem.retry: %w", err))
 		}
 		result.Retry = *retryPolicy
+	}
+
+	if len(errs) > 0 {
+		return result, errors.Join(errs...)
 	}
 
 	return result, nil

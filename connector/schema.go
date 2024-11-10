@@ -54,11 +54,10 @@ func (c *RESTConnector) parseRESTOptionsFromArguments(argumentsInfo map[string]r
 		return &result, nil
 	}
 	rawRestOptions, ok := rawArgs[rest.RESTOptionsArgumentName]
-	if !ok {
-		return &result, nil
-	}
-	if err := result.FromValue(rawRestOptions); err != nil {
-		return nil, err
+	if ok {
+		if err := result.FromValue(rawRestOptions); err != nil {
+			return nil, err
+		}
 	}
 	restOptionsNamedType := schema.GetUnderlyingNamedType(argInfo.Type)
 	result.Distributed = restOptionsNamedType != nil && restOptionsNamedType.Name == rest.RESTDistributedOptionsObjectName
@@ -67,17 +66,17 @@ func (c *RESTConnector) parseRESTOptionsFromArguments(argumentsInfo map[string]r
 }
 
 func (c *RESTConnector) evalForwardedHeaders(req *internal.RetryableRequest, rawArgs map[string]any) error {
-	if !c.config.ForwardHeaders.Enabled {
+	if !c.config.ForwardHeaders.Enabled || c.config.ForwardHeaders.ArgumentField == nil {
 		return nil
 	}
-	rawHeaders, ok := rawArgs[c.config.ForwardHeaders.ArgumentName]
-	if ok {
+	rawHeaders, ok := rawArgs[*c.config.ForwardHeaders.ArgumentField]
+	if !ok {
 		return nil
 	}
 
 	var headers map[string]string
 	if err := mapstructure.Decode(rawHeaders, &headers); err != nil {
-		return fmt.Errorf("arguments.%s: %w", c.config.ForwardHeaders.ArgumentName, err)
+		return fmt.Errorf("arguments.%s: %w", *c.config.ForwardHeaders.ArgumentField, err)
 	}
 
 	for key, value := range headers {

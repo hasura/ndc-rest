@@ -245,7 +245,7 @@ func buildRESTArguments(config *Configuration, restSchema *rest.NDCRestSchema, c
 		applyOperationInfo(config, &proc)
 	}
 
-	if !conf.Distributed {
+	if !conf.IsDistributed() {
 		return
 	}
 
@@ -305,7 +305,7 @@ func buildRESTArguments(config *Configuration, restSchema *rest.NDCRestSchema, c
 func applyOperationInfo(config *Configuration, info *rest.OperationInfo) {
 	info.Arguments[rest.RESTOptionsArgumentName] = restSingleOptionsArgument
 	if config.ForwardHeaders.Enabled {
-		info.Arguments[config.ForwardHeaders.ArgumentName] = headersArguments
+		info.Arguments[*config.ForwardHeaders.ArgumentField] = headersArguments
 	}
 }
 

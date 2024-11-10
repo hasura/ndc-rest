@@ -31,10 +31,8 @@ func (j *NDCRestSettings) UnmarshalJSON(b []byte) error {
 	}
 
 	result := NDCRestSettings(raw)
+	_ = result.Validate()
 
-	if err := result.Validate(); err != nil {
-		return err
-	}
 	*j = result
 	return nil
 }
@@ -95,10 +93,8 @@ func (j *ServerConfig) UnmarshalJSON(b []byte) error {
 	}
 
 	result := ServerConfig(raw)
+	_ = result.Validate()
 
-	if err := result.Validate(); err != nil {
-		return err
-	}
 	*j = result
 
 	return nil

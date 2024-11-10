@@ -88,54 +88,83 @@
       "type": "object",
       "description": "EncodingObject represents the Encoding Object that contains serialization strategy for application/x-www-form-urlencoded\n\n[Encoding Object]: https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#encoding-object"
     },
-    "EnvBoolean": {
-      "oneOf": [
+    "EnvBool": {
+      "anyOf": [
         {
+          "required": [
+            "value"
+          ],
+          "title": "value"
+        },
+        {
+          "required": [
+            "env"
+          ],
+          "title": "env"
+        }
+      ],
+      "properties": {
+        "value": {
           "type": "boolean"
         },
-        {
+        "env": {
           "type": "string"
         }
-      ]
+      },
+      "additionalProperties": false,
+      "type": "object"
     },
     "EnvInt": {
-      "oneOf": [
+      "anyOf": [
         {
+          "required": [
+            "value"
+          ],
+          "title": "value"
+        },
+        {
+          "required": [
+            "env"
+          ],
+          "title": "env"
+        }
+      ],
+      "properties": {
+        "value": {
           "type": "integer"
         },
-        {
+        "env": {
           "type": "string"
         }
-      ]
-    },
-    "EnvInts": {
-      "oneOf": [
-        {
-          "type": "string"
-        },
-        {
-          "items": {
-            "type": "integer"
-          },
-          "type": "array"
-        }
-      ]
+      },
+      "additionalProperties": false,
+      "type": "object"
     },
     "EnvString": {
-      "type": "string"
-    },
-    "EnvStrings": {
-      "oneOf": [
+      "anyOf": [
         {
-          "type": "string"
+          "required": [
+            "value"
+          ],
+          "title": "value"
         },
         {
-          "items": {
-            "type": "string"
-          },
-          "type": "array"
+          "required": [
+            "env"
+          ],
+          "title": "env"
         }
-      ]
+      ],
+      "properties": {
+        "value": {
+          "type": "string"
+        },
+        "env": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object"
     },
     "NDCRestSchema": {
       "properties": {
@@ -194,13 +223,6 @@
             "$ref": "#/$defs/EnvString"
           },
           "type": "object"
-        },
-        "timeout": {
-          "$ref": "#/$defs/EnvInt",
-          "description": "configure the request timeout in seconds, default 30s"
-        },
-        "retry": {
-          "$ref": "#/$defs/RetryPolicySetting"
         },
         "securitySchemes": {
           "additionalProperties": {
@@ -288,10 +310,6 @@
           "type": "string",
           "description": "Column description"
         },
-        "name": {
-          "type": "string",
-          "description": "The name of the procedure"
-        },
         "result_type": {
           "$ref": "#/$defs/Type",
           "description": "The name of the result type"
@@ -302,7 +320,6 @@
       "required": [
         "request",
         "arguments",
-        "name",
         "result_type"
       ],
       "description": "OperationInfo extends connector command operation with OpenAPI REST information"
@@ -357,10 +374,6 @@
         "security": {
           "$ref": "#/$defs/AuthSecurities"
         },
-        "timeout": {
-          "type": "integer",
-          "description": "configure the request timeout in seconds, default 30s"
-        },
         "servers": {
           "items": {
             "$ref": "#/$defs/ServerConfig"
@@ -372,6 +385,9 @@
         },
         "response": {
           "$ref": "#/$defs/Response"
+        },
+        "timeout": {
+          "type": "integer"
         },
         "retry": {
           "$ref": "#/$defs/RetryPolicy"
@@ -478,25 +494,6 @@
       "additionalProperties": false,
       "type": "object",
       "description": "RetryPolicy represents the retry policy of request"
-    },
-    "RetryPolicySetting": {
-      "properties": {
-        "times": {
-          "$ref": "#/$defs/EnvInt",
-          "description": "Number of retry times"
-        },
-        "delay": {
-          "$ref": "#/$defs/EnvInt",
-          "description": "Delay retry delay in milliseconds"
-        },
-        "httpStatus": {
-          "$ref": "#/$defs/EnvInts",
-          "description": "HTTPStatus retries if the remote service returns one of these http status"
-        }
-      },
-      "additionalProperties": false,
-      "type": "object",
-      "description": "RetryPolicySetting represents retry policy settings"
     },
     "ScalarType": {
       "properties": {
@@ -644,13 +641,6 @@
           },
           "type": "object"
         },
-        "timeout": {
-          "$ref": "#/$defs/EnvInt",
-          "description": "configure the request timeout in seconds, default 30s"
-        },
-        "retry": {
-          "$ref": "#/$defs/RetryPolicySetting"
-        },
         "securitySchemes": {
           "additionalProperties": {
             "$ref": "#/$defs/SecurityScheme"
@@ -698,11 +688,11 @@
           "description": "Alternative to ca_file. Provide the CA cert contents as a string instead of a filepath."
         },
         "insecureSkipVerify": {
-          "$ref": "#/$defs/EnvBoolean",
+          "$ref": "#/$defs/EnvBool",
           "description": "Additionally you can configure TLS to be enabled but skip verifying the server's certificate chain."
         },
         "includeSystemCACertsPool": {
-          "$ref": "#/$defs/EnvBoolean",
+          "$ref": "#/$defs/EnvBool",
           "description": "Whether to load the system certificate authorities pool alongside the certificate authority."
         },
         "minVersion": {
@@ -714,7 +704,10 @@
           "description": "Maximum acceptable TLS version."
         },
         "cipherSuites": {
-          "$ref": "#/$defs/EnvStrings",
+          "items": {
+            "type": "string"
+          },
+          "type": "array",
           "description": "Explicit cipher suites can be set. If left blank, a safe default list is used.\nSee https://go.dev/src/crypto/tls/cipher_suites.go for a list of supported cipher suites."
         },
         "reloadInterval": {
