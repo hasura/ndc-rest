@@ -1,12 +1,12 @@
-# NDC REST Connector
+# REST Connector
 
-NDC REST Connector allows you to quickly convert REST APIs to NDC schema and proxy requests from GraphQL Engine v3 to remote services.
+REST Connector allows you to quickly convert REST APIs to NDC schema and proxy requests from GraphQL Engine v3 to remote services.
 The connector can automatically transform OpenAPI 2.0 and 3.0 definitions to NDC schema.
 
 ![REST connector](./assets/rest_connector.png)
 
 > [!NOTE]
-> REST connector is configuration-based and doesn't limit to the OpenAPI specs only. Use [OpenAPI Connector](https://hasura.io/docs/3.0/connectors/external-apis/open-api) if you want to take more controls of OpenAPI via code generation.
+> REST connector is configuration-based and isn't limited to the OpenAPI specs only. Use [OpenAPI Connector](https://hasura.io/docs/3.0/connectors/external-apis/open-api) if you want to take more control of OpenAPI via code generation.
 
 ## Quick start
 
@@ -143,12 +143,12 @@ See [the example](./ndc-rest-schema/command/testdata/patch) for more context.
 
 ## Distributed execution
 
-Imagine that your backend have many server replications, or multiple applications with different credentials. You want to:
+Imagine that your backend has many server replications or multiple applications with different credentials. You want to:
 
-- Specify the server where the request will be executed to.
+- Specify the server where the request will be executed.
 - Execute an operation to all servers.
 
-For example, with below server settings, the connector will replicate existing operations with `Distributed` suffixes:
+For example, with the following server settings, the connector will replicate existing operations with `Distributed` suffixes:
 
 ```yaml
 settings:
