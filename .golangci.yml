@@ -39,6 +39,7 @@ linters:
     - unparam
     - forbidigo
     - tagalign
+    - recvcheck
 
 issues:
   exclude-files:

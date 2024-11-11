@@ -1,5 +1,5 @@
 {
-  "$schema": "https://raw.githubusercontent.com/hasura/ndc-rest-schema/main/jsonschema/ndc-rest-schema.jsonschema",
+  "$schema": "https://raw.githubusercontent.com/hasura/ndc-rest/refs/heads/main/ndc-rest-schema/jsonschema/ndc-rest-schema.schema.json",
   "settings": {
     "servers": [
       {
@@ -34,9 +34,7 @@
             "name": "id",
             "in": "query",
             "schema": {
-              "type": [
-                "integer"
-              ]
+              "type": ["integer"]
             }
           }
         },
@@ -53,9 +51,7 @@
             "name": "userId",
             "in": "query",
             "schema": {
-              "type": [
-                "integer"
-              ]
+              "type": ["integer"]
             }
           }
         }
@@ -88,9 +84,7 @@
             "name": "id",
             "in": "path",
             "schema": {
-              "type": [
-                "integer"
-              ]
+              "type": ["integer"]
             }
           }
         }
@@ -120,9 +114,7 @@
             "name": "id",
             "in": "path",
             "schema": {
-              "type": [
-                "integer"
-              ]
+              "type": ["integer"]
             }
           }
         }
@@ -155,9 +147,7 @@
             "name": "id",
             "in": "path",
             "schema": {
-              "type": [
-                "integer"
-              ]
+              "type": ["integer"]
             }
           }
         }
@@ -190,9 +180,7 @@
             "name": "id",
             "in": "query",
             "schema": {
-              "type": [
-                "integer"
-              ]
+              "type": ["integer"]
             }
           }
         },
@@ -209,9 +197,7 @@
             "name": "postId",
             "in": "query",
             "schema": {
-              "type": [
-                "integer"
-              ]
+              "type": ["integer"]
             }
           }
         }
@@ -244,9 +230,7 @@
             "name": "id",
             "in": "path",
             "schema": {
-              "type": [
-                "integer"
-              ]
+              "type": ["integer"]
             }
           }
         }
@@ -279,9 +263,7 @@
             "name": "albumId",
             "in": "query",
             "schema": {
-              "type": [
-                "integer"
-              ]
+              "type": ["integer"]
             }
           }
         },
@@ -298,9 +280,7 @@
             "name": "id",
             "in": "query",
             "schema": {
-              "type": [
-                "integer"
-              ]
+              "type": ["integer"]
             }
           }
         }
@@ -333,9 +313,7 @@
             "name": "id",
             "in": "path",
             "schema": {
-              "type": [
-                "integer"
-              ]
+              "type": ["integer"]
             }
           }
         }
@@ -368,9 +346,7 @@
             "name": "id",
             "in": "query",
             "schema": {
-              "type": [
-                "integer"
-              ]
+              "type": ["integer"]
             }
           }
         },
@@ -387,9 +363,7 @@
             "name": "userId",
             "in": "query",
             "schema": {
-              "type": [
-                "integer"
-              ]
+              "type": ["integer"]
             }
           }
         }
@@ -422,9 +396,7 @@
             "name": "id",
             "in": "path",
             "schema": {
-              "type": [
-                "integer"
-              ]
+              "type": ["integer"]
             }
           }
         }
@@ -472,9 +444,7 @@
             "name": "id",
             "in": "path",
             "schema": {
-              "type": [
-                "integer"
-              ]
+              "type": ["integer"]
             }
           }
         }
@@ -507,9 +477,7 @@
             "name": "id",
             "in": "query",
             "schema": {
-              "type": [
-                "integer"
-              ]
+              "type": ["integer"]
             }
           }
         },
@@ -526,9 +494,7 @@
             "name": "userId",
             "in": "query",
             "schema": {
-              "type": [
-                "integer"
-              ]
+              "type": ["integer"]
             }
           }
         }
@@ -561,9 +527,7 @@
             "name": "id",
             "in": "path",
             "schema": {
-              "type": [
-                "integer"
-              ]
+              "type": ["integer"]
             }
           }
         }
@@ -596,9 +560,7 @@
             "name": "email",
             "in": "query",
             "schema": {
-              "type": [
-                "integer"
-              ]
+              "type": ["integer"]
             }
           }
         },
@@ -615,9 +577,7 @@
             "name": "id",
             "in": "query",
             "schema": {
-              "type": [
-                "integer"
-              ]
+              "type": ["integer"]
             }
           }
         }
@@ -644,9 +604,7 @@
             }
           },
           "rest": {
-            "type": [
-              "integer"
-            ],
+            "type": ["integer"],
             "format": "int64"
           }
         },
@@ -659,9 +617,7 @@
             }
           },
           "rest": {
-            "type": [
-              "string"
-            ]
+            "type": ["string"]
           }
         },
         "userId": {
@@ -673,9 +629,7 @@
             }
           },
           "rest": {
-            "type": [
-              "integer"
-            ],
+            "type": ["integer"],
             "format": "int64"
           }
         }
@@ -692,9 +646,7 @@
             }
           },
           "rest": {
-            "type": [
-              "string"
-            ]
+            "type": ["string"]
           }
         },
         "email": {
@@ -706,9 +658,7 @@
             }
           },
           "rest": {
-            "type": [
-              "string"
-            ],
+            "type": ["string"],
             "format": "email"
           }
         },
@@ -721,9 +671,7 @@
             }
           },
           "rest": {
-            "type": [
-              "integer"
-            ],
+            "type": ["integer"],
             "format": "int64"
           }
         },
@@ -736,9 +684,7 @@
             }
           },
           "rest": {
-            "type": [
-              "string"
-            ]
+            "type": ["string"]
           }
         },
         "postId": {
@@ -750,9 +696,7 @@
             }
           },
           "rest": {
-            "type": [
-              "integer"
-            ],
+            "type": ["integer"],
             "format": "int64"
           }
         }
@@ -769,9 +713,7 @@
             }
           },
           "rest": {
-            "type": [
-              "integer"
-            ],
+            "type": ["integer"],
             "format": "int64"
           }
         },
@@ -784,9 +726,7 @@
             }
           },
           "rest": {
-            "type": [
-              "integer"
-            ],
+            "type": ["integer"],
             "format": "int64"
           }
         },
@@ -799,9 +739,7 @@
             }
           },
           "rest": {
-            "type": [
-              "string"
-            ],
+            "type": ["string"],
             "format": "uri"
           }
         },
@@ -814,9 +752,7 @@
             }
           },
           "rest": {
-            "type": [
-              "string"
-            ]
+            "type": ["string"]
           }
         },
         "url": {
@@ -828,9 +764,7 @@
             }
           },
           "rest": {
-            "type": [
-              "string"
-            ],
+            "type": ["string"],
             "format": "uri"
           }
         }
@@ -847,9 +781,7 @@
             }
           },
           "rest": {
-            "type": [
-              "string"
-            ]
+            "type": ["string"]
           }
         },
         "id": {
@@ -861,9 +793,7 @@
             }
           },
           "rest": {
-            "type": [
-              "integer"
-            ],
+            "type": ["integer"],
             "format": "int64"
           }
         },
@@ -876,9 +806,7 @@
             }
           },
           "rest": {
-            "type": [
-              "string"
-            ]
+            "type": ["string"]
           }
         },
         "userId": {
@@ -890,9 +818,7 @@
             }
           },
           "rest": {
-            "type": [
-              "integer"
-            ],
+            "type": ["integer"],
             "format": "int64"
           }
         }
@@ -909,9 +835,7 @@
             }
           },
           "rest": {
-            "type": [
-              "boolean"
-            ]
+            "type": ["boolean"]
           }
         },
         "id": {
@@ -923,9 +847,7 @@
             }
           },
           "rest": {
-            "type": [
-              "integer"
-            ],
+            "type": ["integer"],
             "format": "int64"
           }
         },
@@ -938,9 +860,7 @@
             }
           },
           "rest": {
-            "type": [
-              "string"
-            ]
+            "type": ["string"]
           }
         },
         "userId": {
@@ -952,9 +872,7 @@
             }
           },
           "rest": {
-            "type": [
-              "integer"
-            ],
+            "type": ["integer"],
             "format": "int64"
           }
         }
@@ -971,9 +889,7 @@
             }
           },
           "rest": {
-            "type": [
-              "object"
-            ]
+            "type": ["object"]
           }
         },
         "company": {
@@ -985,9 +901,7 @@
             }
           },
           "rest": {
-            "type": [
-              "object"
-            ]
+            "type": ["object"]
           }
         },
         "email": {
@@ -999,9 +913,7 @@
             }
           },
           "rest": {
-            "type": [
-              "string"
-            ],
+            "type": ["string"],
             "format": "email"
           }
         },
@@ -1014,9 +926,7 @@
             }
           },
           "rest": {
-            "type": [
-              "integer"
-            ],
+            "type": ["integer"],
             "format": "int64"
           }
         },
@@ -1029,9 +939,7 @@
             }
           },
           "rest": {
-            "type": [
-              "string"
-            ]
+            "type": ["string"]
           }
         },
         "phone": {
@@ -1043,9 +951,7 @@
             }
           },
           "rest": {
-            "type": [
-              "string"
-            ]
+            "type": ["string"]
           }
         },
         "username": {
@@ -1057,9 +963,7 @@
             }
           },
           "rest": {
-            "type": [
-              "string"
-            ]
+            "type": ["string"]
           }
         },
         "website": {
@@ -1071,9 +975,7 @@
             }
           },
           "rest": {
-            "type": [
-              "string"
-            ]
+            "type": ["string"]
           }
         }
       }
@@ -1089,9 +991,7 @@
             }
           },
           "rest": {
-            "type": [
-              "string"
-            ]
+            "type": ["string"]
           }
         },
         "geo": {
@@ -1103,9 +1003,7 @@
             }
           },
           "rest": {
-            "type": [
-              "object"
-            ]
+            "type": ["object"]
           }
         },
         "street": {
@@ -1117,9 +1015,7 @@
             }
           },
           "rest": {
-            "type": [
-              "string"
-            ]
+            "type": ["string"]
           }
         },
         "suite": {
@@ -1131,9 +1027,7 @@
             }
           },
           "rest": {
-            "type": [
-              "string"
-            ]
+            "type": ["string"]
           }
         },
         "zipcode": {
@@ -1145,9 +1039,7 @@
             }
           },
           "rest": {
-            "type": [
-              "string"
-            ]
+            "type": ["string"]
           }
         }
       }
@@ -1163,9 +1055,7 @@
             }
           },
           "rest": {
-            "type": [
-              "string"
-            ]
+            "type": ["string"]
           }
         },
         "lng": {
@@ -1177,9 +1067,7 @@
             }
           },
           "rest": {
-            "type": [
-              "string"
-            ]
+            "type": ["string"]
           }
         }
       }
@@ -1195,9 +1083,7 @@
             }
           },
           "rest": {
-            "type": [
-              "string"
-            ]
+            "type": ["string"]
           }
         },
         "catchPhrase": {
@@ -1209,9 +1095,7 @@
             }
           },
           "rest": {
-            "type": [
-              "string"
-            ]
+            "type": ["string"]
           }
         },
         "name": {
@@ -1223,9 +1107,7 @@
             }
           },
           "rest": {
-            "type": [
-              "string"
-            ]
+            "type": ["string"]
           }
         }
       }
@@ -1253,9 +1135,7 @@
           "rest": {
             "in": "body",
             "schema": {
-              "type": [
-                "object"
-              ]
+              "type": ["object"]
             }
           }
         }
@@ -1285,9 +1165,7 @@
             "name": "id",
             "in": "path",
             "schema": {
-              "type": [
-                "integer"
-              ]
+              "type": ["integer"]
             }
           }
         }
@@ -1322,9 +1200,7 @@
           "rest": {
             "in": "body",
             "schema": {
-              "type": [
-                "object"
-              ]
+              "type": ["object"]
             }
           }
         },
@@ -1338,9 +1214,7 @@
             "name": "id",
             "in": "path",
             "schema": {
-              "type": [
-                "integer"
-              ]
+              "type": ["integer"]
             }
           }
         }
@@ -1372,9 +1246,7 @@
           "rest": {
             "in": "body",
             "schema": {
-              "type": [
-                "object"
-              ]
+              "type": ["object"]
             }
           }
         },
@@ -1388,9 +1260,7 @@
             "name": "id",
             "in": "path",
             "schema": {
-              "type": [
-                "integer"
-              ]
+              "type": ["integer"]
             }
           }
         }

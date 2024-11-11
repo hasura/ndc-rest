@@ -72,7 +72,7 @@ jobs:
       - name: Get version from tag
         id: get-version
         run: |
-          echo "tagged_version=${GITHUB_REF#refs/tags/v}" >> $GITHUB_OUTPUT
+          echo "tagged_version=${GITHUB_REF#refs/tags/}" >> $GITHUB_OUTPUT
         shell: bash
 
       - name: Build connector definition
