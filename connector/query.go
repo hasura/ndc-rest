@@ -1,4 +1,4 @@
-package rest
+package connector
 
 import (
 	"context"
@@ -6,9 +6,9 @@ import (
 	"fmt"
 	"io"
 
-	"github.com/hasura/ndc-rest/connector/internal"
-	"github.com/hasura/ndc-rest/ndc-rest-schema/configuration"
-	rest "github.com/hasura/ndc-rest/ndc-rest-schema/schema"
+	"github.com/hasura/ndc-http/connector/internal"
+	"github.com/hasura/ndc-http/ndc-http-schema/configuration"
+	rest "github.com/hasura/ndc-http/ndc-http-schema/schema"
 	"github.com/hasura/ndc-sdk-go/schema"
 	"github.com/hasura/ndc-sdk-go/utils"
 	"go.opentelemetry.io/otel/codes"
@@ -16,7 +16,7 @@ import (
 )
 
 // Query executes a query.
-func (c *RESTConnector) Query(ctx context.Context, configuration *configuration.Configuration, state *State, request *schema.QueryRequest) (schema.QueryResponse, error) {
+func (c *HTTPConnector) Query(ctx context.Context, configuration *configuration.Configuration, state *State, request *schema.QueryRequest) (schema.QueryResponse, error) {
 	valueField, err := utils.EvalFunctionSelectionFieldValue(request)
 	if err != nil {
 		return nil, schema.UnprocessableContentError(err.Error(), nil)
@@ -34,21 +34,21 @@ func (c *RESTConnector) Query(ctx context.Context, configuration *configuration.
 }
 
 // QueryExplain explains a query by creating an execution plan.
-func (c *RESTConnector) QueryExplain(ctx context.Context, configuration *configuration.Configuration, state *State, request *schema.QueryRequest) (*schema.ExplainResponse, error) {
+func (c *HTTPConnector) QueryExplain(ctx context.Context, configuration *configuration.Configuration, state *State, request *schema.QueryRequest) (*schema.ExplainResponse, error) {
 	requestVars := request.Variables
 	if len(requestVars) == 0 {
 		requestVars = []schema.QueryRequestVariablesElem{make(schema.QueryRequestVariablesElem)}
 	}
 
-	httpRequest, _, restOptions, err := c.explainQuery(request, requestVars[0])
+	httpRequest, _, httpOptions, err := c.explainQuery(request, requestVars[0])
 	if err != nil {
 		return nil, err
 	}
 
-	return serializeExplainResponse(httpRequest, restOptions)
+	return serializeExplainResponse(httpRequest, httpOptions)
 }
 
-func (c *RESTConnector) explainQuery(request *schema.QueryRequest, variables map[string]any) (*internal.RetryableRequest, *rest.OperationInfo, *internal.RESTOptions, error) {
+func (c *HTTPConnector) explainQuery(request *schema.QueryRequest, variables map[string]any) (*internal.RetryableRequest, *rest.OperationInfo, *internal.HTTPOptions, error) {
 	function, metadata, err := c.metadata.GetFunction(request.Collection)
 	if err != nil {
 		return nil, nil, nil, err
@@ -74,19 +74,19 @@ func (c *RESTConnector) explainQuery(request *schema.QueryRequest, variables map
 		})
 	}
 
-	restOptions, err := c.parseRESTOptionsFromArguments(function.Arguments, rawArgs)
+	httpOptions, err := c.parseHTTPOptionsFromArguments(function.Arguments, rawArgs)
 	if err != nil {
-		return nil, nil, nil, schema.UnprocessableContentError("invalid rest options", map[string]any{
+		return nil, nil, nil, schema.UnprocessableContentError("invalid http options", map[string]any{
 			"cause": err.Error(),
 		})
 	}
 
-	restOptions.Settings = metadata.Settings
+	httpOptions.Settings = metadata.Settings
 
-	return req, function, restOptions, err
+	return req, function, httpOptions, err
 }
 
-func (c *RESTConnector) execQuerySync(ctx context.Context, state *State, request *schema.QueryRequest, valueField schema.NestedField, requestVars []schema.QueryRequestVariablesElem) ([]schema.RowSet, error) {
+func (c *HTTPConnector) execQuerySync(ctx context.Context, state *State, request *schema.QueryRequest, valueField schema.NestedField, requestVars []schema.QueryRequestVariablesElem) ([]schema.RowSet, error) {
 	rowSets := make([]schema.RowSet, len(requestVars))
 
 	for i, requestVar := range requestVars {
@@ -107,7 +107,7 @@ func (c *RESTConnector) execQuerySync(ctx context.Context, state *State, request
 	return rowSets, nil
 }
 
-func (c *RESTConnector) execQueryAsync(ctx context.Context, state *State, request *schema.QueryRequest, valueField schema.NestedField, requestVars []schema.QueryRequestVariablesElem) ([]schema.RowSet, error) {
+func (c *HTTPConnector) execQueryAsync(ctx context.Context, state *State, request *schema.QueryRequest, valueField schema.NestedField, requestVars []schema.QueryRequestVariablesElem) ([]schema.RowSet, error) {
 	rowSets := make([]schema.RowSet, len(requestVars))
 
 	eg, ctx := errgroup.WithContext(ctx)
@@ -141,11 +141,11 @@ func (c *RESTConnector) execQueryAsync(ctx context.Context, state *State, reques
 	return rowSets, nil
 }
 
-func (c *RESTConnector) execQuery(ctx context.Context, state *State, request *schema.QueryRequest, queryFields schema.NestedField, variables map[string]any, index int) (any, error) {
+func (c *HTTPConnector) execQuery(ctx context.Context, state *State, request *schema.QueryRequest, queryFields schema.NestedField, variables map[string]any, index int) (any, error) {
 	ctx, span := state.Tracer.Start(ctx, fmt.Sprintf("Execute Query %d", index))
 	defer span.End()
 
-	httpRequest, function, restOptions, err := c.explainQuery(request, variables)
+	httpRequest, function, httpOptions, err := c.explainQuery(request, variables)
 	if err != nil {
 		span.SetStatus(codes.Error, "failed to explain query")
 		span.RecordError(err)
@@ -153,8 +153,8 @@ func (c *RESTConnector) execQuery(ctx context.Context, state *State, request *sc
 		return nil, err
 	}
 
-	restOptions.Concurrency = c.config.Concurrency.REST
-	result, headers, err := c.client.Send(ctx, httpRequest, queryFields, function.ResultType, restOptions)
+	httpOptions.Concurrency = c.config.Concurrency.HTTP
+	result, headers, err := c.client.Send(ctx, httpRequest, queryFields, function.ResultType, httpOptions)
 	if err != nil {
 		span.SetStatus(codes.Error, "failed to execute the http request")
 		span.RecordError(err)
@@ -165,7 +165,7 @@ func (c *RESTConnector) execQuery(ctx context.Context, state *State, request *sc
 	return c.createHeaderForwardingResponse(result, headers), nil
 }
 
-func serializeExplainResponse(httpRequest *internal.RetryableRequest, restOptions *internal.RESTOptions) (*schema.ExplainResponse, error) {
+func serializeExplainResponse(httpRequest *internal.RetryableRequest, httpOptions *internal.HTTPOptions) (*schema.ExplainResponse, error) {
 	explainResp := &schema.ExplainResponse{
 		Details: schema.ExplainResponseDetails{},
 	}
@@ -180,9 +180,9 @@ func serializeExplainResponse(httpRequest *internal.RetryableRequest, restOption
 		explainResp.Details["body"] = string(bodyBytes)
 	}
 
-	restOptions.Distributed = false
-	restOptions.Explain = true
-	requests, err := internal.BuildDistributedRequestsWithOptions(httpRequest, restOptions)
+	httpOptions.Distributed = false
+	httpOptions.Explain = true
+	requests, err := internal.BuildDistributedRequestsWithOptions(httpRequest, httpOptions)
 	if err != nil {
 		return nil, err
 	}

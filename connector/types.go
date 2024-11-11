@@ -1,16 +1,16 @@
-package rest
+package connector
 
 import (
 	"errors"
 	"net/http"
 
-	"github.com/hasura/ndc-rest/connector/internal"
+	"github.com/hasura/ndc-http/connector/internal"
 	"go.opentelemetry.io/otel/trace"
 )
 
 var (
-	errInvalidSchema     = errors.New("failed to validate NDC REST schema")
-	errBuildSchemaFailed = errors.New("failed to build NDC REST schema")
+	errInvalidSchema     = errors.New("failed to validate NDC HTTP schema")
+	errBuildSchemaFailed = errors.New("failed to build NDC HTTP schema")
 )
 
 // State is the global state which is shared for every connector request.
@@ -28,7 +28,7 @@ var defaultOptions options = options{
 	},
 }
 
-// Option is an interface to set custom REST connector options
+// Option is an interface to set custom HTTP connector options
 type Option (func(*options))
 
 // WithClient sets the custom HTTP client that satisfy the Doer interface

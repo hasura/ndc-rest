@@ -1,20 +1,20 @@
-package rest
+package connector
 
 import (
 	"context"
 	"encoding/json"
 	"fmt"
 
-	"github.com/hasura/ndc-rest/connector/internal"
-	"github.com/hasura/ndc-rest/ndc-rest-schema/configuration"
-	rest "github.com/hasura/ndc-rest/ndc-rest-schema/schema"
+	"github.com/hasura/ndc-http/connector/internal"
+	"github.com/hasura/ndc-http/ndc-http-schema/configuration"
+	rest "github.com/hasura/ndc-http/ndc-http-schema/schema"
 	"github.com/hasura/ndc-sdk-go/schema"
 	"go.opentelemetry.io/otel/codes"
 	"golang.org/x/sync/errgroup"
 )
 
 // Mutation executes a mutation.
-func (c *RESTConnector) Mutation(ctx context.Context, configuration *configuration.Configuration, state *State, request *schema.MutationRequest) (*schema.MutationResponse, error) {
+func (c *HTTPConnector) Mutation(ctx context.Context, configuration *configuration.Configuration, state *State, request *schema.MutationRequest) (*schema.MutationResponse, error) {
 	if len(request.Operations) == 1 || c.config.Concurrency.Mutation <= 1 {
 		return c.execMutationSync(ctx, state, request)
 	}
@@ -23,7 +23,7 @@ func (c *RESTConnector) Mutation(ctx context.Context, configuration *configurati
 }
 
 // MutationExplain explains a mutation by creating an execution plan.
-func (c *RESTConnector) MutationExplain(ctx context.Context, configuration *configuration.Configuration, state *State, request *schema.MutationRequest) (*schema.ExplainResponse, error) {
+func (c *HTTPConnector) MutationExplain(ctx context.Context, configuration *configuration.Configuration, state *State, request *schema.MutationRequest) (*schema.ExplainResponse, error) {
 	if len(request.Operations) == 0 {
 		return &schema.ExplainResponse{
 			Details: schema.ExplainResponseDetails{},
@@ -32,18 +32,18 @@ func (c *RESTConnector) MutationExplain(ctx context.Context, configuration *conf
 	operation := request.Operations[0]
 	switch operation.Type {
 	case schema.MutationOperationProcedure:
-		httpRequest, _, restOptions, err := c.explainProcedure(&operation)
+		httpRequest, _, httpOptions, err := c.explainProcedure(&operation)
 		if err != nil {
 			return nil, err
 		}
 
-		return serializeExplainResponse(httpRequest, restOptions)
+		return serializeExplainResponse(httpRequest, httpOptions)
 	default:
 		return nil, schema.BadRequestError(fmt.Sprintf("invalid operation type: %s", operation.Type), nil)
 	}
 }
 
-func (c *RESTConnector) explainProcedure(operation *schema.MutationOperation) (*internal.RetryableRequest, *rest.OperationInfo, *internal.RESTOptions, error) {
+func (c *HTTPConnector) explainProcedure(operation *schema.MutationOperation) (*internal.RetryableRequest, *rest.OperationInfo, *internal.HTTPOptions, error) {
 	procedure, metadata, err := c.metadata.GetProcedure(operation.Name)
 	if err != nil {
 		return nil, nil, nil, err
@@ -70,18 +70,18 @@ func (c *RESTConnector) explainProcedure(operation *schema.MutationOperation) (*
 		})
 	}
 
-	restOptions, err := c.parseRESTOptionsFromArguments(procedure.Arguments, rawArgs)
+	httpOptions, err := c.parseHTTPOptionsFromArguments(procedure.Arguments, rawArgs)
 	if err != nil {
-		return nil, nil, nil, schema.UnprocessableContentError("invalid rest options", map[string]any{
+		return nil, nil, nil, schema.UnprocessableContentError("invalid http options", map[string]any{
 			"cause": err.Error(),
 		})
 	}
 
-	restOptions.Settings = metadata.Settings
-	return httpRequest, procedure, restOptions, nil
+	httpOptions.Settings = metadata.Settings
+	return httpRequest, procedure, httpOptions, nil
 }
 
-func (c *RESTConnector) execMutationSync(ctx context.Context, state *State, request *schema.MutationRequest) (*schema.MutationResponse, error) {
+func (c *HTTPConnector) execMutationSync(ctx context.Context, state *State, request *schema.MutationRequest) (*schema.MutationResponse, error) {
 	operationResults := make([]schema.MutationOperationResults, len(request.Operations))
 	for i, operation := range request.Operations {
 		result, err := c.execMutationOperation(ctx, state, operation, i)
@@ -96,7 +96,7 @@ func (c *RESTConnector) execMutationSync(ctx context.Context, state *State, requ
 	}, nil
 }
 
-func (c *RESTConnector) execMutationAsync(ctx context.Context, state *State, request *schema.MutationRequest) (*schema.MutationResponse, error) {
+func (c *HTTPConnector) execMutationAsync(ctx context.Context, state *State, request *schema.MutationRequest) (*schema.MutationResponse, error) {
 	operationResults := make([]schema.MutationOperationResults, len(request.Operations))
 
 	eg, ctx := errgroup.WithContext(ctx)
@@ -125,11 +125,11 @@ func (c *RESTConnector) execMutationAsync(ctx context.Context, state *State, req
 	}, nil
 }
 
-func (c *RESTConnector) execMutationOperation(parentCtx context.Context, state *State, operation schema.MutationOperation, index int) (schema.MutationOperationResults, error) {
+func (c *HTTPConnector) execMutationOperation(parentCtx context.Context, state *State, operation schema.MutationOperation, index int) (schema.MutationOperationResults, error) {
 	ctx, span := state.Tracer.Start(parentCtx, fmt.Sprintf("Execute Operation %d", index))
 	defer span.End()
 
-	httpRequest, procedure, restOptions, err := c.explainProcedure(&operation)
+	httpRequest, procedure, httpOptions, err := c.explainProcedure(&operation)
 	if err != nil {
 		span.SetStatus(codes.Error, "failed to explain mutation")
 		span.RecordError(err)
@@ -137,8 +137,8 @@ func (c *RESTConnector) execMutationOperation(parentCtx context.Context, state *
 		return nil, err
 	}
 
-	restOptions.Concurrency = c.config.Concurrency.REST
-	result, headers, err := c.client.Send(ctx, httpRequest, operation.Fields, procedure.ResultType, restOptions)
+	httpOptions.Concurrency = c.config.Concurrency.HTTP
+	result, headers, err := c.client.Send(ctx, httpRequest, operation.Fields, procedure.ResultType, httpOptions)
 	if err != nil {
 		span.SetStatus(codes.Error, "failed to execute mutation")
 		span.RecordError(err)

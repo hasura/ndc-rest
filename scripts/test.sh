@@ -32,8 +32,8 @@ http_wait() {
   exit 1
 }
 
-go build -o ./tmp/ndc-rest ./server
-./tmp/ndc-rest serve --configuration $CONFIG_PATH > /dev/null 2>&1 &
+go build -o ./tmp/ndc-http ./server
+./tmp/ndc-http serve --configuration $CONFIG_PATH > /dev/null 2>&1 &
 serverPID=$!
 
 http_wait http://localhost:8080/health

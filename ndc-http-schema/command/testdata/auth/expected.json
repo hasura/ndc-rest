@@ -1,0 +1,318 @@
+[
+  {
+    "name": "testdata/auth/schema.yaml",
+    "settings": {
+      "servers": [
+        {
+          "url": {
+            "env": "PET_STORE_URL"
+          },
+          "securitySchemes": {
+            "api_key": {
+              "type": "apiKey",
+              "value": {
+                "env": "PET_STORE_API_KEY"
+              },
+              "in": "header",
+              "name": "api_key"
+            },
+            "bearer": {
+              "type": "http",
+              "value": {
+                "env": "PET_STORE_BEARER_TOKEN"
+              },
+              "header": "",
+              "scheme": "bearer"
+            },
+            "petstore_auth": {
+              "type": "oauth2",
+              "flows": {
+                "implicit": {
+                  "authorizationUrl": "https://petstore3.swagger.io/oauth/authorize",
+                  "scopes": {
+                    "read:pets": "read your pets",
+                    "write:pets": "modify pets in your account"
+                  }
+                }
+              }
+            }
+          },
+          "security": [
+            {
+              "api_key": []
+            }
+          ]
+        }
+      ],
+      "securitySchemes": {
+        "api_key": {
+          "type": "apiKey",
+          "value": {
+            "env": "PET_STORE_API_KEY"
+          },
+          "in": "header",
+          "name": "api_key"
+        },
+        "bearer": {
+          "type": "http",
+          "value": {
+            "env": "PET_STORE_BEARER_TOKEN"
+          },
+          "header": "",
+          "scheme": "bearer"
+        },
+        "petstore_auth": {
+          "type": "oauth2",
+          "flows": {
+            "implicit": {
+              "authorizationUrl": "https://petstore3.swagger.io/oauth/authorize",
+              "scopes": {
+                "read:pets": "read your pets",
+                "write:pets": "modify pets in your account"
+              }
+            }
+          }
+        }
+      },
+      "security": [
+        {
+          "api_key": []
+        }
+      ],
+      "version": "1.0.18"
+    },
+    "functions": {
+      "findPets": {
+        "request": {
+          "url": "/pet",
+          "method": "get",
+          "type": "http",
+          "response": {
+            "contentType": ""
+          }
+        },
+        "arguments": {},
+        "description": "Finds Pets",
+        "result_type": {
+          "element_type": {
+            "name": "Pet",
+            "type": "named"
+          },
+          "type": "array"
+        }
+      },
+      "findPetsByStatus": {
+        "request": {
+          "url": "/pet/findByStatus",
+          "method": "get",
+          "type": "http",
+          "security": [
+            {
+              "bearer": []
+            }
+          ],
+          "response": {
+            "contentType": ""
+          }
+        },
+        "arguments": {
+          "status": {
+            "description": "Status values that need to be considered for filter",
+            "type": {
+              "type": "nullable",
+              "underlying_type": {
+                "name": "String",
+                "type": "named"
+              }
+            },
+            "http": {
+              "in": "query",
+              "schema": {
+                "type": ["string"]
+              }
+            }
+          }
+        },
+        "description": "Finds Pets by status",
+        "result_type": {
+          "element_type": {
+            "name": "Pet",
+            "type": "named"
+          },
+          "type": "array"
+        }
+      },
+      "petRetry": {
+        "request": {
+          "url": "/pet/retry",
+          "method": "get",
+          "type": "http",
+          "response": {
+            "contentType": ""
+          }
+        },
+        "arguments": {},
+        "result_type": {
+          "element_type": {
+            "name": "Pet",
+            "type": "named"
+          },
+          "type": "array"
+        }
+      }
+    },
+    "object_types": {
+      "CreateModelRequest": {
+        "fields": {
+          "model": {
+            "description": "The name of the model to create",
+            "type": {
+              "type": "nullable",
+              "underlying_type": {
+                "name": "String",
+                "type": "named"
+              }
+            }
+          }
+        }
+      },
+      "Pet": {
+        "fields": {
+          "id": {
+            "type": {
+              "type": "nullable",
+              "underlying_type": {
+                "name": "Int",
+                "type": "named"
+              }
+            }
+          },
+          "name": {
+            "type": {
+              "name": "String",
+              "type": "named"
+            }
+          }
+        }
+      },
+      "ProgressResponse": {
+        "fields": {
+          "completed": {
+            "description": "The completed size of the task",
+            "type": {
+              "type": "nullable",
+              "underlying_type": {
+                "name": "Int32",
+                "type": "named"
+              }
+            }
+          },
+          "status": {
+            "description": "The status of the request",
+            "type": {
+              "type": "nullable",
+              "underlying_type": {
+                "name": "String",
+                "type": "named"
+              }
+            }
+          }
+        }
+      }
+    },
+    "procedures": {
+      "addPet": {
+        "request": {
+          "url": "/pet",
+          "method": "post",
+          "type": "http",
+          "headers": {
+            "Content-Type": {
+              "value": "application/json"
+            }
+          },
+          "security": [
+            {
+              "api_key": []
+            }
+          ],
+          "requestBody": {
+            "contentType": "application/json"
+          },
+          "response": {
+            "contentType": ""
+          }
+        },
+        "arguments": {
+          "body": {
+            "description": "Request body of /pet",
+            "type": {
+              "name": "Pet",
+              "type": "named"
+            },
+            "http": {
+              "in": "body"
+            }
+          }
+        },
+        "description": "Add a new pet to the store",
+        "result_type": {
+          "name": "Pet",
+          "type": "named"
+        }
+      },
+      "createModel": {
+        "request": {
+          "url": "/model",
+          "method": "post",
+          "type": "http",
+          "requestBody": {
+            "contentType": "application/json"
+          },
+          "response": {
+            "contentType": "application/x-ndjson"
+          }
+        },
+        "arguments": {
+          "body": {
+            "description": "Request body of POST /api/create",
+            "type": {
+              "name": "CreateModelRequest",
+              "type": "named"
+            }
+          }
+        },
+        "result_type": {
+          "element_type": {
+            "name": "ProgressResponse",
+            "type": "named"
+          },
+          "type": "array"
+        }
+      }
+    },
+    "scalar_types": {
+      "Boolean": {
+        "aggregate_functions": {},
+        "comparison_operators": {},
+        "representation": {
+          "type": "boolean"
+        }
+      },
+      "Int": {
+        "aggregate_functions": {},
+        "comparison_operators": {},
+        "representation": {
+          "type": "int32"
+        }
+      },
+      "String": {
+        "aggregate_functions": {},
+        "comparison_operators": {},
+        "representation": {
+          "type": "string"
+        }
+      }
+    }
+  }
+]

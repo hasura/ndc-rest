@@ -13,10 +13,10 @@ All reports are thoroughly investigated by a set of community volunteers.
 
 ### When Should I Report a Vulnerability?
 
-- You think you have discovered a potential security vulnerability in the NDC Go SDK or related components.
-- You are unsure how a vulnerability affects the SDK.
-- You think you discovered a vulnerability in another project that SDK depends on (e.g. Docker, etc).
-- You want to report any other security risk that could potentially harm SDK users.
+- You think you have discovered a potential security vulnerability in the HTTP connector or related components.
+- You are unsure how a vulnerability affects the connector.
+- You think you discovered a vulnerability in another project that connector depends on (e.g. Docker, etc).
+- You want to report any other security risk that could potentially harm connector users.
 
 ### When Should I NOT Report a Vulnerability?
 

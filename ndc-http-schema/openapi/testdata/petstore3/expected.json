@@ -1,0 +1,6944 @@
+{
+  "$schema": "https://raw.githubusercontent.com/hasura/ndc-http/refs/heads/main/ndc-http-schema/jsonschema/ndc-http-schema.schema.json",
+  "settings": {
+    "servers": [
+      {
+        "url": {
+          "value": "https://petstore3.swagger.io/api/v3",
+          "env": "PET_STORE_SERVER_URL"
+        }
+      },
+      {
+        "url": {
+          "value": "https://petstore3.swagger.io/api/v3.1",
+          "env": "PET_STORE_SERVER_URL_2"
+        }
+      }
+    ],
+    "securitySchemes": {
+      "api_key": {
+        "type": "apiKey",
+        "value": {
+          "env": "PET_STORE_API_KEY"
+        },
+        "in": "header",
+        "name": "api_key"
+      },
+      "basic": {
+        "type": "http",
+        "value": {
+          "env": "PET_STORE_BASIC_TOKEN"
+        },
+        "header": "Authorization",
+        "scheme": "basic"
+      },
+      "petstore_auth": {
+        "type": "oauth2",
+        "flows": {
+          "implicit": {
+            "authorizationUrl": "https://petstore3.swagger.io/oauth/authorize",
+            "scopes": {
+              "read:pets": "read your pets",
+              "write:pets": "modify pets in your account"
+            }
+          }
+        }
+      }
+    },
+    "security": [
+      {},
+      {
+        "petstore_auth": ["write:pets", "read:pets"]
+      }
+    ],
+    "version": "1.0.19"
+  },
+  "functions": {
+    "GetInvoices": {
+      "request": {
+        "url": "/v1/invoices",
+        "method": "get",
+        "response": {
+          "contentType": "application/json"
+        }
+      },
+      "arguments": {
+        "collection_method": {
+          "description": "The collection method of the invoice to retrieve. Either `charge_automatically` or `send_invoice`.",
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "InvoicesCollectionMethod",
+              "type": "named"
+            }
+          },
+          "http": {
+            "style": "form",
+            "name": "collection_method",
+            "in": "query",
+            "schema": {
+              "type": ["string"]
+            }
+          }
+        },
+        "created": {
+          "description": "Only return invoices that were created during the given date interval.",
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "JSON",
+              "type": "named"
+            }
+          },
+          "http": {
+            "style": "deepObject",
+            "explode": true,
+            "name": "created",
+            "in": "query",
+            "schema": {
+              "type": null
+            }
+          }
+        },
+        "customer": {
+          "description": "Only return invoices for the customer specified by this customer ID.",
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "String",
+              "type": "named"
+            }
+          },
+          "http": {
+            "style": "form",
+            "name": "customer",
+            "in": "query",
+            "schema": {
+              "type": ["string"],
+              "maxLength": 5000
+            }
+          }
+        },
+        "due_date": {
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "JSON",
+              "type": "named"
+            }
+          },
+          "http": {
+            "style": "deepObject",
+            "explode": true,
+            "name": "due_date",
+            "in": "query",
+            "schema": {
+              "type": null
+            }
+          }
+        },
+        "ending_before": {
+          "description": "A cursor for use in pagination. `ending_before` is an object ID that defines your place in the list. For instance, if you make a list request and receive 100 objects, starting with `obj_bar`, your subsequent call can include `ending_before=obj_bar` in order to fetch the previous page of the list.",
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "String",
+              "type": "named"
+            }
+          },
+          "http": {
+            "style": "form",
+            "name": "ending_before",
+            "in": "query",
+            "schema": {
+              "type": ["string"],
+              "maxLength": 5000
+            }
+          }
+        },
+        "expand": {
+          "description": "Specifies which fields in the response should be expanded.",
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "element_type": {
+                "name": "String",
+                "type": "named"
+              },
+              "type": "array"
+            }
+          },
+          "http": {
+            "style": "deepObject",
+            "explode": true,
+            "name": "expand",
+            "in": "query",
+            "schema": {
+              "type": ["array"],
+              "items": {
+                "type": ["string"],
+                "maxLength": 5000
+              }
+            }
+          }
+        },
+        "limit": {
+          "description": "A limit on the number of objects to be returned. Limit can range between 1 and 100, and the default is 10.",
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "Int32",
+              "type": "named"
+            }
+          },
+          "http": {
+            "style": "form",
+            "name": "limit",
+            "in": "query",
+            "schema": {
+              "type": ["integer"]
+            }
+          }
+        },
+        "starting_after": {
+          "description": "A cursor for use in pagination. `starting_after` is an object ID that defines your place in the list. For instance, if you make a list request and receive 100 objects, ending with `obj_foo`, your subsequent call can include `starting_after=obj_foo` in order to fetch the next page of the list.",
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "String",
+              "type": "named"
+            }
+          },
+          "http": {
+            "style": "form",
+            "name": "starting_after",
+            "in": "query",
+            "schema": {
+              "type": ["string"],
+              "maxLength": 5000
+            }
+          }
+        },
+        "status": {
+          "description": "The status of the invoice, one of `draft`, `open`, `paid`, `uncollectible`, or `void`. [Learn more](https://stripe.com/docs/billing/invoices/workflow#workflow-overview)",
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "InvoicesStatus",
+              "type": "named"
+            }
+          },
+          "http": {
+            "style": "form",
+            "name": "status",
+            "in": "query",
+            "schema": {
+              "type": ["string"]
+            }
+          }
+        },
+        "subscription": {
+          "description": "Only return invoices for the subscription specified by this subscription ID.",
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "String",
+              "type": "named"
+            }
+          },
+          "http": {
+            "style": "form",
+            "name": "subscription",
+            "in": "query",
+            "schema": {
+              "type": ["string"],
+              "maxLength": 5000
+            }
+          }
+        }
+      },
+      "description": "You can list all invoices, or list the invoices for a specific customer. The invoices are returned sorted by creation date, with the most recently created invoices appearing first.",
+      "result_type": {
+        "name": "GetInvoicesResult",
+        "type": "named"
+      }
+    },
+    "findPetsByStatus": {
+      "request": {
+        "url": "/pet/findByStatus",
+        "method": "get",
+        "security": [
+          {
+            "petstore_auth": ["write:pets", "read:pets"]
+          }
+        ],
+        "response": {
+          "contentType": "application/json"
+        }
+      },
+      "arguments": {
+        "status": {
+          "description": "Status values that need to be considered for filter",
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "PetStatus",
+              "type": "named"
+            }
+          },
+          "http": {
+            "explode": true,
+            "name": "status",
+            "in": "query",
+            "schema": {
+              "type": ["string"]
+            }
+          }
+        }
+      },
+      "description": "Finds Pets by status",
+      "result_type": {
+        "element_type": {
+          "name": "Pet",
+          "type": "named"
+        },
+        "type": "array"
+      }
+    },
+    "findPetsByTags": {
+      "request": {
+        "url": "/pet/findByTags",
+        "method": "get",
+        "security": [
+          {
+            "petstore_auth": ["write:pets", "read:pets"]
+          }
+        ],
+        "response": {
+          "contentType": "application/json"
+        }
+      },
+      "arguments": {
+        "tags": {
+          "description": "Tags to filter by",
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "element_type": {
+                "name": "String",
+                "type": "named"
+              },
+              "type": "array"
+            }
+          },
+          "http": {
+            "explode": true,
+            "name": "tags",
+            "in": "query",
+            "schema": {
+              "type": ["array"],
+              "items": {
+                "type": ["string"]
+              }
+            }
+          }
+        }
+      },
+      "description": "Finds Pets by tags",
+      "result_type": {
+        "element_type": {
+          "name": "Pet",
+          "type": "named"
+        },
+        "type": "array"
+      }
+    },
+    "getInventory": {
+      "request": {
+        "url": "/store/inventory",
+        "method": "get",
+        "security": [
+          {
+            "api_key": []
+          }
+        ],
+        "response": {
+          "contentType": "application/json"
+        }
+      },
+      "arguments": {},
+      "description": "Returns pet inventories by status",
+      "result_type": {
+        "name": "JSON",
+        "type": "named"
+      }
+    },
+    "getOrderById": {
+      "request": {
+        "url": "/store/order/{orderId}",
+        "method": "get",
+        "response": {
+          "contentType": "application/json"
+        }
+      },
+      "arguments": {
+        "orderId": {
+          "description": "ID of order that needs to be fetched",
+          "type": {
+            "name": "Int64",
+            "type": "named"
+          },
+          "http": {
+            "name": "orderId",
+            "in": "path",
+            "schema": {
+              "type": ["integer"],
+              "format": "int64"
+            }
+          }
+        }
+      },
+      "description": "Find purchase order by ID",
+      "result_type": {
+        "name": "Order",
+        "type": "named"
+      }
+    },
+    "getPetById": {
+      "request": {
+        "url": "/pet/{petId}",
+        "method": "get",
+        "security": [
+          {
+            "api_key": []
+          },
+          {
+            "petstore_auth": ["write:pets", "read:pets"]
+          }
+        ],
+        "response": {
+          "contentType": "application/json"
+        }
+      },
+      "arguments": {
+        "petId": {
+          "description": "ID of pet to return",
+          "type": {
+            "name": "Int64",
+            "type": "named"
+          },
+          "http": {
+            "name": "petId",
+            "in": "path",
+            "schema": {
+              "type": ["integer"],
+              "format": "int64"
+            }
+          }
+        }
+      },
+      "description": "Find pet by ID",
+      "result_type": {
+        "name": "Pet",
+        "type": "named"
+      }
+    },
+    "getSnake": {
+      "request": {
+        "url": "/snake",
+        "method": "get",
+        "response": {
+          "contentType": "application/json"
+        }
+      },
+      "arguments": {},
+      "description": "Get snake object",
+      "result_type": {
+        "name": "SnakeObject",
+        "type": "named"
+      }
+    },
+    "getUserByName": {
+      "request": {
+        "url": "/user/{username}",
+        "method": "get",
+        "response": {
+          "contentType": "application/json"
+        }
+      },
+      "arguments": {
+        "username": {
+          "description": "The name that needs to be fetched. Use user1 for testing. ",
+          "type": {
+            "name": "String",
+            "type": "named"
+          },
+          "http": {
+            "name": "username",
+            "in": "path",
+            "schema": {
+              "type": ["string"]
+            }
+          }
+        }
+      },
+      "description": "Get user by user name",
+      "result_type": {
+        "name": "User",
+        "type": "named"
+      }
+    },
+    "loginUser": {
+      "request": {
+        "url": "/user/login",
+        "method": "get",
+        "response": {
+          "contentType": "application/json"
+        }
+      },
+      "arguments": {
+        "password": {
+          "description": "The password for login in clear text",
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "String",
+              "type": "named"
+            }
+          },
+          "http": {
+            "name": "password",
+            "in": "query",
+            "schema": {
+              "type": ["string"]
+            }
+          }
+        },
+        "username": {
+          "description": "The user name for login",
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "String",
+              "type": "named"
+            }
+          },
+          "http": {
+            "name": "username",
+            "in": "query",
+            "schema": {
+              "type": ["string"]
+            }
+          }
+        }
+      },
+      "description": "Logs user into the system",
+      "result_type": {
+        "name": "String",
+        "type": "named"
+      }
+    }
+  },
+  "object_types": {
+    "Address": {
+      "fields": {
+        "city": {
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "String",
+              "type": "named"
+            }
+          },
+          "http": {
+            "type": ["string"]
+          }
+        },
+        "state": {
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "String",
+              "type": "named"
+            }
+          },
+          "http": {
+            "type": ["string"]
+          }
+        },
+        "street": {
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "String",
+              "type": "named"
+            }
+          },
+          "http": {
+            "type": ["string"]
+          }
+        },
+        "zip": {
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "String",
+              "type": "named"
+            }
+          },
+          "http": {
+            "type": ["string"]
+          }
+        }
+      }
+    },
+    "ApiResponse": {
+      "fields": {
+        "code": {
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "Int32",
+              "type": "named"
+            }
+          },
+          "http": {
+            "type": ["integer"],
+            "format": "int32"
+          }
+        },
+        "message": {
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "String",
+              "type": "named"
+            }
+          },
+          "http": {
+            "type": ["string"]
+          }
+        },
+        "type": {
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "String",
+              "type": "named"
+            }
+          },
+          "http": {
+            "type": ["string"]
+          }
+        }
+      }
+    },
+    "Category": {
+      "fields": {
+        "id": {
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "Int64",
+              "type": "named"
+            }
+          },
+          "http": {
+            "type": ["integer"],
+            "format": "int64"
+          }
+        },
+        "name": {
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "String",
+              "type": "named"
+            }
+          },
+          "http": {
+            "type": ["string"]
+          }
+        }
+      }
+    },
+    "CreateFineTuningJobRequest": {
+      "fields": {
+        "model": {
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "String",
+              "type": "named"
+            }
+          },
+          "http": {
+            "type": ["string"]
+          }
+        }
+      }
+    },
+    "GetInvoicesResult": {
+      "fields": {
+        "has_more": {
+          "description": "True if this list has another page of items after this one that can be fetched.",
+          "type": {
+            "name": "Boolean",
+            "type": "named"
+          },
+          "http": {
+            "type": ["boolean"]
+          }
+        },
+        "object": {
+          "description": "String representing the object's type. Objects of the same type share the same value. Always has the value `list`.",
+          "type": {
+            "name": "InvoicesObject",
+            "type": "named"
+          },
+          "http": {
+            "type": ["string"]
+          }
+        },
+        "url": {
+          "description": "The URL where this list can be accessed.",
+          "type": {
+            "name": "String",
+            "type": "named"
+          },
+          "http": {
+            "type": ["string"],
+            "pattern": "^/v1/invoices",
+            "maxLength": 5000
+          }
+        }
+      }
+    },
+    "Order": {
+      "fields": {
+        "complete": {
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "Boolean",
+              "type": "named"
+            }
+          },
+          "http": {
+            "type": ["boolean"]
+          }
+        },
+        "id": {
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "Int64",
+              "type": "named"
+            }
+          },
+          "http": {
+            "type": ["integer"],
+            "format": "int64"
+          }
+        },
+        "petId": {
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "Int64",
+              "type": "named"
+            }
+          },
+          "http": {
+            "type": ["integer"],
+            "format": "int64"
+          }
+        },
+        "quantity": {
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "Int32",
+              "type": "named"
+            }
+          },
+          "http": {
+            "type": ["integer"],
+            "format": "int32"
+          }
+        },
+        "shipDate": {
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "TimestampTZ",
+              "type": "named"
+            }
+          },
+          "http": {
+            "type": ["string"],
+            "format": "date-time"
+          }
+        },
+        "status": {
+          "description": "Order Status",
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "OrderStatus",
+              "type": "named"
+            }
+          },
+          "http": {
+            "type": ["string"]
+          }
+        }
+      }
+    },
+    "Pet": {
+      "fields": {
+        "category": {
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "Category",
+              "type": "named"
+            }
+          },
+          "http": {
+            "type": ["object"]
+          }
+        },
+        "id": {
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "Int64",
+              "type": "named"
+            }
+          },
+          "http": {
+            "type": ["integer"],
+            "format": "int64"
+          }
+        },
+        "name": {
+          "type": {
+            "name": "String",
+            "type": "named"
+          },
+          "http": {
+            "type": ["string"]
+          }
+        },
+        "photoUrls": {
+          "type": {
+            "element_type": {
+              "name": "String",
+              "type": "named"
+            },
+            "type": "array"
+          },
+          "http": {
+            "type": ["array"],
+            "items": {
+              "type": ["string"]
+            }
+          }
+        },
+        "status": {
+          "description": "pet status in the store",
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "PetStatus",
+              "type": "named"
+            }
+          },
+          "http": {
+            "type": ["string"]
+          }
+        },
+        "tags": {
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "element_type": {
+                "name": "Tag",
+                "type": "named"
+              },
+              "type": "array"
+            }
+          },
+          "http": {
+            "type": ["array"]
+          }
+        }
+      }
+    },
+    "PostCheckoutSessionsBody": {
+      "fields": {
+        "after_expiration": {
+          "description": "Configure actions after a Checkout Session has expired.",
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "PostCheckoutSessionsBodyAfterExpiration",
+              "type": "named"
+            }
+          },
+          "http": {
+            "type": ["object"]
+          }
+        },
+        "allow_promotion_codes": {
+          "description": "Enables user redeemable promotion codes.",
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "Boolean",
+              "type": "named"
+            }
+          },
+          "http": {
+            "type": ["boolean"]
+          }
+        },
+        "automatic_tax": {
+          "description": "Settings for automatic tax lookup for this session and resulting payments, invoices, and subscriptions.",
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "PostCheckoutSessionsBodyAutomaticTax",
+              "type": "named"
+            }
+          },
+          "http": {
+            "type": ["object"]
+          }
+        },
+        "billing_address_collection": {
+          "description": "Specify whether Checkout should collect the customer's billing address. Defaults to `auto`.",
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "CheckoutBillingAddressCollection",
+              "type": "named"
+            }
+          },
+          "http": {
+            "type": ["string"]
+          }
+        },
+        "cancel_url": {
+          "description": "If set, Checkout displays a back button and customers will be directed to this URL if they decide to cancel payment and return to your website.",
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "String",
+              "type": "named"
+            }
+          },
+          "http": {
+            "type": ["string"],
+            "maxLength": 5000
+          }
+        },
+        "client_reference_id": {
+          "description": "A unique string to reference the Checkout Session. This can be a\ncustomer ID, a cart ID, or similar, and can be used to reconcile the\nsession with your internal systems.",
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "String",
+              "type": "named"
+            }
+          },
+          "http": {
+            "type": ["string"],
+            "maxLength": 200
+          }
+        },
+        "consent_collection": {
+          "description": "Configure fields for the Checkout Session to gather active consent from customers.",
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "PostCheckoutSessionsBodyConsentCollection",
+              "type": "named"
+            }
+          },
+          "http": {
+            "type": ["object"]
+          }
+        },
+        "currency": {
+          "description": "Three-letter [ISO currency code](https://www.iso.org/iso-4217-currency-codes.html), in lowercase. Must be a [supported currency](https://stripe.com/docs/currencies). Required in `setup` mode when `payment_method_types` is not set.",
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "String",
+              "type": "named"
+            }
+          },
+          "http": {
+            "type": ["string"]
+          }
+        },
+        "custom_fields": {
+          "description": "Collect additional information from your customer using custom fields. Up to 3 fields are supported.",
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "element_type": {
+                "name": "PostCheckoutSessionsBodyCustomFields",
+                "type": "named"
+              },
+              "type": "array"
+            }
+          },
+          "http": {
+            "type": ["array"],
+            "items": {
+              "type": ["object"]
+            }
+          }
+        },
+        "custom_text": {
+          "description": "Display additional text for your customers using custom text.",
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "PostCheckoutSessionsBodyCustomText",
+              "type": "named"
+            }
+          },
+          "http": {
+            "type": ["object"]
+          }
+        },
+        "customer": {
+          "description": "ID of an existing Customer, if one exists. In `payment` mode, the customer’s most recently saved card\npayment method will be used to prefill the email, name, card details, and billing address\non the Checkout page. In `subscription` mode, the customer’s [default payment method](https://stripe.com/docs/api/customers/update#update_customer-invoice_settings-default_payment_method)\nwill be used if it’s a card, otherwise the most recently saved card will be used. A valid billing address, billing name and billing email are required on the payment method for Checkout to prefill the customer's card details.\n\nIf the Customer already has a valid [email](https://stripe.com/docs/api/customers/object#customer_object-email) set, the email will be prefilled and not editable in Checkout.\nIf the Customer does not have a valid `email`, Checkout will set the email entered during the session on the Customer.\n\nIf blank for Checkout Sessions in `subscription` mode or with `customer_creation` set as `always` in `payment` mode, Checkout will create a new Customer object based on information provided during the payment flow.\n\nYou can set [`payment_intent_data.setup_future_usage`](https://stripe.com/docs/api/checkout/sessions/create#create_checkout_session-payment_intent_data-setup_future_usage) to have Checkout automatically attach the payment method to the Customer you pass in for future reuse.",
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "String",
+              "type": "named"
+            }
+          },
+          "http": {
+            "type": ["string"],
+            "maxLength": 5000
+          }
+        },
+        "customer_creation": {
+          "description": "Configure whether a Checkout Session creates a [Customer](https://stripe.com/docs/api/customers) during Session confirmation.\n\nWhen a Customer is not created, you can still retrieve email, address, and other customer data entered in Checkout\nwith [customer_details](https://stripe.com/docs/api/checkout/sessions/object#checkout_session_object-customer_details).\n\nSessions that don't create Customers instead are grouped by [guest customers](https://stripe.com/docs/payments/checkout/guest-customers)\nin the Dashboard. Promotion codes limited to first time customers will return invalid for these Sessions.\n\nCan only be set in `payment` and `setup` mode.",
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "CheckoutCustomerCreation",
+              "type": "named"
+            }
+          },
+          "http": {
+            "type": ["string"]
+          }
+        },
+        "customer_email": {
+          "description": "If provided, this value will be used when the Customer object is created.\nIf not provided, customers will be asked to enter their email address.\nUse this parameter to prefill customer data if you already have an email\non file. To access information about the customer once a session is\ncomplete, use the `customer` field.",
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "String",
+              "type": "named"
+            }
+          },
+          "http": {
+            "type": ["string"]
+          }
+        },
+        "customer_update": {
+          "description": "Controls what fields on Customer can be updated by the Checkout Session. Can only be provided when `customer` is provided.",
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "PostCheckoutSessionsBodyCustomerUpdate",
+              "type": "named"
+            }
+          },
+          "http": {
+            "type": ["object"]
+          }
+        },
+        "discounts": {
+          "description": "The coupon or promotion code to apply to this Session. Currently, only up to one may be specified.",
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "element_type": {
+                "name": "PostCheckoutSessionsBodyDiscounts",
+                "type": "named"
+              },
+              "type": "array"
+            }
+          },
+          "http": {
+            "type": ["array"],
+            "items": {
+              "type": ["object"]
+            }
+          }
+        },
+        "expand": {
+          "description": "Specifies which fields in the response should be expanded.",
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "element_type": {
+                "name": "String",
+                "type": "named"
+              },
+              "type": "array"
+            }
+          },
+          "http": {
+            "type": ["array"],
+            "items": {
+              "type": ["string"],
+              "maxLength": 5000
+            }
+          }
+        },
+        "expires_at": {
+          "description": "The Epoch time in seconds at which the Checkout Session will expire. It can be anywhere from 30 minutes to 24 hours after Checkout Session creation. By default, this value is 24 hours from creation.",
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "UnixTime",
+              "type": "named"
+            }
+          },
+          "http": {
+            "type": ["integer"],
+            "format": "unix-time"
+          }
+        },
+        "invoice_creation": {
+          "description": "Generate a post-purchase Invoice for one-time payments.",
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "PostCheckoutSessionsBodyInvoiceCreation",
+              "type": "named"
+            }
+          },
+          "http": {
+            "type": ["object"]
+          }
+        },
+        "line_items": {
+          "description": "A list of items the customer is purchasing. Use this parameter to pass one-time or recurring [Prices](https://stripe.com/docs/api/prices).\n\nFor `payment` mode, there is a maximum of 100 line items, however it is recommended to consolidate line items if there are more than a few dozen.\n\nFor `subscription` mode, there is a maximum of 20 line items with recurring Prices and 20 line items with one-time Prices. Line items with one-time Prices will be on the initial invoice only.",
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "element_type": {
+                "name": "PostCheckoutSessionsBodyLineItems",
+                "type": "named"
+              },
+              "type": "array"
+            }
+          },
+          "http": {
+            "type": ["array"],
+            "items": {
+              "type": ["object"]
+            }
+          }
+        },
+        "locale": {
+          "description": "The IETF language tag of the locale Checkout is displayed in. If blank or `auto`, the browser's locale is used.",
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "CheckoutLocale",
+              "type": "named"
+            }
+          },
+          "http": {
+            "type": ["string"]
+          }
+        },
+        "metadata": {
+          "description": "Set of [key-value pairs](https://stripe.com/docs/api/metadata) that you can attach to an object. This can be useful for storing additional information about the object in a structured format. Individual keys can be unset by posting an empty value to them. All keys can be unset by posting an empty value to `metadata`.",
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "JSON",
+              "type": "named"
+            }
+          },
+          "http": {
+            "type": ["object"]
+          }
+        },
+        "mode": {
+          "description": "The mode of the Checkout Session. Pass `subscription` if the Checkout Session includes at least one recurring item.",
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "CheckoutMode",
+              "type": "named"
+            }
+          },
+          "http": {
+            "type": ["string"]
+          }
+        },
+        "payment_intent_data": {
+          "description": "A subset of parameters to be passed to PaymentIntent creation for Checkout Sessions in `payment` mode.",
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "PostCheckoutSessionsBodyPaymentIntentData",
+              "type": "named"
+            }
+          },
+          "http": {
+            "type": ["object"]
+          }
+        },
+        "payment_method_collection": {
+          "description": "Specify whether Checkout should collect a payment method. When set to `if_required`, Checkout will not collect a payment method when the total due for the session is 0.\nThis may occur if the Checkout Session includes a free trial or a discount.\n\nCan only be set in `subscription` mode. Defaults to `always`.\n\nIf you'd like information on how to collect a payment method outside of Checkout, read the guide on configuring [subscriptions with a free trial](https://stripe.com/docs/payments/checkout/free-trials).",
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "CheckoutPaymentMethodCollection",
+              "type": "named"
+            }
+          },
+          "http": {
+            "type": ["string"]
+          }
+        },
+        "payment_method_configuration": {
+          "description": "The ID of the payment method configuration to use with this Checkout session.",
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "String",
+              "type": "named"
+            }
+          },
+          "http": {
+            "type": ["string"],
+            "maxLength": 100
+          }
+        },
+        "payment_method_options": {
+          "description": "Payment-method-specific configuration.",
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "PostCheckoutSessionsBodyPaymentMethodOptions",
+              "type": "named"
+            }
+          },
+          "http": {
+            "type": ["object"]
+          }
+        },
+        "payment_method_types": {
+          "description": "A list of the types of payment methods (e.g., `card`) this Checkout Session can accept.\n\nYou can omit this attribute to manage your payment methods from the [Stripe Dashboard](https://dashboard.stripe.com/settings/payment_methods).\nSee [Dynamic Payment Methods](https://stripe.com/docs/payments/payment-methods/integration-options#using-dynamic-payment-methods) for more details.\n\nRead more about the supported payment methods and their requirements in our [payment\nmethod details guide](/docs/payments/checkout/payment-methods).\n\nIf multiple payment methods are passed, Checkout will dynamically reorder them to\nprioritize the most relevant payment methods based on the customer's location and\nother characteristics.",
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "element_type": {
+                "name": "CheckoutPaymentMethodTypes",
+                "type": "named"
+              },
+              "type": "array"
+            }
+          },
+          "http": {
+            "type": ["array"],
+            "items": {
+              "type": ["string"]
+            }
+          }
+        },
+        "phone_number_collection": {
+          "description": "Controls phone number collection settings for the session.\n\nWe recommend that you review your privacy policy and check with your legal contacts\nbefore using this feature. Learn more about [collecting phone numbers with Checkout](https://stripe.com/docs/payments/checkout/phone-numbers).",
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "PostCheckoutSessionsBodyPhoneNumberCollection",
+              "type": "named"
+            }
+          },
+          "http": {
+            "type": ["object"]
+          }
+        },
+        "redirect_on_completion": {
+          "description": "This parameter applies to `ui_mode: embedded`. Learn more about the [redirect behavior](https://stripe.com/docs/payments/checkout/custom-redirect-behavior) of embedded sessions. Defaults to `always`.",
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "CheckoutRedirectOnCompletion",
+              "type": "named"
+            }
+          },
+          "http": {
+            "type": ["string"]
+          }
+        },
+        "return_url": {
+          "description": "The URL to redirect your customer back to after they authenticate or cancel their payment on the\npayment method's app or site. This parameter is required if ui_mode is `embedded`\nand redirect-based payment methods are enabled on the session.",
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "String",
+              "type": "named"
+            }
+          },
+          "http": {
+            "type": ["string"],
+            "maxLength": 5000
+          }
+        },
+        "setup_intent_data": {
+          "description": "A subset of parameters to be passed to SetupIntent creation for Checkout Sessions in `setup` mode.",
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "PostCheckoutSessionsBodySetupIntentData",
+              "type": "named"
+            }
+          },
+          "http": {
+            "type": ["object"]
+          }
+        },
+        "shipping_address_collection": {
+          "description": "When set, provides configuration for Checkout to collect a shipping address from a customer.",
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "PostCheckoutSessionsBodyShippingAddressCollection",
+              "type": "named"
+            }
+          },
+          "http": {
+            "type": ["object"]
+          }
+        },
+        "shipping_options": {
+          "description": "The shipping rate options to apply to this Session. Up to a maximum of 5.",
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "element_type": {
+                "name": "PostCheckoutSessionsBodyShippingOptions",
+                "type": "named"
+              },
+              "type": "array"
+            }
+          },
+          "http": {
+            "type": ["array"],
+            "items": {
+              "type": ["object"]
+            }
+          }
+        },
+        "submit_type": {
+          "description": "Describes the type of transaction being performed by Checkout in order to customize\nrelevant text on the page, such as the submit button. `submit_type` can only be\nspecified on Checkout Sessions in `payment` mode. If blank or `auto`, `pay` is used.",
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "CheckoutSubmitType",
+              "type": "named"
+            }
+          },
+          "http": {
+            "type": ["string"]
+          }
+        },
+        "subscription_data": {
+          "description": "A subset of parameters to be passed to subscription creation for Checkout Sessions in `subscription` mode.",
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "PostCheckoutSessionsBodySubscriptionData",
+              "type": "named"
+            }
+          },
+          "http": {
+            "type": ["object"]
+          }
+        },
+        "success_url": {
+          "description": "The URL to which Stripe should send customers when payment or setup\nis complete.\nThis parameter is not allowed if ui_mode is `embedded`. If you’d like to use\ninformation from the successful Checkout Session on your page, read the\nguide on [customizing your success page](https://stripe.com/docs/payments/checkout/custom-success-page).",
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "String",
+              "type": "named"
+            }
+          },
+          "http": {
+            "type": ["string"],
+            "maxLength": 5000
+          }
+        },
+        "tax_id_collection": {
+          "description": "Controls tax ID collection settings for the session.",
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "PostCheckoutSessionsBodyTaxIdCollection",
+              "type": "named"
+            }
+          },
+          "http": {
+            "type": ["object"]
+          }
+        },
+        "ui_mode": {
+          "description": "The UI mode of the Session. Defaults to `hosted`.",
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "CheckoutUiMode",
+              "type": "named"
+            }
+          },
+          "http": {
+            "type": ["string"]
+          }
+        }
+      }
+    },
+    "PostCheckoutSessionsBodyAfterExpiration": {
+      "description": "Configure actions after a Checkout Session has expired.",
+      "fields": {
+        "recovery": {
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "PostCheckoutSessionsBodyAfterExpirationRecovery",
+              "type": "named"
+            }
+          },
+          "http": {
+            "type": ["object"]
+          }
+        }
+      }
+    },
+    "PostCheckoutSessionsBodyAfterExpirationRecovery": {
+      "fields": {
+        "allow_promotion_codes": {
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "Boolean",
+              "type": "named"
+            }
+          },
+          "http": {
+            "type": ["boolean"]
+          }
+        },
+        "enabled": {
+          "type": {
+            "name": "Boolean",
+            "type": "named"
+          },
+          "http": {
+            "type": ["boolean"]
+          }
+        }
+      }
+    },
+    "PostCheckoutSessionsBodyAutomaticTax": {
+      "description": "Settings for automatic tax lookup for this session and resulting payments, invoices, and subscriptions.",
+      "fields": {
+        "enabled": {
+          "type": {
+            "name": "Boolean",
+            "type": "named"
+          },
+          "http": {
+            "type": ["boolean"]
+          }
+        },
+        "liability": {
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "PostCheckoutSessionsBodyAutomaticTaxLiability",
+              "type": "named"
+            }
+          },
+          "http": {
+            "type": ["object"]
+          }
+        }
+      }
+    },
+    "PostCheckoutSessionsBodyAutomaticTaxLiability": {
+      "fields": {
+        "account": {
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "String",
+              "type": "named"
+            }
+          },
+          "http": {
+            "type": ["string"]
+          }
+        },
+        "type": {
+          "type": {
+            "name": "CheckoutType",
+            "type": "named"
+          },
+          "http": {
+            "type": ["string"]
+          }
+        }
+      }
+    },
+    "PostCheckoutSessionsBodyConsentCollection": {
+      "description": "Configure fields for the Checkout Session to gather active consent from customers.",
+      "fields": {
+        "payment_method_reuse_agreement": {
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "PostCheckoutSessionsBodyConsentCollectionPaymentMethodReuseAgreement",
+              "type": "named"
+            }
+          },
+          "http": {
+            "type": ["object"]
+          }
+        },
+        "promotions": {
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "CheckoutPromotions",
+              "type": "named"
+            }
+          },
+          "http": {
+            "type": ["string"]
+          }
+        },
+        "terms_of_service": {
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "CheckoutTermsOfService",
+              "type": "named"
+            }
+          },
+          "http": {
+            "type": ["string"]
+          }
+        }
+      }
+    },
+    "PostCheckoutSessionsBodyConsentCollectionPaymentMethodReuseAgreement": {
+      "fields": {
+        "position": {
+          "type": {
+            "name": "CheckoutPosition",
+            "type": "named"
+          },
+          "http": {
+            "type": ["string"]
+          }
+        }
+      }
+    },
+    "PostCheckoutSessionsBodyCustomFields": {
+      "fields": {
+        "dropdown": {
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "PostCheckoutSessionsBodyCustomFieldsDropdown",
+              "type": "named"
+            }
+          },
+          "http": {
+            "type": ["object"]
+          }
+        },
+        "key": {
+          "type": {
+            "name": "String",
+            "type": "named"
+          },
+          "http": {
+            "type": ["string"],
+            "maxLength": 200
+          }
+        },
+        "label": {
+          "type": {
+            "name": "PostCheckoutSessionsBodyCustomFieldsLabel",
+            "type": "named"
+          },
+          "http": {
+            "type": ["object"]
+          }
+        },
+        "numeric": {
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "PostCheckoutSessionsBodyCustomFieldsNumeric",
+              "type": "named"
+            }
+          },
+          "http": {
+            "type": ["object"]
+          }
+        },
+        "optional": {
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "Boolean",
+              "type": "named"
+            }
+          },
+          "http": {
+            "type": ["boolean"]
+          }
+        },
+        "text": {
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "PostCheckoutSessionsBodyCustomFieldsText",
+              "type": "named"
+            }
+          },
+          "http": {
+            "type": ["object"]
+          }
+        },
+        "type": {
+          "type": {
+            "name": "PostCheckoutSessionsBodyCustomFieldsType",
+            "type": "named"
+          },
+          "http": {
+            "type": ["string"]
+          }
+        }
+      }
+    },
+    "PostCheckoutSessionsBodyCustomFieldsDropdown": {
+      "fields": {
+        "options": {
+          "type": {
+            "element_type": {
+              "name": "PostCheckoutSessionsBodyCustomFieldsDropdownOptions",
+              "type": "named"
+            },
+            "type": "array"
+          },
+          "http": {
+            "type": ["array"],
+            "items": {
+              "type": ["object"]
+            }
+          }
+        }
+      }
+    },
+    "PostCheckoutSessionsBodyCustomFieldsDropdownOptions": {
+      "fields": {
+        "label": {
+          "type": {
+            "name": "String",
+            "type": "named"
+          },
+          "http": {
+            "type": ["string"],
+            "maxLength": 100
+          }
+        },
+        "value": {
+          "type": {
+            "name": "String",
+            "type": "named"
+          },
+          "http": {
+            "type": ["string"],
+            "maxLength": 100
+          }
+        }
+      }
+    },
+    "PostCheckoutSessionsBodyCustomFieldsLabel": {
+      "fields": {
+        "custom": {
+          "type": {
+            "name": "String",
+            "type": "named"
+          },
+          "http": {
+            "type": ["string"],
+            "maxLength": 50
+          }
+        },
+        "type": {
+          "type": {
+            "name": "PostCheckoutSessionsBodyCustomFieldsLabelType",
+            "type": "named"
+          },
+          "http": {
+            "type": ["string"]
+          }
+        }
+      }
+    },
+    "PostCheckoutSessionsBodyCustomFieldsNumeric": {
+      "fields": {
+        "maximum_length": {
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "Int32",
+              "type": "named"
+            }
+          },
+          "http": {
+            "type": ["integer"]
+          }
+        },
+        "minimum_length": {
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "Int32",
+              "type": "named"
+            }
+          },
+          "http": {
+            "type": ["integer"]
+          }
+        }
+      }
+    },
+    "PostCheckoutSessionsBodyCustomFieldsText": {
+      "fields": {
+        "maximum_length": {
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "Int32",
+              "type": "named"
+            }
+          },
+          "http": {
+            "type": ["integer"]
+          }
+        },
+        "minimum_length": {
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "Int32",
+              "type": "named"
+            }
+          },
+          "http": {
+            "type": ["integer"]
+          }
+        }
+      }
+    },
+    "PostCheckoutSessionsBodyCustomText": {
+      "description": "Display additional text for your customers using custom text.",
+      "fields": {
+        "after_submit": {
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "PostCheckoutSessionsBodyCustomTextAfterSubmit",
+              "type": "named"
+            }
+          },
+          "http": {
+            "type": ["object"]
+          }
+        },
+        "shipping_address": {
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "PostCheckoutSessionsBodyCustomTextShippingAddress",
+              "type": "named"
+            }
+          },
+          "http": {
+            "type": ["object"]
+          }
+        },
+        "submit": {
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "PostCheckoutSessionsBodyCustomTextSubmit",
+              "type": "named"
+            }
+          },
+          "http": {
+            "type": ["object"]
+          }
+        },
+        "terms_of_service_acceptance": {
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "PostCheckoutSessionsBodyCustomTextTermsOfServiceAcceptance",
+              "type": "named"
+            }
+          },
+          "http": {
+            "type": ["object"]
+          }
+        }
+      }
+    },
+    "PostCheckoutSessionsBodyCustomTextAfterSubmit": {
+      "fields": {
+        "message": {
+          "type": {
+            "name": "String",
+            "type": "named"
+          },
+          "http": {
+            "type": ["string"],
+            "maxLength": 1200
+          }
+        }
+      }
+    },
+    "PostCheckoutSessionsBodyCustomTextShippingAddress": {
+      "fields": {
+        "message": {
+          "type": {
+            "name": "String",
+            "type": "named"
+          },
+          "http": {
+            "type": ["string"],
+            "maxLength": 1200
+          }
+        }
+      }
+    },
+    "PostCheckoutSessionsBodyCustomTextSubmit": {
+      "fields": {
+        "message": {
+          "type": {
+            "name": "String",
+            "type": "named"
+          },
+          "http": {
+            "type": ["string"],
+            "maxLength": 1200
+          }
+        }
+      }
+    },
+    "PostCheckoutSessionsBodyCustomTextTermsOfServiceAcceptance": {
+      "fields": {
+        "message": {
+          "type": {
+            "name": "String",
+            "type": "named"
+          },
+          "http": {
+            "type": ["string"],
+            "maxLength": 1200
+          }
+        }
+      }
+    },
+    "PostCheckoutSessionsBodyCustomerUpdate": {
+      "description": "Controls what fields on Customer can be updated by the Checkout Session. Can only be provided when `customer` is provided.",
+      "fields": {
+        "address": {
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "CheckoutAddress",
+              "type": "named"
+            }
+          },
+          "http": {
+            "type": ["string"]
+          }
+        },
+        "name": {
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "CheckoutName",
+              "type": "named"
+            }
+          },
+          "http": {
+            "type": ["string"]
+          }
+        },
+        "shipping": {
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "CheckoutShipping",
+              "type": "named"
+            }
+          },
+          "http": {
+            "type": ["string"]
+          }
+        }
+      }
+    },
+    "PostCheckoutSessionsBodyDiscounts": {
+      "fields": {
+        "coupon": {
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "String",
+              "type": "named"
+            }
+          },
+          "http": {
+            "type": ["string"],
+            "maxLength": 5000
+          }
+        },
+        "promotion_code": {
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "String",
+              "type": "named"
+            }
+          },
+          "http": {
+            "type": ["string"],
+            "maxLength": 5000
+          }
+        }
+      }
+    },
+    "PostCheckoutSessionsBodyInvoiceCreation": {
+      "description": "Generate a post-purchase Invoice for one-time payments.",
+      "fields": {
+        "enabled": {
+          "type": {
+            "name": "Boolean",
+            "type": "named"
+          },
+          "http": {
+            "type": ["boolean"]
+          }
+        },
+        "invoice_data": {
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "PostCheckoutSessionsBodyInvoiceCreationInvoiceData",
+              "type": "named"
+            }
+          },
+          "http": {
+            "type": ["object"]
+          }
+        }
+      }
+    },
+    "PostCheckoutSessionsBodyInvoiceCreationInvoiceData": {
+      "fields": {
+        "account_tax_ids": {
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "element_type": {
+                "name": "String",
+                "type": "named"
+              },
+              "type": "array"
+            }
+          },
+          "http": {
+            "type": ["array"],
+            "items": {
+              "type": ["string"],
+              "maxLength": 5000
+            }
+          }
+        },
+        "custom_fields": {
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "element_type": {
+                "name": "PostCheckoutSessionsBodyInvoiceCreationInvoiceDataCustomFields",
+                "type": "named"
+              },
+              "type": "array"
+            }
+          },
+          "http": {
+            "type": ["array"],
+            "items": {
+              "type": ["object"]
+            }
+          }
+        },
+        "description": {
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "String",
+              "type": "named"
+            }
+          },
+          "http": {
+            "type": ["string"],
+            "maxLength": 1500
+          }
+        },
+        "footer": {
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "String",
+              "type": "named"
+            }
+          },
+          "http": {
+            "type": ["string"],
+            "maxLength": 5000
+          }
+        },
+        "issuer": {
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "PostCheckoutSessionsBodyInvoiceCreationInvoiceDataIssuer",
+              "type": "named"
+            }
+          },
+          "http": {
+            "type": ["object"]
+          }
+        },
+        "metadata": {
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "JSON",
+              "type": "named"
+            }
+          },
+          "http": {
+            "type": ["object"]
+          }
+        },
+        "rendering_options": {
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "PostCheckoutSessionsBodyInvoiceCreationInvoiceDataRenderingOptions",
+              "type": "named"
+            }
+          },
+          "http": {
+            "type": ["object"]
+          }
+        }
+      }
+    },
+    "PostCheckoutSessionsBodyInvoiceCreationInvoiceDataCustomFields": {
+      "fields": {
+        "name": {
+          "type": {
+            "name": "String",
+            "type": "named"
+          },
+          "http": {
+            "type": ["string"],
+            "maxLength": 40
+          }
+        },
+        "value": {
+          "type": {
+            "name": "String",
+            "type": "named"
+          },
+          "http": {
+            "type": ["string"],
+            "maxLength": 140
+          }
+        }
+      }
+    },
+    "PostCheckoutSessionsBodyInvoiceCreationInvoiceDataIssuer": {
+      "fields": {
+        "account": {
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "String",
+              "type": "named"
+            }
+          },
+          "http": {
+            "type": ["string"]
+          }
+        },
+        "type": {
+          "type": {
+            "name": "CheckoutType",
+            "type": "named"
+          },
+          "http": {
+            "type": ["string"]
+          }
+        }
+      }
+    },
+    "PostCheckoutSessionsBodyInvoiceCreationInvoiceDataRenderingOptions": {
+      "fields": {
+        "amount_tax_display": {
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "CheckoutAmountTaxDisplay",
+              "type": "named"
+            }
+          },
+          "http": {
+            "type": ["string"]
+          }
+        }
+      }
+    },
+    "PostCheckoutSessionsBodyLineItems": {
+      "fields": {
+        "adjustable_quantity": {
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "PostCheckoutSessionsBodyLineItemsAdjustableQuantity",
+              "type": "named"
+            }
+          },
+          "http": {
+            "type": ["object"]
+          }
+        },
+        "dynamic_tax_rates": {
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "element_type": {
+                "name": "String",
+                "type": "named"
+              },
+              "type": "array"
+            }
+          },
+          "http": {
+            "type": ["array"],
+            "items": {
+              "type": ["string"],
+              "maxLength": 5000
+            }
+          }
+        },
+        "price": {
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "String",
+              "type": "named"
+            }
+          },
+          "http": {
+            "type": ["string"],
+            "maxLength": 5000
+          }
+        },
+        "price_data": {
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "PostCheckoutSessionsBodyLineItemsPriceData",
+              "type": "named"
+            }
+          },
+          "http": {
+            "type": ["object"]
+          }
+        },
+        "quantity": {
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "Int32",
+              "type": "named"
+            }
+          },
+          "http": {
+            "type": ["integer"]
+          }
+        },
+        "tax_rates": {
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "element_type": {
+                "name": "String",
+                "type": "named"
+              },
+              "type": "array"
+            }
+          },
+          "http": {
+            "type": ["array"],
+            "items": {
+              "type": ["string"],
+              "maxLength": 5000
+            }
+          }
+        }
+      }
+    },
+    "PostCheckoutSessionsBodyLineItemsAdjustableQuantity": {
+      "fields": {
+        "enabled": {
+          "type": {
+            "name": "Boolean",
+            "type": "named"
+          },
+          "http": {
+            "type": ["boolean"]
+          }
+        },
+        "maximum": {
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "Int32",
+              "type": "named"
+            }
+          },
+          "http": {
+            "type": ["integer"]
+          }
+        },
+        "minimum": {
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "Int32",
+              "type": "named"
+            }
+          },
+          "http": {
+            "type": ["integer"]
+          }
+        }
+      }
+    },
+    "PostCheckoutSessionsBodyLineItemsPriceData": {
+      "fields": {
+        "currency": {
+          "type": {
+            "name": "String",
+            "type": "named"
+          },
+          "http": {
+            "type": ["string"]
+          }
+        },
+        "product": {
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "String",
+              "type": "named"
+            }
+          },
+          "http": {
+            "type": ["string"],
+            "maxLength": 5000
+          }
+        },
+        "product_data": {
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "PostCheckoutSessionsBodyLineItemsPriceDataProductData",
+              "type": "named"
+            }
+          },
+          "http": {
+            "type": ["object"]
+          }
+        },
+        "recurring": {
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "PostCheckoutSessionsBodyLineItemsPriceDataRecurring",
+              "type": "named"
+            }
+          },
+          "http": {
+            "type": ["object"]
+          }
+        },
+        "tax_behavior": {
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "CheckoutTaxBehavior",
+              "type": "named"
+            }
+          },
+          "http": {
+            "type": ["string"]
+          }
+        },
+        "unit_amount": {
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "Int32",
+              "type": "named"
+            }
+          },
+          "http": {
+            "type": ["integer"]
+          }
+        },
+        "unit_amount_decimal": {
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "String",
+              "type": "named"
+            }
+          },
+          "http": {
+            "type": ["string"],
+            "format": "decimal"
+          }
+        }
+      }
+    },
+    "PostCheckoutSessionsBodyLineItemsPriceDataProductData": {
+      "fields": {
+        "description": {
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "String",
+              "type": "named"
+            }
+          },
+          "http": {
+            "type": ["string"],
+            "maxLength": 40000
+          }
+        },
+        "images": {
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "element_type": {
+                "name": "String",
+                "type": "named"
+              },
+              "type": "array"
+            }
+          },
+          "http": {
+            "type": ["array"],
+            "items": {
+              "type": ["string"]
+            }
+          }
+        },
+        "metadata": {
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "JSON",
+              "type": "named"
+            }
+          },
+          "http": {
+            "type": ["object"]
+          }
+        },
+        "name": {
+          "type": {
+            "name": "String",
+            "type": "named"
+          },
+          "http": {
+            "type": ["string"],
+            "maxLength": 5000
+          }
+        },
+        "tax_code": {
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "String",
+              "type": "named"
+            }
+          },
+          "http": {
+            "type": ["string"],
+            "maxLength": 5000
+          }
+        }
+      }
+    },
+    "PostCheckoutSessionsBodyLineItemsPriceDataRecurring": {
+      "fields": {
+        "interval": {
+          "type": {
+            "name": "CheckoutInterval",
+            "type": "named"
+          },
+          "http": {
+            "type": ["string"]
+          }
+        },
+        "interval_count": {
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "Int32",
+              "type": "named"
+            }
+          },
+          "http": {
+            "type": ["integer"]
+          }
+        }
+      }
+    },
+    "PostCheckoutSessionsBodyPaymentIntentData": {
+      "description": "A subset of parameters to be passed to PaymentIntent creation for Checkout Sessions in `payment` mode.",
+      "fields": {
+        "application_fee_amount": {
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "Int32",
+              "type": "named"
+            }
+          },
+          "http": {
+            "type": ["integer"]
+          }
+        },
+        "capture_method": {
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "CheckoutCaptureMethod",
+              "type": "named"
+            }
+          },
+          "http": {
+            "type": ["string"]
+          }
+        },
+        "description": {
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "String",
+              "type": "named"
+            }
+          },
+          "http": {
+            "type": ["string"],
+            "maxLength": 1000
+          }
+        },
+        "metadata": {
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "JSON",
+              "type": "named"
+            }
+          },
+          "http": {
+            "type": ["object"]
+          }
+        },
+        "on_behalf_of": {
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "String",
+              "type": "named"
+            }
+          },
+          "http": {
+            "type": ["string"]
+          }
+        },
+        "receipt_email": {
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "String",
+              "type": "named"
+            }
+          },
+          "http": {
+            "type": ["string"]
+          }
+        },
+        "setup_future_usage": {
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "CheckoutSetupFutureUsage",
+              "type": "named"
+            }
+          },
+          "http": {
+            "type": ["string"]
+          }
+        },
+        "shipping": {
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "PostCheckoutSessionsBodyPaymentIntentDataShipping",
+              "type": "named"
+            }
+          },
+          "http": {
+            "type": ["object"]
+          }
+        },
+        "statement_descriptor": {
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "String",
+              "type": "named"
+            }
+          },
+          "http": {
+            "type": ["string"],
+            "maxLength": 22
+          }
+        },
+        "statement_descriptor_suffix": {
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "String",
+              "type": "named"
+            }
+          },
+          "http": {
+            "type": ["string"],
+            "maxLength": 22
+          }
+        },
+        "transfer_data": {
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "PostCheckoutSessionsBodyPaymentIntentDataTransferData",
+              "type": "named"
+            }
+          },
+          "http": {
+            "type": ["object"]
+          }
+        },
+        "transfer_group": {
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "String",
+              "type": "named"
+            }
+          },
+          "http": {
+            "type": ["string"]
+          }
+        }
+      }
+    },
+    "PostCheckoutSessionsBodyPaymentIntentDataShipping": {
+      "fields": {
+        "address": {
+          "type": {
+            "name": "PostCheckoutSessionsBodyPaymentIntentDataShippingAddress",
+            "type": "named"
+          },
+          "http": {
+            "type": ["object"]
+          }
+        },
+        "carrier": {
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "String",
+              "type": "named"
+            }
+          },
+          "http": {
+            "type": ["string"],
+            "maxLength": 5000
+          }
+        },
+        "name": {
+          "type": {
+            "name": "String",
+            "type": "named"
+          },
+          "http": {
+            "type": ["string"],
+            "maxLength": 5000
+          }
+        },
+        "phone": {
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "String",
+              "type": "named"
+            }
+          },
+          "http": {
+            "type": ["string"],
+            "maxLength": 5000
+          }
+        },
+        "tracking_number": {
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "String",
+              "type": "named"
+            }
+          },
+          "http": {
+            "type": ["string"],
+            "maxLength": 5000
+          }
+        }
+      }
+    },
+    "PostCheckoutSessionsBodyPaymentIntentDataShippingAddress": {
+      "fields": {
+        "city": {
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "String",
+              "type": "named"
+            }
+          },
+          "http": {
+            "type": ["string"],
+            "maxLength": 5000
+          }
+        },
+        "country": {
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "String",
+              "type": "named"
+            }
+          },
+          "http": {
+            "type": ["string"],
+            "maxLength": 5000
+          }
+        },
+        "line1": {
+          "type": {
+            "name": "String",
+            "type": "named"
+          },
+          "http": {
+            "type": ["string"],
+            "maxLength": 5000
+          }
+        },
+        "line2": {
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "String",
+              "type": "named"
+            }
+          },
+          "http": {
+            "type": ["string"],
+            "maxLength": 5000
+          }
+        },
+        "postal_code": {
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "String",
+              "type": "named"
+            }
+          },
+          "http": {
+            "type": ["string"],
+            "maxLength": 5000
+          }
+        },
+        "state": {
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "String",
+              "type": "named"
+            }
+          },
+          "http": {
+            "type": ["string"],
+            "maxLength": 5000
+          }
+        }
+      }
+    },
+    "PostCheckoutSessionsBodyPaymentIntentDataTransferData": {
+      "fields": {
+        "amount": {
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "Int32",
+              "type": "named"
+            }
+          },
+          "http": {
+            "type": ["integer"]
+          }
+        },
+        "destination": {
+          "type": {
+            "name": "String",
+            "type": "named"
+          },
+          "http": {
+            "type": ["string"]
+          }
+        }
+      }
+    },
+    "PostCheckoutSessionsBodyPaymentMethodOptions": {
+      "description": "Payment-method-specific configuration.",
+      "fields": {
+        "acss_debit": {
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "PostCheckoutSessionsBodyPaymentMethodOptionsAcssDebit",
+              "type": "named"
+            }
+          },
+          "http": {
+            "type": ["object"]
+          }
+        },
+        "affirm": {
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "PostCheckoutSessionsBodyPaymentMethodOptionsAffirm",
+              "type": "named"
+            }
+          },
+          "http": {
+            "type": ["object"]
+          }
+        },
+        "afterpay_clearpay": {
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "PostCheckoutSessionsBodyPaymentMethodOptionsAfterpayClearpay",
+              "type": "named"
+            }
+          },
+          "http": {
+            "type": ["object"]
+          }
+        },
+        "alipay": {
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "PostCheckoutSessionsBodyPaymentMethodOptionsAlipay",
+              "type": "named"
+            }
+          },
+          "http": {
+            "type": ["object"]
+          }
+        },
+        "au_becs_debit": {
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "PostCheckoutSessionsBodyPaymentMethodOptionsAuBecsDebit",
+              "type": "named"
+            }
+          },
+          "http": {
+            "type": ["object"]
+          }
+        },
+        "bacs_debit": {
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "PostCheckoutSessionsBodyPaymentMethodOptionsBacsDebit",
+              "type": "named"
+            }
+          },
+          "http": {
+            "type": ["object"]
+          }
+        },
+        "bancontact": {
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "PostCheckoutSessionsBodyPaymentMethodOptionsBancontact",
+              "type": "named"
+            }
+          },
+          "http": {
+            "type": ["object"]
+          }
+        },
+        "boleto": {
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "PostCheckoutSessionsBodyPaymentMethodOptionsBoleto",
+              "type": "named"
+            }
+          },
+          "http": {
+            "type": ["object"]
+          }
+        },
+        "card": {
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "PostCheckoutSessionsBodyPaymentMethodOptionsCard",
+              "type": "named"
+            }
+          },
+          "http": {
+            "type": ["object"]
+          }
+        },
+        "cashapp": {
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "PostCheckoutSessionsBodyPaymentMethodOptionsCashapp",
+              "type": "named"
+            }
+          },
+          "http": {
+            "type": ["object"]
+          }
+        },
+        "customer_balance": {
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "PostCheckoutSessionsBodyPaymentMethodOptionsCustomerBalance",
+              "type": "named"
+            }
+          },
+          "http": {
+            "type": ["object"]
+          }
+        },
+        "eps": {
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "PostCheckoutSessionsBodyPaymentMethodOptionsEps",
+              "type": "named"
+            }
+          },
+          "http": {
+            "type": ["object"]
+          }
+        },
+        "fpx": {
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "PostCheckoutSessionsBodyPaymentMethodOptionsFpx",
+              "type": "named"
+            }
+          },
+          "http": {
+            "type": ["object"]
+          }
+        },
+        "giropay": {
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "PostCheckoutSessionsBodyPaymentMethodOptionsGiropay",
+              "type": "named"
+            }
+          },
+          "http": {
+            "type": ["object"]
+          }
+        },
+        "grabpay": {
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "PostCheckoutSessionsBodyPaymentMethodOptionsGrabpay",
+              "type": "named"
+            }
+          },
+          "http": {
+            "type": ["object"]
+          }
+        },
+        "ideal": {
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "PostCheckoutSessionsBodyPaymentMethodOptionsIdeal",
+              "type": "named"
+            }
+          },
+          "http": {
+            "type": ["object"]
+          }
+        },
+        "klarna": {
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "PostCheckoutSessionsBodyPaymentMethodOptionsKlarna",
+              "type": "named"
+            }
+          },
+          "http": {
+            "type": ["object"]
+          }
+        },
+        "konbini": {
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "PostCheckoutSessionsBodyPaymentMethodOptionsKonbini",
+              "type": "named"
+            }
+          },
+          "http": {
+            "type": ["object"]
+          }
+        },
+        "link": {
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "PostCheckoutSessionsBodyPaymentMethodOptionsLink",
+              "type": "named"
+            }
+          },
+          "http": {
+            "type": ["object"]
+          }
+        },
+        "oxxo": {
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "PostCheckoutSessionsBodyPaymentMethodOptionsOxxo",
+              "type": "named"
+            }
+          },
+          "http": {
+            "type": ["object"]
+          }
+        },
+        "p24": {
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "PostCheckoutSessionsBodyPaymentMethodOptionsP24",
+              "type": "named"
+            }
+          },
+          "http": {
+            "type": ["object"]
+          }
+        },
+        "paynow": {
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "PostCheckoutSessionsBodyPaymentMethodOptionsPaynow",
+              "type": "named"
+            }
+          },
+          "http": {
+            "type": ["object"]
+          }
+        },
+        "paypal": {
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "PostCheckoutSessionsBodyPaymentMethodOptionsPaypal",
+              "type": "named"
+            }
+          },
+          "http": {
+            "type": ["object"]
+          }
+        },
+        "pix": {
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "PostCheckoutSessionsBodyPaymentMethodOptionsPix",
+              "type": "named"
+            }
+          },
+          "http": {
+            "type": ["object"]
+          }
+        },
+        "revolut_pay": {
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "PostCheckoutSessionsBodyPaymentMethodOptionsRevolutPay",
+              "type": "named"
+            }
+          },
+          "http": {
+            "type": ["object"]
+          }
+        },
+        "sepa_debit": {
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "PostCheckoutSessionsBodyPaymentMethodOptionsSepaDebit",
+              "type": "named"
+            }
+          },
+          "http": {
+            "type": ["object"]
+          }
+        },
+        "sofort": {
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "PostCheckoutSessionsBodyPaymentMethodOptionsSofort",
+              "type": "named"
+            }
+          },
+          "http": {
+            "type": ["object"]
+          }
+        },
+        "swish": {
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "PostCheckoutSessionsBodyPaymentMethodOptionsSwish",
+              "type": "named"
+            }
+          },
+          "http": {
+            "type": ["object"]
+          }
+        },
+        "us_bank_account": {
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "PostCheckoutSessionsBodyPaymentMethodOptionsUsBankAccount",
+              "type": "named"
+            }
+          },
+          "http": {
+            "type": ["object"]
+          }
+        },
+        "wechat_pay": {
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "PostCheckoutSessionsBodyPaymentMethodOptionsWechatPay",
+              "type": "named"
+            }
+          },
+          "http": {
+            "type": ["object"]
+          }
+        }
+      }
+    },
+    "PostCheckoutSessionsBodyPaymentMethodOptionsAcssDebit": {
+      "fields": {
+        "affirm": {
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "PaymentMethodAffirm",
+              "type": "named"
+            }
+          },
+          "http": {
+            "type": ["object"]
+          }
+        },
+        "currency": {
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "CheckoutCurrency",
+              "type": "named"
+            }
+          },
+          "http": {
+            "type": ["string"]
+          }
+        },
+        "mandate_options": {
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "PostCheckoutSessionsBodyPaymentMethodOptionsAcssDebitMandateOptions",
+              "type": "named"
+            }
+          },
+          "http": {
+            "type": ["object"]
+          }
+        },
+        "setup_future_usage": {
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "PostCheckoutSessionsBodyPaymentMethodOptionsAcssDebitSetupFutureUsage",
+              "type": "named"
+            }
+          },
+          "http": {
+            "type": ["string"]
+          }
+        },
+        "verification_method": {
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "CheckoutVerificationMethod",
+              "type": "named"
+            }
+          },
+          "http": {
+            "type": ["string"]
+          }
+        }
+      }
+    },
+    "PostCheckoutSessionsBodyPaymentMethodOptionsAcssDebitMandateOptions": {
+      "fields": {
+        "custom_mandate_url": {
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "String",
+              "type": "named"
+            }
+          },
+          "http": {
+            "type": ["string"]
+          }
+        },
+        "default_for": {
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "element_type": {
+                "name": "CheckoutDefaultFor",
+                "type": "named"
+              },
+              "type": "array"
+            }
+          },
+          "http": {
+            "type": ["array"],
+            "items": {
+              "type": ["string"]
+            }
+          }
+        },
+        "interval_description": {
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "String",
+              "type": "named"
+            }
+          },
+          "http": {
+            "type": ["string"],
+            "maxLength": 500
+          }
+        },
+        "payment_schedule": {
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "CheckoutPaymentSchedule",
+              "type": "named"
+            }
+          },
+          "http": {
+            "type": ["string"]
+          }
+        },
+        "transaction_type": {
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "CheckoutTransactionType",
+              "type": "named"
+            }
+          },
+          "http": {
+            "type": ["string"]
+          }
+        }
+      }
+    },
+    "PostCheckoutSessionsBodyPaymentMethodOptionsAffirm": {
+      "fields": {
+        "setup_future_usage": {
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "PostCheckoutSessionsBodyPaymentMethodOptionsAffirmSetupFutureUsage",
+              "type": "named"
+            }
+          },
+          "http": {
+            "type": ["string"]
+          }
+        }
+      }
+    },
+    "PostCheckoutSessionsBodyPaymentMethodOptionsAfterpayClearpay": {
+      "fields": {
+        "setup_future_usage": {
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "PostCheckoutSessionsBodyPaymentMethodOptionsAfterpayClearpaySetupFutureUsage",
+              "type": "named"
+            }
+          },
+          "http": {
+            "type": ["string"]
+          }
+        }
+      }
+    },
+    "PostCheckoutSessionsBodyPaymentMethodOptionsAlipay": {
+      "fields": {
+        "setup_future_usage": {
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "PostCheckoutSessionsBodyPaymentMethodOptionsAlipaySetupFutureUsage",
+              "type": "named"
+            }
+          },
+          "http": {
+            "type": ["string"]
+          }
+        }
+      }
+    },
+    "PostCheckoutSessionsBodyPaymentMethodOptionsAuBecsDebit": {
+      "fields": {
+        "setup_future_usage": {
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "PostCheckoutSessionsBodyPaymentMethodOptionsAuBecsDebitSetupFutureUsage",
+              "type": "named"
+            }
+          },
+          "http": {
+            "type": ["string"]
+          }
+        }
+      }
+    },
+    "PostCheckoutSessionsBodyPaymentMethodOptionsBacsDebit": {
+      "fields": {
+        "setup_future_usage": {
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "PostCheckoutSessionsBodyPaymentMethodOptionsBacsDebitSetupFutureUsage",
+              "type": "named"
+            }
+          },
+          "http": {
+            "type": ["string"]
+          }
+        }
+      }
+    },
+    "PostCheckoutSessionsBodyPaymentMethodOptionsBancontact": {
+      "fields": {
+        "setup_future_usage": {
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "PostCheckoutSessionsBodyPaymentMethodOptionsBancontactSetupFutureUsage",
+              "type": "named"
+            }
+          },
+          "http": {
+            "type": ["string"]
+          }
+        }
+      }
+    },
+    "PostCheckoutSessionsBodyPaymentMethodOptionsBoleto": {
+      "fields": {
+        "expires_after_days": {
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "Int32",
+              "type": "named"
+            }
+          },
+          "http": {
+            "type": ["integer"]
+          }
+        },
+        "setup_future_usage": {
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "PostCheckoutSessionsBodyPaymentMethodOptionsBoletoSetupFutureUsage",
+              "type": "named"
+            }
+          },
+          "http": {
+            "type": ["string"]
+          }
+        }
+      }
+    },
+    "PostCheckoutSessionsBodyPaymentMethodOptionsCard": {
+      "fields": {
+        "installments": {
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "PostCheckoutSessionsBodyPaymentMethodOptionsCardInstallments",
+              "type": "named"
+            }
+          },
+          "http": {
+            "type": ["object"]
+          }
+        },
+        "request_three_d_secure": {
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "CheckoutRequestThreeDSecure",
+              "type": "named"
+            }
+          },
+          "http": {
+            "type": ["string"]
+          }
+        },
+        "setup_future_usage": {
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "CheckoutSetupFutureUsage",
+              "type": "named"
+            }
+          },
+          "http": {
+            "type": ["string"]
+          }
+        },
+        "statement_descriptor_suffix_kana": {
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "String",
+              "type": "named"
+            }
+          },
+          "http": {
+            "type": ["string"],
+            "maxLength": 22
+          }
+        },
+        "statement_descriptor_suffix_kanji": {
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "String",
+              "type": "named"
+            }
+          },
+          "http": {
+            "type": ["string"],
+            "maxLength": 17
+          }
+        }
+      }
+    },
+    "PostCheckoutSessionsBodyPaymentMethodOptionsCardInstallments": {
+      "fields": {
+        "enabled": {
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "Boolean",
+              "type": "named"
+            }
+          },
+          "http": {
+            "type": ["boolean"]
+          }
+        }
+      }
+    },
+    "PostCheckoutSessionsBodyPaymentMethodOptionsCashapp": {
+      "fields": {
+        "setup_future_usage": {
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "PostCheckoutSessionsBodyPaymentMethodOptionsCashappSetupFutureUsage",
+              "type": "named"
+            }
+          },
+          "http": {
+            "type": ["string"]
+          }
+        }
+      }
+    },
+    "PostCheckoutSessionsBodyPaymentMethodOptionsCustomerBalance": {
+      "fields": {
+        "bank_transfer": {
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "PostCheckoutSessionsBodyPaymentMethodOptionsCustomerBalanceBankTransfer",
+              "type": "named"
+            }
+          },
+          "http": {
+            "type": ["object"]
+          }
+        },
+        "funding_type": {
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "CheckoutFundingType",
+              "type": "named"
+            }
+          },
+          "http": {
+            "type": ["string"]
+          }
+        },
+        "setup_future_usage": {
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "PostCheckoutSessionsBodyPaymentMethodOptionsCustomerBalanceSetupFutureUsage",
+              "type": "named"
+            }
+          },
+          "http": {
+            "type": ["string"]
+          }
+        }
+      }
+    },
+    "PostCheckoutSessionsBodyPaymentMethodOptionsCustomerBalanceBankTransfer": {
+      "fields": {
+        "eu_bank_transfer": {
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "PostCheckoutSessionsBodyPaymentMethodOptionsCustomerBalanceBankTransferEuBankTransfer",
+              "type": "named"
+            }
+          },
+          "http": {
+            "type": ["object"]
+          }
+        },
+        "requested_address_types": {
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "element_type": {
+                "name": "CheckoutRequestedAddressTypes",
+                "type": "named"
+              },
+              "type": "array"
+            }
+          },
+          "http": {
+            "type": ["array"],
+            "items": {
+              "type": ["string"]
+            }
+          }
+        },
+        "type": {
+          "type": {
+            "name": "PostCheckoutSessionsBodyPaymentMethodOptionsCustomerBalanceBankTransferType",
+            "type": "named"
+          },
+          "http": {
+            "type": ["string"]
+          }
+        }
+      }
+    },
+    "PostCheckoutSessionsBodyPaymentMethodOptionsCustomerBalanceBankTransferEuBankTransfer": {
+      "fields": {
+        "country": {
+          "type": {
+            "name": "String",
+            "type": "named"
+          },
+          "http": {
+            "type": ["string"],
+            "maxLength": 5000
+          }
+        }
+      }
+    },
+    "PostCheckoutSessionsBodyPaymentMethodOptionsEps": {
+      "fields": {
+        "setup_future_usage": {
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "PostCheckoutSessionsBodyPaymentMethodOptionsEpsSetupFutureUsage",
+              "type": "named"
+            }
+          },
+          "http": {
+            "type": ["string"]
+          }
+        }
+      }
+    },
+    "PostCheckoutSessionsBodyPaymentMethodOptionsFpx": {
+      "fields": {
+        "setup_future_usage": {
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "PostCheckoutSessionsBodyPaymentMethodOptionsFpxSetupFutureUsage",
+              "type": "named"
+            }
+          },
+          "http": {
+            "type": ["string"]
+          }
+        }
+      }
+    },
+    "PostCheckoutSessionsBodyPaymentMethodOptionsGiropay": {
+      "fields": {
+        "setup_future_usage": {
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "PostCheckoutSessionsBodyPaymentMethodOptionsGiropaySetupFutureUsage",
+              "type": "named"
+            }
+          },
+          "http": {
+            "type": ["string"]
+          }
+        }
+      }
+    },
+    "PostCheckoutSessionsBodyPaymentMethodOptionsGrabpay": {
+      "fields": {
+        "setup_future_usage": {
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "PostCheckoutSessionsBodyPaymentMethodOptionsGrabpaySetupFutureUsage",
+              "type": "named"
+            }
+          },
+          "http": {
+            "type": ["string"]
+          }
+        }
+      }
+    },
+    "PostCheckoutSessionsBodyPaymentMethodOptionsIdeal": {
+      "fields": {
+        "setup_future_usage": {
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "PostCheckoutSessionsBodyPaymentMethodOptionsIdealSetupFutureUsage",
+              "type": "named"
+            }
+          },
+          "http": {
+            "type": ["string"]
+          }
+        }
+      }
+    },
+    "PostCheckoutSessionsBodyPaymentMethodOptionsKlarna": {
+      "fields": {
+        "setup_future_usage": {
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "PostCheckoutSessionsBodyPaymentMethodOptionsKlarnaSetupFutureUsage",
+              "type": "named"
+            }
+          },
+          "http": {
+            "type": ["string"]
+          }
+        }
+      }
+    },
+    "PostCheckoutSessionsBodyPaymentMethodOptionsKonbini": {
+      "fields": {
+        "expires_after_days": {
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "Int32",
+              "type": "named"
+            }
+          },
+          "http": {
+            "type": ["integer"]
+          }
+        },
+        "setup_future_usage": {
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "PostCheckoutSessionsBodyPaymentMethodOptionsKonbiniSetupFutureUsage",
+              "type": "named"
+            }
+          },
+          "http": {
+            "type": ["string"]
+          }
+        }
+      }
+    },
+    "PostCheckoutSessionsBodyPaymentMethodOptionsLink": {
+      "fields": {
+        "setup_future_usage": {
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "PostCheckoutSessionsBodyPaymentMethodOptionsLinkSetupFutureUsage",
+              "type": "named"
+            }
+          },
+          "http": {
+            "type": ["string"]
+          }
+        }
+      }
+    },
+    "PostCheckoutSessionsBodyPaymentMethodOptionsOxxo": {
+      "fields": {
+        "expires_after_days": {
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "Int32",
+              "type": "named"
+            }
+          },
+          "http": {
+            "type": ["integer"]
+          }
+        },
+        "setup_future_usage": {
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "PostCheckoutSessionsBodyPaymentMethodOptionsOxxoSetupFutureUsage",
+              "type": "named"
+            }
+          },
+          "http": {
+            "type": ["string"]
+          }
+        }
+      }
+    },
+    "PostCheckoutSessionsBodyPaymentMethodOptionsP24": {
+      "fields": {
+        "setup_future_usage": {
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "PostCheckoutSessionsBodyPaymentMethodOptionsP24SetupFutureUsage",
+              "type": "named"
+            }
+          },
+          "http": {
+            "type": ["string"]
+          }
+        },
+        "tos_shown_and_accepted": {
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "Boolean",
+              "type": "named"
+            }
+          },
+          "http": {
+            "type": ["boolean"]
+          }
+        }
+      }
+    },
+    "PostCheckoutSessionsBodyPaymentMethodOptionsPaynow": {
+      "fields": {
+        "setup_future_usage": {
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "PostCheckoutSessionsBodyPaymentMethodOptionsPaynowSetupFutureUsage",
+              "type": "named"
+            }
+          },
+          "http": {
+            "type": ["string"]
+          }
+        }
+      }
+    },
+    "PostCheckoutSessionsBodyPaymentMethodOptionsPaypal": {
+      "fields": {
+        "capture_method": {
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "PostCheckoutSessionsBodyPaymentMethodOptionsPaypalCaptureMethod",
+              "type": "named"
+            }
+          },
+          "http": {
+            "type": ["string"]
+          }
+        },
+        "preferred_locale": {
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "CheckoutPreferredLocale",
+              "type": "named"
+            }
+          },
+          "http": {
+            "type": ["string"]
+          }
+        },
+        "reference": {
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "String",
+              "type": "named"
+            }
+          },
+          "http": {
+            "type": ["string"],
+            "maxLength": 127
+          }
+        },
+        "risk_correlation_id": {
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "String",
+              "type": "named"
+            }
+          },
+          "http": {
+            "type": ["string"],
+            "maxLength": 32
+          }
+        },
+        "setup_future_usage": {
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "PostCheckoutSessionsBodyPaymentMethodOptionsPaypalSetupFutureUsage",
+              "type": "named"
+            }
+          },
+          "http": {
+            "type": ["string"]
+          }
+        }
+      }
+    },
+    "PostCheckoutSessionsBodyPaymentMethodOptionsPix": {
+      "fields": {
+        "expires_after_seconds": {
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "Int32",
+              "type": "named"
+            }
+          },
+          "http": {
+            "type": ["integer"]
+          }
+        }
+      }
+    },
+    "PostCheckoutSessionsBodyPaymentMethodOptionsRevolutPay": {
+      "fields": {
+        "setup_future_usage": {
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "PostCheckoutSessionsBodyPaymentMethodOptionsRevolutPaySetupFutureUsage",
+              "type": "named"
+            }
+          },
+          "http": {
+            "type": ["string"]
+          }
+        }
+      }
+    },
+    "PostCheckoutSessionsBodyPaymentMethodOptionsSepaDebit": {
+      "fields": {
+        "setup_future_usage": {
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "PostCheckoutSessionsBodyPaymentMethodOptionsSepaDebitSetupFutureUsage",
+              "type": "named"
+            }
+          },
+          "http": {
+            "type": ["string"]
+          }
+        }
+      }
+    },
+    "PostCheckoutSessionsBodyPaymentMethodOptionsSofort": {
+      "fields": {
+        "setup_future_usage": {
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "PostCheckoutSessionsBodyPaymentMethodOptionsSofortSetupFutureUsage",
+              "type": "named"
+            }
+          },
+          "http": {
+            "type": ["string"]
+          }
+        }
+      }
+    },
+    "PostCheckoutSessionsBodyPaymentMethodOptionsSwish": {
+      "fields": {
+        "reference": {
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "String",
+              "type": "named"
+            }
+          },
+          "http": {
+            "type": ["string"],
+            "maxLength": 5000
+          }
+        }
+      }
+    },
+    "PostCheckoutSessionsBodyPaymentMethodOptionsUsBankAccount": {
+      "fields": {
+        "financial_connections": {
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "PostCheckoutSessionsBodyPaymentMethodOptionsUsBankAccountFinancialConnections",
+              "type": "named"
+            }
+          },
+          "http": {
+            "type": ["object"]
+          }
+        },
+        "setup_future_usage": {
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "PostCheckoutSessionsBodyPaymentMethodOptionsUsBankAccountSetupFutureUsage",
+              "type": "named"
+            }
+          },
+          "http": {
+            "type": ["string"]
+          }
+        },
+        "verification_method": {
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "PostCheckoutSessionsBodyPaymentMethodOptionsUsBankAccountVerificationMethod",
+              "type": "named"
+            }
+          },
+          "http": {
+            "type": ["string"]
+          }
+        }
+      }
+    },
+    "PostCheckoutSessionsBodyPaymentMethodOptionsUsBankAccountFinancialConnections": {
+      "fields": {
+        "permissions": {
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "element_type": {
+                "name": "CheckoutPermissions",
+                "type": "named"
+              },
+              "type": "array"
+            }
+          },
+          "http": {
+            "type": ["array"],
+            "items": {
+              "type": ["string"],
+              "maxLength": 5000
+            }
+          }
+        },
+        "prefetch": {
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "element_type": {
+                "name": "CheckoutPrefetch",
+                "type": "named"
+              },
+              "type": "array"
+            }
+          },
+          "http": {
+            "type": ["array"],
+            "items": {
+              "type": ["string"]
+            }
+          }
+        }
+      }
+    },
+    "PostCheckoutSessionsBodyPaymentMethodOptionsWechatPay": {
+      "fields": {
+        "app_id": {
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "String",
+              "type": "named"
+            }
+          },
+          "http": {
+            "type": ["string"],
+            "maxLength": 5000
+          }
+        },
+        "client": {
+          "type": {
+            "name": "CheckoutClient",
+            "type": "named"
+          },
+          "http": {
+            "type": ["string"]
+          }
+        },
+        "setup_future_usage": {
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "PostCheckoutSessionsBodyPaymentMethodOptionsWechatPaySetupFutureUsage",
+              "type": "named"
+            }
+          },
+          "http": {
+            "type": ["string"]
+          }
+        }
+      }
+    },
+    "PostCheckoutSessionsBodyPhoneNumberCollection": {
+      "description": "Controls phone number collection settings for the session.\n\nWe recommend that you review your privacy policy and check with your legal contacts\nbefore using this feature. Learn more about [collecting phone numbers with Checkout](https://stripe.com/docs/payments/checkout/phone-numbers).",
+      "fields": {
+        "enabled": {
+          "type": {
+            "name": "Boolean",
+            "type": "named"
+          },
+          "http": {
+            "type": ["boolean"]
+          }
+        }
+      }
+    },
+    "PostCheckoutSessionsBodySetupIntentData": {
+      "description": "A subset of parameters to be passed to SetupIntent creation for Checkout Sessions in `setup` mode.",
+      "fields": {
+        "description": {
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "String",
+              "type": "named"
+            }
+          },
+          "http": {
+            "type": ["string"],
+            "maxLength": 1000
+          }
+        },
+        "metadata": {
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "JSON",
+              "type": "named"
+            }
+          },
+          "http": {
+            "type": ["object"]
+          }
+        },
+        "on_behalf_of": {
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "String",
+              "type": "named"
+            }
+          },
+          "http": {
+            "type": ["string"]
+          }
+        }
+      }
+    },
+    "PostCheckoutSessionsBodyShippingAddressCollection": {
+      "description": "When set, provides configuration for Checkout to collect a shipping address from a customer.",
+      "fields": {
+        "allowed_countries": {
+          "type": {
+            "element_type": {
+              "name": "CheckoutAllowedCountries",
+              "type": "named"
+            },
+            "type": "array"
+          },
+          "http": {
+            "type": ["array"],
+            "items": {
+              "type": ["string"]
+            }
+          }
+        }
+      }
+    },
+    "PostCheckoutSessionsBodyShippingOptions": {
+      "fields": {
+        "shipping_rate": {
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "String",
+              "type": "named"
+            }
+          },
+          "http": {
+            "type": ["string"],
+            "maxLength": 5000
+          }
+        },
+        "shipping_rate_data": {
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "PostCheckoutSessionsBodyShippingOptionsShippingRateData",
+              "type": "named"
+            }
+          },
+          "http": {
+            "type": ["object"]
+          }
+        }
+      }
+    },
+    "PostCheckoutSessionsBodyShippingOptionsShippingRateData": {
+      "fields": {
+        "delivery_estimate": {
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "PostCheckoutSessionsBodyShippingOptionsShippingRateDataDeliveryEstimate",
+              "type": "named"
+            }
+          },
+          "http": {
+            "type": ["object"]
+          }
+        },
+        "display_name": {
+          "type": {
+            "name": "String",
+            "type": "named"
+          },
+          "http": {
+            "type": ["string"],
+            "maxLength": 100
+          }
+        },
+        "fixed_amount": {
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "PostCheckoutSessionsBodyShippingOptionsShippingRateDataFixedAmount",
+              "type": "named"
+            }
+          },
+          "http": {
+            "type": ["object"]
+          }
+        },
+        "metadata": {
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "JSON",
+              "type": "named"
+            }
+          },
+          "http": {
+            "type": ["object"]
+          }
+        },
+        "tax_behavior": {
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "CheckoutTaxBehavior",
+              "type": "named"
+            }
+          },
+          "http": {
+            "type": ["string"]
+          }
+        },
+        "tax_code": {
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "String",
+              "type": "named"
+            }
+          },
+          "http": {
+            "type": ["string"]
+          }
+        },
+        "type": {
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "PostCheckoutSessionsBodyShippingOptionsShippingRateDataType",
+              "type": "named"
+            }
+          },
+          "http": {
+            "type": ["string"]
+          }
+        }
+      }
+    },
+    "PostCheckoutSessionsBodyShippingOptionsShippingRateDataDeliveryEstimate": {
+      "fields": {
+        "maximum": {
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "PostCheckoutSessionsBodyShippingOptionsShippingRateDataDeliveryEstimateMaximum",
+              "type": "named"
+            }
+          },
+          "http": {
+            "type": ["object"]
+          }
+        },
+        "minimum": {
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "PostCheckoutSessionsBodyShippingOptionsShippingRateDataDeliveryEstimateMinimum",
+              "type": "named"
+            }
+          },
+          "http": {
+            "type": ["object"]
+          }
+        }
+      }
+    },
+    "PostCheckoutSessionsBodyShippingOptionsShippingRateDataDeliveryEstimateMaximum": {
+      "fields": {
+        "unit": {
+          "type": {
+            "name": "CheckoutUnit",
+            "type": "named"
+          },
+          "http": {
+            "type": ["string"]
+          }
+        },
+        "value": {
+          "type": {
+            "name": "Int32",
+            "type": "named"
+          },
+          "http": {
+            "type": ["integer"]
+          }
+        }
+      }
+    },
+    "PostCheckoutSessionsBodyShippingOptionsShippingRateDataDeliveryEstimateMinimum": {
+      "fields": {
+        "unit": {
+          "type": {
+            "name": "CheckoutUnit",
+            "type": "named"
+          },
+          "http": {
+            "type": ["string"]
+          }
+        },
+        "value": {
+          "type": {
+            "name": "Int32",
+            "type": "named"
+          },
+          "http": {
+            "type": ["integer"]
+          }
+        }
+      }
+    },
+    "PostCheckoutSessionsBodyShippingOptionsShippingRateDataFixedAmount": {
+      "fields": {
+        "amount": {
+          "type": {
+            "name": "Int32",
+            "type": "named"
+          },
+          "http": {
+            "type": ["integer"]
+          }
+        },
+        "currency": {
+          "type": {
+            "name": "String",
+            "type": "named"
+          },
+          "http": {
+            "type": ["string"]
+          }
+        },
+        "currency_options": {
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "JSON",
+              "type": "named"
+            }
+          },
+          "http": {
+            "type": ["object"]
+          }
+        }
+      }
+    },
+    "PostCheckoutSessionsBodySubscriptionData": {
+      "description": "A subset of parameters to be passed to subscription creation for Checkout Sessions in `subscription` mode.",
+      "fields": {
+        "application_fee_percent": {
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "Float64",
+              "type": "named"
+            }
+          },
+          "http": {
+            "type": ["number"]
+          }
+        },
+        "billing_cycle_anchor": {
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "UnixTime",
+              "type": "named"
+            }
+          },
+          "http": {
+            "type": ["integer"],
+            "format": "unix-time"
+          }
+        },
+        "default_tax_rates": {
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "element_type": {
+                "name": "String",
+                "type": "named"
+              },
+              "type": "array"
+            }
+          },
+          "http": {
+            "type": ["array"],
+            "items": {
+              "type": ["string"],
+              "maxLength": 5000
+            }
+          }
+        },
+        "description": {
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "String",
+              "type": "named"
+            }
+          },
+          "http": {
+            "type": ["string"],
+            "maxLength": 500
+          }
+        },
+        "invoice_settings": {
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "PostCheckoutSessionsBodySubscriptionDataInvoiceSettings",
+              "type": "named"
+            }
+          },
+          "http": {
+            "type": ["object"]
+          }
+        },
+        "metadata": {
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "JSON",
+              "type": "named"
+            }
+          },
+          "http": {
+            "type": ["object"]
+          }
+        },
+        "on_behalf_of": {
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "String",
+              "type": "named"
+            }
+          },
+          "http": {
+            "type": ["string"]
+          }
+        },
+        "proration_behavior": {
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "CheckoutProrationBehavior",
+              "type": "named"
+            }
+          },
+          "http": {
+            "type": ["string"]
+          }
+        },
+        "transfer_data": {
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "PostCheckoutSessionsBodySubscriptionDataTransferData",
+              "type": "named"
+            }
+          },
+          "http": {
+            "type": ["object"]
+          }
+        },
+        "trial_end": {
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "UnixTime",
+              "type": "named"
+            }
+          },
+          "http": {
+            "type": ["integer"],
+            "format": "unix-time"
+          }
+        },
+        "trial_period_days": {
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "Int32",
+              "type": "named"
+            }
+          },
+          "http": {
+            "type": ["integer"]
+          }
+        },
+        "trial_settings": {
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "PostCheckoutSessionsBodySubscriptionDataTrialSettings",
+              "type": "named"
+            }
+          },
+          "http": {
+            "type": ["object"]
+          }
+        }
+      }
+    },
+    "PostCheckoutSessionsBodySubscriptionDataInvoiceSettings": {
+      "fields": {
+        "issuer": {
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "PostCheckoutSessionsBodySubscriptionDataInvoiceSettingsIssuer",
+              "type": "named"
+            }
+          },
+          "http": {
+            "type": ["object"]
+          }
+        }
+      }
+    },
+    "PostCheckoutSessionsBodySubscriptionDataInvoiceSettingsIssuer": {
+      "fields": {
+        "account": {
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "String",
+              "type": "named"
+            }
+          },
+          "http": {
+            "type": ["string"]
+          }
+        },
+        "type": {
+          "type": {
+            "name": "CheckoutType",
+            "type": "named"
+          },
+          "http": {
+            "type": ["string"]
+          }
+        }
+      }
+    },
+    "PostCheckoutSessionsBodySubscriptionDataTransferData": {
+      "fields": {
+        "amount_percent": {
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "Float64",
+              "type": "named"
+            }
+          },
+          "http": {
+            "type": ["number"]
+          }
+        },
+        "destination": {
+          "type": {
+            "name": "String",
+            "type": "named"
+          },
+          "http": {
+            "type": ["string"]
+          }
+        }
+      }
+    },
+    "PostCheckoutSessionsBodySubscriptionDataTrialSettings": {
+      "fields": {
+        "end_behavior": {
+          "type": {
+            "name": "PostCheckoutSessionsBodySubscriptionDataTrialSettingsEndBehavior",
+            "type": "named"
+          },
+          "http": {
+            "type": ["object"]
+          }
+        }
+      }
+    },
+    "PostCheckoutSessionsBodySubscriptionDataTrialSettingsEndBehavior": {
+      "fields": {
+        "missing_payment_method": {
+          "type": {
+            "name": "CheckoutMissingPaymentMethod",
+            "type": "named"
+          },
+          "http": {
+            "type": ["string"]
+          }
+        }
+      }
+    },
+    "PostCheckoutSessionsBodyTaxIdCollection": {
+      "description": "Controls tax ID collection settings for the session.",
+      "fields": {
+        "enabled": {
+          "type": {
+            "name": "Boolean",
+            "type": "named"
+          },
+          "http": {
+            "type": ["boolean"]
+          }
+        }
+      }
+    },
+    "PostFilesBody": {
+      "fields": {
+        "expand": {
+          "description": "Specifies which fields in the response should be expanded.",
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "element_type": {
+                "name": "String",
+                "type": "named"
+              },
+              "type": "array"
+            }
+          },
+          "http": {
+            "type": ["array"],
+            "items": {
+              "type": ["string"],
+              "maxLength": 5000
+            }
+          }
+        },
+        "expand_json": {
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "element_type": {
+                "name": "String",
+                "type": "named"
+              },
+              "type": "array"
+            }
+          },
+          "http": {
+            "type": ["array"],
+            "items": {
+              "type": ["string"],
+              "maxLength": 5000
+            }
+          }
+        },
+        "file": {
+          "description": "A file to upload. Make sure that the specifications follow RFC 2388, which defines file transfers for the `multipart/form-data` protocol.",
+          "type": {
+            "name": "Binary",
+            "type": "named"
+          },
+          "http": {
+            "type": ["string"],
+            "format": "binary"
+          }
+        },
+        "file_link_data": {
+          "description": "Optional parameters that automatically create a [file link](https://stripe.com/docs/api#file_links) for the newly created file.",
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "PostFilesBodyFileLinkData",
+              "type": "named"
+            }
+          },
+          "http": {
+            "type": ["object"]
+          }
+        },
+        "purpose": {
+          "description": "The [purpose](https://stripe.com/docs/file-upload#uploading-a-file) of the uploaded file.",
+          "type": {
+            "name": "FilesPurpose",
+            "type": "named"
+          },
+          "http": {
+            "type": ["string"]
+          }
+        }
+      }
+    },
+    "PostFilesBodyFileLinkData": {
+      "description": "Optional parameters that automatically create a [file link](https://stripe.com/docs/api#file_links) for the newly created file.",
+      "fields": {
+        "create": {
+          "type": {
+            "name": "Boolean",
+            "type": "named"
+          },
+          "http": {
+            "type": ["boolean"]
+          }
+        },
+        "expires_at": {
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "UnixTime",
+              "type": "named"
+            }
+          },
+          "http": {
+            "type": ["integer"],
+            "format": "unix-time"
+          }
+        },
+        "metadata": {
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "JSON",
+              "type": "named"
+            }
+          },
+          "http": {
+            "type": null
+          }
+        }
+      }
+    },
+    "PostTestHelpersTreasuryInboundTransfersIdFailBody": {
+      "fields": {
+        "expand": {
+          "description": "Specifies which fields in the response should be expanded.",
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "element_type": {
+                "name": "String",
+                "type": "named"
+              },
+              "type": "array"
+            }
+          },
+          "http": {
+            "type": ["array"],
+            "items": {
+              "type": ["string"],
+              "maxLength": 5000
+            }
+          }
+        },
+        "failure_details": {
+          "description": "Details about a failed InboundTransfer.",
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "PostTestHelpersTreasuryInboundTransfersIdFailBodyFailureDetails",
+              "type": "named"
+            }
+          },
+          "http": {
+            "type": ["object"]
+          }
+        }
+      }
+    },
+    "PostTestHelpersTreasuryInboundTransfersIdFailBodyFailureDetails": {
+      "description": "Details about a failed InboundTransfer.",
+      "fields": {
+        "code": {
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "TestHelpersCode",
+              "type": "named"
+            }
+          },
+          "http": {
+            "type": ["string"]
+          }
+        }
+      }
+    },
+    "SnakeObject": {
+      "fields": {
+        "features": {
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "JSON",
+              "type": "named"
+            }
+          },
+          "http": {
+            "type": ["object"]
+          }
+        },
+        "id": {
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "SnakeObjectId",
+              "type": "named"
+            }
+          },
+          "http": {
+            "type": ["object"]
+          }
+        }
+      }
+    },
+    "SnakeObjectId": {
+      "fields": {
+        "complete": {
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "Boolean",
+              "type": "named"
+            }
+          },
+          "http": {
+            "type": ["boolean"]
+          }
+        },
+        "id": {
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "Int64",
+              "type": "named"
+            }
+          },
+          "http": {
+            "type": ["integer"],
+            "format": "int64"
+          }
+        },
+        "petId": {
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "Int64",
+              "type": "named"
+            }
+          },
+          "http": {
+            "type": ["integer"],
+            "format": "int64"
+          }
+        },
+        "quantity": {
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "Int32",
+              "type": "named"
+            }
+          },
+          "http": {
+            "type": ["integer"],
+            "format": "int32"
+          }
+        },
+        "shipDate": {
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "TimestampTZ",
+              "type": "named"
+            }
+          },
+          "http": {
+            "type": ["string"],
+            "format": "date-time"
+          }
+        },
+        "status": {
+          "description": "Order Status",
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "SnakeObjectIdStatus",
+              "type": "named"
+            }
+          },
+          "http": {
+            "type": ["string"]
+          }
+        }
+      }
+    },
+    "Tag": {
+      "fields": {
+        "id": {
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "Int64",
+              "type": "named"
+            }
+          },
+          "http": {
+            "type": ["integer"],
+            "format": "int64"
+          }
+        },
+        "name": {
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "String",
+              "type": "named"
+            }
+          },
+          "http": {
+            "type": ["string"]
+          }
+        }
+      }
+    },
+    "TreasuryInboundTransfer": {
+      "description": "Use [InboundTransfers](https://stripe.com/docs/treasury/moving-money/financial-accounts/into/inbound-transfers) to add funds to your [FinancialAccount](https://stripe.com/docs/api#financial_accounts) via a PaymentMethod that is owned by you. The funds will be transferred via an ACH debit.",
+      "fields": {
+        "amount": {
+          "description": "Amount (in cents) transferred.",
+          "type": {
+            "name": "Int32",
+            "type": "named"
+          },
+          "http": {
+            "type": ["integer"]
+          }
+        },
+        "cancelable": {
+          "description": "Returns `true` if the InboundTransfer is able to be canceled.",
+          "type": {
+            "name": "Boolean",
+            "type": "named"
+          },
+          "http": {
+            "type": ["boolean"]
+          }
+        },
+        "context": {
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "JSON",
+              "type": "named"
+            }
+          },
+          "http": {
+            "type": null
+          }
+        },
+        "created": {
+          "description": "Time at which the object was created. Measured in seconds since the Unix epoch.",
+          "type": {
+            "name": "UnixTime",
+            "type": "named"
+          },
+          "http": {
+            "type": ["integer"],
+            "format": "unix-time"
+          }
+        },
+        "currency": {
+          "description": "Three-letter [ISO currency code](https://www.iso.org/iso-4217-currency-codes.html), in lowercase. Must be a [supported currency](https://stripe.com/docs/currencies).",
+          "type": {
+            "name": "String",
+            "type": "named"
+          },
+          "http": {
+            "type": ["string"]
+          }
+        },
+        "description": {
+          "description": "An arbitrary string attached to the object. Often useful for displaying to users.",
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "String",
+              "type": "named"
+            }
+          },
+          "http": {
+            "type": ["string"],
+            "maxLength": 5000
+          }
+        },
+        "failure_details": {
+          "description": "Details about this InboundTransfer's failure. Only set when status is `failed`.",
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "TreasuryInboundTransfersResourceFailureDetails",
+              "type": "named"
+            }
+          },
+          "http": {
+            "type": ["object"]
+          }
+        },
+        "financial_account": {
+          "description": "The FinancialAccount that received the funds.",
+          "type": {
+            "name": "String",
+            "type": "named"
+          },
+          "http": {
+            "type": ["string"],
+            "maxLength": 5000
+          }
+        },
+        "hosted_regulatory_receipt_url": {
+          "description": "A [hosted transaction receipt](https://stripe.com/docs/treasury/moving-money/regulatory-receipts) URL that is provided when money movement is considered regulated under Stripe's money transmission licenses.",
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "String",
+              "type": "named"
+            }
+          },
+          "http": {
+            "type": ["string"],
+            "maxLength": 5000
+          }
+        },
+        "id": {
+          "description": "Unique identifier for the object.",
+          "type": {
+            "name": "String",
+            "type": "named"
+          },
+          "http": {
+            "type": ["string"],
+            "maxLength": 5000
+          }
+        },
+        "livemode": {
+          "description": "Has the value `true` if the object exists in live mode or the value `false` if the object exists in test mode.",
+          "type": {
+            "name": "Boolean",
+            "type": "named"
+          },
+          "http": {
+            "type": ["boolean"]
+          }
+        },
+        "metadata": {
+          "description": "Set of [key-value pairs](https://stripe.com/docs/api/metadata) that you can attach to an object. This can be useful for storing additional information about the object in a structured format.",
+          "type": {
+            "name": "JSON",
+            "type": "named"
+          },
+          "http": {
+            "type": ["object"]
+          }
+        },
+        "object": {
+          "description": "String representing the object's type. Objects of the same type share the same value.",
+          "type": {
+            "name": "TreasuryInboundTransferObject",
+            "type": "named"
+          },
+          "http": {
+            "type": ["string"]
+          }
+        },
+        "origin_payment_method": {
+          "description": "The origin payment method to be debited for an InboundTransfer.",
+          "type": {
+            "name": "String",
+            "type": "named"
+          },
+          "http": {
+            "type": ["string"],
+            "maxLength": 5000
+          }
+        },
+        "returned": {
+          "description": "Returns `true` if the funds for an InboundTransfer were returned after the InboundTransfer went to the `succeeded` state.",
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "Boolean",
+              "type": "named"
+            }
+          },
+          "http": {
+            "type": ["boolean"]
+          }
+        },
+        "statement_descriptor": {
+          "description": "Statement descriptor shown when funds are debited from the source. Not all payment networks support `statement_descriptor`.",
+          "type": {
+            "name": "String",
+            "type": "named"
+          },
+          "http": {
+            "type": ["string"],
+            "maxLength": 5000
+          }
+        },
+        "status": {
+          "description": "Status of the InboundTransfer: `processing`, `succeeded`, `failed`, and `canceled`. An InboundTransfer is `processing` if it is created and pending. The status changes to `succeeded` once the funds have been \"confirmed\" and a `transaction` is created and posted. The status changes to `failed` if the transfer fails.",
+          "type": {
+            "name": "TreasuryInboundTransferStatus",
+            "type": "named"
+          },
+          "http": {
+            "type": ["string"]
+          }
+        },
+        "status_transitions": {
+          "type": {
+            "name": "TreasuryInboundTransfersResourceInboundTransferResourceStatusTransitions",
+            "type": "named"
+          },
+          "http": {
+            "type": ["object"]
+          }
+        },
+        "transaction": {
+          "description": "The Transaction associated with this object.",
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "JSON",
+              "type": "named"
+            }
+          },
+          "http": {
+            "type": null
+          }
+        }
+      }
+    },
+    "TreasuryInboundTransfersResourceFailureDetails": {
+      "fields": {
+        "code": {
+          "description": "Reason for the failure.",
+          "type": {
+            "name": "TreasuryInboundTransfersResourceFailureDetailsCode",
+            "type": "named"
+          },
+          "http": {
+            "type": ["string"]
+          }
+        }
+      }
+    },
+    "TreasuryInboundTransfersResourceInboundTransferResourceStatusTransitions": {
+      "fields": {
+        "canceled_at": {
+          "description": "Timestamp describing when an InboundTransfer changed status to `canceled`.",
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "UnixTime",
+              "type": "named"
+            }
+          },
+          "http": {
+            "type": ["integer"],
+            "format": "unix-time"
+          }
+        },
+        "failed_at": {
+          "description": "Timestamp describing when an InboundTransfer changed status to `failed`.",
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "UnixTime",
+              "type": "named"
+            }
+          },
+          "http": {
+            "type": ["integer"],
+            "format": "unix-time"
+          }
+        },
+        "succeeded_at": {
+          "description": "Timestamp describing when an InboundTransfer changed status to `succeeded`.",
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "UnixTime",
+              "type": "named"
+            }
+          },
+          "http": {
+            "type": ["integer"],
+            "format": "unix-time"
+          }
+        }
+      }
+    },
+    "UploadPetMultipartBody": {
+      "fields": {
+        "address": {
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "JSON",
+              "type": "named"
+            }
+          },
+          "http": {
+            "type": ["object"]
+          }
+        },
+        "addresses": {
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "element_type": {
+                "name": "Address",
+                "type": "named"
+              },
+              "type": "array"
+            }
+          },
+          "http": {
+            "type": ["array"]
+          }
+        },
+        "children": {
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "element_type": {
+                "name": "String",
+                "type": "named"
+              },
+              "type": "array"
+            }
+          },
+          "http": {
+            "type": ["array"],
+            "items": {
+              "type": ["string"]
+            }
+          }
+        },
+        "id": {
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "UUID",
+              "type": "named"
+            }
+          },
+          "http": {
+            "type": ["string"],
+            "format": "uuid"
+          }
+        },
+        "profileImage": {
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "Binary",
+              "type": "named"
+            }
+          },
+          "http": {
+            "type": ["string"],
+            "format": "binary"
+          }
+        }
+      }
+    },
+    "User": {
+      "fields": {
+        "email": {
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "String",
+              "type": "named"
+            }
+          },
+          "http": {
+            "type": ["string"]
+          }
+        },
+        "firstName": {
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "String",
+              "type": "named"
+            }
+          },
+          "http": {
+            "type": ["string"]
+          }
+        },
+        "id": {
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "Int64",
+              "type": "named"
+            }
+          },
+          "http": {
+            "type": ["integer"],
+            "format": "int64"
+          }
+        },
+        "lastName": {
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "String",
+              "type": "named"
+            }
+          },
+          "http": {
+            "type": ["string"]
+          }
+        },
+        "password": {
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "String",
+              "type": "named"
+            }
+          },
+          "http": {
+            "type": ["string"]
+          }
+        },
+        "phone": {
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "String",
+              "type": "named"
+            }
+          },
+          "http": {
+            "type": ["string"]
+          }
+        },
+        "userStatus": {
+          "description": "User Status",
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "Int32",
+              "type": "named"
+            }
+          },
+          "http": {
+            "type": ["integer"],
+            "format": "int32"
+          }
+        },
+        "username": {
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "String",
+              "type": "named"
+            }
+          },
+          "http": {
+            "type": ["string"]
+          }
+        }
+      }
+    }
+  },
+  "procedures": {
+    "DeleteAccountsAccount": {
+      "request": {
+        "url": "/v1/accounts/{account}",
+        "method": "delete",
+        "response": {
+          "contentType": "application/json"
+        }
+      },
+      "arguments": {
+        "account": {
+          "type": {
+            "name": "String",
+            "type": "named"
+          },
+          "http": {
+            "style": "simple",
+            "name": "account",
+            "in": "path",
+            "schema": {
+              "type": ["string"],
+              "maxLength": 5000
+            }
+          }
+        }
+      },
+      "description": "DELETE /v1/accounts/{account}",
+      "result_type": {
+        "name": "TreasuryInboundTransfer",
+        "type": "named"
+      }
+    },
+    "PostCheckoutSessions": {
+      "request": {
+        "url": "/v1/checkout/sessions",
+        "method": "post",
+        "requestBody": {
+          "contentType": "application/x-www-form-urlencoded",
+          "encoding": {
+            "after_expiration": {
+              "style": "deepObject",
+              "explode": true
+            },
+            "automatic_tax": {
+              "style": "deepObject",
+              "explode": true
+            },
+            "consent_collection": {
+              "style": "deepObject",
+              "explode": true
+            },
+            "custom_fields": {
+              "style": "deepObject",
+              "explode": true
+            },
+            "custom_text": {
+              "style": "deepObject",
+              "explode": true
+            },
+            "customer_update": {
+              "style": "deepObject",
+              "explode": true
+            },
+            "discounts": {
+              "style": "deepObject",
+              "explode": true
+            },
+            "expand": {
+              "style": "deepObject",
+              "explode": true
+            },
+            "invoice_creation": {
+              "style": "deepObject",
+              "explode": true
+            },
+            "line_items": {
+              "style": "deepObject",
+              "explode": true
+            },
+            "metadata": {
+              "style": "deepObject",
+              "explode": true
+            },
+            "payment_intent_data": {
+              "style": "deepObject",
+              "explode": true
+            },
+            "payment_method_options": {
+              "style": "deepObject",
+              "explode": true
+            },
+            "payment_method_types": {
+              "style": "deepObject",
+              "explode": true
+            },
+            "phone_number_collection": {
+              "style": "deepObject",
+              "explode": true
+            },
+            "setup_intent_data": {
+              "style": "deepObject",
+              "explode": true
+            },
+            "shipping_address_collection": {
+              "style": "deepObject",
+              "explode": true
+            },
+            "shipping_options": {
+              "style": "deepObject",
+              "explode": true
+            },
+            "subscription_data": {
+              "style": "deepObject",
+              "explode": true
+            },
+            "tax_id_collection": {
+              "style": "deepObject",
+              "explode": true
+            }
+          }
+        },
+        "response": {
+          "contentType": "application/json"
+        }
+      },
+      "arguments": {
+        "body": {
+          "description": "Request body of POST /v1/checkout/sessions",
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "PostCheckoutSessionsBody",
+              "type": "named"
+            }
+          },
+          "http": {
+            "in": "body"
+          }
+        }
+      },
+      "description": "Creates a Session object.",
+      "result_type": {
+        "name": "Order",
+        "type": "named"
+      }
+    },
+    "PostFiles": {
+      "request": {
+        "url": "/v1/files",
+        "method": "post",
+        "servers": [
+          {
+            "url": {
+              "value": "https://files.stripe.com/",
+              "env": "PET_STORE_SERVER_URL"
+            }
+          }
+        ],
+        "requestBody": {
+          "contentType": "multipart/form-data",
+          "encoding": {
+            "expand": {
+              "style": "deepObject",
+              "explode": true
+            },
+            "expand_json": {
+              "contentType": ["application/json"]
+            },
+            "file": {
+              "headers": {
+                "X-Rate-Limit-Limit": {
+                  "explode": false,
+                  "argumentName": "headerXRateLimitLimit",
+                  "schema": {
+                    "type": ["integer"]
+                  }
+                }
+              }
+            },
+            "file_link_data": {
+              "style": "deepObject",
+              "explode": true
+            }
+          }
+        },
+        "response": {
+          "contentType": "application/json"
+        }
+      },
+      "arguments": {
+        "body": {
+          "description": "Request body of POST /v1/files",
+          "type": {
+            "name": "PostFilesBody",
+            "type": "named"
+          },
+          "http": {
+            "in": "body"
+          }
+        },
+        "headerXRateLimitLimit": {
+          "type": {
+            "name": "Int32",
+            "type": "named"
+          },
+          "http": {
+            "explode": false,
+            "argumentName": "headerXRateLimitLimit",
+            "schema": {
+              "type": ["integer"]
+            }
+          }
+        }
+      },
+      "description": "POST /v1/files",
+      "result_type": {
+        "name": "ApiResponse",
+        "type": "named"
+      }
+    },
+    "PostTestHelpersTreasuryInboundTransfersIdFail": {
+      "request": {
+        "url": "/test_helpers/treasury/inbound_transfers/{id}/fail",
+        "method": "post",
+        "requestBody": {
+          "contentType": "application/x-www-form-urlencoded",
+          "encoding": {
+            "expand": {
+              "style": "deepObject",
+              "explode": true
+            },
+            "failure_details": {
+              "style": "deepObject",
+              "explode": true
+            }
+          }
+        },
+        "response": {
+          "contentType": "application/json"
+        }
+      },
+      "arguments": {
+        "body": {
+          "description": "Request body of POST /test_helpers/treasury/inbound_transfers/{id}/fail",
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "PostTestHelpersTreasuryInboundTransfersIdFailBody",
+              "type": "named"
+            }
+          },
+          "http": {
+            "in": "body"
+          }
+        },
+        "id": {
+          "type": {
+            "name": "String",
+            "type": "named"
+          },
+          "http": {
+            "style": "simple",
+            "name": "id",
+            "in": "path",
+            "schema": {
+              "type": ["string"],
+              "maxLength": 5000
+            }
+          }
+        }
+      },
+      "description": "Transitions a test mode created InboundTransfer to the failed status. The InboundTransfer must already be in the processing state.",
+      "result_type": {
+        "name": "TreasuryInboundTransfer",
+        "type": "named"
+      }
+    },
+    "addPet": {
+      "request": {
+        "url": "/pet",
+        "method": "post",
+        "security": [
+          {
+            "petstore_auth": ["write:pets", "read:pets"]
+          }
+        ],
+        "requestBody": {
+          "contentType": "application/json"
+        },
+        "response": {
+          "contentType": "application/json"
+        }
+      },
+      "arguments": {
+        "body": {
+          "description": "Request body of POST /pet",
+          "type": {
+            "name": "Pet",
+            "type": "named"
+          },
+          "http": {
+            "in": "body"
+          }
+        }
+      },
+      "description": "Add a new pet to the store",
+      "result_type": {
+        "name": "Pet",
+        "type": "named"
+      }
+    },
+    "addSnake": {
+      "request": {
+        "url": "/snake",
+        "method": "post",
+        "response": {
+          "contentType": "application/json"
+        }
+      },
+      "arguments": {},
+      "description": "Add snake object",
+      "result_type": {
+        "name": "SnakeObject",
+        "type": "named"
+      }
+    },
+    "createFineTuningJob": {
+      "request": {
+        "url": "/fine_tuning/jobs",
+        "method": "post",
+        "requestBody": {
+          "contentType": "application/json"
+        },
+        "response": {
+          "contentType": "application/json"
+        }
+      },
+      "arguments": {
+        "body": {
+          "description": "Request body of POST /fine_tuning/jobs",
+          "type": {
+            "name": "CreateFineTuningJobRequest",
+            "type": "named"
+          },
+          "http": {
+            "in": "body"
+          }
+        }
+      },
+      "description": "POST /fine_tuning/jobs",
+      "result_type": {
+        "name": "CreateFineTuningJobRequest",
+        "type": "named"
+      }
+    },
+    "createUsersWithListInput": {
+      "request": {
+        "url": "/user/createWithList",
+        "method": "post",
+        "requestBody": {
+          "contentType": "application/json"
+        },
+        "response": {
+          "contentType": "application/json"
+        }
+      },
+      "arguments": {
+        "body": {
+          "description": "Request body of POST /user/createWithList",
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "element_type": {
+                "name": "User",
+                "type": "named"
+              },
+              "type": "array"
+            }
+          },
+          "http": {
+            "in": "body"
+          }
+        }
+      },
+      "description": "Creates list of users with given input array",
+      "result_type": {
+        "name": "User",
+        "type": "named"
+      }
+    },
+    "deleteOrder": {
+      "request": {
+        "url": "/store/order/{orderId}",
+        "method": "delete",
+        "response": {
+          "contentType": "application/json"
+        }
+      },
+      "arguments": {
+        "orderId": {
+          "description": "ID of the order that needs to be deleted",
+          "type": {
+            "name": "Int64",
+            "type": "named"
+          },
+          "http": {
+            "name": "orderId",
+            "in": "path",
+            "schema": {
+              "type": ["integer"],
+              "format": "int64"
+            }
+          }
+        }
+      },
+      "description": "Delete purchase order by ID",
+      "result_type": {
+        "type": "nullable",
+        "underlying_type": {
+          "name": "Boolean",
+          "type": "named"
+        }
+      }
+    },
+    "deletePet": {
+      "request": {
+        "url": "/pet/{petId}",
+        "method": "delete",
+        "security": [
+          {
+            "petstore_auth": ["write:pets", "read:pets"]
+          }
+        ],
+        "response": {
+          "contentType": "application/json"
+        }
+      },
+      "arguments": {
+        "api_key": {
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "String",
+              "type": "named"
+            }
+          },
+          "http": {
+            "name": "api_key",
+            "in": "header",
+            "schema": {
+              "type": ["string"]
+            }
+          }
+        },
+        "petId": {
+          "description": "Pet id to delete",
+          "type": {
+            "name": "Int64",
+            "type": "named"
+          },
+          "http": {
+            "name": "petId",
+            "in": "path",
+            "schema": {
+              "type": ["integer"],
+              "format": "int64"
+            }
+          }
+        }
+      },
+      "description": "Deletes a pet",
+      "result_type": {
+        "type": "nullable",
+        "underlying_type": {
+          "name": "Boolean",
+          "type": "named"
+        }
+      }
+    },
+    "deleteUser": {
+      "request": {
+        "url": "/user/{username}",
+        "method": "delete",
+        "response": {
+          "contentType": "application/json"
+        }
+      },
+      "arguments": {
+        "username": {
+          "description": "The name that needs to be deleted",
+          "type": {
+            "name": "String",
+            "type": "named"
+          },
+          "http": {
+            "name": "username",
+            "in": "path",
+            "schema": {
+              "type": ["string"]
+            }
+          }
+        }
+      },
+      "description": "Delete user",
+      "result_type": {
+        "type": "nullable",
+        "underlying_type": {
+          "name": "Boolean",
+          "type": "named"
+        }
+      }
+    },
+    "placeOrder": {
+      "request": {
+        "url": "/store/order",
+        "method": "post",
+        "requestBody": {
+          "contentType": "application/json"
+        },
+        "response": {
+          "contentType": "application/json"
+        }
+      },
+      "arguments": {
+        "body": {
+          "description": "Request body of POST /store/order",
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "Order",
+              "type": "named"
+            }
+          },
+          "http": {
+            "in": "body"
+          }
+        }
+      },
+      "description": "Place an order for a pet",
+      "result_type": {
+        "name": "Order",
+        "type": "named"
+      }
+    },
+    "updatePet": {
+      "request": {
+        "url": "/pet",
+        "method": "put",
+        "security": [
+          {
+            "petstore_auth": ["write:pets", "read:pets"]
+          }
+        ],
+        "requestBody": {
+          "contentType": "application/json"
+        },
+        "response": {
+          "contentType": "application/json"
+        }
+      },
+      "arguments": {
+        "body": {
+          "description": "Request body of PUT /pet",
+          "type": {
+            "name": "Pet",
+            "type": "named"
+          },
+          "http": {
+            "in": "body"
+          }
+        }
+      },
+      "description": "Update an existing pet",
+      "result_type": {
+        "name": "Pet",
+        "type": "named"
+      }
+    },
+    "updatePetWithForm": {
+      "request": {
+        "url": "/pet/{petId}",
+        "method": "post",
+        "security": [
+          {
+            "petstore_auth": ["write:pets", "read:pets"]
+          }
+        ],
+        "response": {
+          "contentType": "application/json"
+        }
+      },
+      "arguments": {
+        "name": {
+          "description": "Name of pet that needs to be updated",
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "String",
+              "type": "named"
+            }
+          },
+          "http": {
+            "name": "name",
+            "in": "query",
+            "schema": {
+              "type": ["string"]
+            }
+          }
+        },
+        "petId": {
+          "description": "ID of pet that needs to be updated",
+          "type": {
+            "name": "Int64",
+            "type": "named"
+          },
+          "http": {
+            "name": "petId",
+            "in": "path",
+            "schema": {
+              "type": ["integer"],
+              "format": "int64"
+            }
+          }
+        },
+        "status": {
+          "description": "Status of pet that needs to be updated",
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "String",
+              "type": "named"
+            }
+          },
+          "http": {
+            "name": "status",
+            "in": "query",
+            "schema": {
+              "type": ["string"]
+            }
+          }
+        }
+      },
+      "description": "Updates a pet in the store with form data",
+      "result_type": {
+        "type": "nullable",
+        "underlying_type": {
+          "name": "Boolean",
+          "type": "named"
+        }
+      }
+    },
+    "uploadFile": {
+      "request": {
+        "url": "/pet/{petId}/uploadImage",
+        "method": "post",
+        "security": [
+          {
+            "petstore_auth": ["write:pets", "read:pets"]
+          }
+        ],
+        "requestBody": {
+          "contentType": "application/octet-stream"
+        },
+        "response": {
+          "contentType": "application/json"
+        }
+      },
+      "arguments": {
+        "additionalMetadata": {
+          "description": "Additional Metadata",
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "String",
+              "type": "named"
+            }
+          },
+          "http": {
+            "name": "additionalMetadata",
+            "in": "query",
+            "schema": {
+              "type": ["string"]
+            }
+          }
+        },
+        "body": {
+          "description": "Request body of POST /pet/{petId}/uploadImage",
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "Binary",
+              "type": "named"
+            }
+          },
+          "http": {
+            "in": "body"
+          }
+        },
+        "petId": {
+          "description": "ID of pet to update",
+          "type": {
+            "name": "Int64",
+            "type": "named"
+          },
+          "http": {
+            "name": "petId",
+            "in": "path",
+            "schema": {
+              "type": ["integer"],
+              "format": "int64"
+            }
+          }
+        }
+      },
+      "description": "uploads an image",
+      "result_type": {
+        "name": "ApiResponse",
+        "type": "named"
+      }
+    },
+    "uploadPetMultipart": {
+      "request": {
+        "url": "/pet/multipart",
+        "method": "post",
+        "requestBody": {
+          "contentType": "multipart/form-data",
+          "encoding": {
+            "profileImage": {
+              "contentType": ["image/png", "image/jpeg"],
+              "headers": {
+                "X-Rate-Limit-Limit": {
+                  "explode": false,
+                  "argumentName": "headerXRateLimitLimit",
+                  "schema": {
+                    "type": ["integer"]
+                  }
+                }
+              }
+            }
+          }
+        },
+        "response": {
+          "contentType": "application/json"
+        }
+      },
+      "arguments": {
+        "body": {
+          "description": "Request body of POST /pet/multipart",
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "UploadPetMultipartBody",
+              "type": "named"
+            }
+          },
+          "http": {
+            "in": "body"
+          }
+        },
+        "headerXRateLimitLimit": {
+          "description": "The number of allowed requests in the current period",
+          "type": {
+            "name": "Int32",
+            "type": "named"
+          },
+          "http": {
+            "explode": false,
+            "argumentName": "headerXRateLimitLimit",
+            "schema": {
+              "type": ["integer"]
+            }
+          }
+        }
+      },
+      "description": "POST /pet/multipart",
+      "result_type": {
+        "name": "ApiResponse",
+        "type": "named"
+      }
+    }
+  },
+  "scalar_types": {
+    "Binary": {
+      "aggregate_functions": {},
+      "comparison_operators": {},
+      "representation": {
+        "type": "bytes"
+      }
+    },
+    "Boolean": {
+      "aggregate_functions": {},
+      "comparison_operators": {},
+      "representation": {
+        "type": "boolean"
+      }
+    },
+    "CheckoutAddress": {
+      "aggregate_functions": {},
+      "comparison_operators": {},
+      "representation": {
+        "one_of": ["auto", "never"],
+        "type": "enum"
+      }
+    },
+    "CheckoutAllowedCountries": {
+      "aggregate_functions": {},
+      "comparison_operators": {},
+      "representation": {
+        "one_of": ["AC", "AD"],
+        "type": "enum"
+      }
+    },
+    "CheckoutAmountTaxDisplay": {
+      "aggregate_functions": {},
+      "comparison_operators": {},
+      "representation": {
+        "one_of": ["", "exclude_tax", "include_inclusive_tax"],
+        "type": "enum"
+      }
+    },
+    "CheckoutBillingAddressCollection": {
+      "aggregate_functions": {},
+      "comparison_operators": {},
+      "representation": {
+        "one_of": ["auto", "required"],
+        "type": "enum"
+      }
+    },
+    "CheckoutCaptureMethod": {
+      "aggregate_functions": {},
+      "comparison_operators": {},
+      "representation": {
+        "one_of": ["automatic", "automatic_async", "manual"],
+        "type": "enum"
+      }
+    },
+    "CheckoutClient": {
+      "aggregate_functions": {},
+      "comparison_operators": {},
+      "representation": {
+        "one_of": ["android", "ios", "web"],
+        "type": "enum"
+      }
+    },
+    "CheckoutCurrency": {
+      "aggregate_functions": {},
+      "comparison_operators": {},
+      "representation": {
+        "one_of": ["cad", "usd"],
+        "type": "enum"
+      }
+    },
+    "CheckoutCustomerCreation": {
+      "aggregate_functions": {},
+      "comparison_operators": {},
+      "representation": {
+        "one_of": ["always", "if_required"],
+        "type": "enum"
+      }
+    },
+    "CheckoutDefaultFor": {
+      "aggregate_functions": {},
+      "comparison_operators": {},
+      "representation": {
+        "one_of": ["invoice", "subscription"],
+        "type": "enum"
+      }
+    },
+    "CheckoutFundingType": {
+      "aggregate_functions": {},
+      "comparison_operators": {},
+      "representation": {
+        "one_of": ["bank_transfer"],
+        "type": "enum"
+      }
+    },
+    "CheckoutInterval": {
+      "aggregate_functions": {},
+      "comparison_operators": {},
+      "representation": {
+        "one_of": ["day", "month", "week", "year"],
+        "type": "enum"
+      }
+    },
+    "CheckoutLocale": {
+      "aggregate_functions": {},
+      "comparison_operators": {},
+      "representation": {
+        "one_of": ["auto", "bg", "cs"],
+        "type": "enum"
+      }
+    },
+    "CheckoutMissingPaymentMethod": {
+      "aggregate_functions": {},
+      "comparison_operators": {},
+      "representation": {
+        "one_of": ["cancel", "create_invoice", "pause"],
+        "type": "enum"
+      }
+    },
+    "CheckoutMode": {
+      "aggregate_functions": {},
+      "comparison_operators": {},
+      "representation": {
+        "one_of": ["payment", "setup", "subscription"],
+        "type": "enum"
+      }
+    },
+    "CheckoutName": {
+      "aggregate_functions": {},
+      "comparison_operators": {},
+      "representation": {
+        "one_of": ["auto", "never"],
+        "type": "enum"
+      }
+    },
+    "CheckoutPaymentMethodCollection": {
+      "aggregate_functions": {},
+      "comparison_operators": {},
+      "representation": {
+        "one_of": ["always", "if_required"],
+        "type": "enum"
+      }
+    },
+    "CheckoutPaymentMethodTypes": {
+      "aggregate_functions": {},
+      "comparison_operators": {},
+      "representation": {
+        "one_of": ["acss_debit", "affirm"],
+        "type": "enum"
+      }
+    },
+    "CheckoutPaymentSchedule": {
+      "aggregate_functions": {},
+      "comparison_operators": {},
+      "representation": {
+        "one_of": ["combined", "interval", "sporadic"],
+        "type": "enum"
+      }
+    },
+    "CheckoutPermissions": {
+      "aggregate_functions": {},
+      "comparison_operators": {},
+      "representation": {
+        "one_of": ["balances", "ownership", "payment_method", "transactions"],
+        "type": "enum"
+      }
+    },
+    "CheckoutPosition": {
+      "aggregate_functions": {},
+      "comparison_operators": {},
+      "representation": {
+        "one_of": ["auto", "hidden"],
+        "type": "enum"
+      }
+    },
+    "CheckoutPreferredLocale": {
+      "aggregate_functions": {},
+      "comparison_operators": {},
+      "representation": {
+        "one_of": ["cs-CZ", "da-DK"],
+        "type": "enum"
+      }
+    },
+    "CheckoutPrefetch": {
+      "aggregate_functions": {},
+      "comparison_operators": {},
+      "representation": {
+        "one_of": ["balances", "transactions"],
+        "type": "enum"
+      }
+    },
+    "CheckoutPromotions": {
+      "aggregate_functions": {},
+      "comparison_operators": {},
+      "representation": {
+        "one_of": ["auto", "none"],
+        "type": "enum"
+      }
+    },
+    "CheckoutProrationBehavior": {
+      "aggregate_functions": {},
+      "comparison_operators": {},
+      "representation": {
+        "one_of": ["create_prorations", "none"],
+        "type": "enum"
+      }
+    },
+    "CheckoutRedirectOnCompletion": {
+      "aggregate_functions": {},
+      "comparison_operators": {},
+      "representation": {
+        "one_of": ["always", "if_required", "never"],
+        "type": "enum"
+      }
+    },
+    "CheckoutRequestThreeDSecure": {
+      "aggregate_functions": {},
+      "comparison_operators": {},
+      "representation": {
+        "one_of": ["any", "automatic", "challenge"],
+        "type": "enum"
+      }
+    },
+    "CheckoutRequestedAddressTypes": {
+      "aggregate_functions": {},
+      "comparison_operators": {},
+      "representation": {
+        "one_of": ["aba", "iban"],
+        "type": "enum"
+      }
+    },
+    "CheckoutSetupFutureUsage": {
+      "aggregate_functions": {},
+      "comparison_operators": {},
+      "representation": {
+        "one_of": ["off_session", "on_session"],
+        "type": "enum"
+      }
+    },
+    "CheckoutShipping": {
+      "aggregate_functions": {},
+      "comparison_operators": {},
+      "representation": {
+        "one_of": ["auto", "never"],
+        "type": "enum"
+      }
+    },
+    "CheckoutSubmitType": {
+      "aggregate_functions": {},
+      "comparison_operators": {},
+      "representation": {
+        "one_of": ["auto", "book", "donate", "pay"],
+        "type": "enum"
+      }
+    },
+    "CheckoutTaxBehavior": {
+      "aggregate_functions": {},
+      "comparison_operators": {},
+      "representation": {
+        "one_of": ["exclusive", "inclusive", "unspecified"],
+        "type": "enum"
+      }
+    },
+    "CheckoutTermsOfService": {
+      "aggregate_functions": {},
+      "comparison_operators": {},
+      "representation": {
+        "one_of": ["none", "required"],
+        "type": "enum"
+      }
+    },
+    "CheckoutTransactionType": {
+      "aggregate_functions": {},
+      "comparison_operators": {},
+      "representation": {
+        "one_of": ["business", "personal"],
+        "type": "enum"
+      }
+    },
+    "CheckoutType": {
+      "aggregate_functions": {},
+      "comparison_operators": {},
+      "representation": {
+        "one_of": ["account", "self"],
+        "type": "enum"
+      }
+    },
+    "CheckoutUiMode": {
+      "aggregate_functions": {},
+      "comparison_operators": {},
+      "representation": {
+        "one_of": ["embedded", "hosted"],
+        "type": "enum"
+      }
+    },
+    "CheckoutUnit": {
+      "aggregate_functions": {},
+      "comparison_operators": {},
+      "representation": {
+        "one_of": ["business_day", "day", "hour", "month", "week"],
+        "type": "enum"
+      }
+    },
+    "CheckoutVerificationMethod": {
+      "aggregate_functions": {},
+      "comparison_operators": {},
+      "representation": {
+        "one_of": ["automatic", "instant", "microdeposits"],
+        "type": "enum"
+      }
+    },
+    "FilesPurpose": {
+      "aggregate_functions": {},
+      "comparison_operators": {},
+      "representation": {
+        "one_of": [
+          "account_requirement",
+          "additional_verification",
+          "business_icon",
+          "business_logo",
+          "customer_signature",
+          "dispute_evidence",
+          "identity_document",
+          "issuing_regulatory_reporting",
+          "pci_document",
+          "tax_document_user_upload",
+          "terminal_reader_splashscreen"
+        ],
+        "type": "enum"
+      }
+    },
+    "Float64": {
+      "aggregate_functions": {},
+      "comparison_operators": {},
+      "representation": {
+        "type": "float64"
+      }
+    },
+    "Int32": {
+      "aggregate_functions": {},
+      "comparison_operators": {},
+      "representation": {
+        "type": "int32"
+      }
+    },
+    "Int64": {
+      "aggregate_functions": {},
+      "comparison_operators": {},
+      "representation": {
+        "type": "int64"
+      }
+    },
+    "InvoicesCollectionMethod": {
+      "aggregate_functions": {},
+      "comparison_operators": {},
+      "representation": {
+        "one_of": ["charge_automatically", "send_invoice"],
+        "type": "enum"
+      }
+    },
+    "InvoicesObject": {
+      "aggregate_functions": {},
+      "comparison_operators": {},
+      "representation": {
+        "one_of": ["list"],
+        "type": "enum"
+      }
+    },
+    "InvoicesStatus": {
+      "aggregate_functions": {},
+      "comparison_operators": {},
+      "representation": {
+        "one_of": ["draft", "open", "paid", "uncollectible", "void"],
+        "type": "enum"
+      }
+    },
+    "JSON": {
+      "aggregate_functions": {},
+      "comparison_operators": {},
+      "representation": {
+        "type": "json"
+      }
+    },
+    "OrderStatus": {
+      "aggregate_functions": {},
+      "comparison_operators": {},
+      "representation": {
+        "one_of": ["placed", "approved", "delivered"],
+        "type": "enum"
+      }
+    },
+    "PaymentMethodAffirm": {
+      "aggregate_functions": {},
+      "comparison_operators": {},
+      "representation": {
+        "type": "json"
+      }
+    },
+    "PetStatus": {
+      "aggregate_functions": {},
+      "comparison_operators": {},
+      "representation": {
+        "one_of": ["available", "pending", "sold"],
+        "type": "enum"
+      }
+    },
+    "PostCheckoutSessionsBodyCustomFieldsLabelType": {
+      "aggregate_functions": {},
+      "comparison_operators": {},
+      "representation": {
+        "one_of": ["custom"],
+        "type": "enum"
+      }
+    },
+    "PostCheckoutSessionsBodyCustomFieldsType": {
+      "aggregate_functions": {},
+      "comparison_operators": {},
+      "representation": {
+        "one_of": ["dropdown", "numeric", "text"],
+        "type": "enum"
+      }
+    },
+    "PostCheckoutSessionsBodyPaymentMethodOptionsAcssDebitSetupFutureUsage": {
+      "aggregate_functions": {},
+      "comparison_operators": {},
+      "representation": {
+        "one_of": ["none", "off_session", "on_session"],
+        "type": "enum"
+      }
+    },
+    "PostCheckoutSessionsBodyPaymentMethodOptionsAffirmSetupFutureUsage": {
+      "aggregate_functions": {},
+      "comparison_operators": {},
+      "representation": {
+        "one_of": ["none"],
+        "type": "enum"
+      }
+    },
+    "PostCheckoutSessionsBodyPaymentMethodOptionsAfterpayClearpaySetupFutureUsage": {
+      "aggregate_functions": {},
+      "comparison_operators": {},
+      "representation": {
+        "one_of": ["none"],
+        "type": "enum"
+      }
+    },
+    "PostCheckoutSessionsBodyPaymentMethodOptionsAlipaySetupFutureUsage": {
+      "aggregate_functions": {},
+      "comparison_operators": {},
+      "representation": {
+        "one_of": ["none"],
+        "type": "enum"
+      }
+    },
+    "PostCheckoutSessionsBodyPaymentMethodOptionsAuBecsDebitSetupFutureUsage": {
+      "aggregate_functions": {},
+      "comparison_operators": {},
+      "representation": {
+        "one_of": ["none"],
+        "type": "enum"
+      }
+    },
+    "PostCheckoutSessionsBodyPaymentMethodOptionsBacsDebitSetupFutureUsage": {
+      "aggregate_functions": {},
+      "comparison_operators": {},
+      "representation": {
+        "one_of": ["none", "off_session", "on_session"],
+        "type": "enum"
+      }
+    },
+    "PostCheckoutSessionsBodyPaymentMethodOptionsBancontactSetupFutureUsage": {
+      "aggregate_functions": {},
+      "comparison_operators": {},
+      "representation": {
+        "one_of": ["none"],
+        "type": "enum"
+      }
+    },
+    "PostCheckoutSessionsBodyPaymentMethodOptionsBoletoSetupFutureUsage": {
+      "aggregate_functions": {},
+      "comparison_operators": {},
+      "representation": {
+        "one_of": ["none", "off_session", "on_session"],
+        "type": "enum"
+      }
+    },
+    "PostCheckoutSessionsBodyPaymentMethodOptionsCashappSetupFutureUsage": {
+      "aggregate_functions": {},
+      "comparison_operators": {},
+      "representation": {
+        "one_of": ["none", "off_session", "on_session"],
+        "type": "enum"
+      }
+    },
+    "PostCheckoutSessionsBodyPaymentMethodOptionsCustomerBalanceBankTransferType": {
+      "aggregate_functions": {},
+      "comparison_operators": {},
+      "representation": {
+        "one_of": ["eu_bank_transfer", "gb_bank_transfer"],
+        "type": "enum"
+      }
+    },
+    "PostCheckoutSessionsBodyPaymentMethodOptionsCustomerBalanceSetupFutureUsage": {
+      "aggregate_functions": {},
+      "comparison_operators": {},
+      "representation": {
+        "one_of": ["none"],
+        "type": "enum"
+      }
+    },
+    "PostCheckoutSessionsBodyPaymentMethodOptionsEpsSetupFutureUsage": {
+      "aggregate_functions": {},
+      "comparison_operators": {},
+      "representation": {
+        "one_of": ["none"],
+        "type": "enum"
+      }
+    },
+    "PostCheckoutSessionsBodyPaymentMethodOptionsFpxSetupFutureUsage": {
+      "aggregate_functions": {},
+      "comparison_operators": {},
+      "representation": {
+        "one_of": ["none"],
+        "type": "enum"
+      }
+    },
+    "PostCheckoutSessionsBodyPaymentMethodOptionsGiropaySetupFutureUsage": {
+      "aggregate_functions": {},
+      "comparison_operators": {},
+      "representation": {
+        "one_of": ["none"],
+        "type": "enum"
+      }
+    },
+    "PostCheckoutSessionsBodyPaymentMethodOptionsGrabpaySetupFutureUsage": {
+      "aggregate_functions": {},
+      "comparison_operators": {},
+      "representation": {
+        "one_of": ["none"],
+        "type": "enum"
+      }
+    },
+    "PostCheckoutSessionsBodyPaymentMethodOptionsIdealSetupFutureUsage": {
+      "aggregate_functions": {},
+      "comparison_operators": {},
+      "representation": {
+        "one_of": ["none"],
+        "type": "enum"
+      }
+    },
+    "PostCheckoutSessionsBodyPaymentMethodOptionsKlarnaSetupFutureUsage": {
+      "aggregate_functions": {},
+      "comparison_operators": {},
+      "representation": {
+        "one_of": ["none"],
+        "type": "enum"
+      }
+    },
+    "PostCheckoutSessionsBodyPaymentMethodOptionsKonbiniSetupFutureUsage": {
+      "aggregate_functions": {},
+      "comparison_operators": {},
+      "representation": {
+        "one_of": ["none"],
+        "type": "enum"
+      }
+    },
+    "PostCheckoutSessionsBodyPaymentMethodOptionsLinkSetupFutureUsage": {
+      "aggregate_functions": {},
+      "comparison_operators": {},
+      "representation": {
+        "one_of": ["none", "off_session"],
+        "type": "enum"
+      }
+    },
+    "PostCheckoutSessionsBodyPaymentMethodOptionsOxxoSetupFutureUsage": {
+      "aggregate_functions": {},
+      "comparison_operators": {},
+      "representation": {
+        "one_of": ["none"],
+        "type": "enum"
+      }
+    },
+    "PostCheckoutSessionsBodyPaymentMethodOptionsP24SetupFutureUsage": {
+      "aggregate_functions": {},
+      "comparison_operators": {},
+      "representation": {
+        "one_of": ["none"],
+        "type": "enum"
+      }
+    },
+    "PostCheckoutSessionsBodyPaymentMethodOptionsPaynowSetupFutureUsage": {
+      "aggregate_functions": {},
+      "comparison_operators": {},
+      "representation": {
+        "one_of": ["none"],
+        "type": "enum"
+      }
+    },
+    "PostCheckoutSessionsBodyPaymentMethodOptionsPaypalCaptureMethod": {
+      "aggregate_functions": {},
+      "comparison_operators": {},
+      "representation": {
+        "one_of": ["", "manual"],
+        "type": "enum"
+      }
+    },
+    "PostCheckoutSessionsBodyPaymentMethodOptionsPaypalSetupFutureUsage": {
+      "aggregate_functions": {},
+      "comparison_operators": {},
+      "representation": {
+        "one_of": ["", "none", "off_session"],
+        "type": "enum"
+      }
+    },
+    "PostCheckoutSessionsBodyPaymentMethodOptionsRevolutPaySetupFutureUsage": {
+      "aggregate_functions": {},
+      "comparison_operators": {},
+      "representation": {
+        "one_of": ["none", "off_session"],
+        "type": "enum"
+      }
+    },
+    "PostCheckoutSessionsBodyPaymentMethodOptionsSepaDebitSetupFutureUsage": {
+      "aggregate_functions": {},
+      "comparison_operators": {},
+      "representation": {
+        "one_of": ["none", "off_session", "on_session"],
+        "type": "enum"
+      }
+    },
+    "PostCheckoutSessionsBodyPaymentMethodOptionsSofortSetupFutureUsage": {
+      "aggregate_functions": {},
+      "comparison_operators": {},
+      "representation": {
+        "one_of": ["none"],
+        "type": "enum"
+      }
+    },
+    "PostCheckoutSessionsBodyPaymentMethodOptionsUsBankAccountSetupFutureUsage": {
+      "aggregate_functions": {},
+      "comparison_operators": {},
+      "representation": {
+        "one_of": ["none", "off_session", "on_session"],
+        "type": "enum"
+      }
+    },
+    "PostCheckoutSessionsBodyPaymentMethodOptionsUsBankAccountVerificationMethod": {
+      "aggregate_functions": {},
+      "comparison_operators": {},
+      "representation": {
+        "one_of": ["automatic", "instant"],
+        "type": "enum"
+      }
+    },
+    "PostCheckoutSessionsBodyPaymentMethodOptionsWechatPaySetupFutureUsage": {
+      "aggregate_functions": {},
+      "comparison_operators": {},
+      "representation": {
+        "one_of": ["none"],
+        "type": "enum"
+      }
+    },
+    "PostCheckoutSessionsBodyShippingOptionsShippingRateDataType": {
+      "aggregate_functions": {},
+      "comparison_operators": {},
+      "representation": {
+        "one_of": ["fixed_amount"],
+        "type": "enum"
+      }
+    },
+    "SnakeObjectIdStatus": {
+      "aggregate_functions": {},
+      "comparison_operators": {},
+      "representation": {
+        "one_of": ["placed", "approved", "delivered"],
+        "type": "enum"
+      }
+    },
+    "String": {
+      "aggregate_functions": {},
+      "comparison_operators": {},
+      "representation": {
+        "type": "string"
+      }
+    },
+    "TestHelpersCode": {
+      "aggregate_functions": {},
+      "comparison_operators": {},
+      "representation": {
+        "one_of": [
+          "account_closed",
+          "account_frozen",
+          "bank_account_restricted",
+          "bank_ownership_changed",
+          "debit_not_authorized",
+          "incorrect_account_holder_address",
+          "incorrect_account_holder_name",
+          "incorrect_account_holder_tax_id",
+          "insufficient_funds",
+          "invalid_account_number",
+          "invalid_currency",
+          "no_account",
+          "other"
+        ],
+        "type": "enum"
+      }
+    },
+    "TimestampTZ": {
+      "aggregate_functions": {},
+      "comparison_operators": {},
+      "representation": {
+        "type": "timestamptz"
+      }
+    },
+    "TreasuryInboundTransferObject": {
+      "aggregate_functions": {},
+      "comparison_operators": {},
+      "representation": {
+        "one_of": ["treasury.inbound_transfer"],
+        "type": "enum"
+      }
+    },
+    "TreasuryInboundTransferStatus": {
+      "aggregate_functions": {},
+      "comparison_operators": {},
+      "representation": {
+        "one_of": ["canceled", "failed", "processing", "succeeded"],
+        "type": "enum"
+      }
+    },
+    "TreasuryInboundTransfersResourceFailureDetailsCode": {
+      "aggregate_functions": {},
+      "comparison_operators": {},
+      "representation": {
+        "one_of": [
+          "account_closed",
+          "account_frozen",
+          "bank_account_restricted",
+          "bank_ownership_changed",
+          "debit_not_authorized",
+          "incorrect_account_holder_address",
+          "incorrect_account_holder_name",
+          "incorrect_account_holder_tax_id",
+          "insufficient_funds",
+          "invalid_account_number",
+          "invalid_currency",
+          "no_account",
+          "other"
+        ],
+        "type": "enum"
+      }
+    },
+    "UUID": {
+      "aggregate_functions": {},
+      "comparison_operators": {},
+      "representation": {
+        "type": "uuid"
+      }
+    },
+    "UnixTime": {
+      "aggregate_functions": {},
+      "comparison_operators": {},
+      "representation": {
+        "type": "int32"
+      }
+    }
+  }
+}

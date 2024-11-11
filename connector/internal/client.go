@@ -16,7 +16,7 @@ import (
 	"sync"
 	"time"
 
-	rest "github.com/hasura/ndc-rest/ndc-rest-schema/schema"
+	rest "github.com/hasura/ndc-http/ndc-http-schema/schema"
 	"github.com/hasura/ndc-sdk-go/connector"
 	"github.com/hasura/ndc-sdk-go/schema"
 	"github.com/hasura/ndc-sdk-go/utils"
@@ -54,13 +54,13 @@ func (client *HTTPClient) SetTracer(tracer *connector.Tracer) {
 }
 
 // Send creates and executes the request and evaluate response selection
-func (client *HTTPClient) Send(ctx context.Context, request *RetryableRequest, selection schema.NestedField, resultType schema.Type, restOptions *RESTOptions) (any, http.Header, error) {
-	requests, err := BuildDistributedRequestsWithOptions(request, restOptions)
+func (client *HTTPClient) Send(ctx context.Context, request *RetryableRequest, selection schema.NestedField, resultType schema.Type, httpOptions *HTTPOptions) (any, http.Header, error) {
+	requests, err := BuildDistributedRequestsWithOptions(request, httpOptions)
 	if err != nil {
 		return nil, nil, err
 	}
 
-	if !restOptions.Distributed {
+	if !httpOptions.Distributed {
 		result, headers, err := client.sendSingle(ctx, &requests[0], selection, resultType, requests[0].ServerID, "single")
 		if err != nil {
 			return nil, nil, err
@@ -69,13 +69,13 @@ func (client *HTTPClient) Send(ctx context.Context, request *RetryableRequest, s
 		return result, headers, nil
 	}
 
-	if !restOptions.Parallel || restOptions.Concurrency <= 1 {
+	if !httpOptions.Parallel || httpOptions.Concurrency <= 1 {
 		results, headers := client.sendSequence(ctx, requests, selection, resultType)
 
 		return results, headers, nil
 	}
 
-	results, headers := client.sendParallel(ctx, requests, selection, resultType, restOptions)
+	results, headers := client.sendParallel(ctx, requests, selection, resultType, httpOptions)
 
 	return results, headers, nil
 }
@@ -108,13 +108,13 @@ func (client *HTTPClient) sendSequence(ctx context.Context, requests []Retryable
 }
 
 // execute a request to a list of remote servers in parallel
-func (client *HTTPClient) sendParallel(ctx context.Context, requests []RetryableRequest, selection schema.NestedField, resultType schema.Type, restOptions *RESTOptions) (*DistributedResponse[any], http.Header) {
+func (client *HTTPClient) sendParallel(ctx context.Context, requests []RetryableRequest, selection schema.NestedField, resultType schema.Type, httpOptions *HTTPOptions) (*DistributedResponse[any], http.Header) {
 	results := NewDistributedResponse[any]()
 	var firstHeaders http.Header
 	var lock sync.Mutex
 	eg, ctx := errgroup.WithContext(ctx)
-	if restOptions.Concurrency > 0 {
-		eg.SetLimit(int(restOptions.Concurrency))
+	if httpOptions.Concurrency > 0 {
+		eg.SetLimit(int(httpOptions.Concurrency))
 	}
 
 	sendFunc := func(req RetryableRequest) {
@@ -253,7 +253,7 @@ func (client *HTTPClient) doRequest(ctx context.Context, request *RetryableReque
 	requestURL := request.URL.String()
 
 	span.SetAttributes(
-		attribute.String("db.system", "rest"),
+		attribute.String("db.system", "http"),
 		attribute.String("http.request.method", method),
 		attribute.String("url.full", requestURL),
 		attribute.String("server.address", request.URL.Hostname()),

@@ -1,4 +1,4 @@
-# yaml-language-server: $schema=../../ndc-rest-schema/jsonschema/configuration.schema.json
+# yaml-language-server: $schema=../../ndc-http-schema/jsonschema/configuration.schema.json
 output: schema.output.json
 strict: true
 forwardHeaders:
@@ -13,7 +13,7 @@ forwardHeaders:
 concurrency:
   query: 1
   mutation: 1
-  rest: 0
+  http: 0
 files:
-  - file: https://raw.githubusercontent.com/hasura/ndc-rest/refs/heads/main/connector/testdata/jsonplaceholder/swagger.json
+  - file: https://raw.githubusercontent.com/hasura/ndc-http/refs/heads/main/connector/testdata/jsonplaceholder/swagger.json
     spec: oas2

@@ -1,41 +1,41 @@
-package rest
+package connector
 
 import (
 	"context"
 	"encoding/json"
 	"fmt"
 
-	"github.com/hasura/ndc-rest/connector/internal"
-	"github.com/hasura/ndc-rest/ndc-rest-schema/configuration"
-	rest "github.com/hasura/ndc-rest/ndc-rest-schema/schema"
+	"github.com/hasura/ndc-http/connector/internal"
+	"github.com/hasura/ndc-http/ndc-http-schema/configuration"
+	rest "github.com/hasura/ndc-http/ndc-http-schema/schema"
 	"github.com/hasura/ndc-sdk-go/connector"
 	"github.com/hasura/ndc-sdk-go/schema"
 )
 
-// RESTConnector implements the SDK interface of NDC specification
-type RESTConnector struct {
+// HTTPConnector implements the SDK interface of NDC specification
+type HTTPConnector struct {
 	config       *configuration.Configuration
 	metadata     internal.MetadataCollection
 	capabilities *schema.RawCapabilitiesResponse
 	rawSchema    *schema.RawSchemaResponse
-	schema       *rest.NDCRestSchema
+	schema       *rest.NDCHttpSchema
 	client       *internal.HTTPClient
 }
 
-// NewRESTConnector creates a REST connector instance
-func NewRESTConnector(opts ...Option) *RESTConnector {
+// NewHTTPConnector creates a HTTP connector instance
+func NewHTTPConnector(opts ...Option) *HTTPConnector {
 	for _, opt := range opts {
 		opt(&defaultOptions)
 	}
 
-	return &RESTConnector{
+	return &HTTPConnector{
 		client: internal.NewHTTPClient(defaultOptions.client),
 	}
 }
 
 // ParseConfiguration validates the configuration files provided by the user, returning a validated 'Configuration',
 // or throwing an error to prevents Connector startup.
-func (c *RESTConnector) ParseConfiguration(ctx context.Context, configurationDir string) (*configuration.Configuration, error) {
+func (c *HTTPConnector) ParseConfiguration(ctx context.Context, configurationDir string) (*configuration.Configuration, error) {
 	restCapabilities := schema.CapabilitiesResponse{
 		Version: "0.1.6",
 		Capabilities: schema.Capabilities{
@@ -75,7 +75,7 @@ func (c *RESTConnector) ParseConfiguration(ctx context.Context, configurationDir
 		}
 	}
 
-	if err := c.ApplyNDCRestSchemas(config, schemas, logger); err != nil {
+	if err := c.ApplyNDCHttpSchemas(config, schemas, logger); err != nil {
 		return nil, errInvalidSchema
 	}
 
@@ -91,7 +91,7 @@ func (c *RESTConnector) ParseConfiguration(ctx context.Context, configurationDir
 //
 // In addition, this function should register any
 // connector-specific metrics with the metrics registry.
-func (c *RESTConnector) TryInitState(ctx context.Context, configuration *configuration.Configuration, metrics *connector.TelemetryState) (*State, error) {
+func (c *HTTPConnector) TryInitState(ctx context.Context, configuration *configuration.Configuration, metrics *connector.TelemetryState) (*State, error) {
 	c.client.SetTracer(metrics.Tracer)
 
 	return &State{
@@ -105,11 +105,11 @@ func (c *RESTConnector) TryInitState(ctx context.Context, configuration *configu
 // is able to reach its data source over the network.
 //
 // Should throw if the check fails, else resolve.
-func (c *RESTConnector) HealthCheck(ctx context.Context, configuration *configuration.Configuration, state *State) error {
+func (c *HTTPConnector) HealthCheck(ctx context.Context, configuration *configuration.Configuration, state *State) error {
 	return nil
 }
 
 // GetCapabilities get the connector's capabilities.
-func (c *RESTConnector) GetCapabilities(configuration *configuration.Configuration) schema.CapabilitiesResponseMarshaler {
+func (c *HTTPConnector) GetCapabilities(configuration *configuration.Configuration) schema.CapabilitiesResponseMarshaler {
 	return c.capabilities
 }

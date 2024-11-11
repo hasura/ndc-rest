@@ -1,4 +1,4 @@
-package rest
+package connector
 
 import (
 	"context"
@@ -9,20 +9,20 @@ import (
 	"slices"
 
 	"github.com/go-viper/mapstructure/v2"
-	"github.com/hasura/ndc-rest/connector/internal"
-	"github.com/hasura/ndc-rest/ndc-rest-schema/configuration"
-	rest "github.com/hasura/ndc-rest/ndc-rest-schema/schema"
+	"github.com/hasura/ndc-http/connector/internal"
+	"github.com/hasura/ndc-http/ndc-http-schema/configuration"
+	rest "github.com/hasura/ndc-http/ndc-http-schema/schema"
 	"github.com/hasura/ndc-sdk-go/schema"
 )
 
 // GetSchema gets the connector's schema.
-func (c *RESTConnector) GetSchema(ctx context.Context, configuration *configuration.Configuration, _ *State) (schema.SchemaResponseMarshaler, error) {
+func (c *HTTPConnector) GetSchema(ctx context.Context, configuration *configuration.Configuration, _ *State) (schema.SchemaResponseMarshaler, error) {
 	return c.rawSchema, nil
 }
 
-// ApplyNDCRestSchemas applies slice of raw NDC REST schemas to the connector
-func (c *RESTConnector) ApplyNDCRestSchemas(config *configuration.Configuration, schemas []configuration.NDCRestRuntimeSchema, logger *slog.Logger) error {
-	ndcSchema, metadata, errs := configuration.MergeNDCRestSchemas(config, schemas)
+// ApplyNDCHttpSchemas applies slice of raw NDC HTTP schemas to the connector
+func (c *HTTPConnector) ApplyNDCHttpSchemas(config *configuration.Configuration, schemas []configuration.NDCHttpRuntimeSchema, logger *slog.Logger) error {
+	ndcSchema, metadata, errs := configuration.MergeNDCHttpSchemas(config, schemas)
 	if len(errs) > 0 {
 		printSchemaValidationError(logger, errs)
 		if ndcSchema == nil || config.Strict {
@@ -35,7 +35,7 @@ func (c *RESTConnector) ApplyNDCRestSchemas(config *configuration.Configuration,
 		return err
 	}
 
-	c.schema = &rest.NDCRestSchema{
+	c.schema = &rest.NDCHttpSchema{
 		ScalarTypes: ndcSchema.ScalarTypes,
 		ObjectTypes: ndcSchema.ObjectTypes,
 	}
@@ -46,28 +46,28 @@ func (c *RESTConnector) ApplyNDCRestSchemas(config *configuration.Configuration,
 }
 
 func printSchemaValidationError(logger *slog.Logger, errors map[string][]string) {
-	logger.Error("errors happen when validating NDC REST schemas", slog.Any("errors", errors))
+	logger.Error("errors happen when validating NDC HTTP schemas", slog.Any("errors", errors))
 }
 
-func (c *RESTConnector) parseRESTOptionsFromArguments(argumentsInfo map[string]rest.ArgumentInfo, rawArgs map[string]any) (*internal.RESTOptions, error) {
-	var result internal.RESTOptions
-	argInfo, ok := argumentsInfo[rest.RESTOptionsArgumentName]
+func (c *HTTPConnector) parseHTTPOptionsFromArguments(argumentsInfo map[string]rest.ArgumentInfo, rawArgs map[string]any) (*internal.HTTPOptions, error) {
+	var result internal.HTTPOptions
+	argInfo, ok := argumentsInfo[rest.HTTPOptionsArgumentName]
 	if !ok {
 		return &result, nil
 	}
-	rawRestOptions, ok := rawArgs[rest.RESTOptionsArgumentName]
+	rawHttpOptions, ok := rawArgs[rest.HTTPOptionsArgumentName]
 	if ok {
-		if err := result.FromValue(rawRestOptions); err != nil {
+		if err := result.FromValue(rawHttpOptions); err != nil {
 			return nil, err
 		}
 	}
-	restOptionsNamedType := schema.GetUnderlyingNamedType(argInfo.Type)
-	result.Distributed = restOptionsNamedType != nil && restOptionsNamedType.Name == rest.RESTDistributedOptionsObjectName
+	httpOptionsNamedType := schema.GetUnderlyingNamedType(argInfo.Type)
+	result.Distributed = httpOptionsNamedType != nil && httpOptionsNamedType.Name == rest.HTTPDistributedOptionsObjectName
 
 	return &result, nil
 }
 
-func (c *RESTConnector) evalForwardedHeaders(req *internal.RetryableRequest, rawArgs map[string]any) error {
+func (c *HTTPConnector) evalForwardedHeaders(req *internal.RetryableRequest, rawArgs map[string]any) error {
 	if !c.config.ForwardHeaders.Enabled || c.config.ForwardHeaders.ArgumentField == nil {
 		return nil
 	}
@@ -91,7 +91,7 @@ func (c *RESTConnector) evalForwardedHeaders(req *internal.RetryableRequest, raw
 	return nil
 }
 
-func (c *RESTConnector) createHeaderForwardingResponse(result any, rawHeaders http.Header) any {
+func (c *HTTPConnector) createHeaderForwardingResponse(result any, rawHeaders http.Header) any {
 	if !c.config.ForwardHeaders.Enabled || c.config.ForwardHeaders.ResponseHeaders == nil {
 		return result
 	}

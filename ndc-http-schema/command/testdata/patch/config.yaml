@@ -1,0 +1,32 @@
+# yaml-language-server: $schema=../../../jsonschema/configuration.schema.json
+output: schema.output.json
+strict: true
+forwardHeaders:
+  enabled: true
+  argumentField: headers
+  responseHeaders:
+    headersField: headers
+    resultField: response
+    forwardHeaders: []
+concurrency:
+  query: 1
+  mutation: 1
+  http: 0
+files:
+  - file: ../auth/schema.yaml
+    spec: ndc
+    distributed: true
+    timeout:
+      value: 30
+    retry:
+      times:
+        value: 2
+      delay:
+        value: 1000
+      httpStatus: [429, 500]
+    patchBefore:
+      - path: patch-before.yaml
+        strategy: merge
+    patchAfter:
+      - path: patch-after.yaml
+        strategy: json6902

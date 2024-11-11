@@ -11,7 +11,7 @@ import (
 	"strings"
 	"testing"
 
-	rest "github.com/hasura/ndc-rest/ndc-rest-schema/schema"
+	rest "github.com/hasura/ndc-http/ndc-http-schema/schema"
 	"gotest.tools/v3/assert"
 )
 
@@ -588,9 +588,9 @@ func TestCreateFormURLEncoded(t *testing.T) {
 	}
 }
 
-func createMockSchema(t *testing.T) *rest.NDCRestSchema {
-	var ndcSchema rest.NDCRestSchema
-	rawSchemaBytes, err := os.ReadFile("../../ndc-rest-schema/openapi/testdata/petstore3/expected.json")
+func createMockSchema(t *testing.T) *rest.NDCHttpSchema {
+	var ndcSchema rest.NDCHttpSchema
+	rawSchemaBytes, err := os.ReadFile("../../ndc-http-schema/openapi/testdata/petstore3/expected.json")
 	assert.NilError(t, err)
 	assert.NilError(t, json.Unmarshal(rawSchemaBytes, &ndcSchema))
 	return &ndcSchema

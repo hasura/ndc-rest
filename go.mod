@@ -1,4 +1,4 @@
-module github.com/hasura/ndc-rest
+module github.com/hasura/ndc-http
 
 go 1.23.0
 
@@ -7,7 +7,7 @@ toolchain go1.23.1
 require (
 	github.com/go-viper/mapstructure/v2 v2.2.1
 	github.com/google/uuid v1.6.0
-	github.com/hasura/ndc-rest/ndc-rest-schema v0.0.0-00010101000000-000000000000
+	github.com/hasura/ndc-http/ndc-http-schema v0.0.0-00010101000000-000000000000
 	github.com/hasura/ndc-sdk-go v1.6.2-0.20241109102535-399b739f7af5
 	go.opentelemetry.io/otel v1.32.0
 	go.opentelemetry.io/otel/trace v1.32.0
@@ -61,4 +61,4 @@ require (
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
 
-replace github.com/hasura/ndc-rest/ndc-rest-schema => ./ndc-rest-schema
+replace github.com/hasura/ndc-http/ndc-http-schema => ./ndc-http-schema

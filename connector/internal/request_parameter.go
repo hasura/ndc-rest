@@ -12,7 +12,7 @@ import (
 	"time"
 
 	"github.com/google/uuid"
-	rest "github.com/hasura/ndc-rest/ndc-rest-schema/schema"
+	rest "github.com/hasura/ndc-http/ndc-http-schema/schema"
 	"github.com/hasura/ndc-sdk-go/schema"
 	"github.com/hasura/ndc-sdk-go/utils"
 	sdkUtils "github.com/hasura/ndc-sdk-go/utils"
@@ -38,7 +38,7 @@ func (c *RequestBuilder) evalURLAndHeaderParameters() (*url.URL, http.Header, er
 	}
 
 	for argumentKey, argumentInfo := range c.Operation.Arguments {
-		if argumentInfo.Rest == nil || !slices.Contains(urlAndHeaderLocations, argumentInfo.Rest.In) {
+		if argumentInfo.HTTP == nil || !slices.Contains(urlAndHeaderLocations, argumentInfo.HTTP.In) {
 			continue
 		}
 		if err := c.evalURLAndHeaderParameterBySchema(endpoint, &headers, argumentKey, &argumentInfo, c.Arguments[argumentKey]); err != nil {
@@ -52,14 +52,14 @@ func (c *RequestBuilder) evalURLAndHeaderParameters() (*url.URL, http.Header, er
 //
 // [OAS 3.1 spec]: https://swagger.io/docs/specification/serialization/
 func (c *RequestBuilder) evalURLAndHeaderParameterBySchema(endpoint *url.URL, header *http.Header, argumentKey string, argumentInfo *rest.ArgumentInfo, value any) error {
-	if argumentInfo.Rest.Name != "" {
-		argumentKey = argumentInfo.Rest.Name
+	if argumentInfo.HTTP.Name != "" {
+		argumentKey = argumentInfo.HTTP.Name
 	}
 	queryParams, err := c.encodeParameterValues(&rest.ObjectField{
 		ObjectField: schema.ObjectField{
 			Type: argumentInfo.Type,
 		},
-		Rest: argumentInfo.Rest.Schema,
+		HTTP: argumentInfo.HTTP.Schema,
 	}, reflect.ValueOf(value), []string{argumentKey})
 	if err != nil {
 		return err
@@ -72,15 +72,15 @@ func (c *RequestBuilder) evalURLAndHeaderParameterBySchema(endpoint *url.URL, he
 	// following the OAS spec to serialize parameters
 	// https://swagger.io/docs/specification/serialization/
 	// https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#parameter-object
-	switch argumentInfo.Rest.In {
+	switch argumentInfo.HTTP.In {
 	case rest.InHeader:
-		setHeaderParameters(header, argumentInfo.Rest, queryParams)
+		setHeaderParameters(header, argumentInfo.HTTP, queryParams)
 	case rest.InQuery:
 		q := endpoint.Query()
 		for _, qp := range queryParams {
-			evalQueryParameterURL(&q, argumentKey, argumentInfo.Rest.EncodingObject, qp.Keys(), qp.Values())
+			evalQueryParameterURL(&q, argumentKey, argumentInfo.HTTP.EncodingObject, qp.Keys(), qp.Values())
 		}
-		endpoint.RawQuery = encodeQueryValues(q, argumentInfo.Rest.AllowReserved)
+		endpoint.RawQuery = encodeQueryValues(q, argumentInfo.HTTP.AllowReserved)
 	case rest.InPath:
 		defaultParam := queryParams.FindDefault()
 		if defaultParam != nil {
@@ -93,7 +93,7 @@ func (c *RequestBuilder) evalURLAndHeaderParameterBySchema(endpoint *url.URL, he
 func (c *RequestBuilder) encodeParameterValues(objectField *rest.ObjectField, reflectValue reflect.Value, fieldPaths []string) (ParameterItems, error) {
 	results := ParameterItems{}
 
-	typeSchema := objectField.Rest
+	typeSchema := objectField.HTTP
 	reflectValue, nonNull := sdkUtils.UnwrapPointerFromReflectValue(reflectValue)
 
 	switch ty := objectField.Type.Interface().(type) {
@@ -105,7 +105,7 @@ func (c *RequestBuilder) encodeParameterValues(objectField *rest.ObjectField, re
 			ObjectField: schema.ObjectField{
 				Type: ty.UnderlyingType,
 			},
-			Rest: typeSchema,
+			HTTP: typeSchema,
 		}, reflectValue, fieldPaths)
 	case *schema.ArrayType:
 		if !nonNull {
@@ -122,7 +122,7 @@ func (c *RequestBuilder) encodeParameterValues(objectField *rest.ObjectField, re
 				ObjectField: schema.ObjectField{
 					Type: ty.ElementType,
 				},
-				Rest: typeSchema.Items,
+				HTTP: typeSchema.Items,
 			}, reflect.ValueOf(elem), propPaths)
 			if err != nil {
 				return nil, err

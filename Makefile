@@ -4,19 +4,19 @@ OUTPUT_DIR := _output
 .PHONY: format
 format:
 	gofmt -w -s .
-	cd ndc-rest-schema && gofmt -w -s .
+	cd ndc-http-schema && gofmt -w -s .
 
 .PHONY: test
 test:
 	go test -v -race -timeout 3m ./...
-	cd ndc-rest-schema && go test -v -race -timeout 3m ./...
+	cd ndc-http-schema && go test -v -race -timeout 3m ./...
 
 # Install golangci-lint tool to run lint locally
 # https://golangci-lint.run/usage/install
 .PHONY: lint
 lint:
 	golangci-lint run --fix
-	cd ndc-rest-schema && golangci-lint run --fix
+	cd ndc-http-schema && golangci-lint run --fix
 
 # clean the output directory
 .PHONY: clean
@@ -26,30 +26,30 @@ clean:
 .PHONY: go-tidy
 go-tidy:
 	go mod tidy
-	cd ndc-rest-schema && go mod tidy
+	cd ndc-http-schema && go mod tidy
 
 .PHONY: build-jsonschema
 build-jsonschema:
-	cd ./ndc-rest-schema/jsonschema && go run .
+	cd ./ndc-http-schema/jsonschema && go run .
 
-# build the ndc-rest-schema for all given platform/arch
+# build the ndc-http-schema for all given platform/arch
 .PHONY: build-cli
 build-cli:
-	go build -o _output/ndc-rest-schema ./ndc-rest-schema
+	go build -o _output/ndc-http-schema ./ndc-http-schema
 
 .PHONY: ci-build-cli
 ci-build-cli: export CGO_ENABLED=0
 ci-build-cli: clean
-	cd ./ndc-rest-schema && \
+	cd ./ndc-http-schema && \
 	go get github.com/mitchellh/gox && \
-	go run github.com/mitchellh/gox -ldflags '-X github.com/hasura/ndc-rest/ndc-rest-schema/version.BuildVersion=$(VERSION) -s -w -extldflags "-static"' \
+	go run github.com/mitchellh/gox -ldflags '-X github.com/hasura/ndc-http/ndc-http-schema/version.BuildVersion=$(VERSION) -s -w -extldflags "-static"' \
 		-osarch="linux/amd64 darwin/amd64 windows/amd64 darwin/arm64 linux/arm64" \
-		-output="../$(OUTPUT_DIR)/ndc-rest-schema-{{.OS}}-{{.Arch}}" \
+		-output="../$(OUTPUT_DIR)/ndc-http-schema-{{.OS}}-{{.Arch}}" \
 		.
 
 .PHONY: generate-test-config
 generate-test-config:
-	go run ./ndc-rest-schema update -d ./tests/configuration
+	go run ./ndc-http-schema update -d ./tests/configuration
 
 .PHONY: start-ddn
 start-ddn:
@@ -61,7 +61,7 @@ stop-ddn:
 
 .PHONY: build-supergraph-test
 build-supergraph-test:
-	docker compose up -d --build ndc-rest
+	docker compose up -d --build ndc-http
 	cd tests/engine && \
 		ddn connector-link update myapi --add-all-resources --subgraph ./app/subgraph.yaml && \
 		ddn supergraph build local
