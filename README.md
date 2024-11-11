@@ -6,7 +6,7 @@ The connector can automatically transform OpenAPI 2.0 and 3.0 definitions to NDC
 ![REST connector](./assets/rest_connector.png)
 
 > [!NOTE]
-> REST connector is configuration-based and isn't limited to the OpenAPI specs only. Use [OpenAPI Connector](https://hasura.io/docs/3.0/connectors/external-apis/open-api) if you want to take more control of OpenAPI via code generation.
+> REST connector is configuration-based HTTP engine and isn't limited to the OpenAPI specs only. Use [OpenAPI Connector](https://hasura.io/docs/3.0/connectors/external-apis/open-api) if you want to take more control of OpenAPI via code generation.
 
 ## Quick start
 
@@ -138,6 +138,18 @@ files:
 ### JSON Patch
 
 You can add JSON patches to extend API documentation files. REST connector supports `merge` and `json6902` strategies. JSON patches can be applied before or after the conversion from OpenAPI to REST schema configuration. It will be useful if you need to extend or fix some fields in the API documentation such as server URL.
+
+```yaml
+files:
+  - file: openapi.yaml
+    spec: oas3
+    patchBefore:
+      - path: patch-before.yaml
+        strategy: merge
+    patchAfter:
+      - path: patch-after.yaml
+        strategy: json6902
+```
 
 See [the example](./ndc-rest-schema/command/testdata/patch) for more context.
 
