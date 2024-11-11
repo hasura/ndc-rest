@@ -190,9 +190,9 @@ func (client *HTTPClient) sendSingle(ctx context.Context, request *RetryableRequ
 	var err error
 	var cancel context.CancelFunc
 
-	times := int(math.Max(float64(request.Runtime.Retry.Times), 1))
+	times := int(request.Runtime.Retry.Times)
 	delayMs := int(math.Max(float64(request.Runtime.Retry.Delay), 100))
-	for i := range times {
+	for i := 0; i <= times; i++ {
 		resp, errorBytes, cancel, err = client.doRequest(ctx, request, port, i) //nolint:all
 		if err != nil {
 			span.SetStatus(codes.Error, "failed to execute the request")

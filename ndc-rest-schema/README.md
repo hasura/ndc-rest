@@ -119,6 +119,9 @@ Environment variable template which is in `{{CONSTANT_CASE}}` or `{{CONSTANT_CAS
 
 ### Full example
 
+<details>
+<summary>Click to view the full example</summary>
+
 ```yaml
 settings:
   servers:
@@ -209,6 +212,8 @@ procedures:
       name: Pet
       type: named
 ```
+
+</details>
 
 ## Supported specs
 

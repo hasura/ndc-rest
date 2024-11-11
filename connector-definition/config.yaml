@@ -16,6 +16,7 @@ files:
       value: 30
     retry:
       times:
-        value: 1
+        value: 0
       delay:
-        value: 500
+        value: 1000
+      httpStatus: [429, 500, 502, 503]

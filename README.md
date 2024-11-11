@@ -3,6 +3,11 @@
 NDC REST Connector allows you to quickly convert REST APIs to NDC schema and proxy requests from GraphQL Engine v3 to remote services.
 The connector can automatically transform OpenAPI 2.0 and 3.0 definitions to NDC schema.
 
+![REST connector](./assets/rest_connector.png)
+
+> [!NOTE]
+> REST connector is configuration-based and doesn't limit to the OpenAPI specs only. Use [OpenAPI Connector](https://hasura.io/docs/3.0/connectors/external-apis/open-api) if you want to take more controls of OpenAPI via code generation.
+
 ## Quick start
 
 Start the connector server at http://localhost:8080 using the [JSON Placeholder](https://jsonplaceholder.typicode.com/) APIs.
@@ -11,14 +16,7 @@ Start the connector server at http://localhost:8080 using the [JSON Placeholder]
 go run ./server serve --configuration ./connector/testdata/jsonplaceholder
 ```
 
-## How it works
-
-![REST connector](./assets/rest_connector.png)
-
-REST connector uses the [NDC REST extension](https://github.com/hasura/ndc-rest/ndc-rest-schema#ndc-rest-schema-extension) that includes request information.
-The connector has request context to transform the NDC request body to REST request and versa.
-
-### Configuration
+## Configuration
 
 The connector reads `config.{json,yaml}` file in the configuration folder. The file contains information about the schema file path and its specification:
 
@@ -30,32 +28,35 @@ files:
     spec: openapi3
     trimPrefix: /v1
     envPrefix: PET_STORE
-    methodAlias:
-      post: create
-      put: update
   - file: schema.json
     spec: ndc
 ```
 
 The config of each element follows the [config schema](https://github.com/hasura/ndc-rest/ndc-rest-schema/blob/main/config.example.yaml) of `ndc-rest-schema`.
 
-You can add many OpenAPI files into the same connector.
+You can add many API documentation files into the same connector.
 
 > [!IMPORTANT]
 > Conflicted object and scalar types will be ignored. Only the type of the first file is kept in the schema.
 
-#### Supported specs
+### Supported specs
 
-- `openapi3`: OpenAPI 3.0/3.1.
-- `openapi2`: OpenAPI 2.0.
-- `ndc`: NDC REST schema.
+#### OpenAPI
 
-The connector can convert OpenAPI to REST NDC schema in runtime. However, it's more flexible and performance-wise to pre-convert them, for example, change better function or procedure names.
+REST connector supports both OpenAPI 2 and 3 specifications.
 
-```sh
-go install github.com/hasura/ndc-rest/ndc-rest-schema@latest
-ndc-rest-schema convert -f ./rest/testdata/jsonplaceholder/swagger.json -o ./rest/testdata/jsonplaceholder/schema.json --spec openapi2
-```
+- `oas3`: OpenAPI 3.0/3.1.
+- `oas2`: OpenAPI 2.0.
+
+**Supported request types**
+
+| Request Type | Query | Path | Body | Headers |
+| ------------ | ----- | ---- | ---- | ------- |
+| GET          | ✅    | ✅   | NA   | ✅      |
+| POST         | ✅    | ✅   | ✅   | ✅      |
+| DELETE       | ✅    | ✅   | ✅   | ✅      |
+| PUT          | ✅    | ✅   | ✅   | ✅      |
+| PATCH        | ✅    | ✅   | ✅   | ✅      |
 
 #### Supported content types
 
@@ -65,6 +66,12 @@ ndc-rest-schema convert -f ./rest/testdata/jsonplaceholder/swagger.json -o ./res
 - `multipart/form-data`
 - `text/*`
 - Upload file content types, e.g.`image/*` from `base64` arguments.
+
+#### REST schema
+
+Enum: `ndc`
+
+REST schema is the native configuration schema which other specs will be converted to behind the scene. The schema extends the NDC Specification with REST configuration and can be converted from other specs by the [NDC REST schema CLI](./ndc-rest-schema).
 
 ### Authentication
 
@@ -128,6 +135,12 @@ files:
       httpStatus: [429, 500, 502, 503]
 ```
 
+### JSON Patch
+
+You can add JSON patches to extend API documentation files. REST connector supports `merge` and `json6902` strategies. JSON patches can be applied before or after the conversion from OpenAPI to REST schema configuration. It will be useful if you need to extend or fix some fields in the API documentation such as server URL.
+
+See [the example](./ndc-rest-schema/command/testdata/patch) for more context.
+
 ## Distributed execution
 
 Imagine that your backend have many server replications, or multiple applications with different credentials. You want to:
@@ -167,7 +180,8 @@ files:
     distributed: true
 ```
 
-The generated schema will be:
+<details>
+<summary>The generated schema will be:</summary>
 
 ```json
 {
@@ -263,4 +277,10 @@ The generated schema will be:
 }
 ```
 
+</details>
+
 `RestSingleOptions` object type is added to existing operations (findPets). API consumers can specify the server to be executed. If you want to execute all remote servers in sequence or parallel, `findPetsDistributed` function should be used.
+
+## License
+
+REST Connector is available under the [Apache License 2.0](./LICENSE).
