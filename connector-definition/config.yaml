@@ -9,6 +9,8 @@ concurrency:
   query: 1
   mutation: 1
   rest: 5
+# You can find or request pre-built configuration recipes of popular API services here:
+# https://github.com/hasura/ndc-rest-recipes/tree/main/recipes
 files:
   - file: https://raw.githubusercontent.com/hasura/ndc-rest/main/connector/testdata/jsonplaceholder/swagger.json
     spec: oas2

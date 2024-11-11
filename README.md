@@ -8,6 +8,35 @@ The connector can automatically transform OpenAPI 2.0 and 3.0 definitions to NDC
 > [!NOTE]
 > REST connector is configuration-based HTTP engine and isn't limited to the OpenAPI specs only. Use [OpenAPI Connector](https://hasura.io/docs/3.0/connectors/external-apis/open-api) if you want to take more control of OpenAPI via code generation.
 
+## Features
+
+- [No code. Configuration based](#configuration).
+- Composable.
+- [Supported many API specifications](#supported-specs).
+- [Supported authentication](#authentication).
+- [Supported headers forwarding](#header-forwarding).
+- [Supported timeout and retry](#timeout-and-retry).
+- Supported concurrency and [sending distributed requests](#distributed-execution) to multiple servers.
+
+**Supported request types**
+
+| Request Type | Query | Path | Body | Headers |
+| ------------ | ----- | ---- | ---- | ------- |
+| GET          | ✅    | ✅   | NA   | ✅      |
+| POST         | ✅    | ✅   | ✅   | ✅      |
+| DELETE       | ✅    | ✅   | ✅   | ✅      |
+| PUT          | ✅    | ✅   | ✅   | ✅      |
+| PATCH        | ✅    | ✅   | ✅   | ✅      |
+
+**Supported content types**
+
+- `application/json`
+- `application/x-www-form-urlencoded`
+- `application/octet-stream`
+- `multipart/form-data`
+- `text/*`
+- Upload file content types, e.g.`image/*` from `base64` arguments.
+
 ## Quick start
 
 Start the connector server at http://localhost:8080 using the [JSON Placeholder](https://jsonplaceholder.typicode.com/) APIs.
@@ -15,6 +44,11 @@ Start the connector server at http://localhost:8080 using the [JSON Placeholder]
 ```go
 go run ./server serve --configuration ./connector/testdata/jsonplaceholder
 ```
+
+## Documentation
+
+- [NDC REST schema](./ndc-rest-schema)
+- [Recipes](https://github.com/hasura/ndc-rest-recipes/tree/main): You can find or request pre-built configuration recipes of popular API services here.
 
 ## Configuration
 
@@ -47,25 +81,6 @@ REST connector supports both OpenAPI 2 and 3 specifications.
 
 - `oas3`: OpenAPI 3.0/3.1.
 - `oas2`: OpenAPI 2.0.
-
-**Supported request types**
-
-| Request Type | Query | Path | Body | Headers |
-| ------------ | ----- | ---- | ---- | ------- |
-| GET          | ✅    | ✅   | NA   | ✅      |
-| POST         | ✅    | ✅   | ✅   | ✅      |
-| DELETE       | ✅    | ✅   | ✅   | ✅      |
-| PUT          | ✅    | ✅   | ✅   | ✅      |
-| PATCH        | ✅    | ✅   | ✅   | ✅      |
-
-#### Supported content types
-
-- `application/json`
-- `application/x-www-form-urlencoded`
-- `application/octet-stream`
-- `multipart/form-data`
-- `text/*`
-- Upload file content types, e.g.`image/*` from `base64` arguments.
 
 #### REST schema
 
