@@ -1,0 +1,202 @@
+{
+  "$schema": "https://raw.githubusercontent.com/hasura/ndc-http/refs/heads/main/ndc-http-schema/jsonschema/ndc-http-schema.schema.json",
+  "settings": {
+    "servers": [
+      {
+        "id": "foo",
+        "url": {
+          "env": "FOO_SERVER_URL",
+          "value": "https://onesignal.com/api/v1"
+        }
+      }
+    ],
+    "securitySchemes": {
+      "app_key": {
+        "type": "http",
+        "value": {
+          "env": "APP_KEY_TOKEN"
+        },
+        "header": "Authorization",
+        "scheme": "bearer"
+      },
+      "user_key": {
+        "type": "http",
+        "value": {
+          "env": "USER_KEY_TOKEN"
+        },
+        "header": "Authorization",
+        "scheme": "bearer"
+      }
+    },
+    "version": "1.2.2"
+  },
+  "collections": [],
+  "procedures": {
+    "create_notification": {
+      "request": {
+        "url": "/notifications",
+        "method": "post",
+        "security": [
+          {
+            "app_key": []
+          }
+        ],
+        "requestBody": {
+          "contentType": "application/json",
+          "schema": {
+            "type": "NotificationInput"
+          }
+        },
+        "response": {
+          "contentType": "application/json"
+        }
+      },
+      "arguments": {
+        "body": {
+          "description": "Request body of POST /notifications",
+          "type": {
+            "name": "NotificationInput",
+            "type": "named"
+          },
+          "http": {
+            "in": "body"
+          }
+        }
+      },
+      "description": "Create notification",
+      "name": "create_notification",
+      "result_type": {
+        "name": "CreateNotificationSuccessResponse",
+        "type": "named"
+      }
+    },
+    "cancel_notification": {
+      "request": {
+        "url": "/notifications/{notification_id}",
+        "method": "delete",
+        "parameters": [
+          {
+            "name": "notification_id",
+            "in": "path",
+            "schema": {
+              "type": "String"
+            }
+          },
+          {
+            "name": "app_id",
+            "in": "query",
+            "schema": {
+              "type": "String"
+            }
+          }
+        ],
+        "security": [
+          {
+            "app_key": []
+          }
+        ],
+        "response": {
+          "contentType": "application/json"
+        }
+      },
+      "arguments": {
+        "app_id": {
+          "type": {
+            "name": "String",
+            "type": "named"
+          },
+          "http": {
+            "name": "app_id",
+            "in": "query",
+            "schema": {
+              "type": ["string"]
+            }
+          }
+        },
+        "notification_id": {
+          "type": {
+            "name": "String",
+            "type": "named"
+          },
+          "http": {
+            "name": "notification_id",
+            "in": "path",
+            "schema": {
+              "type": ["string"]
+            }
+          }
+        }
+      },
+      "description": "Stop a scheduled or currently outgoing notification",
+      "name": "cancel_notification",
+      "result_type": {
+        "name": "CancelNotificationSuccessResponse",
+        "type": "named"
+      }
+    }
+  },
+  "scalar_types": {
+    "Boolean": {
+      "aggregate_functions": {},
+      "comparison_operators": {},
+      "representation": { "type": "boolean" }
+    },
+    "FilterRelation": {
+      "aggregate_functions": {},
+      "comparison_operators": {},
+      "representation": {
+        "one_of": [
+          "\u003e",
+          "\u003c",
+          "=",
+          "!=",
+          "exists",
+          "not_exists",
+          "time_elapsed_gt",
+          "time_elapsed_lt"
+        ],
+        "type": "enum"
+      }
+    },
+    "Int32": {
+      "aggregate_functions": {},
+      "comparison_operators": {},
+      "representation": { "type": "int32" }
+    },
+    "Int64": {
+      "aggregate_functions": {},
+      "comparison_operators": {},
+      "representation": { "type": "int64" }
+    },
+    "JSON": {
+      "aggregate_functions": {},
+      "comparison_operators": {},
+      "representation": { "type": "json" }
+    },
+    "Notification200Errors": {
+      "aggregate_functions": {},
+      "comparison_operators": {},
+      "representation": { "type": "json" }
+    },
+    "OutcomeDataAggregation": {
+      "aggregate_functions": {},
+      "comparison_operators": {},
+      "representation": { "one_of": ["sum", "count"], "type": "enum" }
+    },
+    "PlayerNotificationTargetTargetChannel": {
+      "aggregate_functions": {},
+      "comparison_operators": {},
+      "representation": { "one_of": ["push", "email", "sms"], "type": "enum" }
+    },
+    "String": {
+      "aggregate_functions": {},
+      "comparison_operators": {},
+      "representation": { "type": "string" }
+    },
+    "TimestampTZ": {
+      "aggregate_functions": {},
+      "comparison_operators": {},
+      "representation": { "type": "timestamptz" }
+    }
+  }
+}

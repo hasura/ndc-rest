@@ -1,0 +1,22 @@
+# yaml-language-server: $schema=../../../jsonschema/configuration.schema.json
+output: schema.output.json
+strict: true
+forwardHeaders:
+  enabled: false
+  argumentField: headers
+  responseHeaders: null
+concurrency:
+  query: 1
+  mutation: 1
+  http: 10
+files:
+  - file: schema.yaml
+    spec: ndc
+    timeout:
+      value: 10
+    retry:
+      times:
+        value: 1
+      delay:
+        value: 500
+      httpStatus: [429, 500, 501, 502]

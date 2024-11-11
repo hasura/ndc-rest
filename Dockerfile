@@ -2,7 +2,7 @@
 FROM golang:1.23 AS builder
 
 WORKDIR /app
-COPY ndc-rest-schema ./ndc-rest-schema
+COPY ndc-http-schema ./ndc-http-schema
 COPY go.mod go.sum go.work ./
 RUN go mod download
 COPY . .

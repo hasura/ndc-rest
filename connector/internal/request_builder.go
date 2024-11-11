@@ -11,21 +11,21 @@ import (
 	"slices"
 	"strings"
 
-	rest "github.com/hasura/ndc-rest/ndc-rest-schema/schema"
+	rest "github.com/hasura/ndc-http/ndc-http-schema/schema"
 	"github.com/hasura/ndc-sdk-go/schema"
 	"github.com/hasura/ndc-sdk-go/utils"
 )
 
 // RequestBuilder builds requests to the remote service
 type RequestBuilder struct {
-	Schema    *rest.NDCRestSchema
+	Schema    *rest.NDCHttpSchema
 	Operation *rest.OperationInfo
 	Arguments map[string]any
 	Runtime   rest.RuntimeSettings
 }
 
 // NewRequestBuilder creates a new RequestBuilder instance
-func NewRequestBuilder(restSchema *rest.NDCRestSchema, operation *rest.OperationInfo, arguments map[string]any, runtime rest.RuntimeSettings) *RequestBuilder {
+func NewRequestBuilder(restSchema *rest.NDCHttpSchema, operation *rest.OperationInfo, arguments map[string]any, runtime rest.RuntimeSettings) *RequestBuilder {
 	return &RequestBuilder{
 		Schema:    restSchema,
 		Operation: operation,
@@ -143,7 +143,7 @@ func (c *RequestBuilder) createFormURLEncoded(bodyInfo *rest.ArgumentInfo, bodyD
 		ObjectField: schema.ObjectField{
 			Type: bodyInfo.Type,
 		},
-		Rest: bodyInfo.Rest.Schema,
+		HTTP: bodyInfo.HTTP.Schema,
 	}, reflect.ValueOf(bodyData), []string{"body"})
 	if err != nil {
 		return nil, err
@@ -155,7 +155,7 @@ func (c *RequestBuilder) createFormURLEncoded(bodyInfo *rest.ArgumentInfo, bodyD
 	q := url.Values{}
 	for _, qp := range queryParams {
 		keys := qp.Keys()
-		evalQueryParameterURL(&q, "", bodyInfo.Rest.EncodingObject, keys, qp.Values())
+		evalQueryParameterURL(&q, "", bodyInfo.HTTP.EncodingObject, keys, qp.Values())
 	}
 	rawQuery := encodeQueryValues(q, true)
 
@@ -195,7 +195,7 @@ func (c *RequestBuilder) evalMultipartForm(w *MultipartWriter, bodyInfo *rest.Ar
 			ArgumentInfo: schema.ArgumentInfo{
 				Type: bodyType.UnderlyingType,
 			},
-			Rest: bodyInfo.Rest,
+			HTTP: bodyInfo.HTTP,
 		}, bodyData)
 	case *schema.NamedType:
 		if !ok {
@@ -287,7 +287,7 @@ func (c *RequestBuilder) evalMultipartFieldValueRecursive(w *MultipartWriter, na
 				ObjectField: schema.ObjectField{
 					Type: argType.ElementType,
 				},
-				Rest: fieldInfo.Rest.Items,
+				HTTP: fieldInfo.HTTP.Items,
 			}, enc)
 			if err != nil {
 				return err
@@ -302,7 +302,7 @@ func (c *RequestBuilder) evalMultipartFieldValueRecursive(w *MultipartWriter, na
 			ObjectField: schema.ObjectField{
 				Type: argType.UnderlyingType,
 			},
-			Rest: fieldInfo.Rest,
+			HTTP: fieldInfo.HTTP,
 		}, enc)
 	case *schema.NamedType:
 		if !notNull {
@@ -388,7 +388,7 @@ func (c *RequestBuilder) evalEncodingHeaders(encHeaders map[string]rest.RequestP
 			ObjectField: schema.ObjectField{
 				Type: argumentInfo.Type,
 			},
-			Rest: param.Schema,
+			HTTP: param.Schema,
 		}, reflect.ValueOf(rawHeaderValue), []string{})
 		if err != nil {
 			return nil, err

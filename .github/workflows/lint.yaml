@@ -38,7 +38,7 @@ jobs:
       - name: Format
         run: |
           diff -u <(echo -n) <(gofmt -d -s .)
-          cd ndc-rest-schema && diff -u <(echo -n) <(gofmt -d -s .)
+          cd ndc-http-schema && diff -u <(echo -n) <(gofmt -d -s .)
       - name: golangci-lint ${{ matrix.modules }}
         uses: golangci/golangci-lint-action@v6
         with:

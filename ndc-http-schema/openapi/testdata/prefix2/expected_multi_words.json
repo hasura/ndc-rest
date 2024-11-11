@@ -1,0 +1,184 @@
+{
+  "$schema": "https://raw.githubusercontent.com/hasura/ndc-http/refs/heads/main/ndc-http-schema/jsonschema/ndc-http-schema.schema.json",
+  "settings": {
+    "servers": [
+      {
+        "url": {
+          "env": "SERVER_URL",
+          "value": "https://jsonplaceholder.typicode.com"
+        }
+      }
+    ],
+    "version": "1.0.0"
+  },
+  "functions": {
+    "hasuraMockJsonGetPosts": {
+      "request": {
+        "url": "/posts",
+        "method": "get",
+        "response": {
+          "contentType": "application/json"
+        }
+      },
+      "arguments": {
+        "id": {
+          "description": "Filter by post ID",
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "Int32",
+              "type": "named"
+            }
+          },
+          "http": {
+            "name": "id",
+            "in": "query",
+            "schema": {
+              "type": ["integer"]
+            }
+          }
+        },
+        "userId": {
+          "description": "Filter by user ID",
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "Int32",
+              "type": "named"
+            }
+          },
+          "http": {
+            "name": "userId",
+            "in": "query",
+            "schema": {
+              "type": ["integer"]
+            }
+          }
+        }
+      },
+      "description": "Get all available posts",
+      "name": "hasuraMockJsonGetPosts",
+      "result_type": {
+        "element_type": {
+          "name": "Post",
+          "type": "named"
+        },
+        "type": "array"
+      }
+    }
+  },
+  "object_types": {
+    "Post": {
+      "fields": {
+        "body": {
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "String",
+              "type": "named"
+            }
+          },
+          "http": {
+            "type": ["string"]
+          }
+        },
+        "id": {
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "Int64",
+              "type": "named"
+            }
+          },
+          "http": {
+            "type": ["integer"],
+            "format": "int64"
+          }
+        },
+        "title": {
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "String",
+              "type": "named"
+            }
+          },
+          "http": {
+            "type": ["string"]
+          }
+        },
+        "userId": {
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "Int64",
+              "type": "named"
+            }
+          },
+          "http": {
+            "type": ["integer"],
+            "format": "int64"
+          }
+        }
+      }
+    }
+  },
+  "procedures": {
+    "hasuraMockJsonCreatePost": {
+      "request": {
+        "url": "/posts",
+        "method": "post",
+        "requestBody": {
+          "contentType": "application/json"
+        },
+        "response": {
+          "contentType": "application/json"
+        }
+      },
+      "arguments": {
+        "body": {
+          "description": "Post object that needs to be added",
+          "type": {
+            "name": "Post",
+            "type": "named"
+          },
+          "http": {
+            "in": "body",
+            "schema": {
+              "type": ["object"]
+            }
+          }
+        }
+      },
+      "description": "Create a post",
+      "name": "hasuraMockJsonCreatePost",
+      "result_type": {
+        "name": "Post",
+        "type": "named"
+      }
+    }
+  },
+  "scalar_types": {
+    "Int32": {
+      "aggregate_functions": {},
+      "comparison_operators": {},
+      "representation": {
+        "type": "int32"
+      }
+    },
+    "Int64": {
+      "aggregate_functions": {},
+      "comparison_operators": {},
+      "representation": {
+        "type": "int64"
+      }
+    },
+    "String": {
+      "aggregate_functions": {},
+      "comparison_operators": {},
+      "representation": {
+        "type": "string"
+      }
+    }
+  }
+}

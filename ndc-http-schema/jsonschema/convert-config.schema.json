@@ -1,0 +1,107 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/hasura/ndc-http/ndc-http-schema/configuration/convert-config",
+  "$ref": "#/$defs/ConvertConfig",
+  "$defs": {
+    "ConvertConfig": {
+      "properties": {
+        "file": {
+          "type": "string",
+          "description": "File path needs to be converted"
+        },
+        "spec": {
+          "$ref": "#/$defs/SchemaSpecType",
+          "description": "The API specification of the file, is one of oas3 (openapi3), oas2 (openapi2)"
+        },
+        "methodAlias": {
+          "additionalProperties": {
+            "type": "string"
+          },
+          "type": "object",
+          "description": "Alias names for HTTP method. Used for prefix renaming, e.g. getUsers, postUser"
+        },
+        "prefix": {
+          "type": "string",
+          "description": "Add a prefix to the function and procedure names"
+        },
+        "trimPrefix": {
+          "type": "string",
+          "description": "Trim the prefix in URL, e.g. /v1"
+        },
+        "envPrefix": {
+          "type": "string",
+          "description": "The environment variable prefix for security values, e.g. PET_STORE"
+        },
+        "pure": {
+          "type": "boolean",
+          "description": "Return the pure NDC schema only"
+        },
+        "strict": {
+          "type": "boolean",
+          "description": "Require strict validation"
+        },
+        "patchBefore": {
+          "items": {
+            "$ref": "#/$defs/PatchConfig"
+          },
+          "type": "array",
+          "description": "Patch files to be applied into the input file before converting"
+        },
+        "patchAfter": {
+          "items": {
+            "$ref": "#/$defs/PatchConfig"
+          },
+          "type": "array",
+          "description": "Patch files to be applied into the input file after converting"
+        },
+        "allowedContentTypes": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array",
+          "description": "Allowed content types. All content types are allowed by default"
+        },
+        "output": {
+          "type": "string",
+          "description": "The location where the ndc schema file will be generated. Print to stdout if not set"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object",
+      "required": [
+        "file"
+      ],
+      "description": "ConvertConfig represents the content of convert config file"
+    },
+    "PatchConfig": {
+      "properties": {
+        "path": {
+          "type": "string"
+        },
+        "strategy": {
+          "type": "string",
+          "enum": [
+            "merge",
+            "json6902"
+          ]
+        }
+      },
+      "additionalProperties": false,
+      "type": "object",
+      "required": [
+        "path",
+        "strategy"
+      ]
+    },
+    "SchemaSpecType": {
+      "type": "string",
+      "enum": [
+        "oas3",
+        "oas2",
+        "openapi3",
+        "openapi2",
+        "ndc"
+      ]
+    }
+  }
+}

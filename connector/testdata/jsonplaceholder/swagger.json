@@ -1,7 +1,7 @@
 {
   "swagger": "2.0",
   "info": {
-    "description": "Fake Online REST API for Testing and Prototyping",
+    "description": "Fake Online HTTP API for Testing and Prototyping",
     "version": "1.0.0",
     "title": "JSON Placeholder"
   },

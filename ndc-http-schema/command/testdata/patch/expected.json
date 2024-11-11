@@ -1,0 +1,1178 @@
+[
+  {
+    "name": "testdata/auth/schema.yaml",
+    "settings": {
+      "servers": [
+        {
+          "url": {
+            "env": "PET_STORE_DOG_URL"
+          },
+          "id": "dog",
+          "securitySchemes": {
+            "api_key": {
+              "type": "apiKey",
+              "value": {
+                "value": "dog-secret"
+              },
+              "in": "header",
+              "name": "api_key"
+            },
+            "bearer": {
+              "type": "http",
+              "value": {
+                "env": "PET_STORE_BEARER_TOKEN"
+              },
+              "header": "",
+              "scheme": "bearer"
+            }
+          },
+          "security": [
+            {
+              "api_key": []
+            }
+          ]
+        },
+        {
+          "url": {
+            "env": "PET_STORE_CAT_URL"
+          },
+          "id": "cat",
+          "securitySchemes": {
+            "api_key": {
+              "type": "apiKey",
+              "value": {
+                "value": "cat-secret"
+              },
+              "in": "header",
+              "name": "api_key"
+            },
+            "bearer": {
+              "type": "http",
+              "value": {
+                "env": "PET_STORE_BEARER_TOKEN"
+              },
+              "header": "",
+              "scheme": "bearer"
+            }
+          },
+          "security": [
+            {
+              "api_key": []
+            }
+          ]
+        }
+      ],
+      "securitySchemes": {
+        "api_key": {
+          "type": "apiKey",
+          "value": {
+            "env": "PET_STORE_API_KEY"
+          },
+          "in": "header",
+          "name": "api_key"
+        },
+        "bearer": {
+          "type": "http",
+          "value": {
+            "env": "PET_STORE_BEARER_TOKEN"
+          },
+          "header": "",
+          "scheme": "bearer"
+        }
+      },
+      "security": [
+        {
+          "api_key": []
+        }
+      ],
+      "version": "1.0.18"
+    },
+    "functions": {
+      "findPets": {
+        "request": {
+          "url": "/pet",
+          "method": "get",
+          "type": "http",
+          "response": {
+            "contentType": ""
+          }
+        },
+        "arguments": {
+          "headers": {
+            "description": "Headers forwarded from the Hasura engine",
+            "type": {
+              "type": "nullable",
+              "underlying_type": {
+                "name": "JSON",
+                "type": "named"
+              }
+            }
+          },
+          "httpOptions": {
+            "description": "Execution options for HTTP requests to a single server",
+            "type": {
+              "type": "nullable",
+              "underlying_type": {
+                "name": "HttpSingleOptions",
+                "type": "named"
+              }
+            }
+          }
+        },
+        "description": "Finds Pets",
+        "result_type": {
+          "name": "FindPetsHeadersResponse",
+          "type": "named"
+        }
+      },
+      "findPetsByStatus": {
+        "request": {
+          "url": "/pet/findByStatus",
+          "method": "get",
+          "type": "http",
+          "security": [
+            {
+              "bearer": []
+            }
+          ],
+          "response": {
+            "contentType": ""
+          }
+        },
+        "arguments": {
+          "headers": {
+            "description": "Headers forwarded from the Hasura engine",
+            "type": {
+              "type": "nullable",
+              "underlying_type": {
+                "name": "JSON",
+                "type": "named"
+              }
+            }
+          },
+          "httpOptions": {
+            "description": "Execution options for HTTP requests to a single server",
+            "type": {
+              "type": "nullable",
+              "underlying_type": {
+                "name": "HttpSingleOptions",
+                "type": "named"
+              }
+            }
+          },
+          "status": {
+            "description": "Status values that need to be considered for filter",
+            "type": {
+              "type": "nullable",
+              "underlying_type": {
+                "name": "String",
+                "type": "named"
+              }
+            },
+            "http": {
+              "in": "query",
+              "schema": {
+                "type": ["string"]
+              }
+            }
+          }
+        },
+        "description": "Finds Pets by status",
+        "result_type": {
+          "name": "FindPetsByStatusHeadersResponse",
+          "type": "named"
+        }
+      },
+      "findPetsByStatusDistributed": {
+        "request": {
+          "url": "/pet/findByStatus",
+          "method": "get",
+          "type": "http",
+          "security": [
+            {
+              "bearer": []
+            }
+          ],
+          "response": {
+            "contentType": ""
+          }
+        },
+        "arguments": {
+          "headers": {
+            "description": "Headers forwarded from the Hasura engine",
+            "type": {
+              "type": "nullable",
+              "underlying_type": {
+                "name": "JSON",
+                "type": "named"
+              }
+            }
+          },
+          "httpOptions": {
+            "description": "Distributed execution options for HTTP requests to multiple servers",
+            "type": {
+              "type": "nullable",
+              "underlying_type": {
+                "name": "HttpDistributedOptions",
+                "type": "named"
+              }
+            }
+          },
+          "status": {
+            "description": "Status values that need to be considered for filter",
+            "type": {
+              "type": "nullable",
+              "underlying_type": {
+                "name": "String",
+                "type": "named"
+              }
+            },
+            "http": {
+              "in": "query",
+              "schema": {
+                "type": ["string"]
+              }
+            }
+          }
+        },
+        "description": "Finds Pets by status",
+        "result_type": {
+          "name": "FindPetsByStatusDistributedHeadersResponse",
+          "type": "named"
+        }
+      },
+      "findPetsDistributed": {
+        "request": {
+          "url": "/pet",
+          "method": "get",
+          "type": "http",
+          "response": {
+            "contentType": ""
+          }
+        },
+        "arguments": {
+          "headers": {
+            "description": "Headers forwarded from the Hasura engine",
+            "type": {
+              "type": "nullable",
+              "underlying_type": {
+                "name": "JSON",
+                "type": "named"
+              }
+            }
+          },
+          "httpOptions": {
+            "description": "Distributed execution options for HTTP requests to multiple servers",
+            "type": {
+              "type": "nullable",
+              "underlying_type": {
+                "name": "HttpDistributedOptions",
+                "type": "named"
+              }
+            }
+          }
+        },
+        "description": "Finds Pets",
+        "result_type": {
+          "name": "FindPetsDistributedHeadersResponse",
+          "type": "named"
+        }
+      },
+      "petRetry": {
+        "request": {
+          "url": "/pet/retry",
+          "method": "get",
+          "type": "http",
+          "response": {
+            "contentType": ""
+          }
+        },
+        "arguments": {
+          "headers": {
+            "description": "Headers forwarded from the Hasura engine",
+            "type": {
+              "type": "nullable",
+              "underlying_type": {
+                "name": "JSON",
+                "type": "named"
+              }
+            }
+          },
+          "httpOptions": {
+            "description": "Execution options for HTTP requests to a single server",
+            "type": {
+              "type": "nullable",
+              "underlying_type": {
+                "name": "HttpSingleOptions",
+                "type": "named"
+              }
+            }
+          }
+        },
+        "result_type": {
+          "name": "PetRetryHeadersResponse",
+          "type": "named"
+        }
+      },
+      "petRetryDistributed": {
+        "request": {
+          "url": "/pet/retry",
+          "method": "get",
+          "type": "http",
+          "response": {
+            "contentType": ""
+          }
+        },
+        "arguments": {
+          "headers": {
+            "description": "Headers forwarded from the Hasura engine",
+            "type": {
+              "type": "nullable",
+              "underlying_type": {
+                "name": "JSON",
+                "type": "named"
+              }
+            }
+          },
+          "httpOptions": {
+            "description": "Distributed execution options for HTTP requests to multiple servers",
+            "type": {
+              "type": "nullable",
+              "underlying_type": {
+                "name": "HttpDistributedOptions",
+                "type": "named"
+              }
+            }
+          }
+        },
+        "result_type": {
+          "name": "PetRetryDistributedHeadersResponse",
+          "type": "named"
+        }
+      }
+    },
+    "object_types": {
+      "AddPetDistributedHeadersResponse": {
+        "fields": {
+          "headers": {
+            "type": {
+              "type": "nullable",
+              "underlying_type": {
+                "name": "JSON",
+                "type": "named"
+              }
+            }
+          },
+          "response": {
+            "type": {
+              "name": "AddPetDistributedResult",
+              "type": "named"
+            }
+          }
+        }
+      },
+      "AddPetDistributedResult": {
+        "description": "Distributed responses of addPetDistributed",
+        "fields": {
+          "errors": {
+            "description": "Error responses of addPetDistributed",
+            "type": {
+              "element_type": {
+                "name": "DistributedError",
+                "type": "named"
+              },
+              "type": "array"
+            }
+          },
+          "results": {
+            "description": "Results of addPetDistributed",
+            "type": {
+              "element_type": {
+                "name": "AddPetDistributedResultData",
+                "type": "named"
+              },
+              "type": "array"
+            }
+          }
+        }
+      },
+      "AddPetDistributedResultData": {
+        "description": "Distributed response data of addPetDistributed",
+        "fields": {
+          "data": {
+            "description": "A result of addPetDistributed",
+            "type": {
+              "name": "Pet",
+              "type": "named"
+            }
+          },
+          "server": {
+            "description": "Identity of the remote server",
+            "type": {
+              "name": "HttpServerId",
+              "type": "named"
+            }
+          }
+        }
+      },
+      "AddPetHeadersResponse": {
+        "fields": {
+          "headers": {
+            "type": {
+              "type": "nullable",
+              "underlying_type": {
+                "name": "JSON",
+                "type": "named"
+              }
+            }
+          },
+          "response": {
+            "type": {
+              "name": "Pet",
+              "type": "named"
+            }
+          }
+        }
+      },
+      "CreateModelDistributedHeadersResponse": {
+        "fields": {
+          "headers": {
+            "type": {
+              "type": "nullable",
+              "underlying_type": {
+                "name": "JSON",
+                "type": "named"
+              }
+            }
+          },
+          "response": {
+            "type": {
+              "name": "CreateModelDistributedResult",
+              "type": "named"
+            }
+          }
+        }
+      },
+      "CreateModelDistributedResult": {
+        "description": "Distributed responses of createModelDistributed",
+        "fields": {
+          "errors": {
+            "description": "Error responses of createModelDistributed",
+            "type": {
+              "element_type": {
+                "name": "DistributedError",
+                "type": "named"
+              },
+              "type": "array"
+            }
+          },
+          "results": {
+            "description": "Results of createModelDistributed",
+            "type": {
+              "element_type": {
+                "name": "CreateModelDistributedResultData",
+                "type": "named"
+              },
+              "type": "array"
+            }
+          }
+        }
+      },
+      "CreateModelDistributedResultData": {
+        "description": "Distributed response data of createModelDistributed",
+        "fields": {
+          "data": {
+            "description": "A result of createModelDistributed",
+            "type": {
+              "element_type": {
+                "name": "ProgressResponse",
+                "type": "named"
+              },
+              "type": "array"
+            }
+          },
+          "server": {
+            "description": "Identity of the remote server",
+            "type": {
+              "name": "HttpServerId",
+              "type": "named"
+            }
+          }
+        }
+      },
+      "CreateModelHeadersResponse": {
+        "fields": {
+          "headers": {
+            "type": {
+              "type": "nullable",
+              "underlying_type": {
+                "name": "JSON",
+                "type": "named"
+              }
+            }
+          },
+          "response": {
+            "type": {
+              "element_type": {
+                "name": "ProgressResponse",
+                "type": "named"
+              },
+              "type": "array"
+            }
+          }
+        }
+      },
+      "CreateModelRequest": {
+        "fields": {
+          "model": {
+            "description": "The name of the model to create",
+            "type": {
+              "type": "nullable",
+              "underlying_type": {
+                "name": "String",
+                "type": "named"
+              }
+            }
+          }
+        }
+      },
+      "DistributedError": {
+        "description": "The error response of the remote request",
+        "fields": {
+          "details": {
+            "description": "Any additional structured information about the error",
+            "type": {
+              "type": "nullable",
+              "underlying_type": {
+                "name": "JSON",
+                "type": "named"
+              }
+            }
+          },
+          "message": {
+            "description": "An optional human-readable summary of the error",
+            "type": {
+              "type": "nullable",
+              "underlying_type": {
+                "name": "String",
+                "type": "named"
+              }
+            }
+          },
+          "server": {
+            "description": "Identity of the remote server",
+            "type": {
+              "name": "HttpServerId",
+              "type": "named"
+            }
+          }
+        }
+      },
+      "FindPetsByStatusDistributedHeadersResponse": {
+        "fields": {
+          "headers": {
+            "type": {
+              "type": "nullable",
+              "underlying_type": {
+                "name": "JSON",
+                "type": "named"
+              }
+            }
+          },
+          "response": {
+            "type": {
+              "name": "FindPetsByStatusDistributedResult",
+              "type": "named"
+            }
+          }
+        }
+      },
+      "FindPetsByStatusDistributedResult": {
+        "description": "Distributed responses of findPetsByStatusDistributed",
+        "fields": {
+          "errors": {
+            "description": "Error responses of findPetsByStatusDistributed",
+            "type": {
+              "element_type": {
+                "name": "DistributedError",
+                "type": "named"
+              },
+              "type": "array"
+            }
+          },
+          "results": {
+            "description": "Results of findPetsByStatusDistributed",
+            "type": {
+              "element_type": {
+                "name": "FindPetsByStatusDistributedResultData",
+                "type": "named"
+              },
+              "type": "array"
+            }
+          }
+        }
+      },
+      "FindPetsByStatusDistributedResultData": {
+        "description": "Distributed response data of findPetsByStatusDistributed",
+        "fields": {
+          "data": {
+            "description": "A result of findPetsByStatusDistributed",
+            "type": {
+              "element_type": {
+                "name": "Pet",
+                "type": "named"
+              },
+              "type": "array"
+            }
+          },
+          "server": {
+            "description": "Identity of the remote server",
+            "type": {
+              "name": "HttpServerId",
+              "type": "named"
+            }
+          }
+        }
+      },
+      "FindPetsByStatusHeadersResponse": {
+        "fields": {
+          "headers": {
+            "type": {
+              "type": "nullable",
+              "underlying_type": {
+                "name": "JSON",
+                "type": "named"
+              }
+            }
+          },
+          "response": {
+            "type": {
+              "element_type": {
+                "name": "Pet",
+                "type": "named"
+              },
+              "type": "array"
+            }
+          }
+        }
+      },
+      "FindPetsDistributedHeadersResponse": {
+        "fields": {
+          "headers": {
+            "type": {
+              "type": "nullable",
+              "underlying_type": {
+                "name": "JSON",
+                "type": "named"
+              }
+            }
+          },
+          "response": {
+            "type": {
+              "name": "FindPetsDistributedResult",
+              "type": "named"
+            }
+          }
+        }
+      },
+      "FindPetsDistributedResult": {
+        "description": "Distributed responses of findPetsDistributed",
+        "fields": {
+          "errors": {
+            "description": "Error responses of findPetsDistributed",
+            "type": {
+              "element_type": {
+                "name": "DistributedError",
+                "type": "named"
+              },
+              "type": "array"
+            }
+          },
+          "results": {
+            "description": "Results of findPetsDistributed",
+            "type": {
+              "element_type": {
+                "name": "FindPetsDistributedResultData",
+                "type": "named"
+              },
+              "type": "array"
+            }
+          }
+        }
+      },
+      "FindPetsDistributedResultData": {
+        "description": "Distributed response data of findPetsDistributed",
+        "fields": {
+          "data": {
+            "description": "A result of findPetsDistributed",
+            "type": {
+              "element_type": {
+                "name": "Pet",
+                "type": "named"
+              },
+              "type": "array"
+            }
+          },
+          "server": {
+            "description": "Identity of the remote server",
+            "type": {
+              "name": "HttpServerId",
+              "type": "named"
+            }
+          }
+        }
+      },
+      "FindPetsHeadersResponse": {
+        "fields": {
+          "headers": {
+            "type": {
+              "type": "nullable",
+              "underlying_type": {
+                "name": "JSON",
+                "type": "named"
+              }
+            }
+          },
+          "response": {
+            "type": {
+              "element_type": {
+                "name": "Pet",
+                "type": "named"
+              },
+              "type": "array"
+            }
+          }
+        }
+      },
+      "Pet": {
+        "fields": {
+          "id": {
+            "type": {
+              "type": "nullable",
+              "underlying_type": {
+                "name": "Int",
+                "type": "named"
+              }
+            }
+          },
+          "name": {
+            "type": {
+              "name": "String",
+              "type": "named"
+            }
+          }
+        }
+      },
+      "PetRetryDistributedHeadersResponse": {
+        "fields": {
+          "headers": {
+            "type": {
+              "type": "nullable",
+              "underlying_type": {
+                "name": "JSON",
+                "type": "named"
+              }
+            }
+          },
+          "response": {
+            "type": {
+              "name": "PetRetryDistributedResult",
+              "type": "named"
+            }
+          }
+        }
+      },
+      "PetRetryDistributedResult": {
+        "description": "Distributed responses of petRetryDistributed",
+        "fields": {
+          "errors": {
+            "description": "Error responses of petRetryDistributed",
+            "type": {
+              "element_type": {
+                "name": "DistributedError",
+                "type": "named"
+              },
+              "type": "array"
+            }
+          },
+          "results": {
+            "description": "Results of petRetryDistributed",
+            "type": {
+              "element_type": {
+                "name": "PetRetryDistributedResultData",
+                "type": "named"
+              },
+              "type": "array"
+            }
+          }
+        }
+      },
+      "PetRetryDistributedResultData": {
+        "description": "Distributed response data of petRetryDistributed",
+        "fields": {
+          "data": {
+            "description": "A result of petRetryDistributed",
+            "type": {
+              "element_type": {
+                "name": "Pet",
+                "type": "named"
+              },
+              "type": "array"
+            }
+          },
+          "server": {
+            "description": "Identity of the remote server",
+            "type": {
+              "name": "HttpServerId",
+              "type": "named"
+            }
+          }
+        }
+      },
+      "PetRetryHeadersResponse": {
+        "fields": {
+          "headers": {
+            "type": {
+              "type": "nullable",
+              "underlying_type": {
+                "name": "JSON",
+                "type": "named"
+              }
+            }
+          },
+          "response": {
+            "type": {
+              "element_type": {
+                "name": "Pet",
+                "type": "named"
+              },
+              "type": "array"
+            }
+          }
+        }
+      },
+      "ProgressResponse": {
+        "fields": {
+          "completed": {
+            "description": "The completed size of the task",
+            "type": {
+              "type": "nullable",
+              "underlying_type": {
+                "name": "Int32",
+                "type": "named"
+              }
+            }
+          },
+          "status": {
+            "description": "The status of the request",
+            "type": {
+              "type": "nullable",
+              "underlying_type": {
+                "name": "String",
+                "type": "named"
+              }
+            }
+          }
+        }
+      },
+      "HttpDistributedOptions": {
+        "description": "Distributed execution options for HTTP requests to multiple servers",
+        "fields": {
+          "parallel": {
+            "description": "Execute requests to remote servers in parallel",
+            "type": {
+              "type": "nullable",
+              "underlying_type": {
+                "name": "Boolean",
+                "type": "named"
+              }
+            }
+          },
+          "servers": {
+            "description": "Specify remote servers to receive the request",
+            "type": {
+              "type": "nullable",
+              "underlying_type": {
+                "element_type": {
+                  "name": "HttpServerId",
+                  "type": "named"
+                },
+                "type": "array"
+              }
+            }
+          }
+        }
+      },
+      "HttpSingleOptions": {
+        "description": "Execution options for HTTP requests to a single server",
+        "fields": {
+          "servers": {
+            "description": "Specify remote servers to receive the request. If there are many server IDs the server is selected randomly",
+            "type": {
+              "type": "nullable",
+              "underlying_type": {
+                "element_type": {
+                  "name": "HttpServerId",
+                  "type": "named"
+                },
+                "type": "array"
+              }
+            }
+          }
+        }
+      }
+    },
+    "procedures": {
+      "addPet": {
+        "request": {
+          "url": "/pet",
+          "method": "post",
+          "type": "http",
+          "headers": {
+            "Content-Type": {
+              "value": "application/json"
+            }
+          },
+          "security": [
+            {
+              "api_key": []
+            }
+          ],
+          "requestBody": {
+            "contentType": "application/json"
+          },
+          "response": {
+            "contentType": ""
+          }
+        },
+        "arguments": {
+          "body": {
+            "description": "Request body of /pet",
+            "type": {
+              "name": "Pet",
+              "type": "named"
+            },
+            "http": {
+              "in": "body"
+            }
+          },
+          "headers": {
+            "description": "Headers forwarded from the Hasura engine",
+            "type": {
+              "type": "nullable",
+              "underlying_type": {
+                "name": "JSON",
+                "type": "named"
+              }
+            }
+          },
+          "httpOptions": {
+            "description": "Execution options for HTTP requests to a single server",
+            "type": {
+              "type": "nullable",
+              "underlying_type": {
+                "name": "HttpSingleOptions",
+                "type": "named"
+              }
+            }
+          }
+        },
+        "description": "Add a new pet to the store",
+        "result_type": {
+          "name": "AddPetHeadersResponse",
+          "type": "named"
+        }
+      },
+      "addPetDistributed": {
+        "request": {
+          "url": "/pet",
+          "method": "post",
+          "type": "http",
+          "headers": {
+            "Content-Type": {
+              "value": "application/json"
+            }
+          },
+          "security": [
+            {
+              "api_key": []
+            }
+          ],
+          "requestBody": {
+            "contentType": "application/json"
+          },
+          "response": {
+            "contentType": ""
+          }
+        },
+        "arguments": {
+          "body": {
+            "description": "Request body of /pet",
+            "type": {
+              "name": "Pet",
+              "type": "named"
+            },
+            "http": {
+              "in": "body"
+            }
+          },
+          "headers": {
+            "description": "Headers forwarded from the Hasura engine",
+            "type": {
+              "type": "nullable",
+              "underlying_type": {
+                "name": "JSON",
+                "type": "named"
+              }
+            }
+          },
+          "httpOptions": {
+            "description": "Distributed execution options for HTTP requests to multiple servers",
+            "type": {
+              "type": "nullable",
+              "underlying_type": {
+                "name": "HttpDistributedOptions",
+                "type": "named"
+              }
+            }
+          }
+        },
+        "description": "Add a new pet to the store",
+        "result_type": {
+          "name": "AddPetDistributedHeadersResponse",
+          "type": "named"
+        }
+      },
+      "createModel": {
+        "request": {
+          "url": "/model",
+          "method": "post",
+          "type": "http",
+          "requestBody": {
+            "contentType": "application/json"
+          },
+          "response": {
+            "contentType": "application/x-ndjson"
+          }
+        },
+        "arguments": {
+          "body": {
+            "description": "Request body of POST /api/create",
+            "type": {
+              "name": "CreateModelRequest",
+              "type": "named"
+            }
+          },
+          "headers": {
+            "description": "Headers forwarded from the Hasura engine",
+            "type": {
+              "type": "nullable",
+              "underlying_type": {
+                "name": "JSON",
+                "type": "named"
+              }
+            }
+          },
+          "httpOptions": {
+            "description": "Execution options for HTTP requests to a single server",
+            "type": {
+              "type": "nullable",
+              "underlying_type": {
+                "name": "HttpSingleOptions",
+                "type": "named"
+              }
+            }
+          }
+        },
+        "result_type": {
+          "name": "CreateModelHeadersResponse",
+          "type": "named"
+        }
+      },
+      "createModelDistributed": {
+        "request": {
+          "url": "/model",
+          "method": "post",
+          "type": "http",
+          "requestBody": {
+            "contentType": "application/json"
+          },
+          "response": {
+            "contentType": "application/x-ndjson"
+          }
+        },
+        "arguments": {
+          "body": {
+            "description": "Request body of POST /api/create",
+            "type": {
+              "name": "CreateModelRequest",
+              "type": "named"
+            }
+          },
+          "headers": {
+            "description": "Headers forwarded from the Hasura engine",
+            "type": {
+              "type": "nullable",
+              "underlying_type": {
+                "name": "JSON",
+                "type": "named"
+              }
+            }
+          },
+          "httpOptions": {
+            "description": "Distributed execution options for HTTP requests to multiple servers",
+            "type": {
+              "type": "nullable",
+              "underlying_type": {
+                "name": "HttpDistributedOptions",
+                "type": "named"
+              }
+            }
+          }
+        },
+        "result_type": {
+          "name": "CreateModelDistributedHeadersResponse",
+          "type": "named"
+        }
+      }
+    },
+    "scalar_types": {
+      "Boolean": {
+        "aggregate_functions": {},
+        "comparison_operators": {},
+        "representation": {
+          "type": "boolean"
+        }
+      },
+      "Int": {
+        "aggregate_functions": {},
+        "comparison_operators": {},
+        "representation": {
+          "type": "int32"
+        }
+      },
+      "JSON": {
+        "aggregate_functions": {},
+        "comparison_operators": {},
+        "representation": {
+          "type": "json"
+        }
+      },
+      "HttpServerId": {
+        "aggregate_functions": {},
+        "comparison_operators": {},
+        "representation": {
+          "one_of": ["dog", "cat"],
+          "type": "enum"
+        }
+      },
+      "String": {
+        "aggregate_functions": {},
+        "comparison_operators": {},
+        "representation": {
+          "type": "string"
+        }
+      }
+    }
+  }
+]

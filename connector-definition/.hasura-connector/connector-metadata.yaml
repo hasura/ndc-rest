@@ -1,11 +1,11 @@
 packagingDefinition:
   type: PrebuiltDockerImage
-  dockerImage: ghcr.io/hasura/ndc-rest:{{VERSION}}
+  dockerImage: ghcr.io/hasura/ndc-http:{{VERSION}}
 supportedEnvironmentVariables: []
 commands:
-  update: ndc-rest-schema update
+  update: ndc-http-schema update
 cliPlugin:
-  name: ndc-rest
+  name: ndc-http
   version: "{{VERSION}}"
 dockerComposeWatch:
   # copy config files into the existing container and restart it

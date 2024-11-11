@@ -1,17 +1,17 @@
-# REST Connector
+# HTTP Connector
 
-REST Connector allows you to quickly convert REST APIs to NDC schema and proxy requests from GraphQL Engine v3 to remote services.
+HTTP Connector allows you to quickly convert HTTP APIs to NDC schema and proxy requests from GraphQL Engine v3 to remote services.
 The connector can automatically transform OpenAPI 2.0 and 3.0 definitions to NDC schema.
 
-![REST connector](./assets/rest_connector.png)
+![HTTP connector](./assets/rest_connector.png)
 
 > [!NOTE]
-> REST connector is configuration-based HTTP engine and isn't limited to the OpenAPI specs only. Use [OpenAPI Connector](https://hasura.io/docs/3.0/connectors/external-apis/open-api) if you want to take more control of OpenAPI via code generation.
+> HTTP connector is configuration-based HTTP engine and isn't limited to the OpenAPI specs only. Use [OpenAPI Connector](https://hasura.io/docs/3.0/connectors/external-apis/open-api) if you want to take more control of OpenAPI via code generation.
 
 ## Features
 
 - [No code. Configuration based](#configuration).
-- Composable.
+- Composable API collections.
 - [Supported many API specifications](#supported-specs).
 - [Supported authentication](#authentication).
 - [Supported headers forwarding](#header-forwarding).
@@ -34,6 +34,7 @@ The connector can automatically transform OpenAPI 2.0 and 3.0 definitions to NDC
 - `application/x-www-form-urlencoded`
 - `application/octet-stream`
 - `multipart/form-data`
+- `application/x-ndjson`
 - `text/*`
 - Upload file content types, e.g.`image/*` from `base64` arguments.
 
@@ -47,8 +48,8 @@ go run ./server serve --configuration ./connector/testdata/jsonplaceholder
 
 ## Documentation
 
-- [NDC REST schema](./ndc-rest-schema)
-- [Recipes](https://github.com/hasura/ndc-rest-recipes/tree/main): You can find or request pre-built configuration recipes of popular API services here.
+- [NDC HTTP schema](./ndc-http-schema)
+- [Recipes](https://github.com/hasura/ndc-http-recipes/tree/main): You can find or request pre-built configuration recipes of popular API services here.
 
 ## Configuration
 
@@ -66,7 +67,7 @@ files:
     spec: ndc
 ```
 
-The config of each element follows the [config schema](https://github.com/hasura/ndc-rest/ndc-rest-schema/blob/main/config.example.yaml) of `ndc-rest-schema`.
+The config of each element follows the [config schema](https://github.com/hasura/ndc-http/ndc-http-schema/blob/main/config.example.yaml) of `ndc-http-schema`.
 
 You can add many API documentation files into the same connector.
 
@@ -77,20 +78,20 @@ You can add many API documentation files into the same connector.
 
 #### OpenAPI
 
-REST connector supports both OpenAPI 2 and 3 specifications.
+HTTP connector supports both OpenAPI 2 and 3 specifications.
 
 - `oas3`: OpenAPI 3.0/3.1.
 - `oas2`: OpenAPI 2.0.
 
-#### REST schema
+#### HTTP schema
 
-Enum: `ndc`
+Enum: `http`
 
-REST schema is the native configuration schema which other specs will be converted to behind the scene. The schema extends the NDC Specification with REST configuration and can be converted from other specs by the [NDC REST schema CLI](./ndc-rest-schema).
+HTTP schema is the native configuration schema which other specs will be converted to behind the scene. The schema extends the NDC Specification with HTTP configuration and can be converted from other specs by the [NDC HTTP schema CLI](./ndc-http-schema).
 
 ### Authentication
 
-The current version supports API key and Auth token authentication schemes. The configuration is inspired from `securitySchemes` [with env variables](https://github.com/hasura/ndc-rest/ndc-rest-schema#authentication). The connector supports the following authentication strategies:
+The current version supports API key and Auth token authentication schemes. The configuration is inspired from `securitySchemes` [with env variables](https://github.com/hasura/ndc-http/ndc-http-schema#authentication). The connector supports the following authentication strategies:
 
 - API Key
 - Bearer Auth
@@ -152,7 +153,7 @@ files:
 
 ### JSON Patch
 
-You can add JSON patches to extend API documentation files. REST connector supports `merge` and `json6902` strategies. JSON patches can be applied before or after the conversion from OpenAPI to REST schema configuration. It will be useful if you need to extend or fix some fields in the API documentation such as server URL.
+You can add JSON patches to extend API documentation files. HTTP connector supports `merge` and `json6902` strategies. JSON patches can be applied before or after the conversion from OpenAPI to HTTP schema configuration. It will be useful if you need to extend or fix some fields in the API documentation such as server URL.
 
 ```yaml
 files:
@@ -166,7 +167,7 @@ files:
         strategy: json6902
 ```
 
-See [the example](./ndc-rest-schema/command/testdata/patch) for more context.
+See [the example](./ndc-http-schema/command/testdata/patch) for more context.
 
 ## Distributed execution
 
@@ -215,11 +216,11 @@ files:
   "functions": [
     {
       "arguments": {
-        "restOptions": {
+        "httpOptions": {
           "type": {
             "type": "nullable",
             "underlying_type": {
-              "name": "RestSingleOptions",
+              "name": "HttpSingleOptions",
               "type": "named"
             }
           }
@@ -236,11 +237,11 @@ files:
     },
     {
       "arguments": {
-        "restOptions": {
+        "httpOptions": {
           "type": {
             "type": "nullable",
             "underlying_type": {
-              "name": "RestDistributedOptions",
+              "name": "HttpDistributedOptions",
               "type": "named"
             }
           }
@@ -254,8 +255,8 @@ files:
     }
   ],
   "object_types": {
-    "RestDistributedOptions": {
-      "description": "Distributed execution options for REST requests to multiple servers",
+    "HttpDistributedOptions": {
+      "description": "Distributed execution options for HTTP requests to multiple servers",
       "fields": {
         "parallel": {
           "description": "Execute requests to remote servers in parallel",
@@ -273,7 +274,7 @@ files:
             "type": "nullable",
             "underlying_type": {
               "element_type": {
-                "name": "RestServerId",
+                "name": "HttpServerId",
                 "type": "named"
               },
               "type": "array"
@@ -282,8 +283,8 @@ files:
         }
       }
     },
-    "RestSingleOptions": {
-      "description": "Execution options for REST requests to a single server",
+    "HttpSingleOptions": {
+      "description": "Execution options for HTTP requests to a single server",
       "fields": {
         "servers": {
           "description": "Specify remote servers to receive the request. If there are many server IDs the server is selected randomly",
@@ -291,7 +292,7 @@ files:
             "type": "nullable",
             "underlying_type": {
               "element_type": {
-                "name": "RestServerId",
+                "name": "HttpServerId",
                 "type": "named"
               },
               "type": "array"
@@ -306,8 +307,8 @@ files:
 
 </details>
 
-`RestSingleOptions` object type is added to existing operations (findPets). API consumers can specify the server to be executed. If you want to execute all remote servers in sequence or parallel, `findPetsDistributed` function should be used.
+`HttpSingleOptions` object type is added to existing operations (findPets). API consumers can specify the server to be executed. If you want to execute all remote servers in sequence or parallel, `findPetsDistributed` function should be used.
 
 ## License
 
-REST Connector is available under the [Apache License 2.0](./LICENSE).
+HTTP Connector is available under the [Apache License 2.0](./LICENSE).

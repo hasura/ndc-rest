@@ -5,7 +5,7 @@ import (
 	"net/url"
 	"testing"
 
-	rest "github.com/hasura/ndc-rest/ndc-rest-schema/schema"
+	rest "github.com/hasura/ndc-http/ndc-http-schema/schema"
 	"github.com/hasura/ndc-sdk-go/utils"
 	"gotest.tools/v3/assert"
 )

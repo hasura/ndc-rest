@@ -12,8 +12,8 @@ import (
 	"strings"
 	"time"
 
-	rest "github.com/hasura/ndc-rest/ndc-rest-schema/schema"
-	"github.com/hasura/ndc-rest/ndc-rest-schema/utils"
+	rest "github.com/hasura/ndc-http/ndc-http-schema/schema"
+	"github.com/hasura/ndc-http/ndc-http-schema/utils"
 )
 
 // RetryableRequest wraps the raw request with retryable
@@ -85,18 +85,18 @@ func getBaseURLFromServers(servers []rest.ServerConfig, serverIDs []string) (*ur
 }
 
 // BuildDistributedRequestsWithOptions builds distributed requests with options
-func BuildDistributedRequestsWithOptions(request *RetryableRequest, restOptions *RESTOptions) ([]RetryableRequest, error) {
+func BuildDistributedRequestsWithOptions(request *RetryableRequest, httpOptions *HTTPOptions) ([]RetryableRequest, error) {
 	if strings.HasPrefix(request.URL.Scheme, "http") {
 		return []RetryableRequest{*request}, nil
 	}
 
-	if !restOptions.Distributed || len(restOptions.Settings.Servers) == 1 {
-		baseURL, serverID := getBaseURLFromServers(restOptions.Settings.Servers, restOptions.Servers)
+	if !httpOptions.Distributed || len(httpOptions.Settings.Servers) == 1 {
+		baseURL, serverID := getBaseURLFromServers(httpOptions.Settings.Servers, httpOptions.Servers)
 		request.URL.Scheme = baseURL.Scheme
 		request.URL.Host = baseURL.Host
 		request.URL.Path = baseURL.Path + request.URL.Path
 		request.ServerID = serverID
-		if err := request.applySettings(restOptions.Settings, restOptions.Explain); err != nil {
+		if err := request.applySettings(httpOptions.Settings, httpOptions.Explain); err != nil {
 			return nil, err
 		}
 		return []RetryableRequest{*request}, nil
@@ -105,21 +105,21 @@ func BuildDistributedRequestsWithOptions(request *RetryableRequest, restOptions 
 	var requests []RetryableRequest
 	var buf []byte
 	var err error
-	if restOptions.Parallel && request.Body != nil {
+	if httpOptions.Parallel && request.Body != nil {
 		// copy new readers for each requests to avoid race condition
 		buf, err = io.ReadAll(request.Body)
 		if err != nil {
 			return nil, fmt.Errorf("failed to read request body: %w", err)
 		}
 	}
-	serverIDs := restOptions.Servers
+	serverIDs := httpOptions.Servers
 	if len(serverIDs) == 0 {
-		for _, server := range restOptions.Settings.Servers {
+		for _, server := range httpOptions.Settings.Servers {
 			serverIDs = append(serverIDs, server.ID)
 		}
 	}
 	for _, serverID := range serverIDs {
-		baseURL, serverID := getBaseURLFromServers(restOptions.Settings.Servers, []string{serverID})
+		baseURL, serverID := getBaseURLFromServers(httpOptions.Settings.Servers, []string{serverID})
 		if baseURL == nil {
 			continue
 		}
@@ -134,7 +134,7 @@ func BuildDistributedRequestsWithOptions(request *RetryableRequest, restOptions 
 			Headers:     request.Headers.Clone(),
 			Body:        request.Body,
 		}
-		if err := req.applySettings(restOptions.Settings, restOptions.Explain); err != nil {
+		if err := req.applySettings(httpOptions.Settings, httpOptions.Explain); err != nil {
 			return nil, err
 		}
 		if len(buf) > 0 {
@@ -145,7 +145,7 @@ func BuildDistributedRequestsWithOptions(request *RetryableRequest, restOptions 
 	return requests, nil
 }
 
-func (req *RetryableRequest) getServerConfig(settings *rest.NDCRestSettings) *rest.ServerConfig {
+func (req *RetryableRequest) getServerConfig(settings *rest.NDCHttpSettings) *rest.ServerConfig {
 	if settings == nil {
 		return nil
 	}
@@ -244,7 +244,7 @@ func (req *RetryableRequest) applySecurity(serverConfig *rest.ServerConfig, isEx
 	return nil
 }
 
-func (req *RetryableRequest) applySettings(settings *rest.NDCRestSettings, isExplain bool) error {
+func (req *RetryableRequest) applySettings(settings *rest.NDCHttpSettings, isExplain bool) error {
 	if settings == nil {
 		return nil
 	}

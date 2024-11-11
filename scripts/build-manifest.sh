@@ -3,7 +3,7 @@ set -evo pipefail
 
 REF=$(git rev-parse --short HEAD)
 VERSION=${VERSION:-$REF}
-BUILD_DIR=/tmp/ndc-rest
+BUILD_DIR=/tmp/ndc-http
 ROOT="$(pwd)"
 
 rm -rf $BUILD_DIR

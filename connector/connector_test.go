@@ -1,4 +1,4 @@
-package rest
+package connector
 
 import (
 	"bytes"
@@ -15,13 +15,13 @@ import (
 	"testing"
 	"time"
 
-	"github.com/hasura/ndc-rest/ndc-rest-schema/configuration"
+	"github.com/hasura/ndc-http/ndc-http-schema/configuration"
 	"github.com/hasura/ndc-sdk-go/connector"
 	"github.com/hasura/ndc-sdk-go/schema"
 	"gotest.tools/v3/assert"
 )
 
-func TestRESTConnector(t *testing.T) {
+func TestHTTPConnector(t *testing.T) {
 	testCases := []struct {
 		Name string
 		Dir  string
@@ -83,20 +83,20 @@ func TestRESTConnector(t *testing.T) {
 	}
 }
 
-func TestRESTConnector_configurationFailure(t *testing.T) {
-	c := NewRESTConnector()
+func TestHTTPConnector_configurationFailure(t *testing.T) {
+	c := NewHTTPConnector()
 	_, err := c.ParseConfiguration(context.Background(), "")
 	assert.ErrorContains(t, err, "the config.{json,yaml,yml} file does not exist at")
 }
 
-func TestRESTConnector_emptyServer(t *testing.T) {
-	_, err := connector.NewServer(NewRESTConnector(), &connector.ServerOptions{
+func TestHTTPConnector_emptyServer(t *testing.T) {
+	_, err := connector.NewServer(NewHTTPConnector(), &connector.ServerOptions{
 		Configuration: "testdata/server-empty",
 	}, connector.WithoutRecovery())
-	assert.Error(t, err, "failed to build NDC REST schema")
+	assert.Error(t, err, "failed to build NDC HTTP schema")
 }
 
-func TestRESTConnector_authentication(t *testing.T) {
+func TestHTTPConnector_authentication(t *testing.T) {
 	apiKey := "random_api_key"
 	bearerToken := "random_bearer_token"
 	// slog.SetLogLoggerLevel(slog.LevelDebug)
@@ -106,7 +106,7 @@ func TestRESTConnector_authentication(t *testing.T) {
 	t.Setenv("PET_STORE_URL", server.URL)
 	t.Setenv("PET_STORE_API_KEY", apiKey)
 	t.Setenv("PET_STORE_BEARER_TOKEN", bearerToken)
-	connServer, err := connector.NewServer(NewRESTConnector(), &connector.ServerOptions{
+	connServer, err := connector.NewServer(NewHTTPConnector(), &connector.ServerOptions{
 		Configuration: "testdata/auth",
 	}, connector.WithoutRecovery())
 	assert.NilError(t, err)
@@ -323,7 +323,7 @@ func TestRESTConnector_authentication(t *testing.T) {
 
 }
 
-func TestRESTConnector_distribution(t *testing.T) {
+func TestHTTPConnector_distribution(t *testing.T) {
 	apiKey := "random_api_key"
 	bearerToken := "random_bearer_token"
 
@@ -338,7 +338,7 @@ func TestRESTConnector_distribution(t *testing.T) {
 		t.Setenv("PET_STORE_DOG_URL", fmt.Sprintf("%s/dog", server.URL))
 		t.Setenv("PET_STORE_CAT_URL", fmt.Sprintf("%s/cat", server.URL))
 
-		rc := NewRESTConnector()
+		rc := NewHTTPConnector()
 		connServer, err := connector.NewServer(rc, &connector.ServerOptions{
 			Configuration: "testdata/patch",
 		}, connector.WithoutRecovery())
@@ -404,7 +404,7 @@ func TestRESTConnector_distribution(t *testing.T) {
 
 		t.Setenv("PET_STORE_DOG_URL", fmt.Sprintf("%s/dog", server.URL))
 		t.Setenv("PET_STORE_CAT_URL", fmt.Sprintf("%s/cat", server.URL))
-		rc := NewRESTConnector()
+		rc := NewHTTPConnector()
 		connServer, err := connector.NewServer(rc, &connector.ServerOptions{
 			Configuration: "testdata/patch",
 		}, connector.WithoutRecovery())
@@ -422,7 +422,7 @@ func TestRESTConnector_distribution(t *testing.T) {
 						"body": {
 							"name": "pet"
 						},
-						"restOptions": {
+						"httpOptions": {
 							"parallel": true
 						}
 					}
@@ -466,7 +466,7 @@ func TestRESTConnector_distribution(t *testing.T) {
 		t.Setenv("PET_STORE_DOG_URL", fmt.Sprintf("%s/dog", server.URL))
 		t.Setenv("PET_STORE_CAT_URL", fmt.Sprintf("%s/cat", server.URL))
 
-		rc := NewRESTConnector()
+		rc := NewHTTPConnector()
 		connServer, err := connector.NewServer(rc, &connector.ServerOptions{
 			Configuration: "testdata/patch",
 		}, connector.WithoutRecovery())
@@ -486,7 +486,7 @@ func TestRESTConnector_distribution(t *testing.T) {
 				}
 			},
 			"arguments": {
-				"restOptions": {
+				"httpOptions": {
 					"type": "literal",
 					"value": {
 						"servers": ["cat"]
@@ -521,7 +521,7 @@ func TestRESTConnector_distribution(t *testing.T) {
 	})
 }
 
-func TestRESTConnector_multiSchemas(t *testing.T) {
+func TestHTTPConnector_multiSchemas(t *testing.T) {
 	mock := mockMultiSchemaServer{}
 	server := mock.createServer()
 	defer server.Close()
@@ -529,7 +529,7 @@ func TestRESTConnector_multiSchemas(t *testing.T) {
 	t.Setenv("CAT_STORE_URL", fmt.Sprintf("%s/cat", server.URL))
 	t.Setenv("DOG_STORE_URL", fmt.Sprintf("%s/dog", server.URL))
 
-	connServer, err := connector.NewServer(NewRESTConnector(), &connector.ServerOptions{
+	connServer, err := connector.NewServer(NewHTTPConnector(), &connector.ServerOptions{
 		Configuration: "testdata/multi-schemas",
 	}, connector.WithoutRecovery())
 	assert.NilError(t, err)
@@ -798,7 +798,7 @@ func assertNdcOperations(t *testing.T, dir string, targetURL string) {
 
 func test_createServer(t *testing.T, dir string) *connector.Server[configuration.Configuration, State] {
 	t.Helper()
-	c := NewRESTConnector()
+	c := NewHTTPConnector()
 	server, err := connector.NewServer(c, &connector.ServerOptions{
 		Configuration: dir,
 	}, connector.WithoutRecovery())

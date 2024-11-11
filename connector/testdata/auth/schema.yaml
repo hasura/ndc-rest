@@ -56,7 +56,7 @@ functions:
           underlying_type:
             name: String
             type: named
-        rest:
+        http:
           in: query
           schema:
             type: [string]
@@ -102,7 +102,7 @@ procedures:
         type:
           name: Pet
           type: named
-        rest:
+        http:
           in: body
     description: Add a new pet to the store
     name: addPet

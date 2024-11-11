@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"regexp"
 
-	rest "github.com/hasura/ndc-rest/ndc-rest-schema/schema"
+	rest "github.com/hasura/ndc-http/ndc-http-schema/schema"
 	"github.com/hasura/ndc-sdk-go/schema"
 	"github.com/hasura/ndc-sdk-go/utils"
 )
@@ -26,29 +26,29 @@ var (
 var defaultRetryHTTPStatus = []int{429, 500, 502, 503}
 var sensitiveHeaderRegex = regexp.MustCompile(`auth|key|secret|token`)
 
-// RESTOptions represent execution options for REST requests
-type RESTOptions struct {
+// HTTPOptions represent execution options for HTTP requests
+type HTTPOptions struct {
 	Servers  []string `json:"serverIds"  yaml:"serverIds"`
 	Parallel bool     `json:"parallel" yaml:"parallel"`
 
 	Explain     bool                  `json:"-" yaml:"-"`
 	Distributed bool                  `json:"-" yaml:"-"`
 	Concurrency uint                  `json:"-" yaml:"-"`
-	Settings    *rest.NDCRestSettings `json:"-" yaml:"-"`
+	Settings    *rest.NDCHttpSettings `json:"-" yaml:"-"`
 }
 
-// FromValue parses rest execution options from any value
-func (ro *RESTOptions) FromValue(value any) error {
+// FromValue parses http execution options from any value
+func (ro *HTTPOptions) FromValue(value any) error {
 	if utils.IsNil(value) {
 		return nil
 	}
 	valueMap, ok := value.(map[string]any)
 	if !ok {
-		return fmt.Errorf("invalid rest options; expected object, got %v", value)
+		return fmt.Errorf("invalid http options; expected object, got %v", value)
 	}
 	rawServerIds, err := utils.GetNullableStringSlice(valueMap, "servers")
 	if err != nil {
-		return fmt.Errorf("invalid rest options; %w", err)
+		return fmt.Errorf("invalid http options; %w", err)
 	}
 	if rawServerIds != nil {
 		ro.Servers = *rawServerIds
@@ -56,7 +56,7 @@ func (ro *RESTOptions) FromValue(value any) error {
 
 	parallel, err := utils.GetNullableBoolean(valueMap, "parallel")
 	if err != nil {
-		return fmt.Errorf("invalid parallel in rest options: %w", err)
+		return fmt.Errorf("invalid parallel in http options: %w", err)
 	}
 	ro.Parallel = parallel != nil && *parallel
 
