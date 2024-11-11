@@ -13,7 +13,7 @@ import (
 //
 // [NDC Go SDK]: https://github.com/hasura/ndc-sdk-go
 func main() {
-	if err := rest.Start(
+	if err := connector.Start(
 		rest.NewHTTPConnector(),
 		connector.WithMetricsPrefix("ndc_http"),
 		connector.WithDefaultServiceName("ndc_http"),
