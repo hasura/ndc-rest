@@ -33,7 +33,7 @@
   "paths": {
     "/api/create": {
       "post": {
-        "operationId": "createModel",
+        "operationId": "0GET-createModel",
         "requestBody": {
           "required": true,
           "content": {

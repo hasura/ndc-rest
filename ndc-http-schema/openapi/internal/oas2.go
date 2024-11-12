@@ -239,20 +239,23 @@ func (oc *OAS2Builder) getSchemaTypeFromProxy(schemaProxy *base.SchemaProxy, nul
 			ndcType = schema.NewNullableType(ndcType)
 		}
 	}
+
 	return ndcType, typeSchema, nil
 }
 
 // get and convert an OpenAPI data type to a NDC type from parameter
 func (oc *OAS2Builder) getSchemaTypeFromParameter(param *v2.Parameter, apiPath string, fieldPaths []string) (schema.TypeEncoder, error) {
 	var result schema.TypeEncoder
+	nullable := param.Required == nil || !*param.Required
 	if param.Type == "" {
 		if oc.Strict {
 			return nil, errParameterSchemaEmpty(fieldPaths)
 		}
 		result = oc.buildScalarJSON()
 	} else if isPrimitiveScalar([]string{param.Type}) {
-		scalarName := getScalarFromType(oc.schema, []string{param.Type}, param.Format, param.Enum, oc.trimPathPrefix(apiPath), fieldPaths)
+		scalarName, isNull := getScalarFromType(oc.schema, []string{param.Type}, param.Format, param.Enum, oc.trimPathPrefix(apiPath), fieldPaths)
 		result = schema.NewNamedType(scalarName)
+		nullable = nullable || isNull
 	} else {
 		switch param.Type {
 		case "object":
@@ -264,17 +267,19 @@ func (oc *OAS2Builder) getSchemaTypeFromParameter(param *v2.Parameter, apiPath s
 				}
 				result = schema.NewArrayType(oc.buildScalarJSON())
 			} else {
-				itemName := getScalarFromType(oc.schema, []string{param.Items.Type}, param.Format, param.Enum, oc.trimPathPrefix(apiPath), fieldPaths)
+				itemName, isNull := getScalarFromType(oc.schema, []string{param.Items.Type}, param.Format, param.Enum, oc.trimPathPrefix(apiPath), fieldPaths)
 				result = schema.NewArrayType(schema.NewNamedType(itemName))
+				nullable = nullable || isNull
 			}
 		default:
 			return nil, fmt.Errorf("unsupported schema type %s", param.Type)
 		}
 	}
 
-	if param.Required == nil || !*param.Required {
+	if nullable {
 		return schema.NewNullableType(result), nil
 	}
+
 	return result, nil
 }
 
@@ -291,10 +296,12 @@ func (oc *OAS2Builder) getSchemaType(typeSchema *base.Schema, apiPath string, fi
 			oc.schema.ScalarTypes[scalarName] = *defaultScalarTypes[rest.ScalarJSON]
 		}
 		typeResult = createSchemaFromOpenAPISchema(typeSchema)
+
 		return schema.NewNamedType(scalarName), typeResult, nil
 	}
 
 	var result schema.TypeEncoder
+	nullable := typeSchema.Nullable != nil && *typeSchema.Nullable
 	if len(typeSchema.Type) == 0 {
 		if oc.Strict {
 			return nil, nil, errParameterSchemaEmpty(fieldPaths)
@@ -304,9 +311,10 @@ func (oc *OAS2Builder) getSchemaType(typeSchema *base.Schema, apiPath string, fi
 	} else {
 		typeName := typeSchema.Type[0]
 		if isPrimitiveScalar(typeSchema.Type) {
-			scalarName := getScalarFromType(oc.schema, typeSchema.Type, typeSchema.Format, typeSchema.Enum, oc.trimPathPrefix(apiPath), fieldPaths)
+			scalarName, isNull := getScalarFromType(oc.schema, typeSchema.Type, typeSchema.Format, typeSchema.Enum, oc.trimPathPrefix(apiPath), fieldPaths)
 			result = schema.NewNamedType(scalarName)
 			typeResult = createSchemaFromOpenAPISchema(typeSchema)
+			nullable = nullable || isNull
 		} else {
 			typeResult = createSchemaFromOpenAPISchema(typeSchema)
 			switch typeName {
@@ -383,7 +391,7 @@ func (oc *OAS2Builder) getSchemaType(typeSchema *base.Schema, apiPath string, fi
 		}
 	}
 
-	if typeSchema.Nullable != nil && *typeSchema.Nullable {
+	if nullable {
 		return schema.NewNullableType(result), typeResult, nil
 	}
 	return result, typeResult, nil

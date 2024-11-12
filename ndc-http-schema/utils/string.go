@@ -179,3 +179,21 @@ func StripHTMLTags(str string) string {
 	}
 	return builder.String()
 }
+
+// RemoveYAMLSpecialCharacters remote special characters to avoid YAML unmarshaling error
+func RemoveYAMLSpecialCharacters(input []byte) []byte {
+	var sb strings.Builder
+	for _, c := range input {
+		switch c {
+		case '\n', '\t':
+			sb.WriteRune(' ')
+		default:
+			r := rune(c)
+			if !unicode.IsControl(r) && utf8.ValidRune(r) && r != utf8.RuneError {
+				sb.WriteByte(c)
+			}
+		}
+	}
+
+	return []byte(strings.ToValidUTF8(sb.String(), ""))
+}

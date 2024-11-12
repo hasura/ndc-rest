@@ -112,6 +112,7 @@ func (oc *oas3SchemaBuilder) getSchemaType(typeSchema *base.Schema, fieldPaths [
 		if ty != nil {
 			ty.Description = typeSchema.Description
 		}
+
 		return enc, ty, isRef, nil
 	}
 
@@ -123,6 +124,7 @@ func (oc *oas3SchemaBuilder) getSchemaType(typeSchema *base.Schema, fieldPaths [
 		if ty != nil {
 			ty.Description = typeSchema.Description
 		}
+
 		return enc, ty, isRef, nil
 	}
 
@@ -135,6 +137,7 @@ func (oc *oas3SchemaBuilder) getSchemaType(typeSchema *base.Schema, fieldPaths [
 		if ty != nil {
 			ty.Description = typeSchema.Description
 		}
+
 		return enc, ty, isRef, nil
 	}
 
@@ -151,8 +154,11 @@ func (oc *oas3SchemaBuilder) getSchemaType(typeSchema *base.Schema, fieldPaths [
 		}
 		result = oc.builder.buildScalarJSON()
 	} else if len(typeSchema.Type) > 1 || isPrimitiveScalar(typeSchema.Type) {
-		scalarName := getScalarFromType(oc.builder.schema, typeSchema.Type, typeSchema.Format, typeSchema.Enum, oc.builder.trimPathPrefix(oc.apiPath), fieldPaths)
+		scalarName, nullable := getScalarFromType(oc.builder.schema, typeSchema.Type, typeSchema.Format, typeSchema.Enum, oc.builder.trimPathPrefix(oc.apiPath), fieldPaths)
 		result = schema.NewNamedType(scalarName)
+		if nullable {
+			result = schema.NewNullableType(result)
+		}
 	} else {
 		typeName := typeSchema.Type[0]
 		switch typeName {
@@ -203,7 +209,9 @@ func (oc *oas3SchemaBuilder) getSchemaType(typeSchema *base.Schema, fieldPaths [
 					HTTP: propApiSchema,
 				}
 				if propApiSchema == nil {
-					propApiSchema = &rest.TypeSchema{}
+					propApiSchema = &rest.TypeSchema{
+						Type: []string{},
+					}
 				}
 				if propApiSchema.Description != "" {
 					objField.Description = &propApiSchema.Description
@@ -316,6 +324,7 @@ func (oc *oas3SchemaBuilder) buildAllOfAnyOfSchemaType(schemaProxies []*base.Sch
 			// TODO: should we keep the original anyOf or allOf type schema
 			ty = &rest.TypeSchema{
 				Description: ty.Description,
+				Type:        []string{},
 			}
 			return oc.builder.buildScalarJSON(), ty, false, nil
 		}

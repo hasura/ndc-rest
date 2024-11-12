@@ -692,6 +692,26 @@
     {
       "arguments": {
         "body": {
+          "description": "Request body of POST /api/create",
+          "type": {
+            "name": "CreateModelRequest",
+            "type": "named"
+          }
+        }
+      },
+      "description": "POST /api/create",
+      "name": "_GET_createModel",
+      "result_type": {
+        "element_type": {
+          "name": "ProgressResponse",
+          "type": "named"
+        },
+        "type": "array"
+      }
+    },
+    {
+      "arguments": {
+        "body": {
           "description": "Request body of POST /chat/completions",
           "type": {
             "name": "CreateChatCompletionRequest",
@@ -704,26 +724,6 @@
       "result_type": {
         "name": "CreateChatCompletionResponse",
         "type": "named"
-      }
-    },
-    {
-      "arguments": {
-        "body": {
-          "description": "Request body of POST /api/create",
-          "type": {
-            "name": "CreateModelRequest",
-            "type": "named"
-          }
-        }
-      },
-      "description": "POST /api/create",
-      "name": "createModel",
-      "result_type": {
-        "element_type": {
-          "name": "ProgressResponse",
-          "type": "named"
-        },
-        "type": "array"
       }
     }
   ],

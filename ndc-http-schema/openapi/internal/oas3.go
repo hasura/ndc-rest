@@ -355,6 +355,7 @@ func (oc *OAS3Builder) populateWriteSchemaType(schemaType schema.Type) (schema.T
 		if _, ok := oc.schema.ObjectTypes[writeName]; ok {
 			oc.typeUsageCounter.Add(writeName, 1)
 			oc.typeUsageCounter.Add(ty.Name, -1)
+
 			return schema.NewNamedType(writeName).Encode(), writeName, true
 		}
 		if evaluated {

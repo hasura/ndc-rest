@@ -178,6 +178,14 @@
               "default": "available",
               "enum": ["available", "pending", "sold"]
             }
+          },
+          {
+            "description": "The date that the IP address was entered into warmup.",
+            "name": "start_date",
+            "in": "query",
+            "schema": {
+              "type": ["number", "null"]
+            }
           }
         ],
         "responses": {
@@ -3308,6 +3316,10 @@
           },
           "category": {
             "$ref": "#/components/schemas/Category"
+          },
+          "field": {
+            "type": "null",
+            "description": "This empty field is returned instead of the list of scopes if the user making the call doesn't have the authorization required."
           },
           "photoUrls": {
             "type": "array",

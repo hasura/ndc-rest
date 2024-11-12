@@ -30,7 +30,7 @@ func (oc *oas2OperationBuilder) BuildFunction(pathKey string, operation *v2.Oper
 	if operation == nil {
 		return nil, "", nil
 	}
-	funcName := operation.OperationId
+	funcName := formatOperationName(operation.OperationId)
 	if funcName == "" {
 		funcName = buildPathMethodName(pathKey, "get", oc.builder.ConvertOptions)
 	}
@@ -91,7 +91,7 @@ func (oc *oas2OperationBuilder) BuildProcedure(pathKey string, method string, op
 		return nil, "", nil
 	}
 
-	procName := operation.OperationId
+	procName := formatOperationName(operation.OperationId)
 	if procName == "" {
 		procName = buildPathMethodName(pathKey, method, oc.builder.ConvertOptions)
 	}
@@ -191,7 +191,7 @@ func (oc *oas2OperationBuilder) convertParameters(operation *v2.Operation, apiPa
 				return nil, err
 			}
 			typeSchema = &rest.TypeSchema{
-				Type:    []string{param.Type},
+				Type:    evaluateOpenAPITypes([]string{param.Type}),
 				Pattern: param.Pattern,
 			}
 			if param.Maximum != nil {
@@ -214,6 +214,11 @@ func (oc *oas2OperationBuilder) convertParameters(operation *v2.Operation, apiPa
 			typeEncoder, typeSchema, err = oc.builder.getSchemaTypeFromProxy(param.Schema, !paramRequired, apiPath, fieldPaths)
 			if err != nil {
 				return nil, err
+			}
+		} else {
+			typeEncoder = oc.builder.buildScalarJSON()
+			typeSchema = &rest.TypeSchema{
+				Type: []string{},
 			}
 		}
 

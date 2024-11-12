@@ -48,7 +48,10 @@
     "security": [
       {},
       {
-        "petstore_auth": ["write:pets", "read:pets"]
+        "petstore_auth": [
+          "write:pets",
+          "read:pets"
+        ]
       }
     ],
     "version": "1.0.19"
@@ -77,7 +80,9 @@
             "name": "collection_method",
             "in": "query",
             "schema": {
-              "type": ["string"]
+              "type": [
+                "string"
+              ]
             }
           }
         },
@@ -96,7 +101,7 @@
             "name": "created",
             "in": "query",
             "schema": {
-              "type": null
+              "type": []
             }
           }
         },
@@ -114,7 +119,9 @@
             "name": "customer",
             "in": "query",
             "schema": {
-              "type": ["string"],
+              "type": [
+                "string"
+              ],
               "maxLength": 5000
             }
           }
@@ -133,7 +140,7 @@
             "name": "due_date",
             "in": "query",
             "schema": {
-              "type": null
+              "type": []
             }
           }
         },
@@ -151,7 +158,9 @@
             "name": "ending_before",
             "in": "query",
             "schema": {
-              "type": ["string"],
+              "type": [
+                "string"
+              ],
               "maxLength": 5000
             }
           }
@@ -174,9 +183,13 @@
             "name": "expand",
             "in": "query",
             "schema": {
-              "type": ["array"],
+              "type": [
+                "array"
+              ],
               "items": {
-                "type": ["string"],
+                "type": [
+                  "string"
+                ],
                 "maxLength": 5000
               }
             }
@@ -196,7 +209,9 @@
             "name": "limit",
             "in": "query",
             "schema": {
-              "type": ["integer"]
+              "type": [
+                "integer"
+              ]
             }
           }
         },
@@ -214,7 +229,9 @@
             "name": "starting_after",
             "in": "query",
             "schema": {
-              "type": ["string"],
+              "type": [
+                "string"
+              ],
               "maxLength": 5000
             }
           }
@@ -233,7 +250,9 @@
             "name": "status",
             "in": "query",
             "schema": {
-              "type": ["string"]
+              "type": [
+                "string"
+              ]
             }
           }
         },
@@ -251,7 +270,9 @@
             "name": "subscription",
             "in": "query",
             "schema": {
-              "type": ["string"],
+              "type": [
+                "string"
+              ],
               "maxLength": 5000
             }
           }
@@ -269,7 +290,10 @@
         "method": "get",
         "security": [
           {
-            "petstore_auth": ["write:pets", "read:pets"]
+            "petstore_auth": [
+              "write:pets",
+              "read:pets"
+            ]
           }
         ],
         "response": {
@@ -277,6 +301,25 @@
         }
       },
       "arguments": {
+        "start_date": {
+          "description": "The date that the IP address was entered into warmup.",
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "Float64",
+              "type": "named"
+            }
+          },
+          "http": {
+            "name": "start_date",
+            "in": "query",
+            "schema": {
+              "type": [
+                "number"
+              ]
+            }
+          }
+        },
         "status": {
           "description": "Status values that need to be considered for filter",
           "type": {
@@ -291,7 +334,9 @@
             "name": "status",
             "in": "query",
             "schema": {
-              "type": ["string"]
+              "type": [
+                "string"
+              ]
             }
           }
         }
@@ -311,7 +356,10 @@
         "method": "get",
         "security": [
           {
-            "petstore_auth": ["write:pets", "read:pets"]
+            "petstore_auth": [
+              "write:pets",
+              "read:pets"
+            ]
           }
         ],
         "response": {
@@ -336,9 +384,13 @@
             "name": "tags",
             "in": "query",
             "schema": {
-              "type": ["array"],
+              "type": [
+                "array"
+              ],
               "items": {
-                "type": ["string"]
+                "type": [
+                  "string"
+                ]
               }
             }
           }
@@ -392,7 +444,9 @@
             "name": "orderId",
             "in": "path",
             "schema": {
-              "type": ["integer"],
+              "type": [
+                "integer"
+              ],
               "format": "int64"
             }
           }
@@ -413,7 +467,10 @@
             "api_key": []
           },
           {
-            "petstore_auth": ["write:pets", "read:pets"]
+            "petstore_auth": [
+              "write:pets",
+              "read:pets"
+            ]
           }
         ],
         "response": {
@@ -431,7 +488,9 @@
             "name": "petId",
             "in": "path",
             "schema": {
-              "type": ["integer"],
+              "type": [
+                "integer"
+              ],
               "format": "int64"
             }
           }
@@ -477,7 +536,9 @@
             "name": "username",
             "in": "path",
             "schema": {
-              "type": ["string"]
+              "type": [
+                "string"
+              ]
             }
           }
         }
@@ -510,7 +571,9 @@
             "name": "password",
             "in": "query",
             "schema": {
-              "type": ["string"]
+              "type": [
+                "string"
+              ]
             }
           }
         },
@@ -527,7 +590,9 @@
             "name": "username",
             "in": "query",
             "schema": {
-              "type": ["string"]
+              "type": [
+                "string"
+              ]
             }
           }
         }
@@ -551,7 +616,9 @@
             }
           },
           "http": {
-            "type": ["string"]
+            "type": [
+              "string"
+            ]
           }
         },
         "state": {
@@ -563,7 +630,9 @@
             }
           },
           "http": {
-            "type": ["string"]
+            "type": [
+              "string"
+            ]
           }
         },
         "street": {
@@ -575,7 +644,9 @@
             }
           },
           "http": {
-            "type": ["string"]
+            "type": [
+              "string"
+            ]
           }
         },
         "zip": {
@@ -587,7 +658,9 @@
             }
           },
           "http": {
-            "type": ["string"]
+            "type": [
+              "string"
+            ]
           }
         }
       }
@@ -603,7 +676,9 @@
             }
           },
           "http": {
-            "type": ["integer"],
+            "type": [
+              "integer"
+            ],
             "format": "int32"
           }
         },
@@ -616,7 +691,9 @@
             }
           },
           "http": {
-            "type": ["string"]
+            "type": [
+              "string"
+            ]
           }
         },
         "type": {
@@ -628,7 +705,9 @@
             }
           },
           "http": {
-            "type": ["string"]
+            "type": [
+              "string"
+            ]
           }
         }
       }
@@ -644,7 +723,9 @@
             }
           },
           "http": {
-            "type": ["integer"],
+            "type": [
+              "integer"
+            ],
             "format": "int64"
           }
         },
@@ -657,7 +738,9 @@
             }
           },
           "http": {
-            "type": ["string"]
+            "type": [
+              "string"
+            ]
           }
         }
       }
@@ -673,7 +756,9 @@
             }
           },
           "http": {
-            "type": ["string"]
+            "type": [
+              "string"
+            ]
           }
         }
       }
@@ -687,7 +772,9 @@
             "type": "named"
           },
           "http": {
-            "type": ["boolean"]
+            "type": [
+              "boolean"
+            ]
           }
         },
         "object": {
@@ -697,7 +784,9 @@
             "type": "named"
           },
           "http": {
-            "type": ["string"]
+            "type": [
+              "string"
+            ]
           }
         },
         "url": {
@@ -707,7 +796,9 @@
             "type": "named"
           },
           "http": {
-            "type": ["string"],
+            "type": [
+              "string"
+            ],
             "pattern": "^/v1/invoices",
             "maxLength": 5000
           }
@@ -725,7 +816,9 @@
             }
           },
           "http": {
-            "type": ["boolean"]
+            "type": [
+              "boolean"
+            ]
           }
         },
         "id": {
@@ -737,7 +830,9 @@
             }
           },
           "http": {
-            "type": ["integer"],
+            "type": [
+              "integer"
+            ],
             "format": "int64"
           }
         },
@@ -750,7 +845,9 @@
             }
           },
           "http": {
-            "type": ["integer"],
+            "type": [
+              "integer"
+            ],
             "format": "int64"
           }
         },
@@ -763,7 +860,9 @@
             }
           },
           "http": {
-            "type": ["integer"],
+            "type": [
+              "integer"
+            ],
             "format": "int32"
           }
         },
@@ -776,7 +875,9 @@
             }
           },
           "http": {
-            "type": ["string"],
+            "type": [
+              "string"
+            ],
             "format": "date-time"
           }
         },
@@ -790,7 +891,9 @@
             }
           },
           "http": {
-            "type": ["string"]
+            "type": [
+              "string"
+            ]
           }
         }
       }
@@ -806,7 +909,22 @@
             }
           },
           "http": {
-            "type": ["object"]
+            "type": [
+              "object"
+            ]
+          }
+        },
+        "field": {
+          "description": "This empty field is returned instead of the list of scopes if the user making the call doesn't have the authorization required.",
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "JSON",
+              "type": "named"
+            }
+          },
+          "http": {
+            "type": null
           }
         },
         "id": {
@@ -818,7 +936,9 @@
             }
           },
           "http": {
-            "type": ["integer"],
+            "type": [
+              "integer"
+            ],
             "format": "int64"
           }
         },
@@ -828,7 +948,9 @@
             "type": "named"
           },
           "http": {
-            "type": ["string"]
+            "type": [
+              "string"
+            ]
           }
         },
         "photoUrls": {
@@ -840,9 +962,13 @@
             "type": "array"
           },
           "http": {
-            "type": ["array"],
+            "type": [
+              "array"
+            ],
             "items": {
-              "type": ["string"]
+              "type": [
+                "string"
+              ]
             }
           }
         },
@@ -856,7 +982,9 @@
             }
           },
           "http": {
-            "type": ["string"]
+            "type": [
+              "string"
+            ]
           }
         },
         "tags": {
@@ -871,7 +999,9 @@
             }
           },
           "http": {
-            "type": ["array"]
+            "type": [
+              "array"
+            ]
           }
         }
       }
@@ -888,7 +1018,9 @@
             }
           },
           "http": {
-            "type": ["object"]
+            "type": [
+              "object"
+            ]
           }
         },
         "allow_promotion_codes": {
@@ -901,7 +1033,9 @@
             }
           },
           "http": {
-            "type": ["boolean"]
+            "type": [
+              "boolean"
+            ]
           }
         },
         "automatic_tax": {
@@ -914,7 +1048,9 @@
             }
           },
           "http": {
-            "type": ["object"]
+            "type": [
+              "object"
+            ]
           }
         },
         "billing_address_collection": {
@@ -927,7 +1063,9 @@
             }
           },
           "http": {
-            "type": ["string"]
+            "type": [
+              "string"
+            ]
           }
         },
         "cancel_url": {
@@ -940,7 +1078,9 @@
             }
           },
           "http": {
-            "type": ["string"],
+            "type": [
+              "string"
+            ],
             "maxLength": 5000
           }
         },
@@ -954,7 +1094,9 @@
             }
           },
           "http": {
-            "type": ["string"],
+            "type": [
+              "string"
+            ],
             "maxLength": 200
           }
         },
@@ -968,7 +1110,9 @@
             }
           },
           "http": {
-            "type": ["object"]
+            "type": [
+              "object"
+            ]
           }
         },
         "currency": {
@@ -981,7 +1125,9 @@
             }
           },
           "http": {
-            "type": ["string"]
+            "type": [
+              "string"
+            ]
           }
         },
         "custom_fields": {
@@ -997,9 +1143,13 @@
             }
           },
           "http": {
-            "type": ["array"],
+            "type": [
+              "array"
+            ],
             "items": {
-              "type": ["object"]
+              "type": [
+                "object"
+              ]
             }
           }
         },
@@ -1013,11 +1163,13 @@
             }
           },
           "http": {
-            "type": ["object"]
+            "type": [
+              "object"
+            ]
           }
         },
         "customer": {
-          "description": "ID of an existing Customer, if one exists. In `payment` mode, the customer’s most recently saved card\npayment method will be used to prefill the email, name, card details, and billing address\non the Checkout page. In `subscription` mode, the customer’s [default payment method](https://stripe.com/docs/api/customers/update#update_customer-invoice_settings-default_payment_method)\nwill be used if it’s a card, otherwise the most recently saved card will be used. A valid billing address, billing name and billing email are required on the payment method for Checkout to prefill the customer's card details.\n\nIf the Customer already has a valid [email](https://stripe.com/docs/api/customers/object#customer_object-email) set, the email will be prefilled and not editable in Checkout.\nIf the Customer does not have a valid `email`, Checkout will set the email entered during the session on the Customer.\n\nIf blank for Checkout Sessions in `subscription` mode or with `customer_creation` set as `always` in `payment` mode, Checkout will create a new Customer object based on information provided during the payment flow.\n\nYou can set [`payment_intent_data.setup_future_usage`](https://stripe.com/docs/api/checkout/sessions/create#create_checkout_session-payment_intent_data-setup_future_usage) to have Checkout automatically attach the payment method to the Customer you pass in for future reuse.",
+          "description": "ID of an existing Customer, if one exists. In `payment` mode, the customers most recently saved card\npayment method will be used to prefill the email, name, card details, and billing address\non the Checkout page. In `subscription` mode, the customers [default payment method](https://stripe.com/docs/api/customers/update#update_customer-invoice_settings-default_payment_method)\nwill be used if its a card, otherwise the most recently saved card will be used. A valid billing address, billing name and billing email are required on the payment method for Checkout to prefill the customer's card details.\n\nIf the Customer already has a valid [email](https://stripe.com/docs/api/customers/object#customer_object-email) set, the email will be prefilled and not editable in Checkout.\nIf the Customer does not have a valid `email`, Checkout will set the email entered during the session on the Customer.\n\nIf blank for Checkout Sessions in `subscription` mode or with `customer_creation` set as `always` in `payment` mode, Checkout will create a new Customer object based on information provided during the payment flow.\n\nYou can set [`payment_intent_data.setup_future_usage`](https://stripe.com/docs/api/checkout/sessions/create#create_checkout_session-payment_intent_data-setup_future_usage) to have Checkout automatically attach the payment method to the Customer you pass in for future reuse.",
           "type": {
             "type": "nullable",
             "underlying_type": {
@@ -1026,7 +1178,9 @@
             }
           },
           "http": {
-            "type": ["string"],
+            "type": [
+              "string"
+            ],
             "maxLength": 5000
           }
         },
@@ -1040,7 +1194,9 @@
             }
           },
           "http": {
-            "type": ["string"]
+            "type": [
+              "string"
+            ]
           }
         },
         "customer_email": {
@@ -1053,7 +1209,9 @@
             }
           },
           "http": {
-            "type": ["string"]
+            "type": [
+              "string"
+            ]
           }
         },
         "customer_update": {
@@ -1066,7 +1224,9 @@
             }
           },
           "http": {
-            "type": ["object"]
+            "type": [
+              "object"
+            ]
           }
         },
         "discounts": {
@@ -1082,9 +1242,13 @@
             }
           },
           "http": {
-            "type": ["array"],
+            "type": [
+              "array"
+            ],
             "items": {
-              "type": ["object"]
+              "type": [
+                "object"
+              ]
             }
           }
         },
@@ -1101,9 +1265,13 @@
             }
           },
           "http": {
-            "type": ["array"],
+            "type": [
+              "array"
+            ],
             "items": {
-              "type": ["string"],
+              "type": [
+                "string"
+              ],
               "maxLength": 5000
             }
           }
@@ -1118,7 +1286,9 @@
             }
           },
           "http": {
-            "type": ["integer"],
+            "type": [
+              "integer"
+            ],
             "format": "unix-time"
           }
         },
@@ -1132,7 +1302,9 @@
             }
           },
           "http": {
-            "type": ["object"]
+            "type": [
+              "object"
+            ]
           }
         },
         "line_items": {
@@ -1148,9 +1320,13 @@
             }
           },
           "http": {
-            "type": ["array"],
+            "type": [
+              "array"
+            ],
             "items": {
-              "type": ["object"]
+              "type": [
+                "object"
+              ]
             }
           }
         },
@@ -1164,7 +1340,9 @@
             }
           },
           "http": {
-            "type": ["string"]
+            "type": [
+              "string"
+            ]
           }
         },
         "metadata": {
@@ -1177,7 +1355,9 @@
             }
           },
           "http": {
-            "type": ["object"]
+            "type": [
+              "object"
+            ]
           }
         },
         "mode": {
@@ -1190,7 +1370,9 @@
             }
           },
           "http": {
-            "type": ["string"]
+            "type": [
+              "string"
+            ]
           }
         },
         "payment_intent_data": {
@@ -1203,7 +1385,9 @@
             }
           },
           "http": {
-            "type": ["object"]
+            "type": [
+              "object"
+            ]
           }
         },
         "payment_method_collection": {
@@ -1216,7 +1400,9 @@
             }
           },
           "http": {
-            "type": ["string"]
+            "type": [
+              "string"
+            ]
           }
         },
         "payment_method_configuration": {
@@ -1229,7 +1415,9 @@
             }
           },
           "http": {
-            "type": ["string"],
+            "type": [
+              "string"
+            ],
             "maxLength": 100
           }
         },
@@ -1243,7 +1431,9 @@
             }
           },
           "http": {
-            "type": ["object"]
+            "type": [
+              "object"
+            ]
           }
         },
         "payment_method_types": {
@@ -1259,9 +1449,13 @@
             }
           },
           "http": {
-            "type": ["array"],
+            "type": [
+              "array"
+            ],
             "items": {
-              "type": ["string"]
+              "type": [
+                "string"
+              ]
             }
           }
         },
@@ -1275,7 +1469,9 @@
             }
           },
           "http": {
-            "type": ["object"]
+            "type": [
+              "object"
+            ]
           }
         },
         "redirect_on_completion": {
@@ -1288,7 +1484,9 @@
             }
           },
           "http": {
-            "type": ["string"]
+            "type": [
+              "string"
+            ]
           }
         },
         "return_url": {
@@ -1301,7 +1499,9 @@
             }
           },
           "http": {
-            "type": ["string"],
+            "type": [
+              "string"
+            ],
             "maxLength": 5000
           }
         },
@@ -1315,7 +1515,9 @@
             }
           },
           "http": {
-            "type": ["object"]
+            "type": [
+              "object"
+            ]
           }
         },
         "shipping_address_collection": {
@@ -1328,7 +1530,9 @@
             }
           },
           "http": {
-            "type": ["object"]
+            "type": [
+              "object"
+            ]
           }
         },
         "shipping_options": {
@@ -1344,9 +1548,13 @@
             }
           },
           "http": {
-            "type": ["array"],
+            "type": [
+              "array"
+            ],
             "items": {
-              "type": ["object"]
+              "type": [
+                "object"
+              ]
             }
           }
         },
@@ -1360,7 +1568,9 @@
             }
           },
           "http": {
-            "type": ["string"]
+            "type": [
+              "string"
+            ]
           }
         },
         "subscription_data": {
@@ -1373,11 +1583,13 @@
             }
           },
           "http": {
-            "type": ["object"]
+            "type": [
+              "object"
+            ]
           }
         },
         "success_url": {
-          "description": "The URL to which Stripe should send customers when payment or setup\nis complete.\nThis parameter is not allowed if ui_mode is `embedded`. If you’d like to use\ninformation from the successful Checkout Session on your page, read the\nguide on [customizing your success page](https://stripe.com/docs/payments/checkout/custom-success-page).",
+          "description": "The URL to which Stripe should send customers when payment or setup\nis complete.\nThis parameter is not allowed if ui_mode is `embedded`. If youd like to use\ninformation from the successful Checkout Session on your page, read the\nguide on [customizing your success page](https://stripe.com/docs/payments/checkout/custom-success-page).",
           "type": {
             "type": "nullable",
             "underlying_type": {
@@ -1386,7 +1598,9 @@
             }
           },
           "http": {
-            "type": ["string"],
+            "type": [
+              "string"
+            ],
             "maxLength": 5000
           }
         },
@@ -1400,7 +1614,9 @@
             }
           },
           "http": {
-            "type": ["object"]
+            "type": [
+              "object"
+            ]
           }
         },
         "ui_mode": {
@@ -1413,7 +1629,9 @@
             }
           },
           "http": {
-            "type": ["string"]
+            "type": [
+              "string"
+            ]
           }
         }
       }
@@ -1430,7 +1648,9 @@
             }
           },
           "http": {
-            "type": ["object"]
+            "type": [
+              "object"
+            ]
           }
         }
       }
@@ -1446,7 +1666,9 @@
             }
           },
           "http": {
-            "type": ["boolean"]
+            "type": [
+              "boolean"
+            ]
           }
         },
         "enabled": {
@@ -1455,7 +1677,9 @@
             "type": "named"
           },
           "http": {
-            "type": ["boolean"]
+            "type": [
+              "boolean"
+            ]
           }
         }
       }
@@ -1469,7 +1693,9 @@
             "type": "named"
           },
           "http": {
-            "type": ["boolean"]
+            "type": [
+              "boolean"
+            ]
           }
         },
         "liability": {
@@ -1481,7 +1707,9 @@
             }
           },
           "http": {
-            "type": ["object"]
+            "type": [
+              "object"
+            ]
           }
         }
       }
@@ -1497,7 +1725,9 @@
             }
           },
           "http": {
-            "type": ["string"]
+            "type": [
+              "string"
+            ]
           }
         },
         "type": {
@@ -1506,7 +1736,9 @@
             "type": "named"
           },
           "http": {
-            "type": ["string"]
+            "type": [
+              "string"
+            ]
           }
         }
       }
@@ -1523,7 +1755,9 @@
             }
           },
           "http": {
-            "type": ["object"]
+            "type": [
+              "object"
+            ]
           }
         },
         "promotions": {
@@ -1535,7 +1769,9 @@
             }
           },
           "http": {
-            "type": ["string"]
+            "type": [
+              "string"
+            ]
           }
         },
         "terms_of_service": {
@@ -1547,7 +1783,9 @@
             }
           },
           "http": {
-            "type": ["string"]
+            "type": [
+              "string"
+            ]
           }
         }
       }
@@ -1560,7 +1798,9 @@
             "type": "named"
           },
           "http": {
-            "type": ["string"]
+            "type": [
+              "string"
+            ]
           }
         }
       }
@@ -1576,7 +1816,9 @@
             }
           },
           "http": {
-            "type": ["object"]
+            "type": [
+              "object"
+            ]
           }
         },
         "key": {
@@ -1585,7 +1827,9 @@
             "type": "named"
           },
           "http": {
-            "type": ["string"],
+            "type": [
+              "string"
+            ],
             "maxLength": 200
           }
         },
@@ -1595,7 +1839,9 @@
             "type": "named"
           },
           "http": {
-            "type": ["object"]
+            "type": [
+              "object"
+            ]
           }
         },
         "numeric": {
@@ -1607,7 +1853,9 @@
             }
           },
           "http": {
-            "type": ["object"]
+            "type": [
+              "object"
+            ]
           }
         },
         "optional": {
@@ -1619,7 +1867,9 @@
             }
           },
           "http": {
-            "type": ["boolean"]
+            "type": [
+              "boolean"
+            ]
           }
         },
         "text": {
@@ -1631,7 +1881,9 @@
             }
           },
           "http": {
-            "type": ["object"]
+            "type": [
+              "object"
+            ]
           }
         },
         "type": {
@@ -1640,7 +1892,9 @@
             "type": "named"
           },
           "http": {
-            "type": ["string"]
+            "type": [
+              "string"
+            ]
           }
         }
       }
@@ -1656,9 +1910,13 @@
             "type": "array"
           },
           "http": {
-            "type": ["array"],
+            "type": [
+              "array"
+            ],
             "items": {
-              "type": ["object"]
+              "type": [
+                "object"
+              ]
             }
           }
         }
@@ -1672,7 +1930,9 @@
             "type": "named"
           },
           "http": {
-            "type": ["string"],
+            "type": [
+              "string"
+            ],
             "maxLength": 100
           }
         },
@@ -1682,7 +1942,9 @@
             "type": "named"
           },
           "http": {
-            "type": ["string"],
+            "type": [
+              "string"
+            ],
             "maxLength": 100
           }
         }
@@ -1696,7 +1958,9 @@
             "type": "named"
           },
           "http": {
-            "type": ["string"],
+            "type": [
+              "string"
+            ],
             "maxLength": 50
           }
         },
@@ -1706,7 +1970,9 @@
             "type": "named"
           },
           "http": {
-            "type": ["string"]
+            "type": [
+              "string"
+            ]
           }
         }
       }
@@ -1722,7 +1988,9 @@
             }
           },
           "http": {
-            "type": ["integer"]
+            "type": [
+              "integer"
+            ]
           }
         },
         "minimum_length": {
@@ -1734,7 +2002,9 @@
             }
           },
           "http": {
-            "type": ["integer"]
+            "type": [
+              "integer"
+            ]
           }
         }
       }
@@ -1750,7 +2020,9 @@
             }
           },
           "http": {
-            "type": ["integer"]
+            "type": [
+              "integer"
+            ]
           }
         },
         "minimum_length": {
@@ -1762,7 +2034,9 @@
             }
           },
           "http": {
-            "type": ["integer"]
+            "type": [
+              "integer"
+            ]
           }
         }
       }
@@ -1779,7 +2053,9 @@
             }
           },
           "http": {
-            "type": ["object"]
+            "type": [
+              "object"
+            ]
           }
         },
         "shipping_address": {
@@ -1791,7 +2067,9 @@
             }
           },
           "http": {
-            "type": ["object"]
+            "type": [
+              "object"
+            ]
           }
         },
         "submit": {
@@ -1803,7 +2081,9 @@
             }
           },
           "http": {
-            "type": ["object"]
+            "type": [
+              "object"
+            ]
           }
         },
         "terms_of_service_acceptance": {
@@ -1815,7 +2095,9 @@
             }
           },
           "http": {
-            "type": ["object"]
+            "type": [
+              "object"
+            ]
           }
         }
       }
@@ -1828,7 +2110,9 @@
             "type": "named"
           },
           "http": {
-            "type": ["string"],
+            "type": [
+              "string"
+            ],
             "maxLength": 1200
           }
         }
@@ -1842,7 +2126,9 @@
             "type": "named"
           },
           "http": {
-            "type": ["string"],
+            "type": [
+              "string"
+            ],
             "maxLength": 1200
           }
         }
@@ -1856,7 +2142,9 @@
             "type": "named"
           },
           "http": {
-            "type": ["string"],
+            "type": [
+              "string"
+            ],
             "maxLength": 1200
           }
         }
@@ -1870,7 +2158,9 @@
             "type": "named"
           },
           "http": {
-            "type": ["string"],
+            "type": [
+              "string"
+            ],
             "maxLength": 1200
           }
         }
@@ -1888,7 +2178,9 @@
             }
           },
           "http": {
-            "type": ["string"]
+            "type": [
+              "string"
+            ]
           }
         },
         "name": {
@@ -1900,7 +2192,9 @@
             }
           },
           "http": {
-            "type": ["string"]
+            "type": [
+              "string"
+            ]
           }
         },
         "shipping": {
@@ -1912,7 +2206,9 @@
             }
           },
           "http": {
-            "type": ["string"]
+            "type": [
+              "string"
+            ]
           }
         }
       }
@@ -1928,7 +2224,9 @@
             }
           },
           "http": {
-            "type": ["string"],
+            "type": [
+              "string"
+            ],
             "maxLength": 5000
           }
         },
@@ -1941,7 +2239,9 @@
             }
           },
           "http": {
-            "type": ["string"],
+            "type": [
+              "string"
+            ],
             "maxLength": 5000
           }
         }
@@ -1956,7 +2256,9 @@
             "type": "named"
           },
           "http": {
-            "type": ["boolean"]
+            "type": [
+              "boolean"
+            ]
           }
         },
         "invoice_data": {
@@ -1968,7 +2270,9 @@
             }
           },
           "http": {
-            "type": ["object"]
+            "type": [
+              "object"
+            ]
           }
         }
       }
@@ -1987,9 +2291,13 @@
             }
           },
           "http": {
-            "type": ["array"],
+            "type": [
+              "array"
+            ],
             "items": {
-              "type": ["string"],
+              "type": [
+                "string"
+              ],
               "maxLength": 5000
             }
           }
@@ -2006,9 +2314,13 @@
             }
           },
           "http": {
-            "type": ["array"],
+            "type": [
+              "array"
+            ],
             "items": {
-              "type": ["object"]
+              "type": [
+                "object"
+              ]
             }
           }
         },
@@ -2021,7 +2333,9 @@
             }
           },
           "http": {
-            "type": ["string"],
+            "type": [
+              "string"
+            ],
             "maxLength": 1500
           }
         },
@@ -2034,7 +2348,9 @@
             }
           },
           "http": {
-            "type": ["string"],
+            "type": [
+              "string"
+            ],
             "maxLength": 5000
           }
         },
@@ -2047,7 +2363,9 @@
             }
           },
           "http": {
-            "type": ["object"]
+            "type": [
+              "object"
+            ]
           }
         },
         "metadata": {
@@ -2059,7 +2377,9 @@
             }
           },
           "http": {
-            "type": ["object"]
+            "type": [
+              "object"
+            ]
           }
         },
         "rendering_options": {
@@ -2071,7 +2391,9 @@
             }
           },
           "http": {
-            "type": ["object"]
+            "type": [
+              "object"
+            ]
           }
         }
       }
@@ -2084,7 +2406,9 @@
             "type": "named"
           },
           "http": {
-            "type": ["string"],
+            "type": [
+              "string"
+            ],
             "maxLength": 40
           }
         },
@@ -2094,7 +2418,9 @@
             "type": "named"
           },
           "http": {
-            "type": ["string"],
+            "type": [
+              "string"
+            ],
             "maxLength": 140
           }
         }
@@ -2111,7 +2437,9 @@
             }
           },
           "http": {
-            "type": ["string"]
+            "type": [
+              "string"
+            ]
           }
         },
         "type": {
@@ -2120,7 +2448,9 @@
             "type": "named"
           },
           "http": {
-            "type": ["string"]
+            "type": [
+              "string"
+            ]
           }
         }
       }
@@ -2136,7 +2466,9 @@
             }
           },
           "http": {
-            "type": ["string"]
+            "type": [
+              "string"
+            ]
           }
         }
       }
@@ -2152,7 +2484,9 @@
             }
           },
           "http": {
-            "type": ["object"]
+            "type": [
+              "object"
+            ]
           }
         },
         "dynamic_tax_rates": {
@@ -2167,9 +2501,13 @@
             }
           },
           "http": {
-            "type": ["array"],
+            "type": [
+              "array"
+            ],
             "items": {
-              "type": ["string"],
+              "type": [
+                "string"
+              ],
               "maxLength": 5000
             }
           }
@@ -2183,7 +2521,9 @@
             }
           },
           "http": {
-            "type": ["string"],
+            "type": [
+              "string"
+            ],
             "maxLength": 5000
           }
         },
@@ -2196,7 +2536,9 @@
             }
           },
           "http": {
-            "type": ["object"]
+            "type": [
+              "object"
+            ]
           }
         },
         "quantity": {
@@ -2208,7 +2550,9 @@
             }
           },
           "http": {
-            "type": ["integer"]
+            "type": [
+              "integer"
+            ]
           }
         },
         "tax_rates": {
@@ -2223,9 +2567,13 @@
             }
           },
           "http": {
-            "type": ["array"],
+            "type": [
+              "array"
+            ],
             "items": {
-              "type": ["string"],
+              "type": [
+                "string"
+              ],
               "maxLength": 5000
             }
           }
@@ -2240,7 +2588,9 @@
             "type": "named"
           },
           "http": {
-            "type": ["boolean"]
+            "type": [
+              "boolean"
+            ]
           }
         },
         "maximum": {
@@ -2252,7 +2602,9 @@
             }
           },
           "http": {
-            "type": ["integer"]
+            "type": [
+              "integer"
+            ]
           }
         },
         "minimum": {
@@ -2264,7 +2616,9 @@
             }
           },
           "http": {
-            "type": ["integer"]
+            "type": [
+              "integer"
+            ]
           }
         }
       }
@@ -2277,7 +2631,9 @@
             "type": "named"
           },
           "http": {
-            "type": ["string"]
+            "type": [
+              "string"
+            ]
           }
         },
         "product": {
@@ -2289,7 +2645,9 @@
             }
           },
           "http": {
-            "type": ["string"],
+            "type": [
+              "string"
+            ],
             "maxLength": 5000
           }
         },
@@ -2302,7 +2660,9 @@
             }
           },
           "http": {
-            "type": ["object"]
+            "type": [
+              "object"
+            ]
           }
         },
         "recurring": {
@@ -2314,7 +2674,9 @@
             }
           },
           "http": {
-            "type": ["object"]
+            "type": [
+              "object"
+            ]
           }
         },
         "tax_behavior": {
@@ -2326,7 +2688,9 @@
             }
           },
           "http": {
-            "type": ["string"]
+            "type": [
+              "string"
+            ]
           }
         },
         "unit_amount": {
@@ -2338,7 +2702,9 @@
             }
           },
           "http": {
-            "type": ["integer"]
+            "type": [
+              "integer"
+            ]
           }
         },
         "unit_amount_decimal": {
@@ -2350,7 +2716,9 @@
             }
           },
           "http": {
-            "type": ["string"],
+            "type": [
+              "string"
+            ],
             "format": "decimal"
           }
         }
@@ -2367,7 +2735,9 @@
             }
           },
           "http": {
-            "type": ["string"],
+            "type": [
+              "string"
+            ],
             "maxLength": 40000
           }
         },
@@ -2383,9 +2753,13 @@
             }
           },
           "http": {
-            "type": ["array"],
+            "type": [
+              "array"
+            ],
             "items": {
-              "type": ["string"]
+              "type": [
+                "string"
+              ]
             }
           }
         },
@@ -2398,7 +2772,9 @@
             }
           },
           "http": {
-            "type": ["object"]
+            "type": [
+              "object"
+            ]
           }
         },
         "name": {
@@ -2407,7 +2783,9 @@
             "type": "named"
           },
           "http": {
-            "type": ["string"],
+            "type": [
+              "string"
+            ],
             "maxLength": 5000
           }
         },
@@ -2420,7 +2798,9 @@
             }
           },
           "http": {
-            "type": ["string"],
+            "type": [
+              "string"
+            ],
             "maxLength": 5000
           }
         }
@@ -2434,7 +2814,9 @@
             "type": "named"
           },
           "http": {
-            "type": ["string"]
+            "type": [
+              "string"
+            ]
           }
         },
         "interval_count": {
@@ -2446,7 +2828,9 @@
             }
           },
           "http": {
-            "type": ["integer"]
+            "type": [
+              "integer"
+            ]
           }
         }
       }
@@ -2463,7 +2847,9 @@
             }
           },
           "http": {
-            "type": ["integer"]
+            "type": [
+              "integer"
+            ]
           }
         },
         "capture_method": {
@@ -2475,7 +2861,9 @@
             }
           },
           "http": {
-            "type": ["string"]
+            "type": [
+              "string"
+            ]
           }
         },
         "description": {
@@ -2487,7 +2875,9 @@
             }
           },
           "http": {
-            "type": ["string"],
+            "type": [
+              "string"
+            ],
             "maxLength": 1000
           }
         },
@@ -2500,7 +2890,9 @@
             }
           },
           "http": {
-            "type": ["object"]
+            "type": [
+              "object"
+            ]
           }
         },
         "on_behalf_of": {
@@ -2512,7 +2904,9 @@
             }
           },
           "http": {
-            "type": ["string"]
+            "type": [
+              "string"
+            ]
           }
         },
         "receipt_email": {
@@ -2524,7 +2918,9 @@
             }
           },
           "http": {
-            "type": ["string"]
+            "type": [
+              "string"
+            ]
           }
         },
         "setup_future_usage": {
@@ -2536,7 +2932,9 @@
             }
           },
           "http": {
-            "type": ["string"]
+            "type": [
+              "string"
+            ]
           }
         },
         "shipping": {
@@ -2548,7 +2946,9 @@
             }
           },
           "http": {
-            "type": ["object"]
+            "type": [
+              "object"
+            ]
           }
         },
         "statement_descriptor": {
@@ -2560,7 +2960,9 @@
             }
           },
           "http": {
-            "type": ["string"],
+            "type": [
+              "string"
+            ],
             "maxLength": 22
           }
         },
@@ -2573,7 +2975,9 @@
             }
           },
           "http": {
-            "type": ["string"],
+            "type": [
+              "string"
+            ],
             "maxLength": 22
           }
         },
@@ -2586,7 +2990,9 @@
             }
           },
           "http": {
-            "type": ["object"]
+            "type": [
+              "object"
+            ]
           }
         },
         "transfer_group": {
@@ -2598,7 +3004,9 @@
             }
           },
           "http": {
-            "type": ["string"]
+            "type": [
+              "string"
+            ]
           }
         }
       }
@@ -2611,7 +3019,9 @@
             "type": "named"
           },
           "http": {
-            "type": ["object"]
+            "type": [
+              "object"
+            ]
           }
         },
         "carrier": {
@@ -2623,7 +3033,9 @@
             }
           },
           "http": {
-            "type": ["string"],
+            "type": [
+              "string"
+            ],
             "maxLength": 5000
           }
         },
@@ -2633,7 +3045,9 @@
             "type": "named"
           },
           "http": {
-            "type": ["string"],
+            "type": [
+              "string"
+            ],
             "maxLength": 5000
           }
         },
@@ -2646,7 +3060,9 @@
             }
           },
           "http": {
-            "type": ["string"],
+            "type": [
+              "string"
+            ],
             "maxLength": 5000
           }
         },
@@ -2659,7 +3075,9 @@
             }
           },
           "http": {
-            "type": ["string"],
+            "type": [
+              "string"
+            ],
             "maxLength": 5000
           }
         }
@@ -2676,7 +3094,9 @@
             }
           },
           "http": {
-            "type": ["string"],
+            "type": [
+              "string"
+            ],
             "maxLength": 5000
           }
         },
@@ -2689,7 +3109,9 @@
             }
           },
           "http": {
-            "type": ["string"],
+            "type": [
+              "string"
+            ],
             "maxLength": 5000
           }
         },
@@ -2699,7 +3121,9 @@
             "type": "named"
           },
           "http": {
-            "type": ["string"],
+            "type": [
+              "string"
+            ],
             "maxLength": 5000
           }
         },
@@ -2712,7 +3136,9 @@
             }
           },
           "http": {
-            "type": ["string"],
+            "type": [
+              "string"
+            ],
             "maxLength": 5000
           }
         },
@@ -2725,7 +3151,9 @@
             }
           },
           "http": {
-            "type": ["string"],
+            "type": [
+              "string"
+            ],
             "maxLength": 5000
           }
         },
@@ -2738,7 +3166,9 @@
             }
           },
           "http": {
-            "type": ["string"],
+            "type": [
+              "string"
+            ],
             "maxLength": 5000
           }
         }
@@ -2755,7 +3185,9 @@
             }
           },
           "http": {
-            "type": ["integer"]
+            "type": [
+              "integer"
+            ]
           }
         },
         "destination": {
@@ -2764,7 +3196,9 @@
             "type": "named"
           },
           "http": {
-            "type": ["string"]
+            "type": [
+              "string"
+            ]
           }
         }
       }
@@ -2781,7 +3215,9 @@
             }
           },
           "http": {
-            "type": ["object"]
+            "type": [
+              "object"
+            ]
           }
         },
         "affirm": {
@@ -2793,7 +3229,9 @@
             }
           },
           "http": {
-            "type": ["object"]
+            "type": [
+              "object"
+            ]
           }
         },
         "afterpay_clearpay": {
@@ -2805,7 +3243,9 @@
             }
           },
           "http": {
-            "type": ["object"]
+            "type": [
+              "object"
+            ]
           }
         },
         "alipay": {
@@ -2817,7 +3257,9 @@
             }
           },
           "http": {
-            "type": ["object"]
+            "type": [
+              "object"
+            ]
           }
         },
         "au_becs_debit": {
@@ -2829,7 +3271,9 @@
             }
           },
           "http": {
-            "type": ["object"]
+            "type": [
+              "object"
+            ]
           }
         },
         "bacs_debit": {
@@ -2841,7 +3285,9 @@
             }
           },
           "http": {
-            "type": ["object"]
+            "type": [
+              "object"
+            ]
           }
         },
         "bancontact": {
@@ -2853,7 +3299,9 @@
             }
           },
           "http": {
-            "type": ["object"]
+            "type": [
+              "object"
+            ]
           }
         },
         "boleto": {
@@ -2865,7 +3313,9 @@
             }
           },
           "http": {
-            "type": ["object"]
+            "type": [
+              "object"
+            ]
           }
         },
         "card": {
@@ -2877,7 +3327,9 @@
             }
           },
           "http": {
-            "type": ["object"]
+            "type": [
+              "object"
+            ]
           }
         },
         "cashapp": {
@@ -2889,7 +3341,9 @@
             }
           },
           "http": {
-            "type": ["object"]
+            "type": [
+              "object"
+            ]
           }
         },
         "customer_balance": {
@@ -2901,7 +3355,9 @@
             }
           },
           "http": {
-            "type": ["object"]
+            "type": [
+              "object"
+            ]
           }
         },
         "eps": {
@@ -2913,7 +3369,9 @@
             }
           },
           "http": {
-            "type": ["object"]
+            "type": [
+              "object"
+            ]
           }
         },
         "fpx": {
@@ -2925,7 +3383,9 @@
             }
           },
           "http": {
-            "type": ["object"]
+            "type": [
+              "object"
+            ]
           }
         },
         "giropay": {
@@ -2937,7 +3397,9 @@
             }
           },
           "http": {
-            "type": ["object"]
+            "type": [
+              "object"
+            ]
           }
         },
         "grabpay": {
@@ -2949,7 +3411,9 @@
             }
           },
           "http": {
-            "type": ["object"]
+            "type": [
+              "object"
+            ]
           }
         },
         "ideal": {
@@ -2961,7 +3425,9 @@
             }
           },
           "http": {
-            "type": ["object"]
+            "type": [
+              "object"
+            ]
           }
         },
         "klarna": {
@@ -2973,7 +3439,9 @@
             }
           },
           "http": {
-            "type": ["object"]
+            "type": [
+              "object"
+            ]
           }
         },
         "konbini": {
@@ -2985,7 +3453,9 @@
             }
           },
           "http": {
-            "type": ["object"]
+            "type": [
+              "object"
+            ]
           }
         },
         "link": {
@@ -2997,7 +3467,9 @@
             }
           },
           "http": {
-            "type": ["object"]
+            "type": [
+              "object"
+            ]
           }
         },
         "oxxo": {
@@ -3009,7 +3481,9 @@
             }
           },
           "http": {
-            "type": ["object"]
+            "type": [
+              "object"
+            ]
           }
         },
         "p24": {
@@ -3021,7 +3495,9 @@
             }
           },
           "http": {
-            "type": ["object"]
+            "type": [
+              "object"
+            ]
           }
         },
         "paynow": {
@@ -3033,7 +3509,9 @@
             }
           },
           "http": {
-            "type": ["object"]
+            "type": [
+              "object"
+            ]
           }
         },
         "paypal": {
@@ -3045,7 +3523,9 @@
             }
           },
           "http": {
-            "type": ["object"]
+            "type": [
+              "object"
+            ]
           }
         },
         "pix": {
@@ -3057,7 +3537,9 @@
             }
           },
           "http": {
-            "type": ["object"]
+            "type": [
+              "object"
+            ]
           }
         },
         "revolut_pay": {
@@ -3069,7 +3551,9 @@
             }
           },
           "http": {
-            "type": ["object"]
+            "type": [
+              "object"
+            ]
           }
         },
         "sepa_debit": {
@@ -3081,7 +3565,9 @@
             }
           },
           "http": {
-            "type": ["object"]
+            "type": [
+              "object"
+            ]
           }
         },
         "sofort": {
@@ -3093,7 +3579,9 @@
             }
           },
           "http": {
-            "type": ["object"]
+            "type": [
+              "object"
+            ]
           }
         },
         "swish": {
@@ -3105,7 +3593,9 @@
             }
           },
           "http": {
-            "type": ["object"]
+            "type": [
+              "object"
+            ]
           }
         },
         "us_bank_account": {
@@ -3117,7 +3607,9 @@
             }
           },
           "http": {
-            "type": ["object"]
+            "type": [
+              "object"
+            ]
           }
         },
         "wechat_pay": {
@@ -3129,7 +3621,9 @@
             }
           },
           "http": {
-            "type": ["object"]
+            "type": [
+              "object"
+            ]
           }
         }
       }
@@ -3145,7 +3639,9 @@
             }
           },
           "http": {
-            "type": ["object"]
+            "type": [
+              "object"
+            ]
           }
         },
         "currency": {
@@ -3157,7 +3653,9 @@
             }
           },
           "http": {
-            "type": ["string"]
+            "type": [
+              "string"
+            ]
           }
         },
         "mandate_options": {
@@ -3169,7 +3667,9 @@
             }
           },
           "http": {
-            "type": ["object"]
+            "type": [
+              "object"
+            ]
           }
         },
         "setup_future_usage": {
@@ -3181,7 +3681,9 @@
             }
           },
           "http": {
-            "type": ["string"]
+            "type": [
+              "string"
+            ]
           }
         },
         "verification_method": {
@@ -3193,7 +3695,9 @@
             }
           },
           "http": {
-            "type": ["string"]
+            "type": [
+              "string"
+            ]
           }
         }
       }
@@ -3209,7 +3713,9 @@
             }
           },
           "http": {
-            "type": ["string"]
+            "type": [
+              "string"
+            ]
           }
         },
         "default_for": {
@@ -3224,9 +3730,13 @@
             }
           },
           "http": {
-            "type": ["array"],
+            "type": [
+              "array"
+            ],
             "items": {
-              "type": ["string"]
+              "type": [
+                "string"
+              ]
             }
           }
         },
@@ -3239,7 +3749,9 @@
             }
           },
           "http": {
-            "type": ["string"],
+            "type": [
+              "string"
+            ],
             "maxLength": 500
           }
         },
@@ -3252,7 +3764,9 @@
             }
           },
           "http": {
-            "type": ["string"]
+            "type": [
+              "string"
+            ]
           }
         },
         "transaction_type": {
@@ -3264,7 +3778,9 @@
             }
           },
           "http": {
-            "type": ["string"]
+            "type": [
+              "string"
+            ]
           }
         }
       }
@@ -3280,7 +3796,9 @@
             }
           },
           "http": {
-            "type": ["string"]
+            "type": [
+              "string"
+            ]
           }
         }
       }
@@ -3296,7 +3814,9 @@
             }
           },
           "http": {
-            "type": ["string"]
+            "type": [
+              "string"
+            ]
           }
         }
       }
@@ -3312,7 +3832,9 @@
             }
           },
           "http": {
-            "type": ["string"]
+            "type": [
+              "string"
+            ]
           }
         }
       }
@@ -3328,7 +3850,9 @@
             }
           },
           "http": {
-            "type": ["string"]
+            "type": [
+              "string"
+            ]
           }
         }
       }
@@ -3344,7 +3868,9 @@
             }
           },
           "http": {
-            "type": ["string"]
+            "type": [
+              "string"
+            ]
           }
         }
       }
@@ -3360,7 +3886,9 @@
             }
           },
           "http": {
-            "type": ["string"]
+            "type": [
+              "string"
+            ]
           }
         }
       }
@@ -3376,7 +3904,9 @@
             }
           },
           "http": {
-            "type": ["integer"]
+            "type": [
+              "integer"
+            ]
           }
         },
         "setup_future_usage": {
@@ -3388,7 +3918,9 @@
             }
           },
           "http": {
-            "type": ["string"]
+            "type": [
+              "string"
+            ]
           }
         }
       }
@@ -3404,7 +3936,9 @@
             }
           },
           "http": {
-            "type": ["object"]
+            "type": [
+              "object"
+            ]
           }
         },
         "request_three_d_secure": {
@@ -3416,7 +3950,9 @@
             }
           },
           "http": {
-            "type": ["string"]
+            "type": [
+              "string"
+            ]
           }
         },
         "setup_future_usage": {
@@ -3428,7 +3964,9 @@
             }
           },
           "http": {
-            "type": ["string"]
+            "type": [
+              "string"
+            ]
           }
         },
         "statement_descriptor_suffix_kana": {
@@ -3440,7 +3978,9 @@
             }
           },
           "http": {
-            "type": ["string"],
+            "type": [
+              "string"
+            ],
             "maxLength": 22
           }
         },
@@ -3453,7 +3993,9 @@
             }
           },
           "http": {
-            "type": ["string"],
+            "type": [
+              "string"
+            ],
             "maxLength": 17
           }
         }
@@ -3470,7 +4012,9 @@
             }
           },
           "http": {
-            "type": ["boolean"]
+            "type": [
+              "boolean"
+            ]
           }
         }
       }
@@ -3486,7 +4030,9 @@
             }
           },
           "http": {
-            "type": ["string"]
+            "type": [
+              "string"
+            ]
           }
         }
       }
@@ -3502,7 +4048,9 @@
             }
           },
           "http": {
-            "type": ["object"]
+            "type": [
+              "object"
+            ]
           }
         },
         "funding_type": {
@@ -3514,7 +4062,9 @@
             }
           },
           "http": {
-            "type": ["string"]
+            "type": [
+              "string"
+            ]
           }
         },
         "setup_future_usage": {
@@ -3526,7 +4076,9 @@
             }
           },
           "http": {
-            "type": ["string"]
+            "type": [
+              "string"
+            ]
           }
         }
       }
@@ -3542,7 +4094,9 @@
             }
           },
           "http": {
-            "type": ["object"]
+            "type": [
+              "object"
+            ]
           }
         },
         "requested_address_types": {
@@ -3557,9 +4111,13 @@
             }
           },
           "http": {
-            "type": ["array"],
+            "type": [
+              "array"
+            ],
             "items": {
-              "type": ["string"]
+              "type": [
+                "string"
+              ]
             }
           }
         },
@@ -3569,7 +4127,9 @@
             "type": "named"
           },
           "http": {
-            "type": ["string"]
+            "type": [
+              "string"
+            ]
           }
         }
       }
@@ -3582,7 +4142,9 @@
             "type": "named"
           },
           "http": {
-            "type": ["string"],
+            "type": [
+              "string"
+            ],
             "maxLength": 5000
           }
         }
@@ -3599,7 +4161,9 @@
             }
           },
           "http": {
-            "type": ["string"]
+            "type": [
+              "string"
+            ]
           }
         }
       }
@@ -3615,7 +4179,9 @@
             }
           },
           "http": {
-            "type": ["string"]
+            "type": [
+              "string"
+            ]
           }
         }
       }
@@ -3631,7 +4197,9 @@
             }
           },
           "http": {
-            "type": ["string"]
+            "type": [
+              "string"
+            ]
           }
         }
       }
@@ -3647,7 +4215,9 @@
             }
           },
           "http": {
-            "type": ["string"]
+            "type": [
+              "string"
+            ]
           }
         }
       }
@@ -3663,7 +4233,9 @@
             }
           },
           "http": {
-            "type": ["string"]
+            "type": [
+              "string"
+            ]
           }
         }
       }
@@ -3679,7 +4251,9 @@
             }
           },
           "http": {
-            "type": ["string"]
+            "type": [
+              "string"
+            ]
           }
         }
       }
@@ -3695,7 +4269,9 @@
             }
           },
           "http": {
-            "type": ["integer"]
+            "type": [
+              "integer"
+            ]
           }
         },
         "setup_future_usage": {
@@ -3707,7 +4283,9 @@
             }
           },
           "http": {
-            "type": ["string"]
+            "type": [
+              "string"
+            ]
           }
         }
       }
@@ -3723,7 +4301,9 @@
             }
           },
           "http": {
-            "type": ["string"]
+            "type": [
+              "string"
+            ]
           }
         }
       }
@@ -3739,7 +4319,9 @@
             }
           },
           "http": {
-            "type": ["integer"]
+            "type": [
+              "integer"
+            ]
           }
         },
         "setup_future_usage": {
@@ -3751,7 +4333,9 @@
             }
           },
           "http": {
-            "type": ["string"]
+            "type": [
+              "string"
+            ]
           }
         }
       }
@@ -3767,7 +4351,9 @@
             }
           },
           "http": {
-            "type": ["string"]
+            "type": [
+              "string"
+            ]
           }
         },
         "tos_shown_and_accepted": {
@@ -3779,7 +4365,9 @@
             }
           },
           "http": {
-            "type": ["boolean"]
+            "type": [
+              "boolean"
+            ]
           }
         }
       }
@@ -3795,7 +4383,9 @@
             }
           },
           "http": {
-            "type": ["string"]
+            "type": [
+              "string"
+            ]
           }
         }
       }
@@ -3811,7 +4401,9 @@
             }
           },
           "http": {
-            "type": ["string"]
+            "type": [
+              "string"
+            ]
           }
         },
         "preferred_locale": {
@@ -3823,7 +4415,9 @@
             }
           },
           "http": {
-            "type": ["string"]
+            "type": [
+              "string"
+            ]
           }
         },
         "reference": {
@@ -3835,7 +4429,9 @@
             }
           },
           "http": {
-            "type": ["string"],
+            "type": [
+              "string"
+            ],
             "maxLength": 127
           }
         },
@@ -3848,7 +4444,9 @@
             }
           },
           "http": {
-            "type": ["string"],
+            "type": [
+              "string"
+            ],
             "maxLength": 32
           }
         },
@@ -3861,7 +4459,9 @@
             }
           },
           "http": {
-            "type": ["string"]
+            "type": [
+              "string"
+            ]
           }
         }
       }
@@ -3877,7 +4477,9 @@
             }
           },
           "http": {
-            "type": ["integer"]
+            "type": [
+              "integer"
+            ]
           }
         }
       }
@@ -3893,7 +4495,9 @@
             }
           },
           "http": {
-            "type": ["string"]
+            "type": [
+              "string"
+            ]
           }
         }
       }
@@ -3909,7 +4513,9 @@
             }
           },
           "http": {
-            "type": ["string"]
+            "type": [
+              "string"
+            ]
           }
         }
       }
@@ -3925,7 +4531,9 @@
             }
           },
           "http": {
-            "type": ["string"]
+            "type": [
+              "string"
+            ]
           }
         }
       }
@@ -3941,7 +4549,9 @@
             }
           },
           "http": {
-            "type": ["string"],
+            "type": [
+              "string"
+            ],
             "maxLength": 5000
           }
         }
@@ -3958,7 +4568,9 @@
             }
           },
           "http": {
-            "type": ["object"]
+            "type": [
+              "object"
+            ]
           }
         },
         "setup_future_usage": {
@@ -3970,7 +4582,9 @@
             }
           },
           "http": {
-            "type": ["string"]
+            "type": [
+              "string"
+            ]
           }
         },
         "verification_method": {
@@ -3982,7 +4596,9 @@
             }
           },
           "http": {
-            "type": ["string"]
+            "type": [
+              "string"
+            ]
           }
         }
       }
@@ -4001,9 +4617,13 @@
             }
           },
           "http": {
-            "type": ["array"],
+            "type": [
+              "array"
+            ],
             "items": {
-              "type": ["string"],
+              "type": [
+                "string"
+              ],
               "maxLength": 5000
             }
           }
@@ -4020,9 +4640,13 @@
             }
           },
           "http": {
-            "type": ["array"],
+            "type": [
+              "array"
+            ],
             "items": {
-              "type": ["string"]
+              "type": [
+                "string"
+              ]
             }
           }
         }
@@ -4039,7 +4663,9 @@
             }
           },
           "http": {
-            "type": ["string"],
+            "type": [
+              "string"
+            ],
             "maxLength": 5000
           }
         },
@@ -4049,7 +4675,9 @@
             "type": "named"
           },
           "http": {
-            "type": ["string"]
+            "type": [
+              "string"
+            ]
           }
         },
         "setup_future_usage": {
@@ -4061,7 +4689,9 @@
             }
           },
           "http": {
-            "type": ["string"]
+            "type": [
+              "string"
+            ]
           }
         }
       }
@@ -4075,7 +4705,9 @@
             "type": "named"
           },
           "http": {
-            "type": ["boolean"]
+            "type": [
+              "boolean"
+            ]
           }
         }
       }
@@ -4092,7 +4724,9 @@
             }
           },
           "http": {
-            "type": ["string"],
+            "type": [
+              "string"
+            ],
             "maxLength": 1000
           }
         },
@@ -4105,7 +4739,9 @@
             }
           },
           "http": {
-            "type": ["object"]
+            "type": [
+              "object"
+            ]
           }
         },
         "on_behalf_of": {
@@ -4117,7 +4753,9 @@
             }
           },
           "http": {
-            "type": ["string"]
+            "type": [
+              "string"
+            ]
           }
         }
       }
@@ -4134,9 +4772,13 @@
             "type": "array"
           },
           "http": {
-            "type": ["array"],
+            "type": [
+              "array"
+            ],
             "items": {
-              "type": ["string"]
+              "type": [
+                "string"
+              ]
             }
           }
         }
@@ -4153,7 +4795,9 @@
             }
           },
           "http": {
-            "type": ["string"],
+            "type": [
+              "string"
+            ],
             "maxLength": 5000
           }
         },
@@ -4166,7 +4810,9 @@
             }
           },
           "http": {
-            "type": ["object"]
+            "type": [
+              "object"
+            ]
           }
         }
       }
@@ -4182,7 +4828,9 @@
             }
           },
           "http": {
-            "type": ["object"]
+            "type": [
+              "object"
+            ]
           }
         },
         "display_name": {
@@ -4191,7 +4839,9 @@
             "type": "named"
           },
           "http": {
-            "type": ["string"],
+            "type": [
+              "string"
+            ],
             "maxLength": 100
           }
         },
@@ -4204,7 +4854,9 @@
             }
           },
           "http": {
-            "type": ["object"]
+            "type": [
+              "object"
+            ]
           }
         },
         "metadata": {
@@ -4216,7 +4868,9 @@
             }
           },
           "http": {
-            "type": ["object"]
+            "type": [
+              "object"
+            ]
           }
         },
         "tax_behavior": {
@@ -4228,7 +4882,9 @@
             }
           },
           "http": {
-            "type": ["string"]
+            "type": [
+              "string"
+            ]
           }
         },
         "tax_code": {
@@ -4240,7 +4896,9 @@
             }
           },
           "http": {
-            "type": ["string"]
+            "type": [
+              "string"
+            ]
           }
         },
         "type": {
@@ -4252,7 +4910,9 @@
             }
           },
           "http": {
-            "type": ["string"]
+            "type": [
+              "string"
+            ]
           }
         }
       }
@@ -4268,7 +4928,9 @@
             }
           },
           "http": {
-            "type": ["object"]
+            "type": [
+              "object"
+            ]
           }
         },
         "minimum": {
@@ -4280,7 +4942,9 @@
             }
           },
           "http": {
-            "type": ["object"]
+            "type": [
+              "object"
+            ]
           }
         }
       }
@@ -4293,7 +4957,9 @@
             "type": "named"
           },
           "http": {
-            "type": ["string"]
+            "type": [
+              "string"
+            ]
           }
         },
         "value": {
@@ -4302,7 +4968,9 @@
             "type": "named"
           },
           "http": {
-            "type": ["integer"]
+            "type": [
+              "integer"
+            ]
           }
         }
       }
@@ -4315,7 +4983,9 @@
             "type": "named"
           },
           "http": {
-            "type": ["string"]
+            "type": [
+              "string"
+            ]
           }
         },
         "value": {
@@ -4324,7 +4994,9 @@
             "type": "named"
           },
           "http": {
-            "type": ["integer"]
+            "type": [
+              "integer"
+            ]
           }
         }
       }
@@ -4337,7 +5009,9 @@
             "type": "named"
           },
           "http": {
-            "type": ["integer"]
+            "type": [
+              "integer"
+            ]
           }
         },
         "currency": {
@@ -4346,7 +5020,9 @@
             "type": "named"
           },
           "http": {
-            "type": ["string"]
+            "type": [
+              "string"
+            ]
           }
         },
         "currency_options": {
@@ -4358,7 +5034,9 @@
             }
           },
           "http": {
-            "type": ["object"]
+            "type": [
+              "object"
+            ]
           }
         }
       }
@@ -4375,7 +5053,9 @@
             }
           },
           "http": {
-            "type": ["number"]
+            "type": [
+              "number"
+            ]
           }
         },
         "billing_cycle_anchor": {
@@ -4387,7 +5067,9 @@
             }
           },
           "http": {
-            "type": ["integer"],
+            "type": [
+              "integer"
+            ],
             "format": "unix-time"
           }
         },
@@ -4403,9 +5085,13 @@
             }
           },
           "http": {
-            "type": ["array"],
+            "type": [
+              "array"
+            ],
             "items": {
-              "type": ["string"],
+              "type": [
+                "string"
+              ],
               "maxLength": 5000
             }
           }
@@ -4419,7 +5105,9 @@
             }
           },
           "http": {
-            "type": ["string"],
+            "type": [
+              "string"
+            ],
             "maxLength": 500
           }
         },
@@ -4432,7 +5120,9 @@
             }
           },
           "http": {
-            "type": ["object"]
+            "type": [
+              "object"
+            ]
           }
         },
         "metadata": {
@@ -4444,7 +5134,9 @@
             }
           },
           "http": {
-            "type": ["object"]
+            "type": [
+              "object"
+            ]
           }
         },
         "on_behalf_of": {
@@ -4456,7 +5148,9 @@
             }
           },
           "http": {
-            "type": ["string"]
+            "type": [
+              "string"
+            ]
           }
         },
         "proration_behavior": {
@@ -4468,7 +5162,9 @@
             }
           },
           "http": {
-            "type": ["string"]
+            "type": [
+              "string"
+            ]
           }
         },
         "transfer_data": {
@@ -4480,7 +5176,9 @@
             }
           },
           "http": {
-            "type": ["object"]
+            "type": [
+              "object"
+            ]
           }
         },
         "trial_end": {
@@ -4492,7 +5190,9 @@
             }
           },
           "http": {
-            "type": ["integer"],
+            "type": [
+              "integer"
+            ],
             "format": "unix-time"
           }
         },
@@ -4505,7 +5205,9 @@
             }
           },
           "http": {
-            "type": ["integer"]
+            "type": [
+              "integer"
+            ]
           }
         },
         "trial_settings": {
@@ -4517,7 +5219,9 @@
             }
           },
           "http": {
-            "type": ["object"]
+            "type": [
+              "object"
+            ]
           }
         }
       }
@@ -4533,7 +5237,9 @@
             }
           },
           "http": {
-            "type": ["object"]
+            "type": [
+              "object"
+            ]
           }
         }
       }
@@ -4549,7 +5255,9 @@
             }
           },
           "http": {
-            "type": ["string"]
+            "type": [
+              "string"
+            ]
           }
         },
         "type": {
@@ -4558,7 +5266,9 @@
             "type": "named"
           },
           "http": {
-            "type": ["string"]
+            "type": [
+              "string"
+            ]
           }
         }
       }
@@ -4574,7 +5284,9 @@
             }
           },
           "http": {
-            "type": ["number"]
+            "type": [
+              "number"
+            ]
           }
         },
         "destination": {
@@ -4583,7 +5295,9 @@
             "type": "named"
           },
           "http": {
-            "type": ["string"]
+            "type": [
+              "string"
+            ]
           }
         }
       }
@@ -4596,7 +5310,9 @@
             "type": "named"
           },
           "http": {
-            "type": ["object"]
+            "type": [
+              "object"
+            ]
           }
         }
       }
@@ -4609,7 +5325,9 @@
             "type": "named"
           },
           "http": {
-            "type": ["string"]
+            "type": [
+              "string"
+            ]
           }
         }
       }
@@ -4623,7 +5341,9 @@
             "type": "named"
           },
           "http": {
-            "type": ["boolean"]
+            "type": [
+              "boolean"
+            ]
           }
         }
       }
@@ -4643,9 +5363,13 @@
             }
           },
           "http": {
-            "type": ["array"],
+            "type": [
+              "array"
+            ],
             "items": {
-              "type": ["string"],
+              "type": [
+                "string"
+              ],
               "maxLength": 5000
             }
           }
@@ -4662,9 +5386,13 @@
             }
           },
           "http": {
-            "type": ["array"],
+            "type": [
+              "array"
+            ],
             "items": {
-              "type": ["string"],
+              "type": [
+                "string"
+              ],
               "maxLength": 5000
             }
           }
@@ -4676,7 +5404,9 @@
             "type": "named"
           },
           "http": {
-            "type": ["string"],
+            "type": [
+              "string"
+            ],
             "format": "binary"
           }
         },
@@ -4690,7 +5420,9 @@
             }
           },
           "http": {
-            "type": ["object"]
+            "type": [
+              "object"
+            ]
           }
         },
         "purpose": {
@@ -4700,7 +5432,9 @@
             "type": "named"
           },
           "http": {
-            "type": ["string"]
+            "type": [
+              "string"
+            ]
           }
         }
       }
@@ -4714,7 +5448,9 @@
             "type": "named"
           },
           "http": {
-            "type": ["boolean"]
+            "type": [
+              "boolean"
+            ]
           }
         },
         "expires_at": {
@@ -4726,7 +5462,9 @@
             }
           },
           "http": {
-            "type": ["integer"],
+            "type": [
+              "integer"
+            ],
             "format": "unix-time"
           }
         },
@@ -4739,7 +5477,7 @@
             }
           },
           "http": {
-            "type": null
+            "type": []
           }
         }
       }
@@ -4759,9 +5497,13 @@
             }
           },
           "http": {
-            "type": ["array"],
+            "type": [
+              "array"
+            ],
             "items": {
-              "type": ["string"],
+              "type": [
+                "string"
+              ],
               "maxLength": 5000
             }
           }
@@ -4776,7 +5518,9 @@
             }
           },
           "http": {
-            "type": ["object"]
+            "type": [
+              "object"
+            ]
           }
         }
       }
@@ -4793,7 +5537,9 @@
             }
           },
           "http": {
-            "type": ["string"]
+            "type": [
+              "string"
+            ]
           }
         }
       }
@@ -4809,7 +5555,9 @@
             }
           },
           "http": {
-            "type": ["object"]
+            "type": [
+              "object"
+            ]
           }
         },
         "id": {
@@ -4821,7 +5569,9 @@
             }
           },
           "http": {
-            "type": ["object"]
+            "type": [
+              "object"
+            ]
           }
         }
       }
@@ -4837,7 +5587,9 @@
             }
           },
           "http": {
-            "type": ["boolean"]
+            "type": [
+              "boolean"
+            ]
           }
         },
         "id": {
@@ -4849,7 +5601,9 @@
             }
           },
           "http": {
-            "type": ["integer"],
+            "type": [
+              "integer"
+            ],
             "format": "int64"
           }
         },
@@ -4862,7 +5616,9 @@
             }
           },
           "http": {
-            "type": ["integer"],
+            "type": [
+              "integer"
+            ],
             "format": "int64"
           }
         },
@@ -4875,7 +5631,9 @@
             }
           },
           "http": {
-            "type": ["integer"],
+            "type": [
+              "integer"
+            ],
             "format": "int32"
           }
         },
@@ -4888,7 +5646,9 @@
             }
           },
           "http": {
-            "type": ["string"],
+            "type": [
+              "string"
+            ],
             "format": "date-time"
           }
         },
@@ -4902,7 +5662,9 @@
             }
           },
           "http": {
-            "type": ["string"]
+            "type": [
+              "string"
+            ]
           }
         }
       }
@@ -4918,7 +5680,9 @@
             }
           },
           "http": {
-            "type": ["integer"],
+            "type": [
+              "integer"
+            ],
             "format": "int64"
           }
         },
@@ -4931,7 +5695,9 @@
             }
           },
           "http": {
-            "type": ["string"]
+            "type": [
+              "string"
+            ]
           }
         }
       }
@@ -4946,7 +5712,9 @@
             "type": "named"
           },
           "http": {
-            "type": ["integer"]
+            "type": [
+              "integer"
+            ]
           }
         },
         "cancelable": {
@@ -4956,7 +5724,9 @@
             "type": "named"
           },
           "http": {
-            "type": ["boolean"]
+            "type": [
+              "boolean"
+            ]
           }
         },
         "context": {
@@ -4978,7 +5748,9 @@
             "type": "named"
           },
           "http": {
-            "type": ["integer"],
+            "type": [
+              "integer"
+            ],
             "format": "unix-time"
           }
         },
@@ -4989,7 +5761,9 @@
             "type": "named"
           },
           "http": {
-            "type": ["string"]
+            "type": [
+              "string"
+            ]
           }
         },
         "description": {
@@ -5002,7 +5776,9 @@
             }
           },
           "http": {
-            "type": ["string"],
+            "type": [
+              "string"
+            ],
             "maxLength": 5000
           }
         },
@@ -5016,7 +5792,9 @@
             }
           },
           "http": {
-            "type": ["object"]
+            "type": [
+              "object"
+            ]
           }
         },
         "financial_account": {
@@ -5026,7 +5804,9 @@
             "type": "named"
           },
           "http": {
-            "type": ["string"],
+            "type": [
+              "string"
+            ],
             "maxLength": 5000
           }
         },
@@ -5040,7 +5820,9 @@
             }
           },
           "http": {
-            "type": ["string"],
+            "type": [
+              "string"
+            ],
             "maxLength": 5000
           }
         },
@@ -5051,7 +5833,9 @@
             "type": "named"
           },
           "http": {
-            "type": ["string"],
+            "type": [
+              "string"
+            ],
             "maxLength": 5000
           }
         },
@@ -5062,7 +5846,9 @@
             "type": "named"
           },
           "http": {
-            "type": ["boolean"]
+            "type": [
+              "boolean"
+            ]
           }
         },
         "metadata": {
@@ -5072,7 +5858,9 @@
             "type": "named"
           },
           "http": {
-            "type": ["object"]
+            "type": [
+              "object"
+            ]
           }
         },
         "object": {
@@ -5082,7 +5870,9 @@
             "type": "named"
           },
           "http": {
-            "type": ["string"]
+            "type": [
+              "string"
+            ]
           }
         },
         "origin_payment_method": {
@@ -5092,7 +5882,9 @@
             "type": "named"
           },
           "http": {
-            "type": ["string"],
+            "type": [
+              "string"
+            ],
             "maxLength": 5000
           }
         },
@@ -5106,7 +5898,9 @@
             }
           },
           "http": {
-            "type": ["boolean"]
+            "type": [
+              "boolean"
+            ]
           }
         },
         "statement_descriptor": {
@@ -5116,7 +5910,9 @@
             "type": "named"
           },
           "http": {
-            "type": ["string"],
+            "type": [
+              "string"
+            ],
             "maxLength": 5000
           }
         },
@@ -5127,7 +5923,9 @@
             "type": "named"
           },
           "http": {
-            "type": ["string"]
+            "type": [
+              "string"
+            ]
           }
         },
         "status_transitions": {
@@ -5136,7 +5934,9 @@
             "type": "named"
           },
           "http": {
-            "type": ["object"]
+            "type": [
+              "object"
+            ]
           }
         },
         "transaction": {
@@ -5149,7 +5949,7 @@
             }
           },
           "http": {
-            "type": null
+            "type": []
           }
         }
       }
@@ -5163,7 +5963,9 @@
             "type": "named"
           },
           "http": {
-            "type": ["string"]
+            "type": [
+              "string"
+            ]
           }
         }
       }
@@ -5180,7 +5982,9 @@
             }
           },
           "http": {
-            "type": ["integer"],
+            "type": [
+              "integer"
+            ],
             "format": "unix-time"
           }
         },
@@ -5194,7 +5998,9 @@
             }
           },
           "http": {
-            "type": ["integer"],
+            "type": [
+              "integer"
+            ],
             "format": "unix-time"
           }
         },
@@ -5208,7 +6014,9 @@
             }
           },
           "http": {
-            "type": ["integer"],
+            "type": [
+              "integer"
+            ],
             "format": "unix-time"
           }
         }
@@ -5225,7 +6033,9 @@
             }
           },
           "http": {
-            "type": ["object"]
+            "type": [
+              "object"
+            ]
           }
         },
         "addresses": {
@@ -5240,7 +6050,9 @@
             }
           },
           "http": {
-            "type": ["array"]
+            "type": [
+              "array"
+            ]
           }
         },
         "children": {
@@ -5255,9 +6067,13 @@
             }
           },
           "http": {
-            "type": ["array"],
+            "type": [
+              "array"
+            ],
             "items": {
-              "type": ["string"]
+              "type": [
+                "string"
+              ]
             }
           }
         },
@@ -5270,7 +6086,9 @@
             }
           },
           "http": {
-            "type": ["string"],
+            "type": [
+              "string"
+            ],
             "format": "uuid"
           }
         },
@@ -5283,7 +6101,9 @@
             }
           },
           "http": {
-            "type": ["string"],
+            "type": [
+              "string"
+            ],
             "format": "binary"
           }
         }
@@ -5300,7 +6120,9 @@
             }
           },
           "http": {
-            "type": ["string"]
+            "type": [
+              "string"
+            ]
           }
         },
         "firstName": {
@@ -5312,7 +6134,9 @@
             }
           },
           "http": {
-            "type": ["string"]
+            "type": [
+              "string"
+            ]
           }
         },
         "id": {
@@ -5324,7 +6148,9 @@
             }
           },
           "http": {
-            "type": ["integer"],
+            "type": [
+              "integer"
+            ],
             "format": "int64"
           }
         },
@@ -5337,7 +6163,9 @@
             }
           },
           "http": {
-            "type": ["string"]
+            "type": [
+              "string"
+            ]
           }
         },
         "password": {
@@ -5349,7 +6177,9 @@
             }
           },
           "http": {
-            "type": ["string"]
+            "type": [
+              "string"
+            ]
           }
         },
         "phone": {
@@ -5361,7 +6191,9 @@
             }
           },
           "http": {
-            "type": ["string"]
+            "type": [
+              "string"
+            ]
           }
         },
         "userStatus": {
@@ -5374,7 +6206,9 @@
             }
           },
           "http": {
-            "type": ["integer"],
+            "type": [
+              "integer"
+            ],
             "format": "int32"
           }
         },
@@ -5387,7 +6221,9 @@
             }
           },
           "http": {
-            "type": ["string"]
+            "type": [
+              "string"
+            ]
           }
         }
       }
@@ -5413,7 +6249,9 @@
             "name": "account",
             "in": "path",
             "schema": {
-              "type": ["string"],
+              "type": [
+                "string"
+              ],
               "maxLength": 5000
             }
           }
@@ -5559,7 +6397,9 @@
               "explode": true
             },
             "expand_json": {
-              "contentType": ["application/json"]
+              "contentType": [
+                "application/json"
+              ]
             },
             "file": {
               "headers": {
@@ -5567,7 +6407,9 @@
                   "explode": false,
                   "argumentName": "headerXRateLimitLimit",
                   "schema": {
-                    "type": ["integer"]
+                    "type": [
+                      "integer"
+                    ]
                   }
                 }
               }
@@ -5602,7 +6444,9 @@
             "explode": false,
             "argumentName": "headerXRateLimitLimit",
             "schema": {
-              "type": ["integer"]
+              "type": [
+                "integer"
+              ]
             }
           }
         }
@@ -5658,7 +6502,9 @@
             "name": "id",
             "in": "path",
             "schema": {
-              "type": ["string"],
+              "type": [
+                "string"
+              ],
               "maxLength": 5000
             }
           }
@@ -5676,7 +6522,10 @@
         "method": "post",
         "security": [
           {
-            "petstore_auth": ["write:pets", "read:pets"]
+            "petstore_auth": [
+              "write:pets",
+              "read:pets"
+            ]
           }
         ],
         "requestBody": {
@@ -5802,7 +6651,9 @@
             "name": "orderId",
             "in": "path",
             "schema": {
-              "type": ["integer"],
+              "type": [
+                "integer"
+              ],
               "format": "int64"
             }
           }
@@ -5823,7 +6674,10 @@
         "method": "delete",
         "security": [
           {
-            "petstore_auth": ["write:pets", "read:pets"]
+            "petstore_auth": [
+              "write:pets",
+              "read:pets"
+            ]
           }
         ],
         "response": {
@@ -5843,7 +6697,9 @@
             "name": "api_key",
             "in": "header",
             "schema": {
-              "type": ["string"]
+              "type": [
+                "string"
+              ]
             }
           }
         },
@@ -5857,7 +6713,9 @@
             "name": "petId",
             "in": "path",
             "schema": {
-              "type": ["integer"],
+              "type": [
+                "integer"
+              ],
               "format": "int64"
             }
           }
@@ -5891,7 +6749,9 @@
             "name": "username",
             "in": "path",
             "schema": {
-              "type": ["string"]
+              "type": [
+                "string"
+              ]
             }
           }
         }
@@ -5943,7 +6803,10 @@
         "method": "put",
         "security": [
           {
-            "petstore_auth": ["write:pets", "read:pets"]
+            "petstore_auth": [
+              "write:pets",
+              "read:pets"
+            ]
           }
         ],
         "requestBody": {
@@ -5977,7 +6840,10 @@
         "method": "post",
         "security": [
           {
-            "petstore_auth": ["write:pets", "read:pets"]
+            "petstore_auth": [
+              "write:pets",
+              "read:pets"
+            ]
           }
         ],
         "response": {
@@ -5998,7 +6864,9 @@
             "name": "name",
             "in": "query",
             "schema": {
-              "type": ["string"]
+              "type": [
+                "string"
+              ]
             }
           }
         },
@@ -6012,7 +6880,9 @@
             "name": "petId",
             "in": "path",
             "schema": {
-              "type": ["integer"],
+              "type": [
+                "integer"
+              ],
               "format": "int64"
             }
           }
@@ -6030,7 +6900,9 @@
             "name": "status",
             "in": "query",
             "schema": {
-              "type": ["string"]
+              "type": [
+                "string"
+              ]
             }
           }
         }
@@ -6050,7 +6922,10 @@
         "method": "post",
         "security": [
           {
-            "petstore_auth": ["write:pets", "read:pets"]
+            "petstore_auth": [
+              "write:pets",
+              "read:pets"
+            ]
           }
         ],
         "requestBody": {
@@ -6074,7 +6949,9 @@
             "name": "additionalMetadata",
             "in": "query",
             "schema": {
-              "type": ["string"]
+              "type": [
+                "string"
+              ]
             }
           }
         },
@@ -6101,7 +6978,9 @@
             "name": "petId",
             "in": "path",
             "schema": {
-              "type": ["integer"],
+              "type": [
+                "integer"
+              ],
               "format": "int64"
             }
           }
@@ -6121,13 +7000,18 @@
           "contentType": "multipart/form-data",
           "encoding": {
             "profileImage": {
-              "contentType": ["image/png", "image/jpeg"],
+              "contentType": [
+                "image/png",
+                "image/jpeg"
+              ],
               "headers": {
                 "X-Rate-Limit-Limit": {
                   "explode": false,
                   "argumentName": "headerXRateLimitLimit",
                   "schema": {
-                    "type": ["integer"]
+                    "type": [
+                      "integer"
+                    ]
                   }
                 }
               }
@@ -6162,7 +7046,9 @@
             "explode": false,
             "argumentName": "headerXRateLimitLimit",
             "schema": {
-              "type": ["integer"]
+              "type": [
+                "integer"
+              ]
             }
           }
         }
@@ -6193,7 +7079,10 @@
       "aggregate_functions": {},
       "comparison_operators": {},
       "representation": {
-        "one_of": ["auto", "never"],
+        "one_of": [
+          "auto",
+          "never"
+        ],
         "type": "enum"
       }
     },
@@ -6201,7 +7090,10 @@
       "aggregate_functions": {},
       "comparison_operators": {},
       "representation": {
-        "one_of": ["AC", "AD"],
+        "one_of": [
+          "AC",
+          "AD"
+        ],
         "type": "enum"
       }
     },
@@ -6209,7 +7101,11 @@
       "aggregate_functions": {},
       "comparison_operators": {},
       "representation": {
-        "one_of": ["", "exclude_tax", "include_inclusive_tax"],
+        "one_of": [
+          "",
+          "exclude_tax",
+          "include_inclusive_tax"
+        ],
         "type": "enum"
       }
     },
@@ -6217,7 +7113,10 @@
       "aggregate_functions": {},
       "comparison_operators": {},
       "representation": {
-        "one_of": ["auto", "required"],
+        "one_of": [
+          "auto",
+          "required"
+        ],
         "type": "enum"
       }
     },
@@ -6225,7 +7124,11 @@
       "aggregate_functions": {},
       "comparison_operators": {},
       "representation": {
-        "one_of": ["automatic", "automatic_async", "manual"],
+        "one_of": [
+          "automatic",
+          "automatic_async",
+          "manual"
+        ],
         "type": "enum"
       }
     },
@@ -6233,7 +7136,11 @@
       "aggregate_functions": {},
       "comparison_operators": {},
       "representation": {
-        "one_of": ["android", "ios", "web"],
+        "one_of": [
+          "android",
+          "ios",
+          "web"
+        ],
         "type": "enum"
       }
     },
@@ -6241,7 +7148,10 @@
       "aggregate_functions": {},
       "comparison_operators": {},
       "representation": {
-        "one_of": ["cad", "usd"],
+        "one_of": [
+          "cad",
+          "usd"
+        ],
         "type": "enum"
       }
     },
@@ -6249,7 +7159,10 @@
       "aggregate_functions": {},
       "comparison_operators": {},
       "representation": {
-        "one_of": ["always", "if_required"],
+        "one_of": [
+          "always",
+          "if_required"
+        ],
         "type": "enum"
       }
     },
@@ -6257,7 +7170,10 @@
       "aggregate_functions": {},
       "comparison_operators": {},
       "representation": {
-        "one_of": ["invoice", "subscription"],
+        "one_of": [
+          "invoice",
+          "subscription"
+        ],
         "type": "enum"
       }
     },
@@ -6265,7 +7181,9 @@
       "aggregate_functions": {},
       "comparison_operators": {},
       "representation": {
-        "one_of": ["bank_transfer"],
+        "one_of": [
+          "bank_transfer"
+        ],
         "type": "enum"
       }
     },
@@ -6273,7 +7191,12 @@
       "aggregate_functions": {},
       "comparison_operators": {},
       "representation": {
-        "one_of": ["day", "month", "week", "year"],
+        "one_of": [
+          "day",
+          "month",
+          "week",
+          "year"
+        ],
         "type": "enum"
       }
     },
@@ -6281,7 +7204,11 @@
       "aggregate_functions": {},
       "comparison_operators": {},
       "representation": {
-        "one_of": ["auto", "bg", "cs"],
+        "one_of": [
+          "auto",
+          "bg",
+          "cs"
+        ],
         "type": "enum"
       }
     },
@@ -6289,7 +7216,11 @@
       "aggregate_functions": {},
       "comparison_operators": {},
       "representation": {
-        "one_of": ["cancel", "create_invoice", "pause"],
+        "one_of": [
+          "cancel",
+          "create_invoice",
+          "pause"
+        ],
         "type": "enum"
       }
     },
@@ -6297,7 +7228,11 @@
       "aggregate_functions": {},
       "comparison_operators": {},
       "representation": {
-        "one_of": ["payment", "setup", "subscription"],
+        "one_of": [
+          "payment",
+          "setup",
+          "subscription"
+        ],
         "type": "enum"
       }
     },
@@ -6305,7 +7240,10 @@
       "aggregate_functions": {},
       "comparison_operators": {},
       "representation": {
-        "one_of": ["auto", "never"],
+        "one_of": [
+          "auto",
+          "never"
+        ],
         "type": "enum"
       }
     },
@@ -6313,7 +7251,10 @@
       "aggregate_functions": {},
       "comparison_operators": {},
       "representation": {
-        "one_of": ["always", "if_required"],
+        "one_of": [
+          "always",
+          "if_required"
+        ],
         "type": "enum"
       }
     },
@@ -6321,7 +7262,10 @@
       "aggregate_functions": {},
       "comparison_operators": {},
       "representation": {
-        "one_of": ["acss_debit", "affirm"],
+        "one_of": [
+          "acss_debit",
+          "affirm"
+        ],
         "type": "enum"
       }
     },
@@ -6329,7 +7273,11 @@
       "aggregate_functions": {},
       "comparison_operators": {},
       "representation": {
-        "one_of": ["combined", "interval", "sporadic"],
+        "one_of": [
+          "combined",
+          "interval",
+          "sporadic"
+        ],
         "type": "enum"
       }
     },
@@ -6337,7 +7285,12 @@
       "aggregate_functions": {},
       "comparison_operators": {},
       "representation": {
-        "one_of": ["balances", "ownership", "payment_method", "transactions"],
+        "one_of": [
+          "balances",
+          "ownership",
+          "payment_method",
+          "transactions"
+        ],
         "type": "enum"
       }
     },
@@ -6345,7 +7298,10 @@
       "aggregate_functions": {},
       "comparison_operators": {},
       "representation": {
-        "one_of": ["auto", "hidden"],
+        "one_of": [
+          "auto",
+          "hidden"
+        ],
         "type": "enum"
       }
     },
@@ -6353,7 +7309,10 @@
       "aggregate_functions": {},
       "comparison_operators": {},
       "representation": {
-        "one_of": ["cs-CZ", "da-DK"],
+        "one_of": [
+          "cs-CZ",
+          "da-DK"
+        ],
         "type": "enum"
       }
     },
@@ -6361,7 +7320,10 @@
       "aggregate_functions": {},
       "comparison_operators": {},
       "representation": {
-        "one_of": ["balances", "transactions"],
+        "one_of": [
+          "balances",
+          "transactions"
+        ],
         "type": "enum"
       }
     },
@@ -6369,7 +7331,10 @@
       "aggregate_functions": {},
       "comparison_operators": {},
       "representation": {
-        "one_of": ["auto", "none"],
+        "one_of": [
+          "auto",
+          "none"
+        ],
         "type": "enum"
       }
     },
@@ -6377,7 +7342,10 @@
       "aggregate_functions": {},
       "comparison_operators": {},
       "representation": {
-        "one_of": ["create_prorations", "none"],
+        "one_of": [
+          "create_prorations",
+          "none"
+        ],
         "type": "enum"
       }
     },
@@ -6385,7 +7353,11 @@
       "aggregate_functions": {},
       "comparison_operators": {},
       "representation": {
-        "one_of": ["always", "if_required", "never"],
+        "one_of": [
+          "always",
+          "if_required",
+          "never"
+        ],
         "type": "enum"
       }
     },
@@ -6393,7 +7365,11 @@
       "aggregate_functions": {},
       "comparison_operators": {},
       "representation": {
-        "one_of": ["any", "automatic", "challenge"],
+        "one_of": [
+          "any",
+          "automatic",
+          "challenge"
+        ],
         "type": "enum"
       }
     },
@@ -6401,7 +7377,10 @@
       "aggregate_functions": {},
       "comparison_operators": {},
       "representation": {
-        "one_of": ["aba", "iban"],
+        "one_of": [
+          "aba",
+          "iban"
+        ],
         "type": "enum"
       }
     },
@@ -6409,7 +7388,10 @@
       "aggregate_functions": {},
       "comparison_operators": {},
       "representation": {
-        "one_of": ["off_session", "on_session"],
+        "one_of": [
+          "off_session",
+          "on_session"
+        ],
         "type": "enum"
       }
     },
@@ -6417,7 +7399,10 @@
       "aggregate_functions": {},
       "comparison_operators": {},
       "representation": {
-        "one_of": ["auto", "never"],
+        "one_of": [
+          "auto",
+          "never"
+        ],
         "type": "enum"
       }
     },
@@ -6425,7 +7410,12 @@
       "aggregate_functions": {},
       "comparison_operators": {},
       "representation": {
-        "one_of": ["auto", "book", "donate", "pay"],
+        "one_of": [
+          "auto",
+          "book",
+          "donate",
+          "pay"
+        ],
         "type": "enum"
       }
     },
@@ -6433,7 +7423,11 @@
       "aggregate_functions": {},
       "comparison_operators": {},
       "representation": {
-        "one_of": ["exclusive", "inclusive", "unspecified"],
+        "one_of": [
+          "exclusive",
+          "inclusive",
+          "unspecified"
+        ],
         "type": "enum"
       }
     },
@@ -6441,7 +7435,10 @@
       "aggregate_functions": {},
       "comparison_operators": {},
       "representation": {
-        "one_of": ["none", "required"],
+        "one_of": [
+          "none",
+          "required"
+        ],
         "type": "enum"
       }
     },
@@ -6449,7 +7446,10 @@
       "aggregate_functions": {},
       "comparison_operators": {},
       "representation": {
-        "one_of": ["business", "personal"],
+        "one_of": [
+          "business",
+          "personal"
+        ],
         "type": "enum"
       }
     },
@@ -6457,7 +7457,10 @@
       "aggregate_functions": {},
       "comparison_operators": {},
       "representation": {
-        "one_of": ["account", "self"],
+        "one_of": [
+          "account",
+          "self"
+        ],
         "type": "enum"
       }
     },
@@ -6465,7 +7468,10 @@
       "aggregate_functions": {},
       "comparison_operators": {},
       "representation": {
-        "one_of": ["embedded", "hosted"],
+        "one_of": [
+          "embedded",
+          "hosted"
+        ],
         "type": "enum"
       }
     },
@@ -6473,7 +7479,13 @@
       "aggregate_functions": {},
       "comparison_operators": {},
       "representation": {
-        "one_of": ["business_day", "day", "hour", "month", "week"],
+        "one_of": [
+          "business_day",
+          "day",
+          "hour",
+          "month",
+          "week"
+        ],
         "type": "enum"
       }
     },
@@ -6481,7 +7493,11 @@
       "aggregate_functions": {},
       "comparison_operators": {},
       "representation": {
-        "one_of": ["automatic", "instant", "microdeposits"],
+        "one_of": [
+          "automatic",
+          "instant",
+          "microdeposits"
+        ],
         "type": "enum"
       }
     },
@@ -6530,7 +7546,10 @@
       "aggregate_functions": {},
       "comparison_operators": {},
       "representation": {
-        "one_of": ["charge_automatically", "send_invoice"],
+        "one_of": [
+          "charge_automatically",
+          "send_invoice"
+        ],
         "type": "enum"
       }
     },
@@ -6538,7 +7557,9 @@
       "aggregate_functions": {},
       "comparison_operators": {},
       "representation": {
-        "one_of": ["list"],
+        "one_of": [
+          "list"
+        ],
         "type": "enum"
       }
     },
@@ -6546,7 +7567,13 @@
       "aggregate_functions": {},
       "comparison_operators": {},
       "representation": {
-        "one_of": ["draft", "open", "paid", "uncollectible", "void"],
+        "one_of": [
+          "draft",
+          "open",
+          "paid",
+          "uncollectible",
+          "void"
+        ],
         "type": "enum"
       }
     },
@@ -6561,7 +7588,11 @@
       "aggregate_functions": {},
       "comparison_operators": {},
       "representation": {
-        "one_of": ["placed", "approved", "delivered"],
+        "one_of": [
+          "placed",
+          "approved",
+          "delivered"
+        ],
         "type": "enum"
       }
     },
@@ -6576,7 +7607,11 @@
       "aggregate_functions": {},
       "comparison_operators": {},
       "representation": {
-        "one_of": ["available", "pending", "sold"],
+        "one_of": [
+          "available",
+          "pending",
+          "sold"
+        ],
         "type": "enum"
       }
     },
@@ -6584,7 +7619,9 @@
       "aggregate_functions": {},
       "comparison_operators": {},
       "representation": {
-        "one_of": ["custom"],
+        "one_of": [
+          "custom"
+        ],
         "type": "enum"
       }
     },
@@ -6592,7 +7629,11 @@
       "aggregate_functions": {},
       "comparison_operators": {},
       "representation": {
-        "one_of": ["dropdown", "numeric", "text"],
+        "one_of": [
+          "dropdown",
+          "numeric",
+          "text"
+        ],
         "type": "enum"
       }
     },
@@ -6600,7 +7641,11 @@
       "aggregate_functions": {},
       "comparison_operators": {},
       "representation": {
-        "one_of": ["none", "off_session", "on_session"],
+        "one_of": [
+          "none",
+          "off_session",
+          "on_session"
+        ],
         "type": "enum"
       }
     },
@@ -6608,7 +7653,9 @@
       "aggregate_functions": {},
       "comparison_operators": {},
       "representation": {
-        "one_of": ["none"],
+        "one_of": [
+          "none"
+        ],
         "type": "enum"
       }
     },
@@ -6616,7 +7663,9 @@
       "aggregate_functions": {},
       "comparison_operators": {},
       "representation": {
-        "one_of": ["none"],
+        "one_of": [
+          "none"
+        ],
         "type": "enum"
       }
     },
@@ -6624,7 +7673,9 @@
       "aggregate_functions": {},
       "comparison_operators": {},
       "representation": {
-        "one_of": ["none"],
+        "one_of": [
+          "none"
+        ],
         "type": "enum"
       }
     },
@@ -6632,7 +7683,9 @@
       "aggregate_functions": {},
       "comparison_operators": {},
       "representation": {
-        "one_of": ["none"],
+        "one_of": [
+          "none"
+        ],
         "type": "enum"
       }
     },
@@ -6640,7 +7693,11 @@
       "aggregate_functions": {},
       "comparison_operators": {},
       "representation": {
-        "one_of": ["none", "off_session", "on_session"],
+        "one_of": [
+          "none",
+          "off_session",
+          "on_session"
+        ],
         "type": "enum"
       }
     },
@@ -6648,7 +7705,9 @@
       "aggregate_functions": {},
       "comparison_operators": {},
       "representation": {
-        "one_of": ["none"],
+        "one_of": [
+          "none"
+        ],
         "type": "enum"
       }
     },
@@ -6656,7 +7715,11 @@
       "aggregate_functions": {},
       "comparison_operators": {},
       "representation": {
-        "one_of": ["none", "off_session", "on_session"],
+        "one_of": [
+          "none",
+          "off_session",
+          "on_session"
+        ],
         "type": "enum"
       }
     },
@@ -6664,7 +7727,11 @@
       "aggregate_functions": {},
       "comparison_operators": {},
       "representation": {
-        "one_of": ["none", "off_session", "on_session"],
+        "one_of": [
+          "none",
+          "off_session",
+          "on_session"
+        ],
         "type": "enum"
       }
     },
@@ -6672,7 +7739,10 @@
       "aggregate_functions": {},
       "comparison_operators": {},
       "representation": {
-        "one_of": ["eu_bank_transfer", "gb_bank_transfer"],
+        "one_of": [
+          "eu_bank_transfer",
+          "gb_bank_transfer"
+        ],
         "type": "enum"
       }
     },
@@ -6680,7 +7750,9 @@
       "aggregate_functions": {},
       "comparison_operators": {},
       "representation": {
-        "one_of": ["none"],
+        "one_of": [
+          "none"
+        ],
         "type": "enum"
       }
     },
@@ -6688,7 +7760,9 @@
       "aggregate_functions": {},
       "comparison_operators": {},
       "representation": {
-        "one_of": ["none"],
+        "one_of": [
+          "none"
+        ],
         "type": "enum"
       }
     },
@@ -6696,7 +7770,9 @@
       "aggregate_functions": {},
       "comparison_operators": {},
       "representation": {
-        "one_of": ["none"],
+        "one_of": [
+          "none"
+        ],
         "type": "enum"
       }
     },
@@ -6704,7 +7780,9 @@
       "aggregate_functions": {},
       "comparison_operators": {},
       "representation": {
-        "one_of": ["none"],
+        "one_of": [
+          "none"
+        ],
         "type": "enum"
       }
     },
@@ -6712,7 +7790,9 @@
       "aggregate_functions": {},
       "comparison_operators": {},
       "representation": {
-        "one_of": ["none"],
+        "one_of": [
+          "none"
+        ],
         "type": "enum"
       }
     },
@@ -6720,7 +7800,9 @@
       "aggregate_functions": {},
       "comparison_operators": {},
       "representation": {
-        "one_of": ["none"],
+        "one_of": [
+          "none"
+        ],
         "type": "enum"
       }
     },
@@ -6728,7 +7810,9 @@
       "aggregate_functions": {},
       "comparison_operators": {},
       "representation": {
-        "one_of": ["none"],
+        "one_of": [
+          "none"
+        ],
         "type": "enum"
       }
     },
@@ -6736,7 +7820,9 @@
       "aggregate_functions": {},
       "comparison_operators": {},
       "representation": {
-        "one_of": ["none"],
+        "one_of": [
+          "none"
+        ],
         "type": "enum"
       }
     },
@@ -6744,7 +7830,10 @@
       "aggregate_functions": {},
       "comparison_operators": {},
       "representation": {
-        "one_of": ["none", "off_session"],
+        "one_of": [
+          "none",
+          "off_session"
+        ],
         "type": "enum"
       }
     },
@@ -6752,7 +7841,9 @@
       "aggregate_functions": {},
       "comparison_operators": {},
       "representation": {
-        "one_of": ["none"],
+        "one_of": [
+          "none"
+        ],
         "type": "enum"
       }
     },
@@ -6760,7 +7851,9 @@
       "aggregate_functions": {},
       "comparison_operators": {},
       "representation": {
-        "one_of": ["none"],
+        "one_of": [
+          "none"
+        ],
         "type": "enum"
       }
     },
@@ -6768,7 +7861,9 @@
       "aggregate_functions": {},
       "comparison_operators": {},
       "representation": {
-        "one_of": ["none"],
+        "one_of": [
+          "none"
+        ],
         "type": "enum"
       }
     },
@@ -6776,7 +7871,10 @@
       "aggregate_functions": {},
       "comparison_operators": {},
       "representation": {
-        "one_of": ["", "manual"],
+        "one_of": [
+          "",
+          "manual"
+        ],
         "type": "enum"
       }
     },
@@ -6784,7 +7882,11 @@
       "aggregate_functions": {},
       "comparison_operators": {},
       "representation": {
-        "one_of": ["", "none", "off_session"],
+        "one_of": [
+          "",
+          "none",
+          "off_session"
+        ],
         "type": "enum"
       }
     },
@@ -6792,7 +7894,10 @@
       "aggregate_functions": {},
       "comparison_operators": {},
       "representation": {
-        "one_of": ["none", "off_session"],
+        "one_of": [
+          "none",
+          "off_session"
+        ],
         "type": "enum"
       }
     },
@@ -6800,7 +7905,11 @@
       "aggregate_functions": {},
       "comparison_operators": {},
       "representation": {
-        "one_of": ["none", "off_session", "on_session"],
+        "one_of": [
+          "none",
+          "off_session",
+          "on_session"
+        ],
         "type": "enum"
       }
     },
@@ -6808,7 +7917,9 @@
       "aggregate_functions": {},
       "comparison_operators": {},
       "representation": {
-        "one_of": ["none"],
+        "one_of": [
+          "none"
+        ],
         "type": "enum"
       }
     },
@@ -6816,7 +7927,11 @@
       "aggregate_functions": {},
       "comparison_operators": {},
       "representation": {
-        "one_of": ["none", "off_session", "on_session"],
+        "one_of": [
+          "none",
+          "off_session",
+          "on_session"
+        ],
         "type": "enum"
       }
     },
@@ -6824,7 +7939,10 @@
       "aggregate_functions": {},
       "comparison_operators": {},
       "representation": {
-        "one_of": ["automatic", "instant"],
+        "one_of": [
+          "automatic",
+          "instant"
+        ],
         "type": "enum"
       }
     },
@@ -6832,7 +7950,9 @@
       "aggregate_functions": {},
       "comparison_operators": {},
       "representation": {
-        "one_of": ["none"],
+        "one_of": [
+          "none"
+        ],
         "type": "enum"
       }
     },
@@ -6840,7 +7960,9 @@
       "aggregate_functions": {},
       "comparison_operators": {},
       "representation": {
-        "one_of": ["fixed_amount"],
+        "one_of": [
+          "fixed_amount"
+        ],
         "type": "enum"
       }
     },
@@ -6848,7 +7970,11 @@
       "aggregate_functions": {},
       "comparison_operators": {},
       "representation": {
-        "one_of": ["placed", "approved", "delivered"],
+        "one_of": [
+          "placed",
+          "approved",
+          "delivered"
+        ],
         "type": "enum"
       }
     },
@@ -6892,7 +8018,9 @@
       "aggregate_functions": {},
       "comparison_operators": {},
       "representation": {
-        "one_of": ["treasury.inbound_transfer"],
+        "one_of": [
+          "treasury.inbound_transfer"
+        ],
         "type": "enum"
       }
     },
@@ -6900,7 +8028,12 @@
       "aggregate_functions": {},
       "comparison_operators": {},
       "representation": {
-        "one_of": ["canceled", "failed", "processing", "succeeded"],
+        "one_of": [
+          "canceled",
+          "failed",
+          "processing",
+          "succeeded"
+        ],
         "type": "enum"
       }
     },

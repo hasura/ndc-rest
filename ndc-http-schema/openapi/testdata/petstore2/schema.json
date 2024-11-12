@@ -157,6 +157,16 @@
               "type": "named"
             }
           }
+        },
+        "start_date": {
+          "description": "The date that the IP address was entered into warmup.",
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "JSON",
+              "type": "named"
+            }
+          }
         }
       },
       "description": "List OAuth 2.0 Clients",
@@ -368,6 +378,16 @@
             "type": "nullable",
             "underlying_type": {
               "name": "Category",
+              "type": "named"
+            }
+          }
+        },
+        "field": {
+          "description": "This empty field is returned instead of the list of scopes if the user making the call doesn't have the authorization required.",
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "JSON",
               "type": "named"
             }
           }

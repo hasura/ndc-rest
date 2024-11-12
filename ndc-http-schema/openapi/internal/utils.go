@@ -5,6 +5,7 @@ import (
 	"log/slog"
 	"slices"
 	"strings"
+	"unicode"
 
 	rest "github.com/hasura/ndc-http/ndc-http-schema/schema"
 	"github.com/hasura/ndc-http/ndc-http-schema/utils"
@@ -48,11 +49,21 @@ func getSchemaRefTypeNameV3(name string) string {
 	return result[1]
 }
 
-func getScalarFromType(sm *rest.NDCHttpSchema, names []string, format string, enumNodes []*yaml.Node, apiPath string, fieldPaths []string) string {
+func getScalarFromType(sm *rest.NDCHttpSchema, names []string, format string, enumNodes []*yaml.Node, apiPath string, fieldPaths []string) (string, bool) {
 	var scalarName string
 	var scalarType *schema.ScalarType
+	var typeNames []string
+	var nullable bool
 
-	if len(names) != 1 {
+	for _, name := range names {
+		if name == "null" {
+			nullable = true
+		} else {
+			typeNames = append(typeNames, name)
+		}
+	}
+
+	if len(typeNames) != 1 {
 		scalarName = "JSON"
 		scalarType = defaultScalarTypes[rest.ScalarJSON]
 	} else {
@@ -114,7 +125,8 @@ func getScalarFromType(sm *rest.NDCHttpSchema, names []string, format string, en
 					scalarName = utils.StringSliceToPascalCase([]string{resourceName, enumName})
 					if canSetEnumToSchema(sm, scalarName, enums) {
 						sm.ScalarTypes[scalarName] = *scalarType
-						return scalarName
+
+						return scalarName, nullable
 					}
 				}
 
@@ -122,7 +134,8 @@ func getScalarFromType(sm *rest.NDCHttpSchema, names []string, format string, en
 				scalarName = utils.StringSliceToPascalCase(fieldPaths)
 				if canSetEnumToSchema(sm, scalarName, enums) {
 					sm.ScalarTypes[scalarName] = *scalarType
-					return scalarName
+
+					return scalarName, nullable
 				}
 
 				// 3. Reuse above name with Enum suffix
@@ -130,7 +143,8 @@ func getScalarFromType(sm *rest.NDCHttpSchema, names []string, format string, en
 				if _, ok := sm.ScalarTypes[scalarName]; !ok {
 					sm.ScalarTypes[scalarName] = *scalarType
 				}
-				return scalarName
+
+				return scalarName, nullable
 			}
 
 			switch format {
@@ -171,7 +185,7 @@ func getScalarFromType(sm *rest.NDCHttpSchema, names []string, format string, en
 	if _, ok := sm.ScalarTypes[scalarName]; !ok {
 		sm.ScalarTypes[scalarName] = *scalarType
 	}
-	return scalarName
+	return scalarName, nullable
 }
 
 func canSetEnumToSchema(sm *rest.NDCHttpSchema, scalarName string, enums []string) bool {
@@ -188,12 +202,26 @@ func canSetEnumToSchema(sm *rest.NDCHttpSchema, scalarName string, enums []strin
 	return false
 }
 
+// remove nullable types from raw OpenAPI types
+func evaluateOpenAPITypes(input []string) []string {
+	var typeNames []string
+	for _, t := range input {
+		if t != "null" {
+			typeNames = append(typeNames, t)
+		}
+	}
+
+	return typeNames
+}
+
 func createSchemaFromOpenAPISchema(input *base.Schema) *rest.TypeSchema {
-	ps := &rest.TypeSchema{}
+	ps := &rest.TypeSchema{
+		Type: []string{},
+	}
 	if input == nil {
 		return ps
 	}
-	ps.Type = input.Type
+	ps.Type = evaluateOpenAPITypes(input.Type)
 	ps.Format = input.Format
 	ps.Pattern = input.Pattern
 	ps.Maximum = input.Maximum
@@ -253,7 +281,7 @@ func convertSecurity(security *base.SecurityRequirement) rest.AuthSecurity {
 // check if the OAS type is a scalar
 func isPrimitiveScalar(names []string) bool {
 	for _, name := range names {
-		if !slices.Contains([]string{"boolean", "integer", "number", "string", "file", "long"}, name) {
+		if !slices.Contains([]string{"boolean", "integer", "number", "string", "file", "long", "null"}, name) {
 			return false
 		}
 	}
@@ -373,4 +401,28 @@ func errParameterSchemaEmpty(fieldPaths []string) error {
 // redirection and information response status codes aren't supported
 func isUnsupportedResponseCodes[T int | int64](code T) bool {
 	return code < 200 || (code >= 300 && code < 400)
+}
+
+// format the operation name and remove special characters
+func formatOperationName(input string) string {
+	if input == "" {
+		return ""
+	}
+
+	sb := strings.Builder{}
+	for i, c := range input {
+		if unicode.IsLetter(c) {
+			sb.WriteRune(c)
+			continue
+		}
+
+		if unicode.IsNumber(c) && i > 0 {
+			sb.WriteRune(c)
+			continue
+		}
+
+		sb.WriteRune('_')
+	}
+
+	return sb.String()
 }

@@ -5,6 +5,7 @@ import (
 
 	"github.com/hasura/ndc-http/ndc-http-schema/openapi/internal"
 	rest "github.com/hasura/ndc-http/ndc-http-schema/schema"
+	"github.com/hasura/ndc-http/ndc-http-schema/utils"
 	"github.com/pb33f/libopenapi"
 )
 
@@ -12,6 +13,7 @@ type ConvertOptions internal.ConvertOptions
 
 // OpenAPIv3ToNDCSchema converts OpenAPI v3 JSON bytes to NDC HTTP schema
 func OpenAPIv3ToNDCSchema(input []byte, options ConvertOptions) (*rest.NDCHttpSchema, []error) {
+	input = utils.RemoveYAMLSpecialCharacters(input)
 	document, err := libopenapi.NewDocument(input)
 	if err != nil {
 		return nil, []error{err}

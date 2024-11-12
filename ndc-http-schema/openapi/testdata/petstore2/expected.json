@@ -4,8 +4,8 @@
     "servers": [
       {
         "url": {
-          "env": "SERVER_URL",
-          "value": "https://petstore.swagger.io/v2"
+          "value": "https://petstore.swagger.io/v2",
+          "env": "SERVER_URL"
         }
       }
     ],
@@ -48,7 +48,10 @@
         "method": "get",
         "security": [
           {
-            "petstore_auth": ["write:pets", "read:pets"]
+            "petstore_auth": [
+              "write:pets",
+              "read:pets"
+            ]
           }
         ],
         "response": {
@@ -69,13 +72,14 @@
             "name": "status",
             "in": "query",
             "schema": {
-              "type": ["array"]
+              "type": [
+                "array"
+              ]
             }
           }
         }
       },
       "description": "Finds Pets by status",
-      "name": "findPetsByStatus",
       "result_type": {
         "element_type": {
           "name": "Pet",
@@ -90,7 +94,10 @@
         "method": "get",
         "security": [
           {
-            "petstore_auth": ["write:pets", "read:pets"]
+            "petstore_auth": [
+              "write:pets",
+              "read:pets"
+            ]
           }
         ],
         "response": {
@@ -111,13 +118,14 @@
             "name": "tags",
             "in": "query",
             "schema": {
-              "type": ["array"]
+              "type": [
+                "array"
+              ]
             }
           }
         }
       },
       "description": "Finds Pets by tags",
-      "name": "findPetsByTags",
       "result_type": {
         "element_type": {
           "name": "Pet",
@@ -141,7 +149,6 @@
       },
       "arguments": {},
       "description": "Returns pet inventories by status",
-      "name": "getInventory",
       "result_type": {
         "name": "JSON",
         "type": "named"
@@ -166,7 +173,9 @@
             "name": "orderId",
             "in": "path",
             "schema": {
-              "type": ["integer"],
+              "type": [
+                "integer"
+              ],
               "maximum": 10,
               "minimum": 1
             }
@@ -174,7 +183,6 @@
         }
       },
       "description": "Find purchase order by ID",
-      "name": "getOrderById",
       "result_type": {
         "name": "Order",
         "type": "named"
@@ -204,13 +212,14 @@
             "name": "petId",
             "in": "path",
             "schema": {
-              "type": ["integer"]
+              "type": [
+                "integer"
+              ]
             }
           }
         }
       },
       "description": "Find pet by ID",
-      "name": "getPetById",
       "result_type": {
         "name": "Pet",
         "type": "named"
@@ -226,7 +235,6 @@
       },
       "arguments": {},
       "description": "Get snake",
-      "name": "getSnake",
       "result_type": {
         "name": "SnakeObject",
         "type": "named"
@@ -251,13 +259,14 @@
             "name": "username",
             "in": "path",
             "schema": {
-              "type": ["string"]
+              "type": [
+                "string"
+              ]
             }
           }
         }
       },
       "description": "Get user by user name",
-      "name": "getUserByName",
       "result_type": {
         "name": "User",
         "type": "named"
@@ -285,7 +294,9 @@
             "name": "client_name",
             "in": "query",
             "schema": {
-              "type": ["string"]
+              "type": [
+                "string"
+              ]
             }
           }
         },
@@ -302,7 +313,9 @@
             "name": "limit",
             "in": "query",
             "schema": {
-              "type": ["integer"]
+              "type": [
+                "integer"
+              ]
             }
           }
         },
@@ -319,7 +332,9 @@
             "name": "offset",
             "in": "query",
             "schema": {
-              "type": ["integer"]
+              "type": [
+                "integer"
+              ]
             }
           }
         },
@@ -336,13 +351,31 @@
             "name": "owner",
             "in": "query",
             "schema": {
-              "type": ["string"]
+              "type": [
+                "string"
+              ]
+            }
+          }
+        },
+        "start_date": {
+          "description": "The date that the IP address was entered into warmup.",
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "JSON",
+              "type": "named"
+            }
+          },
+          "http": {
+            "name": "start_date",
+            "in": "query",
+            "schema": {
+              "type": null
             }
           }
         }
       },
       "description": "List OAuth 2.0 Clients",
-      "name": "listOAuth2Clients",
       "result_type": {
         "element_type": {
           "name": "OAuth2Client",
@@ -370,7 +403,9 @@
             "name": "password",
             "in": "query",
             "schema": {
-              "type": ["string"]
+              "type": [
+                "string"
+              ]
             }
           }
         },
@@ -384,13 +419,14 @@
             "name": "username",
             "in": "query",
             "schema": {
-              "type": ["string"]
+              "type": [
+                "string"
+              ]
             }
           }
         }
       },
       "description": "Logs user into the system",
-      "name": "loginUser",
       "result_type": {
         "name": "String",
         "type": "named"
@@ -409,7 +445,9 @@
             }
           },
           "http": {
-            "type": ["integer"],
+            "type": [
+              "integer"
+            ],
             "format": "int32"
           }
         },
@@ -422,7 +460,9 @@
             }
           },
           "http": {
-            "type": ["string"]
+            "type": [
+              "string"
+            ]
           }
         },
         "type": {
@@ -434,7 +474,9 @@
             }
           },
           "http": {
-            "type": ["string"]
+            "type": [
+              "string"
+            ]
           }
         }
       }
@@ -450,7 +492,9 @@
             }
           },
           "http": {
-            "type": ["integer"],
+            "type": [
+              "integer"
+            ],
             "format": "int64"
           }
         },
@@ -463,7 +507,9 @@
             }
           },
           "http": {
-            "type": ["string"]
+            "type": [
+              "string"
+            ]
           }
         }
       }
@@ -480,7 +526,9 @@
             }
           },
           "http": {
-            "type": ["string"]
+            "type": [
+              "string"
+            ]
           }
         },
         "client_name": {
@@ -493,7 +541,9 @@
             }
           },
           "http": {
-            "type": ["string"]
+            "type": [
+              "string"
+            ]
           }
         },
         "client_secret": {
@@ -506,7 +556,9 @@
             }
           },
           "http": {
-            "type": ["string"]
+            "type": [
+              "string"
+            ]
           }
         },
         "client_secret_expires_at": {
@@ -519,7 +571,9 @@
             }
           },
           "http": {
-            "type": ["integer"],
+            "type": [
+              "integer"
+            ],
             "format": "int64"
           }
         },
@@ -533,7 +587,9 @@
             }
           },
           "http": {
-            "type": ["string"]
+            "type": [
+              "string"
+            ]
           }
         }
       }
@@ -549,7 +605,9 @@
             }
           },
           "http": {
-            "type": ["boolean"]
+            "type": [
+              "boolean"
+            ]
           }
         },
         "id": {
@@ -561,7 +619,9 @@
             }
           },
           "http": {
-            "type": ["integer"],
+            "type": [
+              "integer"
+            ],
             "format": "int64"
           }
         },
@@ -574,7 +634,9 @@
             }
           },
           "http": {
-            "type": ["integer"],
+            "type": [
+              "integer"
+            ],
             "format": "int64"
           }
         },
@@ -587,7 +649,9 @@
             }
           },
           "http": {
-            "type": ["integer"],
+            "type": [
+              "integer"
+            ],
             "format": "int32"
           }
         },
@@ -600,7 +664,9 @@
             }
           },
           "http": {
-            "type": ["string"],
+            "type": [
+              "string"
+            ],
             "format": "date-time"
           }
         },
@@ -614,7 +680,9 @@
             }
           },
           "http": {
-            "type": ["string"]
+            "type": [
+              "string"
+            ]
           }
         }
       }
@@ -630,7 +698,22 @@
             }
           },
           "http": {
-            "type": ["object"]
+            "type": [
+              "object"
+            ]
+          }
+        },
+        "field": {
+          "description": "This empty field is returned instead of the list of scopes if the user making the call doesn't have the authorization required.",
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "JSON",
+              "type": "named"
+            }
+          },
+          "http": {
+            "type": null
           }
         },
         "id": {
@@ -642,7 +725,9 @@
             }
           },
           "http": {
-            "type": ["integer"],
+            "type": [
+              "integer"
+            ],
             "format": "int64"
           }
         },
@@ -652,7 +737,9 @@
             "type": "named"
           },
           "http": {
-            "type": ["string"]
+            "type": [
+              "string"
+            ]
           }
         },
         "photoUrls": {
@@ -664,9 +751,13 @@
             "type": "array"
           },
           "http": {
-            "type": ["array"],
+            "type": [
+              "array"
+            ],
             "items": {
-              "type": ["string"]
+              "type": [
+                "string"
+              ]
             }
           }
         },
@@ -680,7 +771,9 @@
             }
           },
           "http": {
-            "type": ["string"]
+            "type": [
+              "string"
+            ]
           }
         },
         "tags": {
@@ -695,7 +788,9 @@
             }
           },
           "http": {
-            "type": ["array"]
+            "type": [
+              "array"
+            ]
           }
         }
       }
@@ -723,7 +818,9 @@
             }
           },
           "http": {
-            "type": ["integer"],
+            "type": [
+              "integer"
+            ],
             "format": "int64"
           }
         },
@@ -736,7 +833,9 @@
             }
           },
           "http": {
-            "type": ["string"]
+            "type": [
+              "string"
+            ]
           }
         }
       }
@@ -752,7 +851,9 @@
             }
           },
           "http": {
-            "type": ["integer"],
+            "type": [
+              "integer"
+            ],
             "format": "int64"
           }
         },
@@ -765,7 +866,9 @@
             }
           },
           "http": {
-            "type": ["string"]
+            "type": [
+              "string"
+            ]
           }
         }
       }
@@ -782,7 +885,9 @@
             }
           },
           "http": {
-            "type": ["string"]
+            "type": [
+              "string"
+            ]
           }
         },
         "status": {
@@ -795,7 +900,9 @@
             }
           },
           "http": {
-            "type": ["string"]
+            "type": [
+              "string"
+            ]
           }
         }
       }
@@ -812,7 +919,9 @@
             }
           },
           "http": {
-            "type": ["string"]
+            "type": [
+              "string"
+            ]
           }
         },
         "file": {
@@ -825,7 +934,9 @@
             }
           },
           "http": {
-            "type": ["file"]
+            "type": [
+              "file"
+            ]
           }
         }
       }
@@ -841,7 +952,9 @@
             }
           },
           "http": {
-            "type": ["string"]
+            "type": [
+              "string"
+            ]
           }
         },
         "firstName": {
@@ -853,7 +966,9 @@
             }
           },
           "http": {
-            "type": ["string"]
+            "type": [
+              "string"
+            ]
           }
         },
         "id": {
@@ -865,7 +980,9 @@
             }
           },
           "http": {
-            "type": ["integer"],
+            "type": [
+              "integer"
+            ],
             "format": "int64"
           }
         },
@@ -878,7 +995,9 @@
             }
           },
           "http": {
-            "type": ["string"]
+            "type": [
+              "string"
+            ]
           }
         },
         "password": {
@@ -890,7 +1009,9 @@
             }
           },
           "http": {
-            "type": ["string"]
+            "type": [
+              "string"
+            ]
           }
         },
         "phone": {
@@ -902,7 +1023,9 @@
             }
           },
           "http": {
-            "type": ["string"]
+            "type": [
+              "string"
+            ]
           }
         },
         "userStatus": {
@@ -915,7 +1038,9 @@
             }
           },
           "http": {
-            "type": ["integer"],
+            "type": [
+              "integer"
+            ],
             "format": "int32"
           }
         },
@@ -928,7 +1053,9 @@
             }
           },
           "http": {
-            "type": ["string"]
+            "type": [
+              "string"
+            ]
           }
         }
       }
@@ -941,7 +1068,10 @@
         "method": "post",
         "security": [
           {
-            "petstore_auth": ["write:pets", "read:pets"]
+            "petstore_auth": [
+              "write:pets",
+              "read:pets"
+            ]
           }
         ],
         "requestBody": {
@@ -961,13 +1091,14 @@
           "http": {
             "in": "body",
             "schema": {
-              "type": ["object"]
+              "type": [
+                "object"
+              ]
             }
           }
         }
       },
       "description": "Add a new pet to the store",
-      "name": "addPet",
       "result_type": {
         "type": "nullable",
         "underlying_type": {
@@ -986,7 +1117,6 @@
       },
       "arguments": {},
       "description": "Create snake",
-      "name": "addSnake",
       "result_type": {
         "name": "SnakeObject",
         "type": "named"
@@ -1011,14 +1141,15 @@
             "name": "orderId",
             "in": "path",
             "schema": {
-              "type": ["integer"],
+              "type": [
+                "integer"
+              ],
               "minimum": 1
             }
           }
         }
       },
       "description": "Delete purchase order by ID",
-      "name": "deleteOrder",
       "result_type": {
         "type": "nullable",
         "underlying_type": {
@@ -1033,7 +1164,10 @@
         "method": "delete",
         "security": [
           {
-            "petstore_auth": ["write:pets", "read:pets"]
+            "petstore_auth": [
+              "write:pets",
+              "read:pets"
+            ]
           }
         ],
         "response": {
@@ -1053,7 +1187,9 @@
             "name": "api_key",
             "in": "header",
             "schema": {
-              "type": ["string"]
+              "type": [
+                "string"
+              ]
             }
           }
         },
@@ -1067,13 +1203,14 @@
             "name": "petId",
             "in": "path",
             "schema": {
-              "type": ["integer"]
+              "type": [
+                "integer"
+              ]
             }
           }
         }
       },
       "description": "Deletes a pet",
-      "name": "deletePet",
       "result_type": {
         "type": "nullable",
         "underlying_type": {
@@ -1101,13 +1238,14 @@
             "name": "username",
             "in": "path",
             "schema": {
-              "type": ["string"]
+              "type": [
+                "string"
+              ]
             }
           }
         }
       },
       "description": "Delete user",
-      "name": "deleteUser",
       "result_type": {
         "type": "nullable",
         "underlying_type": {
@@ -1136,13 +1274,14 @@
           "http": {
             "in": "body",
             "schema": {
-              "type": ["object"]
+              "type": [
+                "object"
+              ]
             }
           }
         }
       },
       "description": "POST /oauth2/register",
-      "name": "dynamicClientRegistrationCreateOAuth2Client",
       "result_type": {
         "name": "OAuth2Client",
         "type": "named"
@@ -1169,13 +1308,14 @@
           "http": {
             "in": "body",
             "schema": {
-              "type": ["object"]
+              "type": [
+                "object"
+              ]
             }
           }
         }
       },
       "description": "Place an order for a pet",
-      "name": "placeOrder",
       "result_type": {
         "name": "Order",
         "type": "named"
@@ -1187,7 +1327,10 @@
         "method": "put",
         "security": [
           {
-            "petstore_auth": ["write:pets", "read:pets"]
+            "petstore_auth": [
+              "write:pets",
+              "read:pets"
+            ]
           }
         ],
         "requestBody": {
@@ -1207,13 +1350,14 @@
           "http": {
             "in": "body",
             "schema": {
-              "type": ["object"]
+              "type": [
+                "object"
+              ]
             }
           }
         }
       },
       "description": "Update an existing pet",
-      "name": "updatePet",
       "result_type": {
         "type": "nullable",
         "underlying_type": {
@@ -1228,7 +1372,10 @@
         "method": "post",
         "security": [
           {
-            "petstore_auth": ["write:pets", "read:pets"]
+            "petstore_auth": [
+              "write:pets",
+              "read:pets"
+            ]
           }
         ],
         "requestBody": {
@@ -1248,7 +1395,9 @@
           "http": {
             "in": "formData",
             "schema": {
-              "type": ["object"]
+              "type": [
+                "object"
+              ]
             }
           }
         },
@@ -1262,13 +1411,14 @@
             "name": "petId",
             "in": "path",
             "schema": {
-              "type": ["integer"]
+              "type": [
+                "integer"
+              ]
             }
           }
         }
       },
       "description": "Updates a pet in the store with form data",
-      "name": "updatePetWithForm",
       "result_type": {
         "type": "nullable",
         "underlying_type": {
@@ -1298,7 +1448,9 @@
           "http": {
             "in": "body",
             "schema": {
-              "type": ["object"]
+              "type": [
+                "object"
+              ]
             }
           }
         },
@@ -1312,13 +1464,14 @@
             "name": "username",
             "in": "path",
             "schema": {
-              "type": ["string"]
+              "type": [
+                "string"
+              ]
             }
           }
         }
       },
       "description": "Updated user",
-      "name": "updateUser",
       "result_type": {
         "type": "nullable",
         "underlying_type": {
@@ -1333,7 +1486,10 @@
         "method": "post",
         "security": [
           {
-            "petstore_auth": ["write:pets", "read:pets"]
+            "petstore_auth": [
+              "write:pets",
+              "read:pets"
+            ]
           }
         ],
         "requestBody": {
@@ -1353,7 +1509,9 @@
           "http": {
             "in": "formData",
             "schema": {
-              "type": ["object"]
+              "type": [
+                "object"
+              ]
             }
           }
         },
@@ -1367,13 +1525,14 @@
             "name": "petId",
             "in": "path",
             "schema": {
-              "type": ["integer"]
+              "type": [
+                "integer"
+              ]
             }
           }
         }
       },
       "description": "uploads an image",
-      "name": "uploadFile",
       "result_type": {
         "name": "ApiResponse",
         "type": "named"
@@ -1420,7 +1579,11 @@
       "aggregate_functions": {},
       "comparison_operators": {},
       "representation": {
-        "one_of": ["placed", "approved", "delivered"],
+        "one_of": [
+          "placed",
+          "approved",
+          "delivered"
+        ],
         "type": "enum"
       }
     },
@@ -1428,7 +1591,11 @@
       "aggregate_functions": {},
       "comparison_operators": {},
       "representation": {
-        "one_of": ["available", "pending", "sold"],
+        "one_of": [
+          "available",
+          "pending",
+          "sold"
+        ],
         "type": "enum"
       }
     },

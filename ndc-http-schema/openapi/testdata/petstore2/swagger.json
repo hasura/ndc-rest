@@ -638,6 +638,12 @@
             "description": "The owner of the clients to filter by.",
             "name": "owner",
             "in": "query"
+          },
+          {
+            "type": "null",
+            "description": "The date that the IP address was entered into warmup.",
+            "name": "start_date",
+            "in": "query"
           }
         ],
         "responses": {
@@ -683,6 +689,46 @@
           }
         }
       }
+    },
+    "/contactdb/lists/{list_id}/recipients": {
+      "parameters": [
+        {
+          "name": "list_id",
+          "in": "path",
+          "description": "The id of the list of recipients you want to retrieve.",
+          "required": true,
+          "type": "integer"
+        }
+      ],
+      "get": {
+        "operationId": "GET_contactdb-lists-list_id-recipients",
+        "parameters": [
+          {
+            "$ref": "#/parameters/trait:onBehalfOfSubuser:on-behalf-of"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "recipients": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/definitions/contactdb_recipient"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "Authorization": []
+          }
+        ]
+      }
     }
   },
   "securityDefinitions": {
@@ -709,6 +755,14 @@
           "$ref": "#/definitions/oAuth2Client"
         }
       }
+    }
+  },
+  "parameters": {
+    "trait:onBehalfOfSubuser:on-behalf-of": {
+      "name": "on-behalf-of",
+      "in": "header",
+      "type": "string",
+      "default": "The subuser's username. This header generates the API call as if the subuser account was making the call."
     }
   },
   "definitions": {
@@ -743,6 +797,10 @@
         "id": { "type": "integer", "format": "int64" },
         "category": { "$ref": "#/definitions/Category" },
         "name": { "type": "string", "example": "doggie" },
+        "field": {
+          "type": "null",
+          "description": "This empty field is returned instead of the list of scopes if the user making the call doesn't have the authorization required."
+        },
         "photoUrls": {
           "type": "array",
           "xml": { "wrapped": true },
@@ -867,7 +925,82 @@
         }
       }
     },
-    "DefaultError": {}
+    "DefaultError": {},
+    "contactdb_recipient": {
+      "title": "ContactDB: Recipient",
+      "type": "object",
+      "properties": {
+        "recipients": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "custom_fields": {
+                "type": "array",
+                "description": "The custom fields assigned to this recipient and their values.",
+                "items": {
+                  "$ref": "#/definitions/contactdb_custom_field_with_id_value"
+                }
+              },
+              "first_name": {
+                "type": ["string", "null"],
+                "description": "The first name of this recipient. This is a default custom field that SendGrid provides."
+              }
+            },
+            "required": ["email"]
+          }
+        }
+      }
+    },
+    "contactdb_custom_field_with_id_value": {
+      "title": "ContactDB Custom field schema.",
+      "allOf": [
+        {
+          "$ref": "#/definitions/contactdb_custom_field_with_id"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "value": {
+              "type": ["string", "null"],
+              "description": "The value of this recipient's custom field"
+            }
+          }
+        }
+      ]
+    },
+    "contactdb_custom_field_with_id": {
+      "title": "ContactDB Custom field schema with ID.",
+      "allOf": [
+        {
+          "$ref": "#/definitions/contactdb_custom_field"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "number",
+              "description": "The ID of the custom field."
+            }
+          }
+        }
+      ]
+    },
+    "contactdb_custom_field": {
+      "title": "ContactDB Custom field schema.",
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "The name of the field"
+        },
+        "type": {
+          "type": "string",
+          "description": "The type of the field.",
+          "enum": ["date", "text", "number"]
+        }
+      }
+    }
   },
   "externalDocs": {
     "description": "Find out more about Swagger",

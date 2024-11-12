@@ -4,14 +4,14 @@
     "servers": [
       {
         "url": {
-          "env": "SERVER_URL",
-          "value": "https://api.openai.com/v1"
+          "value": "https://api.openai.com/v1",
+          "env": "SERVER_URL"
         }
       },
       {
         "url": {
-          "env": "SERVER_URL_2",
-          "value": "http://127.0.0.1:11434"
+          "value": "http://127.0.0.1:11434",
+          "env": "SERVER_URL_2"
         }
       }
     ],
@@ -46,7 +46,9 @@
             }
           },
           "http": {
-            "type": ["string"]
+            "type": [
+              "string"
+            ]
           }
         },
         "name": {
@@ -56,7 +58,9 @@
             "type": "named"
           },
           "http": {
-            "type": ["string"]
+            "type": [
+              "string"
+            ]
           }
         },
         "parameters": {
@@ -69,7 +73,9 @@
             }
           },
           "http": {
-            "type": ["object"]
+            "type": [
+              "object"
+            ]
           }
         }
       }
@@ -83,7 +89,9 @@
             "type": "named"
           },
           "http": {
-            "type": ["object"]
+            "type": [
+              "object"
+            ]
           }
         },
         "id": {
@@ -93,7 +101,9 @@
             "type": "named"
           },
           "http": {
-            "type": ["string"]
+            "type": [
+              "string"
+            ]
           }
         },
         "type": {
@@ -103,7 +113,9 @@
             "type": "named"
           },
           "http": {
-            "type": ["string"]
+            "type": [
+              "string"
+            ]
           }
         }
       }
@@ -118,7 +130,9 @@
             "type": "named"
           },
           "http": {
-            "type": ["string"]
+            "type": [
+              "string"
+            ]
           }
         },
         "name": {
@@ -128,7 +142,9 @@
             "type": "named"
           },
           "http": {
-            "type": ["string"]
+            "type": [
+              "string"
+            ]
           }
         }
       }
@@ -143,7 +159,9 @@
             "type": "named"
           },
           "http": {
-            "type": ["string"]
+            "type": [
+              "string"
+            ]
           }
         },
         "function_call": {
@@ -156,7 +174,9 @@
             }
           },
           "http": {
-            "type": ["object"]
+            "type": [
+              "object"
+            ]
           }
         },
         "role": {
@@ -166,7 +186,9 @@
             "type": "named"
           },
           "http": {
-            "type": ["string"]
+            "type": [
+              "string"
+            ]
           }
         },
         "tool_calls": {
@@ -182,7 +204,9 @@
             }
           },
           "http": {
-            "type": ["array"]
+            "type": [
+              "array"
+            ]
           }
         }
       }
@@ -197,7 +221,9 @@
             "type": "named"
           },
           "http": {
-            "type": ["string"]
+            "type": [
+              "string"
+            ]
           }
         },
         "name": {
@@ -207,7 +233,9 @@
             "type": "named"
           },
           "http": {
-            "type": ["string"]
+            "type": [
+              "string"
+            ]
           }
         }
       }
@@ -225,7 +253,9 @@
             }
           },
           "http": {
-            "type": ["boolean"]
+            "type": [
+              "boolean"
+            ]
           }
         }
       }
@@ -242,9 +272,13 @@
             "type": "array"
           },
           "http": {
-            "type": ["array"],
+            "type": [
+              "array"
+            ],
             "items": {
-              "type": ["integer"]
+              "type": [
+                "integer"
+              ]
             }
           }
         },
@@ -255,7 +289,9 @@
             "type": "named"
           },
           "http": {
-            "type": ["number"]
+            "type": [
+              "number"
+            ]
           }
         },
         "token": {
@@ -265,7 +301,9 @@
             "type": "named"
           },
           "http": {
-            "type": ["string"]
+            "type": [
+              "string"
+            ]
           }
         },
         "top_logprobs": {
@@ -278,9 +316,13 @@
             "type": "array"
           },
           "http": {
-            "type": ["array"],
+            "type": [
+              "array"
+            ],
             "items": {
-              "type": ["object"]
+              "type": [
+                "object"
+              ]
             }
           }
         }
@@ -298,9 +340,13 @@
             "type": "array"
           },
           "http": {
-            "type": ["array"],
+            "type": [
+              "array"
+            ],
             "items": {
-              "type": ["integer"]
+              "type": [
+                "integer"
+              ]
             }
           }
         },
@@ -311,7 +357,9 @@
             "type": "named"
           },
           "http": {
-            "type": ["number"]
+            "type": [
+              "number"
+            ]
           }
         },
         "token": {
@@ -321,7 +369,9 @@
             "type": "named"
           },
           "http": {
-            "type": ["string"]
+            "type": [
+              "string"
+            ]
           }
         }
       }
@@ -334,7 +384,9 @@
             "type": "named"
           },
           "http": {
-            "type": ["object"]
+            "type": [
+              "object"
+            ]
           }
         },
         "type": {
@@ -344,7 +396,9 @@
             "type": "named"
           },
           "http": {
-            "type": ["string"]
+            "type": [
+              "string"
+            ]
           }
         }
       }
@@ -361,7 +415,9 @@
             }
           },
           "http": {
-            "type": ["number"],
+            "type": [
+              "number"
+            ],
             "maximum": 2,
             "minimum": -2
           }
@@ -392,7 +448,9 @@
             }
           },
           "http": {
-            "type": ["array"]
+            "type": [
+              "array"
+            ]
           }
         },
         "logit_bias": {
@@ -405,7 +463,9 @@
             }
           },
           "http": {
-            "type": ["object"]
+            "type": [
+              "object"
+            ]
           }
         },
         "logprobs": {
@@ -418,7 +478,9 @@
             }
           },
           "http": {
-            "type": ["boolean"]
+            "type": [
+              "boolean"
+            ]
           }
         },
         "max_tokens": {
@@ -431,7 +493,9 @@
             }
           },
           "http": {
-            "type": ["integer"]
+            "type": [
+              "integer"
+            ]
           }
         },
         "messages": {
@@ -444,7 +508,9 @@
             "type": "array"
           },
           "http": {
-            "type": ["array"]
+            "type": [
+              "array"
+            ]
           }
         },
         "model": {
@@ -454,7 +520,9 @@
             "type": "named"
           },
           "http": {
-            "type": ["string"]
+            "type": [
+              "string"
+            ]
           }
         },
         "n": {
@@ -467,7 +535,9 @@
             }
           },
           "http": {
-            "type": ["integer"],
+            "type": [
+              "integer"
+            ],
             "maximum": 128,
             "minimum": 1
           }
@@ -482,7 +552,9 @@
             }
           },
           "http": {
-            "type": ["boolean"]
+            "type": [
+              "boolean"
+            ]
           }
         },
         "presence_penalty": {
@@ -495,7 +567,9 @@
             }
           },
           "http": {
-            "type": ["number"],
+            "type": [
+              "number"
+            ],
             "maximum": 2,
             "minimum": -2
           }
@@ -510,7 +584,9 @@
             }
           },
           "http": {
-            "type": ["object"]
+            "type": [
+              "object"
+            ]
           }
         },
         "seed": {
@@ -523,7 +599,9 @@
             }
           },
           "http": {
-            "type": ["integer"],
+            "type": [
+              "integer"
+            ],
             "maximum": 9223372036854776000,
             "minimum": -9223372036854776000
           }
@@ -538,7 +616,9 @@
             }
           },
           "http": {
-            "type": ["string"]
+            "type": [
+              "string"
+            ]
           }
         },
         "stop": {
@@ -564,7 +644,9 @@
             }
           },
           "http": {
-            "type": ["boolean"]
+            "type": [
+              "boolean"
+            ]
           }
         },
         "stream_options": {
@@ -577,7 +659,9 @@
             }
           },
           "http": {
-            "type": ["object"]
+            "type": [
+              "object"
+            ]
           }
         },
         "temperature": {
@@ -590,7 +674,9 @@
             }
           },
           "http": {
-            "type": ["number"],
+            "type": [
+              "number"
+            ],
             "maximum": 2,
             "minimum": 0
           }
@@ -621,7 +707,9 @@
             }
           },
           "http": {
-            "type": ["array"]
+            "type": [
+              "array"
+            ]
           }
         },
         "top_logprobs": {
@@ -634,7 +722,9 @@
             }
           },
           "http": {
-            "type": ["integer"],
+            "type": [
+              "integer"
+            ],
             "maximum": 20,
             "minimum": 0
           }
@@ -649,7 +739,9 @@
             }
           },
           "http": {
-            "type": ["number"],
+            "type": [
+              "number"
+            ],
             "maximum": 1,
             "minimum": 0
           }
@@ -664,7 +756,9 @@
             }
           },
           "http": {
-            "type": ["string"]
+            "type": [
+              "string"
+            ]
           }
         }
       }
@@ -682,7 +776,9 @@
             }
           },
           "http": {
-            "type": ["string"]
+            "type": [
+              "string"
+            ]
           }
         }
       }
@@ -700,9 +796,13 @@
             "type": "array"
           },
           "http": {
-            "type": ["array"],
+            "type": [
+              "array"
+            ],
             "items": {
-              "type": ["object"]
+              "type": [
+                "object"
+              ]
             }
           }
         },
@@ -713,7 +813,9 @@
             "type": "named"
           },
           "http": {
-            "type": ["integer"]
+            "type": [
+              "integer"
+            ]
           }
         },
         "id": {
@@ -723,7 +825,9 @@
             "type": "named"
           },
           "http": {
-            "type": ["string"]
+            "type": [
+              "string"
+            ]
           }
         },
         "model": {
@@ -733,7 +837,9 @@
             "type": "named"
           },
           "http": {
-            "type": ["string"]
+            "type": [
+              "string"
+            ]
           }
         },
         "object": {
@@ -743,7 +849,9 @@
             "type": "named"
           },
           "http": {
-            "type": ["string"]
+            "type": [
+              "string"
+            ]
           }
         },
         "service_tier": {
@@ -756,7 +864,9 @@
             }
           },
           "http": {
-            "type": ["string"]
+            "type": [
+              "string"
+            ]
           }
         },
         "system_fingerprint": {
@@ -769,7 +879,9 @@
             }
           },
           "http": {
-            "type": ["string"]
+            "type": [
+              "string"
+            ]
           }
         }
       }
@@ -783,7 +895,9 @@
             "type": "named"
           },
           "http": {
-            "type": ["string"]
+            "type": [
+              "string"
+            ]
           }
         },
         "index": {
@@ -793,7 +907,9 @@
             "type": "named"
           },
           "http": {
-            "type": ["integer"]
+            "type": [
+              "integer"
+            ]
           }
         },
         "logprobs": {
@@ -803,7 +919,9 @@
             "type": "named"
           },
           "http": {
-            "type": ["object"]
+            "type": [
+              "object"
+            ]
           }
         },
         "message": {
@@ -813,7 +931,9 @@
             "type": "named"
           },
           "http": {
-            "type": ["object"]
+            "type": [
+              "object"
+            ]
           }
         }
       }
@@ -831,7 +951,9 @@
             "type": "array"
           },
           "http": {
-            "type": ["array"]
+            "type": [
+              "array"
+            ]
           }
         }
       }
@@ -848,7 +970,9 @@
             }
           },
           "http": {
-            "type": ["string"]
+            "type": [
+              "string"
+            ]
           }
         }
       }
@@ -865,7 +989,9 @@
             }
           },
           "http": {
-            "type": ["string"]
+            "type": [
+              "string"
+            ]
           }
         },
         "name": {
@@ -875,7 +1001,9 @@
             "type": "named"
           },
           "http": {
-            "type": ["string"]
+            "type": [
+              "string"
+            ]
           }
         },
         "parameters": {
@@ -888,7 +1016,9 @@
             }
           },
           "http": {
-            "type": ["object"]
+            "type": [
+              "object"
+            ]
           }
         }
       }
@@ -905,7 +1035,9 @@
             }
           },
           "http": {
-            "type": ["integer"]
+            "type": [
+              "integer"
+            ]
           }
         },
         "digest": {
@@ -918,7 +1050,9 @@
             }
           },
           "http": {
-            "type": ["string"]
+            "type": [
+              "string"
+            ]
           }
         },
         "status": {
@@ -931,7 +1065,9 @@
             }
           },
           "http": {
-            "type": ["string"]
+            "type": [
+              "string"
+            ]
           }
         },
         "total": {
@@ -944,13 +1080,47 @@
             }
           },
           "http": {
-            "type": ["integer"]
+            "type": [
+              "integer"
+            ]
           }
         }
       }
     }
   },
   "procedures": {
+    "_GET_createModel": {
+      "request": {
+        "url": "/api/create",
+        "method": "post",
+        "requestBody": {
+          "contentType": "application/json"
+        },
+        "response": {
+          "contentType": "application/x-ndjson"
+        }
+      },
+      "arguments": {
+        "body": {
+          "description": "Request body of POST /api/create",
+          "type": {
+            "name": "CreateModelRequest",
+            "type": "named"
+          },
+          "http": {
+            "in": "body"
+          }
+        }
+      },
+      "description": "POST /api/create",
+      "result_type": {
+        "element_type": {
+          "name": "ProgressResponse",
+          "type": "named"
+        },
+        "type": "array"
+      }
+    },
     "createChatCompletion": {
       "request": {
         "url": "/chat/completions",
@@ -975,43 +1145,9 @@
         }
       },
       "description": "Creates a model response for the given chat conversation.",
-      "name": "createChatCompletion",
       "result_type": {
         "name": "CreateChatCompletionResponse",
         "type": "named"
-      }
-    },
-    "createModel": {
-      "request": {
-        "url": "/api/create",
-        "method": "post",
-        "requestBody": {
-          "contentType": "application/json"
-        },
-        "response": {
-          "contentType": "application/x-ndjson"
-        }
-      },
-      "arguments": {
-        "body": {
-          "description": "Request body of POST /api/create",
-          "type": {
-            "name": "CreateModelRequest",
-            "type": "named"
-          },
-          "http": {
-            "in": "body"
-          }
-        }
-      },
-      "description": "POST /api/create",
-      "name": "createModel",
-      "result_type": {
-        "element_type": {
-          "name": "ProgressResponse",
-          "type": "named"
-        },
-        "type": "array"
       }
     }
   },
@@ -1027,7 +1163,9 @@
       "aggregate_functions": {},
       "comparison_operators": {},
       "representation": {
-        "one_of": ["function"],
+        "one_of": [
+          "function"
+        ],
         "type": "enum"
       }
     },
@@ -1042,7 +1180,9 @@
       "aggregate_functions": {},
       "comparison_operators": {},
       "representation": {
-        "one_of": ["assistant"],
+        "one_of": [
+          "assistant"
+        ],
         "type": "enum"
       }
     },
@@ -1057,7 +1197,9 @@
       "aggregate_functions": {},
       "comparison_operators": {},
       "representation": {
-        "one_of": ["function"],
+        "one_of": [
+          "function"
+        ],
         "type": "enum"
       }
     },
@@ -1065,7 +1207,10 @@
       "aggregate_functions": {},
       "comparison_operators": {},
       "representation": {
-        "one_of": ["text", "json_object"],
+        "one_of": [
+          "text",
+          "json_object"
+        ],
         "type": "enum"
       }
     },
@@ -1073,7 +1218,10 @@
       "aggregate_functions": {},
       "comparison_operators": {},
       "representation": {
-        "one_of": ["auto", "default"],
+        "one_of": [
+          "auto",
+          "default"
+        ],
         "type": "enum"
       }
     },
@@ -1095,7 +1243,9 @@
       "aggregate_functions": {},
       "comparison_operators": {},
       "representation": {
-        "one_of": ["chat.completion"],
+        "one_of": [
+          "chat.completion"
+        ],
         "type": "enum"
       }
     },
@@ -1103,7 +1253,10 @@
       "aggregate_functions": {},
       "comparison_operators": {},
       "representation": {
-        "one_of": ["scale", "default"],
+        "one_of": [
+          "scale",
+          "default"
+        ],
         "type": "enum"
       }
     },
