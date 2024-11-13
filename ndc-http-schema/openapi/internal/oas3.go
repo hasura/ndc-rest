@@ -84,7 +84,10 @@ func (oc *OAS3Builder) BuildDocumentModel(docModel *libopenapi.DocumentModel[v3.
 	// reevaluate write argument types
 	oc.schemaCache = make(map[string]SchemaInfoCache)
 	oc.transformWriteSchema()
-	cleanUnusedSchemaTypes(oc.schema)
+
+	if err := cleanUnusedSchemaTypes(oc.schema); err != nil {
+		return err
+	}
 
 	return nil
 }

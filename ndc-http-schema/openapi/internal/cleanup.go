@@ -93,7 +93,7 @@ func (nsc *ndcSchemaCleaner) validateType(schemaType schema.Type) error {
 
 	objectType, ok := nsc.Schema.ObjectTypes[typeName]
 	if !ok {
-		return fmt.Errorf(typeName + ": named type does not exist")
+		return errors.New(typeName + ": named type does not exist")
 	}
 
 	nsc.UsedTypes[typeName] = true
