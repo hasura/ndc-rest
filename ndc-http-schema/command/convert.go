@@ -89,6 +89,7 @@ func CommandConvertToNDCSchema(args *configuration.ConvertCommandArguments, logg
 		format, err = schema.ParseSchemaFileFormat(args.Format)
 		if err != nil {
 			logger.Error("failed to parse format", slog.Any("error", err))
+
 			return err
 		}
 	}
@@ -101,9 +102,11 @@ func CommandConvertToNDCSchema(args *configuration.ConvertCommandArguments, logg
 	resultBytes, err := utils.MarshalSchema(rawResult, format)
 	if err != nil {
 		logger.Error("failed to encode schema", slog.Any("error", err))
+
 		return err
 	}
 
-	fmt.Print(string(resultBytes))
+	fmt.Fprint(os.Stdout, string(resultBytes))
+
 	return nil
 }

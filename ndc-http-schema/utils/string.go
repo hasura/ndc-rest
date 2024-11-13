@@ -3,6 +3,7 @@ package utils
 import (
 	"fmt"
 	"regexp"
+	"slices"
 	"strings"
 	"unicode"
 	"unicode/utf8"
@@ -183,10 +184,22 @@ func StripHTMLTags(str string) string {
 // RemoveYAMLSpecialCharacters remote special characters to avoid YAML unmarshaling error
 func RemoveYAMLSpecialCharacters(input []byte) []byte {
 	var sb strings.Builder
-	for _, c := range input {
+	inputLength := len(input)
+	for i := 0; i < inputLength; i++ {
+		c := input[i]
 		switch c {
 		case '\n', '\t':
 			sb.WriteRune(' ')
+		case '\\':
+			if i < inputLength-1 {
+				if slices.Contains([]byte{'n', 's', 't'}, input[i+1]) {
+					sb.WriteRune(' ')
+				} else {
+					sb.WriteByte(c)
+					sb.WriteByte(input[i+1])
+				}
+				i++
+			}
 		default:
 			r := rune(c)
 			if !unicode.IsControl(r) && utf8.ValidRune(r) && r != utf8.RuneError {

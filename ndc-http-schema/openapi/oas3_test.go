@@ -14,7 +14,6 @@ import (
 )
 
 func TestOpenAPIv3ToRESTSchema(t *testing.T) {
-
 	testCases := []struct {
 		Name     string
 		Source   string

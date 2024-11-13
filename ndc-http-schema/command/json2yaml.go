@@ -48,6 +48,7 @@ func Json2Yaml(args *Json2YamlCommandArguments, logger *slog.Logger) error {
 		return nil
 	}
 
-	fmt.Print(buf.String())
+	fmt.Fprint(os.Stdout, buf.String())
+
 	return nil
 }

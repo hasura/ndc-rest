@@ -186,7 +186,7 @@
           }
         }
       },
-      "description": "**This endpoint allows you to retrieve your email statistics segmented by browser type.**\n\n**We only store up to 7 days of email activity in our database.** By default, 500 items will be returned per request via the Advanced Stats API endpoints.\n\nAdvanced Stats provide a more in-depth view of your email statistics and the actions taken by your recipients. You can segment these statistics by geographic location, device type, client type, browser, and mailbox provider. For more information about statistics, please see our [Statistics Overview](https://sendgrid.com/docs/ui/analytics-and-reporting/stats-overview/).",
+      "description": "**This endpoint allows you to retrieve your email statistics segmented by browser type.**  **We only store up to 7 days of email activity in our database.** By default, 500 items will be returned per request via the Advanced Stats API endpoints.  Advanced Stats provide a more in-depth view of your email statistics and the actions taken by your recipients. You can segment these statistics by geographic location, device type, client type, browser, and mailbox provider. For more information about statistics, please see our [Statistics Overview](https://sendgrid.com/docs/ui/analytics-and-reporting/stats-overview/).",
       "result_type": {
         "element_type": {
           "name": "GETBrowsersStatsResult",
@@ -1671,7 +1671,7 @@
           }
         },
         "client_name": {
-          "description": "Name is the human-readable string name of the client to be presented to the\nend-user during authorization.",
+          "description": "Name is the human-readable string name of the client to be presented to the end-user during authorization.",
           "type": {
             "type": "nullable",
             "underlying_type": {
@@ -1686,7 +1686,7 @@
           }
         },
         "client_secret": {
-          "description": "Secret is the client's secret. The secret will be included in the create request as cleartext, and then\nnever again. The secret is stored using BCrypt so it is impossible to recover it. Tell your users\nthat they need to write the secret down as it will not be made available again.",
+          "description": "Secret is the client's secret. The secret will be included in the create request as cleartext, and then never again. The secret is stored using BCrypt so it is impossible to recover it. Tell your users that they need to write the secret down as it will not be made available again.",
           "type": {
             "type": "nullable",
             "underlying_type": {
@@ -1701,7 +1701,7 @@
           }
         },
         "client_secret_expires_at": {
-          "description": "SecretExpiresAt is an integer holding the time at which the client\nsecret will expire or 0 if it will not expire. The time is\nrepresented as the number of seconds from 1970-01-01T00:00:00Z as\nmeasured in UTC until the date/time of expiration.\n\nThis feature is currently not supported and it's value will always\nbe set to 0.",
+          "description": "SecretExpiresAt is an integer holding the time at which the client secret will expire or 0 if it will not expire. The time is represented as the number of seconds from 1970-01-01T00:00:00Z as measured in UTC until the date/time of expiration.  This feature is currently not supported and it's value will always be set to 0.",
           "type": {
             "type": "nullable",
             "underlying_type": {
@@ -1717,7 +1717,7 @@
           }
         },
         "client_uri": {
-          "description": "ClientURI is an URL string of a web page providing information about the client.\nIf present, the server SHOULD display this URL to the end-user in\na clickable fashion.",
+          "description": "ClientURI is an URL string of a web page providing information about the client. If present, the server SHOULD display this URL to the end-user in a clickable fashion.",
           "type": {
             "type": "nullable",
             "underlying_type": {

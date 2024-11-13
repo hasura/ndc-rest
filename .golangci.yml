@@ -1,11 +1,10 @@
 linters:
   enable-all: true
   disable:
+    - dupl
     - err113
     - lll
     - gocognit
-    - gocritic
-    - nestif
     - execinquery
     - exportloopref
     - gomnd
@@ -17,6 +16,7 @@ linters:
     - gosec
     - revive
     - cyclop
+    - nestif
     - wsl
     - wrapcheck
     - varnamelen
@@ -37,9 +37,13 @@ linters:
     - goconst
     - noctx
     - unparam
-    - forbidigo
-    - tagalign
     - recvcheck
+
+linters-settings:
+  nestif:
+    # Minimal complexity of if statements to report.
+    # Default: 5
+    min-complexity: 10
 
 issues:
   exclude-files:

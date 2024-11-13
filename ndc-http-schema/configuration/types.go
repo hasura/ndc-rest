@@ -23,10 +23,10 @@ var fieldNameRegex = regexp.MustCompile(`^[a-zA-Z_]\w+$`)
 type Configuration struct {
 	Output string `json:"output,omitempty" yaml:"output,omitempty"`
 	// Require strict validation
-	Strict         bool                   `json:"strict" yaml:"strict"`
+	Strict         bool                   `json:"strict"         yaml:"strict"`
 	ForwardHeaders ForwardHeadersSettings `json:"forwardHeaders" yaml:"forwardHeaders"`
-	Concurrency    ConcurrencySettings    `json:"concurrency" yaml:"concurrency"`
-	Files          []ConfigItem           `json:"files" yaml:"files"`
+	Concurrency    ConcurrencySettings    `json:"concurrency"    yaml:"concurrency"`
+	Files          []ConfigItem           `json:"files"          yaml:"files"`
 }
 
 // ConcurrencySettings represent settings for concurrent webhook executions to remote servers.
@@ -44,9 +44,9 @@ type ForwardHeadersSettings struct {
 	// Enable headers forwarding.
 	Enabled bool `json:"enabled" yaml:"enabled"`
 	// The argument field name to be added for headers forwarding.
-	ArgumentField *string `json:"argumentField" yaml:"argumentField" jsonschema:"oneof_type=string;null,pattern=^[a-zA-Z_]\\w+$"`
+	ArgumentField *string `json:"argumentField" jsonschema:"oneof_type=string;null,pattern=^[a-zA-Z_]\\w+$" yaml:"argumentField"`
 	// HTTP response headers to be forwarded from a data connector to the client.
-	ResponseHeaders *ForwardResponseHeadersSettings `json:"responseHeaders" yaml:"responseHeaders" jsonschema:"nullable"`
+	ResponseHeaders *ForwardResponseHeadersSettings `json:"responseHeaders" jsonschema:"nullable" yaml:"responseHeaders"`
 }
 
 // UnmarshalJSON implements json.Unmarshaler.
@@ -80,9 +80,9 @@ func (j *ForwardHeadersSettings) UnmarshalJSON(b []byte) error {
 // ForwardHeadersSettings hold settings of header forwarding from http response to Hasura engine.
 type ForwardResponseHeadersSettings struct {
 	// Name of the field in the NDC function/procedure's result which contains the response headers.
-	HeadersField string `json:"headersField" yaml:"headersField" jsonschema:"pattern=^[a-zA-Z_]\\w+$"`
+	HeadersField string `json:"headersField" jsonschema:"pattern=^[a-zA-Z_]\\w+$" yaml:"headersField"`
 	// Name of the field in the NDC function/procedure's result which contains the result.
-	ResultField string `json:"resultField" yaml:"resultField" jsonschema:"pattern=^[a-zA-Z_]\\w+$"`
+	ResultField string `json:"resultField" jsonschema:"pattern=^[a-zA-Z_]\\w+$" yaml:"resultField"`
 	// List of actual HTTP response headers from the data connector to be set as response headers. Returns all headers if empty.
 	ForwardHeaders []string `json:"forwardHeaders" yaml:"forwardHeaders"`
 }
@@ -153,8 +153,8 @@ type ConfigItem struct {
 	// Distributed enables distributed schema
 	Distributed *bool `json:"distributed,omitempty" yaml:"distributed,omitempty"`
 	// configure the request timeout in seconds.
-	Timeout *utils.EnvInt       `json:"timeout,omitempty"         mapstructure:"timeout"         yaml:"timeout,omitempty"`
-	Retry   *RetryPolicySetting `json:"retry,omitempty"           mapstructure:"retry"           yaml:"retry,omitempty"`
+	Timeout *utils.EnvInt       `json:"timeout,omitempty" mapstructure:"timeout" yaml:"timeout,omitempty"`
+	Retry   *RetryPolicySetting `json:"retry,omitempty"   mapstructure:"retry"   yaml:"retry,omitempty"`
 }
 
 // IsDistributed checks if the distributed option is enabled
@@ -168,11 +168,12 @@ func (ci ConfigItem) GetRuntimeSettings() (*rest.RuntimeSettings, error) {
 	var errs []error
 	if ci.Timeout != nil {
 		timeout, err := ci.Timeout.Get()
-		if err != nil {
+		switch {
+		case err != nil:
 			errs = append(errs, fmt.Errorf("timeout: %w", err))
-		} else if timeout < 0 {
+		case timeout < 0:
 			errs = append(errs, fmt.Errorf("timeout must be positive, got: %d", timeout))
-		} else {
+		default:
 			result.Timeout = uint(timeout)
 		}
 	}
@@ -223,7 +224,7 @@ type ConvertConfig struct {
 // NDCHttpRuntimeSchema wraps NDCHttpSchema with runtime settings
 type NDCHttpRuntimeSchema struct {
 	Name    string               `json:"name" yaml:"name"`
-	Runtime rest.RuntimeSettings `json:"-" yaml:"-"`
+	Runtime rest.RuntimeSettings `json:"-"    yaml:"-"`
 	*rest.NDCHttpSchema
 }
 

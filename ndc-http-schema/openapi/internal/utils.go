@@ -67,125 +67,127 @@ func getScalarFromType(sm *rest.NDCHttpSchema, names []string, format string, en
 		scalarName = "JSON"
 		scalarType = defaultScalarTypes[rest.ScalarJSON]
 	} else {
-		switch names[0] {
-		case "boolean":
-			scalarName = string(rest.ScalarBoolean)
-			scalarType = defaultScalarTypes[rest.ScalarBoolean]
-		case "integer":
-			switch format {
-			case "unix-time":
-				scalarName = string(rest.ScalarUnixTime)
-				scalarType = defaultScalarTypes[rest.ScalarUnixTime]
-			case "int64":
-				scalarName = string(rest.ScalarInt64)
-				scalarType = defaultScalarTypes[rest.ScalarInt64]
-			default:
-				scalarName = "Int32"
-				scalarType = defaultScalarTypes[rest.ScalarInt32]
-			}
-		case "long":
-			scalarName = string(rest.ScalarInt64)
-			scalarType = defaultScalarTypes[rest.ScalarInt64]
-		case "number":
-			switch format {
-			case "float":
-				scalarName = string(rest.ScalarFloat32)
-				scalarType = defaultScalarTypes[rest.ScalarFloat32]
-			default:
-				scalarName = string(rest.ScalarFloat64)
-				scalarType = defaultScalarTypes[rest.ScalarFloat64]
-			}
-		case "file":
-			scalarName = string(rest.ScalarBinary)
-			scalarType = defaultScalarTypes[rest.ScalarBinary]
-		case "string":
-			schemaEnumLength := len(enumNodes)
-			if schemaEnumLength > 0 {
-				enums := make([]string, schemaEnumLength)
-				for i, enum := range enumNodes {
-					enums[i] = enum.Value
-				}
-				scalarType = schema.NewScalarType()
-				scalarType.Representation = schema.NewTypeRepresentationEnum(enums).Encode()
-
-				// build scalar name strategies
-				// 1. combine resource name and field name
-				apiPath = strings.TrimPrefix(apiPath, "/")
-				if apiPath != "" {
-					apiPaths := strings.Split(apiPath, "/")
-					resourceName := fieldPaths[0]
-					if len(apiPaths) > 0 {
-						resourceName = apiPaths[0]
-					}
-					enumName := "Enum"
-					if len(fieldPaths) > 1 {
-						enumName = fieldPaths[len(fieldPaths)-1]
-					}
-
-					scalarName = utils.StringSliceToPascalCase([]string{resourceName, enumName})
-					if canSetEnumToSchema(sm, scalarName, enums) {
-						sm.ScalarTypes[scalarName] = *scalarType
-
-						return scalarName, nullable
-					}
-				}
-
-				// 2. if the scalar type exists, fallback to field paths
-				scalarName = utils.StringSliceToPascalCase(fieldPaths)
-				if canSetEnumToSchema(sm, scalarName, enums) {
-					sm.ScalarTypes[scalarName] = *scalarType
-
-					return scalarName, nullable
-				}
-
-				// 3. Reuse above name with Enum suffix
-				scalarName = scalarName + "Enum"
-				if _, ok := sm.ScalarTypes[scalarName]; !ok {
-					sm.ScalarTypes[scalarName] = *scalarType
-				}
-
-				return scalarName, nullable
-			}
-
-			switch format {
-			case "date":
-				scalarName = string(rest.ScalarDate)
-				scalarType = defaultScalarTypes[rest.ScalarDate]
-			case "date-time":
-				scalarName = string(rest.ScalarTimestampTZ)
-				scalarType = defaultScalarTypes[rest.ScalarTimestampTZ]
-			case "byte", "base64":
-				scalarName = string(rest.ScalarBytes)
-				scalarType = defaultScalarTypes[rest.ScalarBytes]
-			case "binary":
-				scalarName = string(rest.ScalarBinary)
-				scalarType = defaultScalarTypes[rest.ScalarBinary]
-			case "uuid":
-				scalarName = string(rest.ScalarUUID)
-				scalarType = defaultScalarTypes[rest.ScalarUUID]
-			case "uri":
-				scalarName = string(rest.ScalarURI)
-				scalarType = defaultScalarTypes[rest.ScalarURI]
-			case "ipv4":
-				scalarName = string(rest.ScalarIPV4)
-				scalarType = defaultScalarTypes[rest.ScalarIPV4]
-			case "ipv6":
-				scalarName = string(rest.ScalarIPV6)
-				scalarType = defaultScalarTypes[rest.ScalarIPV6]
-			default:
-				scalarName = string(rest.ScalarString)
-				scalarType = defaultScalarTypes[rest.ScalarString]
-			}
-		default:
-			scalarName = string(rest.ScalarJSON)
-			scalarType = defaultScalarTypes[rest.ScalarJSON]
-		}
+		scalarName, scalarType = getScalarFromNamedType(sm, names, format, enumNodes, apiPath, fieldPaths)
 	}
 
 	if _, ok := sm.ScalarTypes[scalarName]; !ok {
 		sm.ScalarTypes[scalarName] = *scalarType
 	}
 	return scalarName, nullable
+}
+
+func getScalarFromNamedType(sm *rest.NDCHttpSchema, names []string, format string, enumNodes []*yaml.Node, apiPath string, fieldPaths []string) (string, *schema.ScalarType) {
+	var scalarName string
+	var scalarType *schema.ScalarType
+
+	switch names[0] {
+	case "boolean":
+		scalarName = string(rest.ScalarBoolean)
+		scalarType = defaultScalarTypes[rest.ScalarBoolean]
+	case "integer":
+		switch format {
+		case "unix-time":
+			scalarName = string(rest.ScalarUnixTime)
+			scalarType = defaultScalarTypes[rest.ScalarUnixTime]
+		case "int64":
+			scalarName = string(rest.ScalarInt64)
+			scalarType = defaultScalarTypes[rest.ScalarInt64]
+		default:
+			scalarName = string(rest.ScalarInt32)
+			scalarType = defaultScalarTypes[rest.ScalarInt32]
+		}
+	case "long":
+		scalarName = string(rest.ScalarInt64)
+		scalarType = defaultScalarTypes[rest.ScalarInt64]
+	case "number":
+		switch format {
+		case "float":
+			scalarName = string(rest.ScalarFloat32)
+			scalarType = defaultScalarTypes[rest.ScalarFloat32]
+		default:
+			scalarName = string(rest.ScalarFloat64)
+			scalarType = defaultScalarTypes[rest.ScalarFloat64]
+		}
+	case "file":
+		scalarName = string(rest.ScalarBinary)
+		scalarType = defaultScalarTypes[rest.ScalarBinary]
+	case "string":
+		schemaEnumLength := len(enumNodes)
+		if schemaEnumLength > 0 {
+			enums := make([]string, schemaEnumLength)
+			for i, enum := range enumNodes {
+				enums[i] = enum.Value
+			}
+			scalarType = schema.NewScalarType()
+			scalarType.Representation = schema.NewTypeRepresentationEnum(enums).Encode()
+
+			// build scalar name strategies
+			// 1. combine resource name and field name
+			apiPath = strings.TrimPrefix(apiPath, "/")
+			if apiPath != "" {
+				apiPaths := strings.Split(apiPath, "/")
+				resourceName := fieldPaths[0]
+				if len(apiPaths) > 0 {
+					resourceName = apiPaths[0]
+				}
+				enumName := "Enum"
+				if len(fieldPaths) > 1 {
+					enumName = fieldPaths[len(fieldPaths)-1]
+				}
+
+				scalarName = utils.StringSliceToPascalCase([]string{resourceName, enumName})
+				if canSetEnumToSchema(sm, scalarName, enums) {
+					return scalarName, scalarType
+				}
+			}
+
+			// 2. if the scalar type exists, fallback to field paths
+			scalarName = utils.StringSliceToPascalCase(fieldPaths)
+			if canSetEnumToSchema(sm, scalarName, enums) {
+				return scalarName, scalarType
+			}
+
+			// 3. Reuse above name with Enum suffix
+			scalarName += "Enum"
+
+			return scalarName, scalarType
+		}
+
+		switch format {
+		case "date":
+			scalarName = string(rest.ScalarDate)
+			scalarType = defaultScalarTypes[rest.ScalarDate]
+		case "date-time":
+			scalarName = string(rest.ScalarTimestampTZ)
+			scalarType = defaultScalarTypes[rest.ScalarTimestampTZ]
+		case "byte", "base64":
+			scalarName = string(rest.ScalarBytes)
+			scalarType = defaultScalarTypes[rest.ScalarBytes]
+		case "binary":
+			scalarName = string(rest.ScalarBinary)
+			scalarType = defaultScalarTypes[rest.ScalarBinary]
+		case "uuid":
+			scalarName = string(rest.ScalarUUID)
+			scalarType = defaultScalarTypes[rest.ScalarUUID]
+		case "uri":
+			scalarName = string(rest.ScalarURI)
+			scalarType = defaultScalarTypes[rest.ScalarURI]
+		case "ipv4":
+			scalarName = string(rest.ScalarIPV4)
+			scalarType = defaultScalarTypes[rest.ScalarIPV4]
+		case "ipv6":
+			scalarName = string(rest.ScalarIPV6)
+			scalarType = defaultScalarTypes[rest.ScalarIPV6]
+		default:
+			scalarName = string(rest.ScalarString)
+			scalarType = defaultScalarTypes[rest.ScalarString]
+		}
+	default:
+		scalarName = string(rest.ScalarJSON)
+		scalarType = defaultScalarTypes[rest.ScalarJSON]
+	}
+
+	return scalarName, scalarType
 }
 
 func canSetEnumToSchema(sm *rest.NDCHttpSchema, scalarName string, enums []string) bool {
@@ -329,15 +331,13 @@ func evalSchemaProxiesSlice(schemaProxies []*base.SchemaProxy, location rest.Par
 			continue
 		}
 
-		switch location {
-		case rest.InQuery:
-			// empty string enum is considered as nullable, e.g. key1=&key2=
-			// however, it's redundant and prevents the tool converting correct types
-			if sc.Type[0] == "string" && len(sc.Enum) == 1 && (sc.Enum[0] == nil || sc.Enum[0].Value == "") {
-				nullable = true
-				continue
-			}
+		// empty string enum is considered as nullable, e.g. key1=&key2=
+		// however, it's redundant and prevents the tool converting correct types
+		if location == rest.InQuery && (sc.Type[0] == "string" && len(sc.Enum) == 1 && (sc.Enum[0] == nil || sc.Enum[0].Value == "")) {
+			nullable = true
+			continue
 		}
+
 		results = append(results, proxy)
 		if len(sc.Type) == 0 {
 			typeNames = append(typeNames, "any")

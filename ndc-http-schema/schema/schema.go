@@ -96,19 +96,19 @@ type Response struct {
 
 // RuntimeSettings contain runtime settings for a server
 type RuntimeSettings struct { // configure the request timeout in seconds, default 30s
-	Timeout uint        `json:"timeout,omitempty"     mapstructure:"timeout"     yaml:"timeout,omitempty"`
-	Retry   RetryPolicy `json:"retry,omitempty"       mapstructure:"retry"       yaml:"retry,omitempty"`
+	Timeout uint        `json:"timeout,omitempty" mapstructure:"timeout" yaml:"timeout,omitempty"`
+	Retry   RetryPolicy `json:"retry,omitempty"   mapstructure:"retry"   yaml:"retry,omitempty"`
 }
 
 // Request represents the HTTP request information of the webhook
 type Request struct {
-	URL         string                     `json:"url,omitempty"      mapstructure:"url"                                              yaml:"url,omitempty"`
-	Method      string                     `json:"method,omitempty"   jsonschema:"enum=get,enum=post,enum=put,enum=patch,enum=delete" mapstructure:"method"     yaml:"method,omitempty"`
-	Headers     map[string]utils.EnvString `json:"headers,omitempty"  mapstructure:"headers"                                          yaml:"headers,omitempty"`
-	Security    AuthSecurities             `json:"security,omitempty" mapstructure:"security"                                         yaml:"security,omitempty"`
-	Servers     []ServerConfig             `json:"servers,omitempty"     mapstructure:"servers"     yaml:"servers,omitempty"`
-	RequestBody *RequestBody               `json:"requestBody,omitempty" mapstructure:"requestBody" yaml:"requestBody,omitempty"`
-	Response    Response                   `json:"response"              mapstructure:"response"    yaml:"response"`
+	URL         string                     `json:"url,omitempty"         mapstructure:"url"                                              yaml:"url,omitempty"`
+	Method      string                     `json:"method,omitempty"      jsonschema:"enum=get,enum=post,enum=put,enum=patch,enum=delete" mapstructure:"method"        yaml:"method,omitempty"`
+	Headers     map[string]utils.EnvString `json:"headers,omitempty"     mapstructure:"headers"                                          yaml:"headers,omitempty"`
+	Security    AuthSecurities             `json:"security,omitempty"    mapstructure:"security"                                         yaml:"security,omitempty"`
+	Servers     []ServerConfig             `json:"servers,omitempty"     mapstructure:"servers"                                          yaml:"servers,omitempty"`
+	RequestBody *RequestBody               `json:"requestBody,omitempty" mapstructure:"requestBody"                                      yaml:"requestBody,omitempty"`
+	Response    Response                   `json:"response"              mapstructure:"response"                                         yaml:"response"`
 
 	*RuntimeSettings `yaml:",inline"`
 }

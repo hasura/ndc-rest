@@ -118,7 +118,7 @@ func applyPatchFromFileError(patchCfg PatchConfig, err error) error {
 
 func convertMaybeYAMLToJSONBytes(input []byte) ([]byte, error) {
 	runes := []byte(strings.TrimSpace(string(input)))
-	if len(runes) <= 0 {
+	if len(runes) == 0 {
 		return nil, errEmptyInput
 	}
 
@@ -134,7 +134,7 @@ func convertMaybeYAMLToJSONBytes(input []byte) ([]byte, error) {
 }
 
 func guessPatchStrategy(runes []byte) (PatchStrategy, error) {
-	if len(runes) <= 0 {
+	if len(runes) == 0 {
 		return "", errEmptyInput
 	}
 

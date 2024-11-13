@@ -273,7 +273,7 @@ func (oc *oas2SchemaBuilder) getSchemaTypeFromProxy(schemaProxy *base.SchemaProx
 }
 
 // Support converting allOf and anyOf to object types with merge strategy
-func (oc *oas2SchemaBuilder) buildAllOfAnyOfSchemaType(schemaProxies []*base.SchemaProxy, nullable bool, fieldPaths []string) (schema.TypeEncoder, *rest.TypeSchema, error) { 
+func (oc *oas2SchemaBuilder) buildAllOfAnyOfSchemaType(schemaProxies []*base.SchemaProxy, nullable bool, fieldPaths []string) (schema.TypeEncoder, *rest.TypeSchema, error) {
 	proxies, mergedType, isNullable := evalSchemaProxiesSlice(schemaProxies, oc.location)
 	nullable = nullable || isNullable
 
@@ -295,8 +295,7 @@ func (oc *oas2SchemaBuilder) buildAllOfAnyOfSchemaType(schemaProxies []*base.Sch
 	}
 
 	for i, item := range proxies {
-		itemFieldPaths := append(fieldPaths, strconv.Itoa(i))
-		enc, ty, err := oc.getSchemaTypeFromProxy(item, nullable, itemFieldPaths)
+		enc, ty, err := oc.getSchemaTypeFromProxy(item, nullable, append(fieldPaths, strconv.Itoa(i)))
 		if err != nil {
 			return nil, nil, err
 		}

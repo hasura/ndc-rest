@@ -260,7 +260,7 @@ func (oc *OAS3Builder) convertComponentSchemas(schemaItem orderedmap.Pair[string
 	if _, ok := oc.schema.ObjectTypes[typeKey]; ok {
 		return nil
 	}
-	typeEncoder, schemaResult, _, err := newOAS3SchemaBuilder(oc, "", rest.InBody, false).
+	typeEncoder, schemaResult, err := newOAS3SchemaBuilder(oc, "", rest.InBody, false).
 		getSchemaType(typeSchema, []string{typeKey})
 	if err != nil {
 		return err

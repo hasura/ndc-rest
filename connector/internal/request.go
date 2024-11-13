@@ -190,6 +190,10 @@ func (req *RetryableRequest) applySecurity(serverConfig *rest.ServerConfig, isEx
 		}
 	}
 
+	return req.applySecurityScheme(securityScheme, isExplain)
+}
+
+func (req *RetryableRequest) applySecurityScheme(securityScheme *rest.SecurityScheme, isExplain bool) error {
 	if securityScheme == nil {
 		return nil
 	}
@@ -241,6 +245,7 @@ func (req *RetryableRequest) applySecurity(serverConfig *rest.ServerConfig, isEx
 	default:
 		return fmt.Errorf("unsupported security scheme: %s", securityScheme.Type)
 	}
+
 	return nil
 }
 

@@ -2,6 +2,7 @@ package internal
 
 import (
 	"fmt"
+	"log"
 	"log/slog"
 	"slices"
 	"strconv"
@@ -185,7 +186,8 @@ func (oc *oas2OperationBuilder) convertParameters(operation *v2.Operation, apiPa
 			paramRequired = true
 		}
 
-		if param.Type != "" {
+		switch {
+		case param.Type != "":
 			typeEncoder, err = newOAS2SchemaBuilder(oc.builder, apiPath, rest.ParameterLocation(param.In)).getSchemaTypeFromParameter(param, fieldPaths)
 			if err != nil {
 				return nil, err
@@ -210,13 +212,13 @@ func (oc *oas2OperationBuilder) convertParameters(operation *v2.Operation, apiPa
 				minLength := int64(*param.MinLength)
 				typeSchema.MinLength = &minLength
 			}
-		} else if param.Schema != nil {
+		case param.Schema != nil:
 			typeEncoder, typeSchema, err = newOAS2SchemaBuilder(oc.builder, apiPath, rest.ParameterLocation(param.In)).
 				getSchemaTypeFromProxy(param.Schema, !paramRequired, fieldPaths)
 			if err != nil {
 				return nil, err
 			}
-		} else {
+		default:
 			typeEncoder = oc.builder.buildScalarJSON()
 			typeSchema = &rest.TypeSchema{
 				Type: []string{},
@@ -228,6 +230,7 @@ func (oc *oas2OperationBuilder) convertParameters(operation *v2.Operation, apiPa
 			return nil, err
 		}
 
+		log.Println("type != ''", apiPath, fieldPaths, typeEncoder)
 		schemaType := typeEncoder.Encode()
 		argument := rest.ArgumentInfo{
 			ArgumentInfo: schema.ArgumentInfo{
