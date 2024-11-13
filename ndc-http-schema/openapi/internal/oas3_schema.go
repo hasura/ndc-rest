@@ -201,7 +201,6 @@ func (oc *oas3SchemaBuilder) getSchemaType(typeSchema *base.Schema, fieldPaths [
 				if propType == nil {
 					continue
 				}
-				oc.builder.typeUsageCounter.Add(getNamedType(propType, true, ""), 1)
 				objField := rest.ObjectField{
 					ObjectField: schema.ObjectField{
 						Type: propType.Encode(),
@@ -280,7 +279,7 @@ func (oc *oas3SchemaBuilder) getSchemaType(typeSchema *base.Schema, fieldPaths [
 }
 
 // Support converting allOf and anyOf to object types with merge strategy
-func (oc *oas3SchemaBuilder) buildAllOfAnyOfSchemaType(schemaProxies []*base.SchemaProxy, nullable bool, fieldPaths []string) (schema.TypeEncoder, *rest.TypeSchema, bool, error) {
+func (oc *oas3SchemaBuilder) buildAllOfAnyOfSchemaType(schemaProxies []*base.SchemaProxy, nullable bool, fieldPaths []string) (schema.TypeEncoder, *rest.TypeSchema, bool, error) { //nolint:all
 	proxies, mergedType, isNullable := evalSchemaProxiesSlice(schemaProxies, oc.location)
 	nullable = nullable || isNullable
 
@@ -339,7 +338,6 @@ func (oc *oas3SchemaBuilder) buildAllOfAnyOfSchemaType(schemaProxies []*base.Sch
 			}
 			for k, v := range readObj.Fields {
 				if _, ok := readObject.Fields[k]; !ok {
-					oc.builder.typeUsageCounter.Add(getNamedType(v.Type.Interface(), true, ""), 1)
 					readObject.Fields[k] = v
 				}
 			}
@@ -351,7 +349,6 @@ func (oc *oas3SchemaBuilder) buildAllOfAnyOfSchemaType(schemaProxies []*base.Sch
 			}
 			for k, v := range writeObj.Fields {
 				if _, ok := writeObject.Fields[k]; !ok {
-					oc.builder.typeUsageCounter.Add(getNamedType(v.Type.Interface(), true, ""), 1)
 					writeObject.Fields[k] = v
 				}
 			}

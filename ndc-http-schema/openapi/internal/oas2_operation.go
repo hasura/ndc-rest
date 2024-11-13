@@ -26,7 +26,7 @@ func newOAS2OperationBuilder(builder *OAS2Builder) *oas2OperationBuilder {
 }
 
 // BuildFunction build a HTTP NDC function information from OpenAPI v2 operation
-func (oc *oas2OperationBuilder) BuildFunction(pathKey string, operation *v2.Operation) (*rest.OperationInfo, string, error) {
+func (oc *oas2OperationBuilder) BuildFunction(pathKey string, operation *v2.Operation, commonParams []*v2.Parameter) (*rest.OperationInfo, string, error) {
 	if operation == nil {
 		return nil, "", nil
 	}
@@ -61,7 +61,7 @@ func (oc *oas2OperationBuilder) BuildFunction(pathKey string, operation *v2.Oper
 	if resultType == nil {
 		return nil, "", nil
 	}
-	reqBody, err := oc.convertParameters(operation, pathKey, []string{funcName})
+	reqBody, err := oc.convertParameters(operation, pathKey, commonParams, []string{funcName})
 	if err != nil {
 		return nil, "", fmt.Errorf("%s: %w", funcName, err)
 	}
@@ -86,7 +86,7 @@ func (oc *oas2OperationBuilder) BuildFunction(pathKey string, operation *v2.Oper
 }
 
 // BuildProcedure build a HTTP NDC function information from OpenAPI v2 operation
-func (oc *oas2OperationBuilder) BuildProcedure(pathKey string, method string, operation *v2.Operation) (*rest.OperationInfo, string, error) {
+func (oc *oas2OperationBuilder) BuildProcedure(pathKey string, method string, operation *v2.Operation, commonParams []*v2.Parameter) (*rest.OperationInfo, string, error) {
 	if operation == nil {
 		return nil, "", nil
 	}
@@ -126,7 +126,7 @@ func (oc *oas2OperationBuilder) BuildProcedure(pathKey string, method string, op
 		return nil, "", nil
 	}
 
-	reqBody, err := oc.convertParameters(operation, pathKey, []string{procName})
+	reqBody, err := oc.convertParameters(operation, pathKey, commonParams, []string{procName})
 	if err != nil {
 		return nil, "", fmt.Errorf("%s: %w", pathKey, err)
 	}
@@ -150,8 +150,8 @@ func (oc *oas2OperationBuilder) BuildProcedure(pathKey string, method string, op
 	return &procedure, procName, nil
 }
 
-func (oc *oas2OperationBuilder) convertParameters(operation *v2.Operation, apiPath string, fieldPaths []string) (*rest.RequestBody, error) {
-	if operation == nil || len(operation.Parameters) == 0 {
+func (oc *oas2OperationBuilder) convertParameters(operation *v2.Operation, apiPath string, commonParams []*v2.Parameter, fieldPaths []string) (*rest.RequestBody, error) {
+	if operation == nil || (len(operation.Parameters) == 0 && len(commonParams) == 0) {
 		return nil, nil
 	}
 
@@ -167,7 +167,7 @@ func (oc *oas2OperationBuilder) convertParameters(operation *v2.Operation, apiPa
 	formDataObject := rest.ObjectType{
 		Fields: map[string]rest.ObjectField{},
 	}
-	for _, param := range operation.Parameters {
+	for _, param := range append(operation.Parameters, commonParams...) {
 		if param == nil {
 			continue
 		}
@@ -186,7 +186,7 @@ func (oc *oas2OperationBuilder) convertParameters(operation *v2.Operation, apiPa
 		}
 
 		if param.Type != "" {
-			typeEncoder, err = oc.builder.getSchemaTypeFromParameter(param, apiPath, fieldPaths)
+			typeEncoder, err = newOAS2SchemaBuilder(oc.builder, apiPath, rest.ParameterLocation(param.In)).getSchemaTypeFromParameter(param, fieldPaths)
 			if err != nil {
 				return nil, err
 			}
@@ -211,7 +211,8 @@ func (oc *oas2OperationBuilder) convertParameters(operation *v2.Operation, apiPa
 				typeSchema.MinLength = &minLength
 			}
 		} else if param.Schema != nil {
-			typeEncoder, typeSchema, err = oc.builder.getSchemaTypeFromProxy(param.Schema, !paramRequired, apiPath, fieldPaths)
+			typeEncoder, typeSchema, err = newOAS2SchemaBuilder(oc.builder, apiPath, rest.ParameterLocation(param.In)).
+				getSchemaTypeFromProxy(param.Schema, !paramRequired, fieldPaths)
 			if err != nil {
 				return nil, err
 			}
@@ -227,7 +228,6 @@ func (oc *oas2OperationBuilder) convertParameters(operation *v2.Operation, apiPa
 			return nil, err
 		}
 
-		oc.builder.typeUsageCounter.Add(getNamedType(typeEncoder, true, ""), 1)
 		schemaType := typeEncoder.Encode()
 		argument := rest.ArgumentInfo{
 			ArgumentInfo: schema.ArgumentInfo{
@@ -271,7 +271,6 @@ func (oc *oas2OperationBuilder) convertParameters(operation *v2.Operation, apiPa
 	if len(formDataObject.Fields) > 0 {
 		bodyName := utils.StringSliceToPascalCase(fieldPaths) + "Body"
 		oc.builder.schema.ObjectTypes[bodyName] = formDataObject
-		oc.builder.typeUsageCounter.Add(bodyName, 1)
 
 		desc := "Form data of " + apiPath
 		oc.Arguments["body"] = rest.ArgumentInfo{
@@ -323,15 +322,16 @@ func (oc *oas2OperationBuilder) convertResponse(responses *v2.Responses, apiPath
 	// return nullable boolean type if the response content is null
 	if resp == nil || resp.Schema == nil {
 		scalarName := string(rest.ScalarBoolean)
-		oc.builder.typeUsageCounter.Add(scalarName, 1)
+
 		return schema.NewNullableNamedType(scalarName), nil
 	}
 
-	schemaType, _, err := oc.builder.getSchemaTypeFromProxy(resp.Schema, false, apiPath, fieldPaths)
+	schemaType, _, err := newOAS2SchemaBuilder(oc.builder, apiPath, rest.InBody).
+		getSchemaTypeFromProxy(resp.Schema, false, fieldPaths)
 	if err != nil {
 		return nil, err
 	}
-	oc.builder.typeUsageCounter.Add(getNamedType(schemaType, true, ""), 1)
+
 	return schemaType, nil
 }
 
@@ -349,6 +349,7 @@ func (oc *oas2OperationBuilder) getResponseContentTypeV2(contentTypes []string) 
 			return ct
 		}
 	}
+
 	return ""
 }
 
@@ -359,5 +360,6 @@ func (oc *oas2OperationBuilder) getOperationDescription(pathKey string, method s
 	if operation.Description != "" {
 		return utils.StripHTMLTags(operation.Description)
 	}
+
 	return strings.ToUpper(method) + " " + pathKey
 }

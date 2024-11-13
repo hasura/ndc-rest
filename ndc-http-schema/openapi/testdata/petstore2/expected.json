@@ -42,6 +42,293 @@
     "version": "1.0.6"
   },
   "functions": {
+    "GET_browsers_stats": {
+      "request": {
+        "url": "/browsers/stats",
+        "method": "get",
+        "security": [
+          {
+            "Authorization": []
+          }
+        ],
+        "response": {
+          "contentType": "application/json"
+        }
+      },
+      "arguments": {
+        "aggregated_by": {
+          "description": "How to group the statistics. Must be either \"day\", \"week\", or \"month\".",
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "BrowsersEnum",
+              "type": "named"
+            }
+          },
+          "http": {
+            "name": "aggregated_by",
+            "in": "query",
+            "schema": {
+              "type": [
+                "string"
+              ]
+            }
+          }
+        },
+        "browsers": {
+          "description": "The browsers to get statistics for. You can include up to 10 different browsers by including this parameter multiple times.",
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "String",
+              "type": "named"
+            }
+          },
+          "http": {
+            "name": "browsers",
+            "in": "query",
+            "schema": {
+              "type": [
+                "string"
+              ]
+            }
+          }
+        },
+        "end_date": {
+          "description": "The end date of the statistics to retrieve. Defaults to today. Must follow format YYYY-MM-DD.",
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "String",
+              "type": "named"
+            }
+          },
+          "http": {
+            "name": "end_date",
+            "in": "query",
+            "schema": {
+              "type": [
+                "string"
+              ]
+            }
+          }
+        },
+        "limit": {
+          "description": "The number of results to return.",
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "Int32",
+              "type": "named"
+            }
+          },
+          "http": {
+            "name": "limit",
+            "in": "query",
+            "schema": {
+              "type": [
+                "integer"
+              ]
+            }
+          }
+        },
+        "offset": {
+          "description": "The point in the list to begin retrieving results.",
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "Int32",
+              "type": "named"
+            }
+          },
+          "http": {
+            "name": "offset",
+            "in": "query",
+            "schema": {
+              "type": [
+                "integer"
+              ]
+            }
+          }
+        },
+        "on-behalf-of": {
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "String",
+              "type": "named"
+            }
+          },
+          "http": {
+            "name": "on-behalf-of",
+            "in": "header",
+            "schema": {
+              "type": [
+                "string"
+              ]
+            }
+          }
+        },
+        "start_date": {
+          "description": "The starting date of the statistics to retrieve. Must follow format YYYY-MM-DD.",
+          "type": {
+            "name": "String",
+            "type": "named"
+          },
+          "http": {
+            "name": "start_date",
+            "in": "query",
+            "schema": {
+              "type": [
+                "string"
+              ]
+            }
+          }
+        }
+      },
+      "description": "**This endpoint allows you to retrieve your email statistics segmented by browser type.**\n\n**We only store up to 7 days of email activity in our database.** By default, 500 items will be returned per request via the Advanced Stats API endpoints.\n\nAdvanced Stats provide a more in-depth view of your email statistics and the actions taken by your recipients. You can segment these statistics by geographic location, device type, client type, browser, and mailbox provider. For more information about statistics, please see our [Statistics Overview](https://sendgrid.com/docs/ui/analytics-and-reporting/stats-overview/).",
+      "result_type": {
+        "element_type": {
+          "name": "GETBrowsersStatsResult",
+          "type": "named"
+        },
+        "type": "array"
+      }
+    },
+    "GET_contactdb_lists_list_id_recipients": {
+      "request": {
+        "url": "/contactdb/lists/{list_id}/recipients",
+        "method": "get",
+        "security": [
+          {
+            "Authorization": []
+          }
+        ],
+        "response": {
+          "contentType": "application/json"
+        }
+      },
+      "arguments": {
+        "list_id": {
+          "description": "The id of the list of recipients you want to retrieve.",
+          "type": {
+            "name": "Int32",
+            "type": "named"
+          },
+          "http": {
+            "name": "list_id",
+            "in": "path",
+            "schema": {
+              "type": [
+                "integer"
+              ]
+            }
+          }
+        },
+        "on-behalf-of": {
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "String",
+              "type": "named"
+            }
+          },
+          "http": {
+            "name": "on-behalf-of",
+            "in": "header",
+            "schema": {
+              "type": [
+                "string"
+              ]
+            }
+          }
+        }
+      },
+      "description": "GET /contactdb/lists/{list_id}/recipients",
+      "result_type": {
+        "name": "GETContactdbListsListIdRecipientsResult",
+        "type": "named"
+      }
+    },
+    "GET_geo_stats": {
+      "request": {
+        "url": "/geo/stats",
+        "method": "get",
+        "security": [
+          {
+            "Authorization": []
+          }
+        ],
+        "response": {
+          "contentType": "application/json"
+        }
+      },
+      "arguments": {
+        "on-behalf-of": {
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "String",
+              "type": "named"
+            }
+          },
+          "http": {
+            "name": "on-behalf-of",
+            "in": "header",
+            "schema": {
+              "type": [
+                "string"
+              ]
+            }
+          }
+        }
+      },
+      "description": "GET /geo/stats",
+      "result_type": {
+        "element_type": {
+          "name": "GETGeoStatsResult",
+          "type": "named"
+        },
+        "type": "array"
+      }
+    },
+    "GET_whitelabel_domains_subuser": {
+      "request": {
+        "url": "/whitelabel/domains/subuser",
+        "method": "get",
+        "security": [
+          {
+            "Authorization": []
+          }
+        ],
+        "response": {
+          "contentType": "application/json"
+        }
+      },
+      "arguments": {
+        "username": {
+          "description": "Username for the subuser to find associated authenticated domain.",
+          "type": {
+            "name": "String",
+            "type": "named"
+          },
+          "http": {
+            "name": "username",
+            "in": "query",
+            "schema": {
+              "type": [
+                "string"
+              ]
+            }
+          }
+        }
+      },
+      "description": "GET /whitelabel/domains/subuser",
+      "result_type": {
+        "name": "DomainAuthenticationDomainSpf",
+        "type": "named"
+      }
+    },
     "findPetsByStatus": {
       "request": {
         "url": "/pet/findByStatus",
@@ -150,7 +437,7 @@
       "arguments": {},
       "description": "Returns pet inventories by status",
       "result_type": {
-        "name": "JSON",
+        "name": "GetInventoryResult",
         "type": "named"
       }
     },
@@ -434,6 +721,106 @@
     }
   },
   "object_types": {
+    "AdvancedStatsClicks": {
+      "description": "The individual events and their stats.",
+      "fields": {
+        "clicks": {
+          "description": "The number of links that were clicked in your emails.",
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "Int32",
+              "type": "named"
+            }
+          },
+          "http": {
+            "type": [
+              "integer"
+            ]
+          }
+        },
+        "unique_clicks": {
+          "description": "The number of unique recipients who clicked links in your emails.",
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "Int32",
+              "type": "named"
+            }
+          },
+          "http": {
+            "type": [
+              "integer"
+            ]
+          }
+        }
+      }
+    },
+    "AdvancedStatsClicksOpens": {
+      "description": "The individual events and their stats.",
+      "fields": {
+        "clicks": {
+          "description": "The number of links that were clicked in your emails.",
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "Int32",
+              "type": "named"
+            }
+          },
+          "http": {
+            "type": [
+              "integer"
+            ]
+          }
+        },
+        "opens": {
+          "description": "The total number of times your emails were opened by recipients.",
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "Int32",
+              "type": "named"
+            }
+          },
+          "http": {
+            "type": [
+              "integer"
+            ]
+          }
+        },
+        "unique_clicks": {
+          "description": "The number of unique recipients who clicked links in your emails.",
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "Int32",
+              "type": "named"
+            }
+          },
+          "http": {
+            "type": [
+              "integer"
+            ]
+          }
+        },
+        "unique_opens": {
+          "description": "The number of unique recipients who opened your emails.",
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "Int32",
+              "type": "named"
+            }
+          },
+          "http": {
+            "type": [
+              "integer"
+            ]
+          }
+        }
+      }
+    },
     "ApiResponse": {
       "fields": {
         "code": {
@@ -499,6 +886,758 @@
           }
         },
         "name": {
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "String",
+              "type": "named"
+            }
+          },
+          "http": {
+            "type": [
+              "string"
+            ]
+          }
+        }
+      }
+    },
+    "ContactdbCustomFieldWithIdValue": {
+      "fields": {
+        "id": {
+          "description": "The ID of the custom field.",
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "Float64",
+              "type": "named"
+            }
+          },
+          "http": {
+            "type": [
+              "number"
+            ]
+          }
+        },
+        "name": {
+          "description": "The name of the field",
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "String",
+              "type": "named"
+            }
+          },
+          "http": {
+            "type": [
+              "string"
+            ]
+          }
+        },
+        "type": {
+          "description": "The type of the field.",
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "ContactdbCustomFieldType",
+              "type": "named"
+            }
+          },
+          "http": {
+            "type": [
+              "string"
+            ]
+          }
+        },
+        "value": {
+          "description": "The value of this recipient's custom field",
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "String",
+              "type": "named"
+            }
+          },
+          "http": {
+            "type": [
+              "string"
+            ]
+          }
+        }
+      }
+    },
+    "ContactdbRecipient": {
+      "fields": {
+        "recipients": {
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "element_type": {
+                "name": "ContactdbRecipientRecipients",
+                "type": "named"
+              },
+              "type": "array"
+            }
+          },
+          "http": {
+            "type": [
+              "array"
+            ],
+            "items": {
+              "type": [
+                "object"
+              ]
+            }
+          }
+        }
+      }
+    },
+    "ContactdbRecipientRecipients": {
+      "fields": {
+        "custom_fields": {
+          "description": "The custom fields assigned to this recipient and their values.",
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "element_type": {
+                "name": "ContactdbCustomFieldWithIdValue",
+                "type": "named"
+              },
+              "type": "array"
+            }
+          },
+          "http": {
+            "type": [
+              "array"
+            ]
+          }
+        },
+        "first_name": {
+          "description": "The first name of this recipient. This is a default custom field that SendGrid provides.",
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "String",
+              "type": "named"
+            }
+          },
+          "http": {
+            "type": [
+              "string"
+            ]
+          }
+        }
+      }
+    },
+    "DomainAuthenticationDomainSpf": {
+      "fields": {
+        "automatic_security": {
+          "description": "Indicates if this authenticated domain uses automated security.",
+          "type": {
+            "name": "Boolean",
+            "type": "named"
+          },
+          "http": {
+            "type": [
+              "boolean"
+            ]
+          }
+        },
+        "custom_spf": {
+          "description": "Indicates if this authenticated domain uses custom SPF.",
+          "type": {
+            "name": "Boolean",
+            "type": "named"
+          },
+          "http": {
+            "type": [
+              "boolean"
+            ]
+          }
+        },
+        "default": {
+          "description": "Indicates if this is the default domain.",
+          "type": {
+            "name": "Boolean",
+            "type": "named"
+          },
+          "http": {
+            "type": [
+              "boolean"
+            ]
+          }
+        },
+        "dns": {
+          "description": "The DNS records for this authenticated domain.",
+          "type": {
+            "name": "DomainAuthenticationDomainSpfDns",
+            "type": "named"
+          },
+          "http": {
+            "type": [
+              "object"
+            ]
+          }
+        },
+        "domain": {
+          "description": "The domain authenticated.",
+          "type": {
+            "name": "String",
+            "type": "named"
+          },
+          "http": {
+            "type": [
+              "string"
+            ]
+          }
+        },
+        "id": {
+          "description": "The ID of the authenticated domain.",
+          "type": {
+            "name": "Int32",
+            "type": "named"
+          },
+          "http": {
+            "type": [
+              "integer"
+            ]
+          }
+        },
+        "ips": {
+          "description": "The IP addresses that are included in the SPF record for this authenticated domain.",
+          "type": {
+            "element_type": {
+              "name": "JSON",
+              "type": "named"
+            },
+            "type": "array"
+          },
+          "http": {
+            "type": [
+              "array"
+            ],
+            "items": {
+              "type": null
+            }
+          }
+        },
+        "legacy": {
+          "description": "Indicates if this authenticated domain was created using the legacy whitelabel tool. If it is a legacy whitelabel, it will still function, but you'll need to create a new authenticated domain if you need to update it.",
+          "type": {
+            "name": "Boolean",
+            "type": "named"
+          },
+          "http": {
+            "type": [
+              "boolean"
+            ]
+          }
+        },
+        "subdomain": {
+          "description": "The subdomain that was used to create this authenticated domain.",
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "String",
+              "type": "named"
+            }
+          },
+          "http": {
+            "type": [
+              "string"
+            ]
+          }
+        },
+        "user_id": {
+          "description": "The user_id of the account that this authenticated domain is associated with.",
+          "type": {
+            "name": "Int32",
+            "type": "named"
+          },
+          "http": {
+            "type": [
+              "integer"
+            ]
+          }
+        },
+        "username": {
+          "description": "The username of the account that this authenticated domain is associated with.",
+          "type": {
+            "name": "String",
+            "type": "named"
+          },
+          "http": {
+            "type": [
+              "string"
+            ]
+          }
+        },
+        "valid": {
+          "description": "Indicates if this is a valid authenticated domain .",
+          "type": {
+            "name": "Boolean",
+            "type": "named"
+          },
+          "http": {
+            "type": [
+              "boolean"
+            ]
+          }
+        }
+      }
+    },
+    "DomainAuthenticationDomainSpfDns": {
+      "description": "The DNS records for this authenticated domain.",
+      "fields": {
+        "dkim": {
+          "description": "The DKIM record for messages sent using this authenticated domain.",
+          "type": {
+            "name": "DomainAuthenticationDomainSpfDnsDkim",
+            "type": "named"
+          },
+          "http": {
+            "type": [
+              "object"
+            ]
+          }
+        },
+        "domain_spf": {
+          "description": "The SPF record for the root domain.",
+          "type": {
+            "name": "DomainAuthenticationDomainSpfDnsDomainSpf",
+            "type": "named"
+          },
+          "http": {
+            "type": [
+              "object"
+            ]
+          }
+        },
+        "mail_server": {
+          "description": "Designates which mail server is responsible for accepting messages from a domain.",
+          "type": {
+            "name": "DomainAuthenticationDomainSpfDnsMailServer",
+            "type": "named"
+          },
+          "http": {
+            "type": [
+              "object"
+            ]
+          }
+        },
+        "subdomain_spf": {
+          "description": "The SPF record for the subdomain used to create this authenticated domain.",
+          "type": {
+            "name": "DomainAuthenticationDomainSpfDnsSubdomainSpf",
+            "type": "named"
+          },
+          "http": {
+            "type": [
+              "object"
+            ]
+          }
+        }
+      }
+    },
+    "DomainAuthenticationDomainSpfDnsDkim": {
+      "description": "The DKIM record for messages sent using this authenticated domain.",
+      "fields": {
+        "data": {
+          "description": "The DKIM record.",
+          "type": {
+            "name": "String",
+            "type": "named"
+          },
+          "http": {
+            "type": [
+              "string"
+            ]
+          }
+        },
+        "host": {
+          "description": "The DNS labels for the DKIM signature.",
+          "type": {
+            "name": "String",
+            "type": "named"
+          },
+          "http": {
+            "type": [
+              "string"
+            ]
+          }
+        },
+        "type": {
+          "description": "The type of data in the DKIM record.",
+          "type": {
+            "name": "String",
+            "type": "named"
+          },
+          "http": {
+            "type": [
+              "string"
+            ]
+          }
+        },
+        "valid": {
+          "description": "Indicates if the DKIM record is valid.",
+          "type": {
+            "name": "Boolean",
+            "type": "named"
+          },
+          "http": {
+            "type": [
+              "boolean"
+            ]
+          }
+        }
+      }
+    },
+    "DomainAuthenticationDomainSpfDnsDomainSpf": {
+      "description": "The SPF record for the root domain.",
+      "fields": {
+        "data": {
+          "description": "The SPF record.",
+          "type": {
+            "name": "String",
+            "type": "named"
+          },
+          "http": {
+            "type": [
+              "string"
+            ]
+          }
+        },
+        "host": {
+          "description": "The root domain that this SPF record will be used to authenticate.",
+          "type": {
+            "name": "String",
+            "type": "named"
+          },
+          "http": {
+            "type": [
+              "string"
+            ]
+          }
+        },
+        "type": {
+          "description": "The type of data in the SPF record.",
+          "type": {
+            "name": "String",
+            "type": "named"
+          },
+          "http": {
+            "type": [
+              "string"
+            ]
+          }
+        },
+        "valid": {
+          "description": "Indicates if the SPF record is valid.",
+          "type": {
+            "name": "Boolean",
+            "type": "named"
+          },
+          "http": {
+            "type": [
+              "boolean"
+            ]
+          }
+        }
+      }
+    },
+    "DomainAuthenticationDomainSpfDnsMailServer": {
+      "description": "Designates which mail server is responsible for accepting messages from a domain.",
+      "fields": {
+        "data": {
+          "description": "The mail server responsible for accepting messages from the sending domain.",
+          "type": {
+            "name": "String",
+            "type": "named"
+          },
+          "http": {
+            "type": [
+              "string"
+            ]
+          }
+        },
+        "host": {
+          "description": "The domain sending the messages.",
+          "type": {
+            "name": "String",
+            "type": "named"
+          },
+          "http": {
+            "type": [
+              "string"
+            ]
+          }
+        },
+        "type": {
+          "description": "They type of DNS record.",
+          "type": {
+            "name": "String",
+            "type": "named"
+          },
+          "http": {
+            "type": [
+              "string"
+            ]
+          }
+        },
+        "valid": {
+          "description": "Indicates if this is a valid DNS record.",
+          "type": {
+            "name": "Boolean",
+            "type": "named"
+          },
+          "http": {
+            "type": [
+              "boolean"
+            ]
+          }
+        }
+      }
+    },
+    "DomainAuthenticationDomainSpfDnsSubdomainSpf": {
+      "description": "The SPF record for the subdomain used to create this authenticated domain.",
+      "fields": {
+        "data": {
+          "description": "The SPF record.",
+          "type": {
+            "name": "String",
+            "type": "named"
+          },
+          "http": {
+            "type": [
+              "string"
+            ]
+          }
+        },
+        "host": {
+          "description": "The domain that this SPF record will be used to authenticate.",
+          "type": {
+            "name": "String",
+            "type": "named"
+          },
+          "http": {
+            "type": [
+              "string"
+            ]
+          }
+        },
+        "type": {
+          "description": "The type of data in the SPF record.",
+          "type": {
+            "name": "String",
+            "type": "named"
+          },
+          "http": {
+            "type": [
+              "string"
+            ]
+          }
+        },
+        "valid": {
+          "description": "Indicates if this is a valid SPF record.",
+          "type": {
+            "name": "Boolean",
+            "type": "named"
+          },
+          "http": {
+            "type": [
+              "boolean"
+            ]
+          }
+        }
+      }
+    },
+    "GETBrowsersStatsResult": {
+      "fields": {
+        "date": {
+          "description": "The date that the statistics were gathered.",
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "String",
+              "type": "named"
+            }
+          },
+          "http": {
+            "type": [
+              "string"
+            ]
+          }
+        },
+        "stats": {
+          "description": "The list of statistics.",
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "element_type": {
+                "name": "GETBrowsersStatsResultStats",
+                "type": "named"
+              },
+              "type": "array"
+            }
+          },
+          "http": {
+            "type": [
+              "array"
+            ],
+            "items": {
+              "type": [
+                "object"
+              ]
+            }
+          }
+        }
+      }
+    },
+    "GETBrowsersStatsResultStats": {
+      "fields": {
+        "metrics": {
+          "description": "The individual events and their stats.",
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "AdvancedStatsClicks",
+              "type": "named"
+            }
+          },
+          "http": {
+            "type": [
+              "object"
+            ]
+          }
+        },
+        "name": {
+          "description": "The name of the specific segmentation.",
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "String",
+              "type": "named"
+            }
+          },
+          "http": {
+            "type": [
+              "string"
+            ]
+          }
+        },
+        "type": {
+          "description": "The type of segmentation.",
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "String",
+              "type": "named"
+            }
+          },
+          "http": {
+            "type": [
+              "string"
+            ]
+          }
+        }
+      }
+    },
+    "GETContactdbListsListIdRecipientsResult": {
+      "fields": {
+        "recipients": {
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "element_type": {
+                "name": "ContactdbRecipient",
+                "type": "named"
+              },
+              "type": "array"
+            }
+          },
+          "http": {
+            "type": [
+              "array"
+            ]
+          }
+        }
+      }
+    },
+    "GETGeoStatsResult": {
+      "fields": {
+        "date": {
+          "description": "The date that the statistics were gathered.",
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "String",
+              "type": "named"
+            }
+          },
+          "http": {
+            "type": [
+              "string"
+            ]
+          }
+        },
+        "stats": {
+          "description": "The list of statistics.",
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "element_type": {
+                "name": "GETGeoStatsResultStats",
+                "type": "named"
+              },
+              "type": "array"
+            }
+          },
+          "http": {
+            "type": [
+              "array"
+            ],
+            "items": {
+              "type": [
+                "object"
+              ]
+            }
+          }
+        }
+      }
+    },
+    "GETGeoStatsResultStats": {
+      "fields": {
+        "metrics": {
+          "description": "The individual events and their stats.",
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "AdvancedStatsClicksOpens",
+              "type": "named"
+            }
+          },
+          "http": {
+            "type": [
+              "object"
+            ]
+          }
+        },
+        "name": {
+          "description": "The name of the specific segmentation.",
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "String",
+              "type": "named"
+            }
+          },
+          "http": {
+            "type": [
+              "string"
+            ]
+          }
+        },
+        "type": {
+          "description": "The type of segmentation.",
           "type": {
             "type": "nullable",
             "underlying_type": {
@@ -1552,6 +2691,44 @@
       "comparison_operators": {},
       "representation": {
         "type": "boolean"
+      }
+    },
+    "BrowsersEnum": {
+      "aggregate_functions": {},
+      "comparison_operators": {},
+      "representation": {
+        "one_of": [
+          "day",
+          "week",
+          "month"
+        ],
+        "type": "enum"
+      }
+    },
+    "ContactdbCustomFieldType": {
+      "aggregate_functions": {},
+      "comparison_operators": {},
+      "representation": {
+        "one_of": [
+          "date",
+          "text",
+          "number"
+        ],
+        "type": "enum"
+      }
+    },
+    "Float64": {
+      "aggregate_functions": {},
+      "comparison_operators": {},
+      "representation": {
+        "type": "float64"
+      }
+    },
+    "GetInventoryResult": {
+      "aggregate_functions": {},
+      "comparison_operators": {},
+      "representation": {
+        "type": "json"
       }
     },
     "Int32": {

@@ -11,8 +11,8 @@ import (
 
 var (
 	bracketRegexp         = regexp.MustCompile(`[\{\}]`)
-	schemaRefNameV2Regexp = regexp.MustCompile(`^#/definitions/([a-zA-Z0-9\.\-_]+)$`)
-	schemaRefNameV3Regexp = regexp.MustCompile(`^#/components/schemas/([a-zA-Z0-9\.\-_]+)$`)
+	schemaRefNameV2Regexp = regexp.MustCompile(`^#/definitions/(.+)$`)
+	schemaRefNameV3Regexp = regexp.MustCompile(`^#/components/schemas/(.+)$`)
 )
 
 var (
@@ -122,25 +122,4 @@ type ConvertOptions struct {
 	EnvPrefix           string
 	Strict              bool
 	Logger              *slog.Logger
-}
-
-// TypeUsageCounter tracks the list of reference types and number of usage of them in other models
-type TypeUsageCounter map[string]int
-
-// Increase increases the usage of an element
-func (tuc *TypeUsageCounter) Add(name string, value int) {
-	if counter, ok := (*tuc)[name]; ok {
-		(*tuc)[name] = counter + value
-	} else {
-		(*tuc)[name] = value
-	}
-}
-
-// Get returns the usage count of the input name
-func (tuc *TypeUsageCounter) Get(name string) int {
-	counter, ok := (*tuc)[name]
-	if !ok {
-		return 0
-	}
-	return counter
 }

@@ -14,18 +14,21 @@ import (
 )
 
 type oas3OperationBuilder struct {
-	builder   *OAS3Builder
-	pathKey   string
-	method    string
 	Arguments map[string]rest.ArgumentInfo
+
+	builder      *OAS3Builder
+	pathKey      string
+	method       string
+	commonParams []*v3.Parameter
 }
 
-func newOAS3OperationBuilder(builder *OAS3Builder, pathKey string, method string) *oas3OperationBuilder {
+func newOAS3OperationBuilder(builder *OAS3Builder, pathKey string, method string, commonParams []*v3.Parameter) *oas3OperationBuilder {
 	return &oas3OperationBuilder{
-		builder:   builder,
-		pathKey:   pathKey,
-		method:    method,
-		Arguments: make(map[string]rest.ArgumentInfo),
+		builder:      builder,
+		pathKey:      pathKey,
+		method:       method,
+		commonParams: commonParams,
+		Arguments:    make(map[string]rest.ArgumentInfo),
 	}
 }
 
@@ -157,11 +160,11 @@ func (oc *oas3OperationBuilder) BuildProcedure(operation *v3.Operation) (*rest.O
 }
 
 func (oc *oas3OperationBuilder) convertParameters(params []*v3.Parameter, apiPath string, fieldPaths []string) error {
-	if len(params) == 0 {
+	if len(params) == 0 && len(oc.commonParams) == 0 {
 		return nil
 	}
 
-	for _, param := range params {
+	for _, param := range append(params, oc.commonParams...) {
 		if param == nil {
 			continue
 		}
@@ -197,7 +200,6 @@ func (oc *oas3OperationBuilder) convertParameters(params []*v3.Parameter, apiPat
 			encoding.Style = style
 		}
 
-		oc.builder.typeUsageCounter.Add(getNamedType(schemaType, true, ""), 1)
 		argument := rest.ArgumentInfo{
 			ArgumentInfo: schema.ArgumentInfo{
 				Type: schemaType.Encode(),
@@ -250,7 +252,6 @@ func (oc *oas3OperationBuilder) convertRequestBody(reqBody *v3.RequestBody, apiP
 		return nil, nil, nil
 	}
 
-	oc.builder.typeUsageCounter.Add(getNamedType(schemaType, true, ""), 1)
 	bodyResult := &rest.RequestBody{
 		ContentType: contentType,
 	}
@@ -312,7 +313,6 @@ func (oc *oas3OperationBuilder) convertRequestBody(reqBody *v3.RequestBody, apiP
 						EncodingObject: headerEncoding,
 					}
 
-					oc.builder.typeUsageCounter.Add(getNamedType(ndcType, true, ""), 1)
 					argument := schema.ArgumentInfo{
 						Type: ndcType.Encode(),
 					}
@@ -360,7 +360,6 @@ func (oc *oas3OperationBuilder) convertResponse(responses *v3.Responses, apiPath
 	// return nullable boolean type if the response content is null
 	if resp == nil || resp.Content == nil {
 		scalarName := string(rest.ScalarBoolean)
-		oc.builder.typeUsageCounter.Add(scalarName, 1)
 		return schema.NewNullableNamedType(scalarName), &rest.Response{
 			ContentType: rest.ContentTypeJSON,
 		}, nil
@@ -394,7 +393,6 @@ func (oc *oas3OperationBuilder) convertResponse(responses *v3.Responses, apiPath
 	if err != nil {
 		return nil, nil, err
 	}
-	oc.builder.typeUsageCounter.Add(getNamedType(schemaType, true, ""), 1)
 
 	schemaResponse := &rest.Response{
 		ContentType: contentType,
