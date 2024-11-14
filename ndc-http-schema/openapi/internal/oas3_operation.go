@@ -362,6 +362,10 @@ func (oc *oas3OperationBuilder) convertResponse(responses *v3.Responses, apiPath
 	// return nullable boolean type if the response content is null
 	if resp == nil || resp.Content == nil {
 		scalarName := string(rest.ScalarBoolean)
+		if _, ok := oc.builder.schema.ScalarTypes[scalarName]; !ok {
+			oc.builder.schema.ScalarTypes[scalarName] = *defaultScalarTypes[rest.ScalarBoolean]
+		}
+
 		return schema.NewNullableNamedType(scalarName), &rest.Response{
 			ContentType: rest.ContentTypeJSON,
 		}, nil

@@ -73,6 +73,7 @@ func getScalarFromType(sm *rest.NDCHttpSchema, names []string, format string, en
 	if _, ok := sm.ScalarTypes[scalarName]; !ok {
 		sm.ScalarTypes[scalarName] = *scalarType
 	}
+
 	return scalarName, nullable
 }
 
@@ -251,6 +252,7 @@ func getMethodAlias(inputs ...map[string]string) map[string]string {
 			methodAlias[k] = alias
 		}
 	}
+
 	return methodAlias
 }
 
@@ -262,6 +264,7 @@ func convertSecurities(securities []*base.SecurityRequirement) rest.AuthSecuriti
 			results = append(results, s)
 		}
 	}
+
 	return results
 }
 
@@ -277,6 +280,7 @@ func convertSecurity(security *base.SecurityRequirement) rest.AuthSecurity {
 		}
 		results[s.Key()] = v
 	}
+
 	return results
 }
 
@@ -287,6 +291,7 @@ func isPrimitiveScalar(names []string) bool {
 			return false
 		}
 	}
+
 	return true
 }
 
@@ -299,6 +304,7 @@ func getNamedType(typeSchema schema.TypeEncoder, recursive bool, defaultValue st
 		if !recursive {
 			return defaultValue
 		}
+
 		return getNamedType(ty.ElementType.Interface(), recursive, defaultValue)
 	case *schema.NamedType:
 		return ty.Name
@@ -309,6 +315,7 @@ func getNamedType(typeSchema schema.TypeEncoder, recursive bool, defaultValue st
 
 func isNullableType(input schema.TypeEncoder) bool {
 	_, ok := input.(*schema.NullableType)
+
 	return ok
 }
 
