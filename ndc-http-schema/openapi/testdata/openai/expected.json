@@ -4,14 +4,14 @@
     "servers": [
       {
         "url": {
-          "env": "SERVER_URL",
-          "value": "https://api.openai.com/v1"
+          "value": "https://api.openai.com/v1",
+          "env": "SERVER_URL"
         }
       },
       {
         "url": {
-          "env": "SERVER_URL_2",
-          "value": "http://127.0.0.1:11434"
+          "value": "http://127.0.0.1:11434",
+          "env": "SERVER_URL_2"
         }
       }
     ],
@@ -46,7 +46,9 @@
             }
           },
           "http": {
-            "type": ["string"]
+            "type": [
+              "string"
+            ]
           }
         },
         "name": {
@@ -56,11 +58,13 @@
             "type": "named"
           },
           "http": {
-            "type": ["string"]
+            "type": [
+              "string"
+            ]
           }
         },
         "parameters": {
-          "description": "The parameters the functions accepts, described as a JSON Schema object. See the [guide](/docs/guides/function-calling) for examples, and the [JSON Schema reference](https://json-schema.org/understanding-json-schema/) for documentation about the format. \n\nOmitting `parameters` defines a function with an empty parameter list.",
+          "description": "The parameters the functions accepts, described as a JSON Schema object. See the [guide](/docs/guides/function-calling) for examples, and the [JSON Schema reference](https://json-schema.org/understanding-json-schema/) for documentation about the format.   Omitting `parameters` defines a function with an empty parameter list.",
           "type": {
             "type": "nullable",
             "underlying_type": {
@@ -69,7 +73,9 @@
             }
           },
           "http": {
-            "type": ["object"]
+            "type": [
+              "object"
+            ]
           }
         }
       }
@@ -83,7 +89,9 @@
             "type": "named"
           },
           "http": {
-            "type": ["object"]
+            "type": [
+              "object"
+            ]
           }
         },
         "id": {
@@ -93,7 +101,9 @@
             "type": "named"
           },
           "http": {
-            "type": ["string"]
+            "type": [
+              "string"
+            ]
           }
         },
         "type": {
@@ -103,7 +113,9 @@
             "type": "named"
           },
           "http": {
-            "type": ["string"]
+            "type": [
+              "string"
+            ]
           }
         }
       }
@@ -118,7 +130,9 @@
             "type": "named"
           },
           "http": {
-            "type": ["string"]
+            "type": [
+              "string"
+            ]
           }
         },
         "name": {
@@ -128,7 +142,9 @@
             "type": "named"
           },
           "http": {
-            "type": ["string"]
+            "type": [
+              "string"
+            ]
           }
         }
       }
@@ -143,7 +159,9 @@
             "type": "named"
           },
           "http": {
-            "type": ["string"]
+            "type": [
+              "string"
+            ]
           }
         },
         "function_call": {
@@ -156,7 +174,9 @@
             }
           },
           "http": {
-            "type": ["object"]
+            "type": [
+              "object"
+            ]
           }
         },
         "role": {
@@ -166,7 +186,9 @@
             "type": "named"
           },
           "http": {
-            "type": ["string"]
+            "type": [
+              "string"
+            ]
           }
         },
         "tool_calls": {
@@ -182,7 +204,9 @@
             }
           },
           "http": {
-            "type": ["array"]
+            "type": [
+              "array"
+            ]
           }
         }
       }
@@ -197,7 +221,9 @@
             "type": "named"
           },
           "http": {
-            "type": ["string"]
+            "type": [
+              "string"
+            ]
           }
         },
         "name": {
@@ -207,16 +233,18 @@
             "type": "named"
           },
           "http": {
-            "type": ["string"]
+            "type": [
+              "string"
+            ]
           }
         }
       }
     },
     "ChatCompletionStreamOptions": {
-      "description": "Options for streaming response. Only set this when you set `stream: true`.\n",
+      "description": "Options for streaming response. Only set this when you set `stream: true`. ",
       "fields": {
         "include_usage": {
-          "description": "If set, an additional chunk will be streamed before the `data: [DONE]` message. The `usage` field on this chunk shows the token usage statistics for the entire request, and the `choices` field will always be an empty array. All other chunks will also include a `usage` field, but with a null value.\n",
+          "description": "If set, an additional chunk will be streamed before the `data: [DONE]` message. The `usage` field on this chunk shows the token usage statistics for the entire request, and the `choices` field will always be an empty array. All other chunks will also include a `usage` field, but with a null value. ",
           "type": {
             "type": "nullable",
             "underlying_type": {
@@ -225,7 +253,9 @@
             }
           },
           "http": {
-            "type": ["boolean"]
+            "type": [
+              "boolean"
+            ]
           }
         }
       }
@@ -242,9 +272,13 @@
             "type": "array"
           },
           "http": {
-            "type": ["array"],
+            "type": [
+              "array"
+            ],
             "items": {
-              "type": ["integer"]
+              "type": [
+                "integer"
+              ]
             }
           }
         },
@@ -255,7 +289,9 @@
             "type": "named"
           },
           "http": {
-            "type": ["number"]
+            "type": [
+              "number"
+            ]
           }
         },
         "token": {
@@ -265,7 +301,9 @@
             "type": "named"
           },
           "http": {
-            "type": ["string"]
+            "type": [
+              "string"
+            ]
           }
         },
         "top_logprobs": {
@@ -278,9 +316,13 @@
             "type": "array"
           },
           "http": {
-            "type": ["array"],
+            "type": [
+              "array"
+            ],
             "items": {
-              "type": ["object"]
+              "type": [
+                "object"
+              ]
             }
           }
         }
@@ -298,9 +340,13 @@
             "type": "array"
           },
           "http": {
-            "type": ["array"],
+            "type": [
+              "array"
+            ],
             "items": {
-              "type": ["integer"]
+              "type": [
+                "integer"
+              ]
             }
           }
         },
@@ -311,7 +357,9 @@
             "type": "named"
           },
           "http": {
-            "type": ["number"]
+            "type": [
+              "number"
+            ]
           }
         },
         "token": {
@@ -321,7 +369,9 @@
             "type": "named"
           },
           "http": {
-            "type": ["string"]
+            "type": [
+              "string"
+            ]
           }
         }
       }
@@ -334,7 +384,9 @@
             "type": "named"
           },
           "http": {
-            "type": ["object"]
+            "type": [
+              "object"
+            ]
           }
         },
         "type": {
@@ -344,7 +396,9 @@
             "type": "named"
           },
           "http": {
-            "type": ["string"]
+            "type": [
+              "string"
+            ]
           }
         }
       }
@@ -352,7 +406,7 @@
     "CreateChatCompletionRequest": {
       "fields": {
         "frequency_penalty": {
-          "description": "Number between -2.0 and 2.0. Positive values penalize new tokens based on their existing frequency in the text so far, decreasing the model's likelihood to repeat the same line verbatim.\n\n[See more information about frequency and presence penalties.](/docs/guides/text-generation/parameter-details)\n",
+          "description": "Number between -2.0 and 2.0. Positive values penalize new tokens based on their existing frequency in the text so far, decreasing the model's likelihood to repeat the same line verbatim.  [See more information about frequency and presence penalties.](/docs/guides/text-generation/parameter-details) ",
           "type": {
             "type": "nullable",
             "underlying_type": {
@@ -361,13 +415,15 @@
             }
           },
           "http": {
-            "type": ["number"],
+            "type": [
+              "number"
+            ],
             "maximum": 2,
             "minimum": -2
           }
         },
         "function_call": {
-          "description": "Deprecated in favor of `tool_choice`.\n\nControls which (if any) function is called by the model.\n`none` means the model will not call a function and instead generates a message.\n`auto` means the model can pick between generating a message or calling a function.\nSpecifying a particular function via `{\"name\": \"my_function\"}` forces the model to call that function.\n\n`none` is the default when no functions are present. `auto` is the default if functions are present.\n",
+          "description": "Deprecated in favor of `tool_choice`.  Controls which (if any) function is called by the model. `none` means the model will not call a function and instead generates a message. `auto` means the model can pick between generating a message or calling a function. Specifying a particular function via `{\"name\": \"my_function\"}` forces the model to call that function.  `none` is the default when no functions are present. `auto` is the default if functions are present. ",
           "type": {
             "type": "nullable",
             "underlying_type": {
@@ -380,7 +436,7 @@
           }
         },
         "functions": {
-          "description": "Deprecated in favor of `tools`.\n\nA list of functions the model may generate JSON inputs for.\n",
+          "description": "Deprecated in favor of `tools`.  A list of functions the model may generate JSON inputs for. ",
           "type": {
             "type": "nullable",
             "underlying_type": {
@@ -392,11 +448,13 @@
             }
           },
           "http": {
-            "type": ["array"]
+            "type": [
+              "array"
+            ]
           }
         },
         "logit_bias": {
-          "description": "Modify the likelihood of specified tokens appearing in the completion.\n\nAccepts a JSON object that maps tokens (specified by their token ID in the tokenizer) to an associated bias value from -100 to 100. Mathematically, the bias is added to the logits generated by the model prior to sampling. The exact effect will vary per model, but values between -1 and 1 should decrease or increase likelihood of selection; values like -100 or 100 should result in a ban or exclusive selection of the relevant token.\n",
+          "description": "Modify the likelihood of specified tokens appearing in the completion.  Accepts a JSON object that maps tokens (specified by their token ID in the tokenizer) to an associated bias value from -100 to 100. Mathematically, the bias is added to the logits generated by the model prior to sampling. The exact effect will vary per model, but values between -1 and 1 should decrease or increase likelihood of selection; values like -100 or 100 should result in a ban or exclusive selection of the relevant token. ",
           "type": {
             "type": "nullable",
             "underlying_type": {
@@ -405,7 +463,9 @@
             }
           },
           "http": {
-            "type": ["object"]
+            "type": [
+              "object"
+            ]
           }
         },
         "logprobs": {
@@ -418,11 +478,13 @@
             }
           },
           "http": {
-            "type": ["boolean"]
+            "type": [
+              "boolean"
+            ]
           }
         },
         "max_tokens": {
-          "description": "The maximum number of [tokens](/tokenizer) that can be generated in the chat completion.\n\nThe total length of input tokens and generated tokens is limited by the model's context length. [Example Python code](https://cookbook.openai.com/examples/how_to_count_tokens_with_tiktoken) for counting tokens.\n",
+          "description": "The maximum number of [tokens](/tokenizer) that can be generated in the chat completion.  The total length of input tokens and generated tokens is limited by the model's context length. [Example Python code](https://cookbook.openai.com/examples/how_to_count_tokens_with_tiktoken) for counting tokens. ",
           "type": {
             "type": "nullable",
             "underlying_type": {
@@ -431,7 +493,9 @@
             }
           },
           "http": {
-            "type": ["integer"]
+            "type": [
+              "integer"
+            ]
           }
         },
         "messages": {
@@ -444,7 +508,9 @@
             "type": "array"
           },
           "http": {
-            "type": ["array"]
+            "type": [
+              "array"
+            ]
           }
         },
         "model": {
@@ -454,7 +520,9 @@
             "type": "named"
           },
           "http": {
-            "type": ["string"]
+            "type": [
+              "string"
+            ]
           }
         },
         "n": {
@@ -467,7 +535,9 @@
             }
           },
           "http": {
-            "type": ["integer"],
+            "type": [
+              "integer"
+            ],
             "maximum": 128,
             "minimum": 1
           }
@@ -482,11 +552,13 @@
             }
           },
           "http": {
-            "type": ["boolean"]
+            "type": [
+              "boolean"
+            ]
           }
         },
         "presence_penalty": {
-          "description": "Number between -2.0 and 2.0. Positive values penalize new tokens based on whether they appear in the text so far, increasing the model's likelihood to talk about new topics.\n\n[See more information about frequency and presence penalties.](/docs/guides/text-generation/parameter-details)\n",
+          "description": "Number between -2.0 and 2.0. Positive values penalize new tokens based on whether they appear in the text so far, increasing the model's likelihood to talk about new topics.  [See more information about frequency and presence penalties.](/docs/guides/text-generation/parameter-details) ",
           "type": {
             "type": "nullable",
             "underlying_type": {
@@ -495,13 +567,15 @@
             }
           },
           "http": {
-            "type": ["number"],
+            "type": [
+              "number"
+            ],
             "maximum": 2,
             "minimum": -2
           }
         },
         "response_format": {
-          "description": "An object specifying the format that the model must output. Compatible with [GPT-4 Turbo](/docs/models/gpt-4-and-gpt-4-turbo) and all GPT-3.5 Turbo models newer than `gpt-3.5-turbo-1106`.\n\nSetting to `{ \"type\": \"json_object\" }` enables JSON mode, which guarantees the message the model generates is valid JSON.\n\n**Important:** when using JSON mode, you **must** also instruct the model to produce JSON yourself via a system or user message. Without this, the model may generate an unending stream of whitespace until the generation reaches the token limit, resulting in a long-running and seemingly \"stuck\" request. Also note that the message content may be partially cut off if `finish_reason=\"length\"`, which indicates the generation exceeded `max_tokens` or the conversation exceeded the max context length.\n",
+          "description": "An object specifying the format that the model must output. Compatible with [GPT-4 Turbo](/docs/models/gpt-4-and-gpt-4-turbo) and all GPT-3.5 Turbo models newer than `gpt-3.5-turbo-1106`.  Setting to `{ \"type\": \"json_object\" }` enables JSON mode, which guarantees the message the model generates is valid JSON.  **Important:** when using JSON mode, you **must** also instruct the model to produce JSON yourself via a system or user message. Without this, the model may generate an unending stream of whitespace until the generation reaches the token limit, resulting in a long-running and seemingly \"stuck\" request. Also note that the message content may be partially cut off if `finish_reason=\"length\"`, which indicates the generation exceeded `max_tokens` or the conversation exceeded the max context length. ",
           "type": {
             "type": "nullable",
             "underlying_type": {
@@ -510,11 +584,13 @@
             }
           },
           "http": {
-            "type": ["object"]
+            "type": [
+              "object"
+            ]
           }
         },
         "seed": {
-          "description": "This feature is in Beta.\nIf specified, our system will make a best effort to sample deterministically, such that repeated requests with the same `seed` and parameters should return the same result.\nDeterminism is not guaranteed, and you should refer to the `system_fingerprint` response parameter to monitor changes in the backend.\n",
+          "description": "This feature is in Beta. If specified, our system will make a best effort to sample deterministically, such that repeated requests with the same `seed` and parameters should return the same result. Determinism is not guaranteed, and you should refer to the `system_fingerprint` response parameter to monitor changes in the backend. ",
           "type": {
             "type": "nullable",
             "underlying_type": {
@@ -523,13 +599,15 @@
             }
           },
           "http": {
-            "type": ["integer"],
+            "type": [
+              "integer"
+            ],
             "maximum": 9223372036854776000,
             "minimum": -9223372036854776000
           }
         },
         "service_tier": {
-          "description": "Specifies the latency tier to use for processing the request. This parameter is relevant for customers subscribed to the scale tier service:\n  - If set to 'auto', the system will utilize scale tier credits until they are exhausted.\n  - If set to 'default', the request will be processed using the default service tier with a lower uptime SLA and no latency guarentee.\n  - When not set, the default behavior is 'auto'.\n\n  When this parameter is set, the response body will include the `service_tier` utilized.\n",
+          "description": "Specifies the latency tier to use for processing the request. This parameter is relevant for customers subscribed to the scale tier service:   - If set to 'auto', the system will utilize scale tier credits until they are exhausted.   - If set to 'default', the request will be processed using the default service tier with a lower uptime SLA and no latency guarentee.   - When not set, the default behavior is 'auto'.    When this parameter is set, the response body will include the `service_tier` utilized. ",
           "type": {
             "type": "nullable",
             "underlying_type": {
@@ -538,11 +616,13 @@
             }
           },
           "http": {
-            "type": ["string"]
+            "type": [
+              "string"
+            ]
           }
         },
         "stop": {
-          "description": "Up to 4 sequences where the API will stop generating further tokens.\n",
+          "description": "Up to 4 sequences where the API will stop generating further tokens. ",
           "type": {
             "type": "nullable",
             "underlying_type": {
@@ -555,7 +635,7 @@
           }
         },
         "stream": {
-          "description": "If set, partial message deltas will be sent, like in ChatGPT. Tokens will be sent as data-only [server-sent events](https://developer.mozilla.org/en-US/docs/Web/API/Server-sent_events/Using_server-sent_events#Event_stream_format) as they become available, with the stream terminated by a `data: [DONE]` message. [Example Python code](https://cookbook.openai.com/examples/how_to_stream_completions).\n",
+          "description": "If set, partial message deltas will be sent, like in ChatGPT. Tokens will be sent as data-only [server-sent events](https://developer.mozilla.org/en-US/docs/Web/API/Server-sent_events/Using_server-sent_events#Event_stream_format) as they become available, with the stream terminated by a `data: [DONE]` message. [Example Python code](https://cookbook.openai.com/examples/how_to_stream_completions). ",
           "type": {
             "type": "nullable",
             "underlying_type": {
@@ -564,11 +644,13 @@
             }
           },
           "http": {
-            "type": ["boolean"]
+            "type": [
+              "boolean"
+            ]
           }
         },
         "stream_options": {
-          "description": "Options for streaming response. Only set this when you set `stream: true`.\n",
+          "description": "Options for streaming response. Only set this when you set `stream: true`. ",
           "type": {
             "type": "nullable",
             "underlying_type": {
@@ -577,11 +659,13 @@
             }
           },
           "http": {
-            "type": ["object"]
+            "type": [
+              "object"
+            ]
           }
         },
         "temperature": {
-          "description": "What sampling temperature to use, between 0 and 2. Higher values like 0.8 will make the output more random, while lower values like 0.2 will make it more focused and deterministic.\n\nWe generally recommend altering this or `top_p` but not both.\n",
+          "description": "What sampling temperature to use, between 0 and 2. Higher values like 0.8 will make the output more random, while lower values like 0.2 will make it more focused and deterministic.  We generally recommend altering this or `top_p` but not both. ",
           "type": {
             "type": "nullable",
             "underlying_type": {
@@ -590,13 +674,15 @@
             }
           },
           "http": {
-            "type": ["number"],
+            "type": [
+              "number"
+            ],
             "maximum": 2,
             "minimum": 0
           }
         },
         "tool_choice": {
-          "description": "Controls which (if any) tool is called by the model.\n`none` means the model will not call any tool and instead generates a message.\n`auto` means the model can pick between generating a message or calling one or more tools.\n`required` means the model must call one or more tools.\nSpecifying a particular tool via `{\"type\": \"function\", \"function\": {\"name\": \"my_function\"}}` forces the model to call that tool.\n\n`none` is the default when no tools are present. `auto` is the default if tools are present.\n",
+          "description": "Controls which (if any) tool is called by the model. `none` means the model will not call any tool and instead generates a message. `auto` means the model can pick between generating a message or calling one or more tools. `required` means the model must call one or more tools. Specifying a particular tool via `{\"type\": \"function\", \"function\": {\"name\": \"my_function\"}}` forces the model to call that tool.  `none` is the default when no tools are present. `auto` is the default if tools are present. ",
           "type": {
             "type": "nullable",
             "underlying_type": {
@@ -609,7 +695,7 @@
           }
         },
         "tools": {
-          "description": "A list of tools the model may call. Currently, only functions are supported as a tool. Use this to provide a list of functions the model may generate JSON inputs for. A max of 128 functions are supported.\n",
+          "description": "A list of tools the model may call. Currently, only functions are supported as a tool. Use this to provide a list of functions the model may generate JSON inputs for. A max of 128 functions are supported. ",
           "type": {
             "type": "nullable",
             "underlying_type": {
@@ -621,7 +707,9 @@
             }
           },
           "http": {
-            "type": ["array"]
+            "type": [
+              "array"
+            ]
           }
         },
         "top_logprobs": {
@@ -634,13 +722,15 @@
             }
           },
           "http": {
-            "type": ["integer"],
+            "type": [
+              "integer"
+            ],
             "maximum": 20,
             "minimum": 0
           }
         },
         "top_p": {
-          "description": "An alternative to sampling with temperature, called nucleus sampling, where the model considers the results of the tokens with top_p probability mass. So 0.1 means only the tokens comprising the top 10% probability mass are considered.\n\nWe generally recommend altering this or `temperature` but not both.\n",
+          "description": "An alternative to sampling with temperature, called nucleus sampling, where the model considers the results of the tokens with top_p probability mass. So 0.1 means only the tokens comprising the top 10% probability mass are considered.  We generally recommend altering this or `temperature` but not both. ",
           "type": {
             "type": "nullable",
             "underlying_type": {
@@ -649,13 +739,15 @@
             }
           },
           "http": {
-            "type": ["number"],
+            "type": [
+              "number"
+            ],
             "maximum": 1,
             "minimum": 0
           }
         },
         "user": {
-          "description": "A unique identifier representing your end-user, which can help OpenAI to monitor and detect abuse. [Learn more](/docs/guides/safety-best-practices/end-user-ids).\n",
+          "description": "A unique identifier representing your end-user, which can help OpenAI to monitor and detect abuse. [Learn more](/docs/guides/safety-best-practices/end-user-ids). ",
           "type": {
             "type": "nullable",
             "underlying_type": {
@@ -664,13 +756,15 @@
             }
           },
           "http": {
-            "type": ["string"]
+            "type": [
+              "string"
+            ]
           }
         }
       }
     },
     "CreateChatCompletionRequestResponseFormat": {
-      "description": "An object specifying the format that the model must output. Compatible with [GPT-4 Turbo](/docs/models/gpt-4-and-gpt-4-turbo) and all GPT-3.5 Turbo models newer than `gpt-3.5-turbo-1106`.\n\nSetting to `{ \"type\": \"json_object\" }` enables JSON mode, which guarantees the message the model generates is valid JSON.\n\n**Important:** when using JSON mode, you **must** also instruct the model to produce JSON yourself via a system or user message. Without this, the model may generate an unending stream of whitespace until the generation reaches the token limit, resulting in a long-running and seemingly \"stuck\" request. Also note that the message content may be partially cut off if `finish_reason=\"length\"`, which indicates the generation exceeded `max_tokens` or the conversation exceeded the max context length.\n",
+      "description": "An object specifying the format that the model must output. Compatible with [GPT-4 Turbo](/docs/models/gpt-4-and-gpt-4-turbo) and all GPT-3.5 Turbo models newer than `gpt-3.5-turbo-1106`.  Setting to `{ \"type\": \"json_object\" }` enables JSON mode, which guarantees the message the model generates is valid JSON.  **Important:** when using JSON mode, you **must** also instruct the model to produce JSON yourself via a system or user message. Without this, the model may generate an unending stream of whitespace until the generation reaches the token limit, resulting in a long-running and seemingly \"stuck\" request. Also note that the message content may be partially cut off if `finish_reason=\"length\"`, which indicates the generation exceeded `max_tokens` or the conversation exceeded the max context length. ",
       "fields": {
         "type": {
           "description": "Must be one of `text` or `json_object`.",
@@ -682,7 +776,9 @@
             }
           },
           "http": {
-            "type": ["string"]
+            "type": [
+              "string"
+            ]
           }
         }
       }
@@ -700,9 +796,13 @@
             "type": "array"
           },
           "http": {
-            "type": ["array"],
+            "type": [
+              "array"
+            ],
             "items": {
-              "type": ["object"]
+              "type": [
+                "object"
+              ]
             }
           }
         },
@@ -713,7 +813,9 @@
             "type": "named"
           },
           "http": {
-            "type": ["integer"]
+            "type": [
+              "integer"
+            ]
           }
         },
         "id": {
@@ -723,7 +825,9 @@
             "type": "named"
           },
           "http": {
-            "type": ["string"]
+            "type": [
+              "string"
+            ]
           }
         },
         "model": {
@@ -733,7 +837,9 @@
             "type": "named"
           },
           "http": {
-            "type": ["string"]
+            "type": [
+              "string"
+            ]
           }
         },
         "object": {
@@ -743,7 +849,9 @@
             "type": "named"
           },
           "http": {
-            "type": ["string"]
+            "type": [
+              "string"
+            ]
           }
         },
         "service_tier": {
@@ -756,11 +864,13 @@
             }
           },
           "http": {
-            "type": ["string"]
+            "type": [
+              "string"
+            ]
           }
         },
         "system_fingerprint": {
-          "description": "This fingerprint represents the backend configuration that the model runs with.\n\nCan be used in conjunction with the `seed` request parameter to understand when backend changes have been made that might impact determinism.\n",
+          "description": "This fingerprint represents the backend configuration that the model runs with.  Can be used in conjunction with the `seed` request parameter to understand when backend changes have been made that might impact determinism. ",
           "type": {
             "type": "nullable",
             "underlying_type": {
@@ -769,7 +879,9 @@
             }
           },
           "http": {
-            "type": ["string"]
+            "type": [
+              "string"
+            ]
           }
         }
       }
@@ -777,13 +889,15 @@
     "CreateChatCompletionResponseChoices": {
       "fields": {
         "finish_reason": {
-          "description": "The reason the model stopped generating tokens. This will be `stop` if the model hit a natural stop point or a provided stop sequence,\n`length` if the maximum number of tokens specified in the request was reached,\n`content_filter` if content was omitted due to a flag from our content filters,\n`tool_calls` if the model called a tool, or `function_call` (deprecated) if the model called a function.\n",
+          "description": "The reason the model stopped generating tokens. This will be `stop` if the model hit a natural stop point or a provided stop sequence, `length` if the maximum number of tokens specified in the request was reached, `content_filter` if content was omitted due to a flag from our content filters, `tool_calls` if the model called a tool, or `function_call` (deprecated) if the model called a function. ",
           "type": {
             "name": "CreateChatCompletionResponseChoicesFinishReason",
             "type": "named"
           },
           "http": {
-            "type": ["string"]
+            "type": [
+              "string"
+            ]
           }
         },
         "index": {
@@ -793,7 +907,9 @@
             "type": "named"
           },
           "http": {
-            "type": ["integer"]
+            "type": [
+              "integer"
+            ]
           }
         },
         "logprobs": {
@@ -803,7 +919,9 @@
             "type": "named"
           },
           "http": {
-            "type": ["object"]
+            "type": [
+              "object"
+            ]
           }
         },
         "message": {
@@ -813,7 +931,9 @@
             "type": "named"
           },
           "http": {
-            "type": ["object"]
+            "type": [
+              "object"
+            ]
           }
         }
       }
@@ -831,7 +951,9 @@
             "type": "array"
           },
           "http": {
-            "type": ["array"]
+            "type": [
+              "array"
+            ]
           }
         }
       }
@@ -848,7 +970,9 @@
             }
           },
           "http": {
-            "type": ["string"]
+            "type": [
+              "string"
+            ]
           }
         }
       }
@@ -865,7 +989,9 @@
             }
           },
           "http": {
-            "type": ["string"]
+            "type": [
+              "string"
+            ]
           }
         },
         "name": {
@@ -875,11 +1001,13 @@
             "type": "named"
           },
           "http": {
-            "type": ["string"]
+            "type": [
+              "string"
+            ]
           }
         },
         "parameters": {
-          "description": "The parameters the functions accepts, described as a JSON Schema object. See the [guide](/docs/guides/function-calling) for examples, and the [JSON Schema reference](https://json-schema.org/understanding-json-schema/) for documentation about the format. \n\nOmitting `parameters` defines a function with an empty parameter list.",
+          "description": "The parameters the functions accepts, described as a JSON Schema object. See the [guide](/docs/guides/function-calling) for examples, and the [JSON Schema reference](https://json-schema.org/understanding-json-schema/) for documentation about the format.   Omitting `parameters` defines a function with an empty parameter list.",
           "type": {
             "type": "nullable",
             "underlying_type": {
@@ -888,7 +1016,9 @@
             }
           },
           "http": {
-            "type": ["object"]
+            "type": [
+              "object"
+            ]
           }
         }
       }
@@ -905,7 +1035,9 @@
             }
           },
           "http": {
-            "type": ["integer"]
+            "type": [
+              "integer"
+            ]
           }
         },
         "digest": {
@@ -918,7 +1050,9 @@
             }
           },
           "http": {
-            "type": ["string"]
+            "type": [
+              "string"
+            ]
           }
         },
         "status": {
@@ -931,7 +1065,9 @@
             }
           },
           "http": {
-            "type": ["string"]
+            "type": [
+              "string"
+            ]
           }
         },
         "total": {
@@ -944,13 +1080,47 @@
             }
           },
           "http": {
-            "type": ["integer"]
+            "type": [
+              "integer"
+            ]
           }
         }
       }
     }
   },
   "procedures": {
+    "_GET_createModel": {
+      "request": {
+        "url": "/api/create",
+        "method": "post",
+        "requestBody": {
+          "contentType": "application/json"
+        },
+        "response": {
+          "contentType": "application/x-ndjson"
+        }
+      },
+      "arguments": {
+        "body": {
+          "description": "Request body of POST /api/create",
+          "type": {
+            "name": "CreateModelRequest",
+            "type": "named"
+          },
+          "http": {
+            "in": "body"
+          }
+        }
+      },
+      "description": "POST /api/create",
+      "result_type": {
+        "element_type": {
+          "name": "ProgressResponse",
+          "type": "named"
+        },
+        "type": "array"
+      }
+    },
     "createChatCompletion": {
       "request": {
         "url": "/chat/completions",
@@ -975,43 +1145,9 @@
         }
       },
       "description": "Creates a model response for the given chat conversation.",
-      "name": "createChatCompletion",
       "result_type": {
         "name": "CreateChatCompletionResponse",
         "type": "named"
-      }
-    },
-    "createModel": {
-      "request": {
-        "url": "/api/create",
-        "method": "post",
-        "requestBody": {
-          "contentType": "application/json"
-        },
-        "response": {
-          "contentType": "application/x-ndjson"
-        }
-      },
-      "arguments": {
-        "body": {
-          "description": "Request body of POST /api/create",
-          "type": {
-            "name": "CreateModelRequest",
-            "type": "named"
-          },
-          "http": {
-            "in": "body"
-          }
-        }
-      },
-      "description": "POST /api/create",
-      "name": "createModel",
-      "result_type": {
-        "element_type": {
-          "name": "ProgressResponse",
-          "type": "named"
-        },
-        "type": "array"
       }
     }
   },
@@ -1027,7 +1163,9 @@
       "aggregate_functions": {},
       "comparison_operators": {},
       "representation": {
-        "one_of": ["function"],
+        "one_of": [
+          "function"
+        ],
         "type": "enum"
       }
     },
@@ -1042,7 +1180,9 @@
       "aggregate_functions": {},
       "comparison_operators": {},
       "representation": {
-        "one_of": ["assistant"],
+        "one_of": [
+          "assistant"
+        ],
         "type": "enum"
       }
     },
@@ -1057,7 +1197,9 @@
       "aggregate_functions": {},
       "comparison_operators": {},
       "representation": {
-        "one_of": ["function"],
+        "one_of": [
+          "function"
+        ],
         "type": "enum"
       }
     },
@@ -1065,7 +1207,10 @@
       "aggregate_functions": {},
       "comparison_operators": {},
       "representation": {
-        "one_of": ["text", "json_object"],
+        "one_of": [
+          "text",
+          "json_object"
+        ],
         "type": "enum"
       }
     },
@@ -1073,7 +1218,10 @@
       "aggregate_functions": {},
       "comparison_operators": {},
       "representation": {
-        "one_of": ["auto", "default"],
+        "one_of": [
+          "auto",
+          "default"
+        ],
         "type": "enum"
       }
     },
@@ -1095,7 +1243,9 @@
       "aggregate_functions": {},
       "comparison_operators": {},
       "representation": {
-        "one_of": ["chat.completion"],
+        "one_of": [
+          "chat.completion"
+        ],
         "type": "enum"
       }
     },
@@ -1103,7 +1253,10 @@
       "aggregate_functions": {},
       "comparison_operators": {},
       "representation": {
-        "one_of": ["scale", "default"],
+        "one_of": [
+          "scale",
+          "default"
+        ],
         "type": "enum"
       }
     },

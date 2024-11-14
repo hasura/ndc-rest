@@ -5,6 +5,7 @@ import (
 	"log/slog"
 	"slices"
 	"strings"
+	"unicode"
 
 	rest "github.com/hasura/ndc-http/ndc-http-schema/schema"
 	"github.com/hasura/ndc-http/ndc-http-schema/utils"
@@ -48,130 +49,146 @@ func getSchemaRefTypeNameV3(name string) string {
 	return result[1]
 }
 
-func getScalarFromType(sm *rest.NDCHttpSchema, names []string, format string, enumNodes []*yaml.Node, apiPath string, fieldPaths []string) string {
+func getScalarFromType(sm *rest.NDCHttpSchema, names []string, format string, enumNodes []*yaml.Node, apiPath string, fieldPaths []string) (string, bool) {
 	var scalarName string
 	var scalarType *schema.ScalarType
+	var typeNames []string
+	var nullable bool
 
-	if len(names) != 1 {
+	for _, name := range names {
+		if name == "null" {
+			nullable = true
+		} else {
+			typeNames = append(typeNames, name)
+		}
+	}
+
+	if len(typeNames) != 1 {
 		scalarName = "JSON"
 		scalarType = defaultScalarTypes[rest.ScalarJSON]
 	} else {
-		switch names[0] {
-		case "boolean":
-			scalarName = string(rest.ScalarBoolean)
-			scalarType = defaultScalarTypes[rest.ScalarBoolean]
-		case "integer":
-			switch format {
-			case "unix-time":
-				scalarName = string(rest.ScalarUnixTime)
-				scalarType = defaultScalarTypes[rest.ScalarUnixTime]
-			case "int64":
-				scalarName = string(rest.ScalarInt64)
-				scalarType = defaultScalarTypes[rest.ScalarInt64]
-			default:
-				scalarName = "Int32"
-				scalarType = defaultScalarTypes[rest.ScalarInt32]
-			}
-		case "long":
-			scalarName = string(rest.ScalarInt64)
-			scalarType = defaultScalarTypes[rest.ScalarInt64]
-		case "number":
-			switch format {
-			case "float":
-				scalarName = string(rest.ScalarFloat32)
-				scalarType = defaultScalarTypes[rest.ScalarFloat32]
-			default:
-				scalarName = string(rest.ScalarFloat64)
-				scalarType = defaultScalarTypes[rest.ScalarFloat64]
-			}
-		case "file":
-			scalarName = string(rest.ScalarBinary)
-			scalarType = defaultScalarTypes[rest.ScalarBinary]
-		case "string":
-			schemaEnumLength := len(enumNodes)
-			if schemaEnumLength > 0 {
-				enums := make([]string, schemaEnumLength)
-				for i, enum := range enumNodes {
-					enums[i] = enum.Value
-				}
-				scalarType = schema.NewScalarType()
-				scalarType.Representation = schema.NewTypeRepresentationEnum(enums).Encode()
-
-				// build scalar name strategies
-				// 1. combine resource name and field name
-				apiPath = strings.TrimPrefix(apiPath, "/")
-				if apiPath != "" {
-					apiPaths := strings.Split(apiPath, "/")
-					resourceName := fieldPaths[0]
-					if len(apiPaths) > 0 {
-						resourceName = apiPaths[0]
-					}
-					enumName := "Enum"
-					if len(fieldPaths) > 1 {
-						enumName = fieldPaths[len(fieldPaths)-1]
-					}
-
-					scalarName = utils.StringSliceToPascalCase([]string{resourceName, enumName})
-					if canSetEnumToSchema(sm, scalarName, enums) {
-						sm.ScalarTypes[scalarName] = *scalarType
-						return scalarName
-					}
-				}
-
-				// 2. if the scalar type exists, fallback to field paths
-				scalarName = utils.StringSliceToPascalCase(fieldPaths)
-				if canSetEnumToSchema(sm, scalarName, enums) {
-					sm.ScalarTypes[scalarName] = *scalarType
-					return scalarName
-				}
-
-				// 3. Reuse above name with Enum suffix
-				scalarName = scalarName + "Enum"
-				if _, ok := sm.ScalarTypes[scalarName]; !ok {
-					sm.ScalarTypes[scalarName] = *scalarType
-				}
-				return scalarName
-			}
-
-			switch format {
-			case "date":
-				scalarName = string(rest.ScalarDate)
-				scalarType = defaultScalarTypes[rest.ScalarDate]
-			case "date-time":
-				scalarName = string(rest.ScalarTimestampTZ)
-				scalarType = defaultScalarTypes[rest.ScalarTimestampTZ]
-			case "byte", "base64":
-				scalarName = string(rest.ScalarBytes)
-				scalarType = defaultScalarTypes[rest.ScalarBytes]
-			case "binary":
-				scalarName = string(rest.ScalarBinary)
-				scalarType = defaultScalarTypes[rest.ScalarBinary]
-			case "uuid":
-				scalarName = string(rest.ScalarUUID)
-				scalarType = defaultScalarTypes[rest.ScalarUUID]
-			case "uri":
-				scalarName = string(rest.ScalarURI)
-				scalarType = defaultScalarTypes[rest.ScalarURI]
-			case "ipv4":
-				scalarName = string(rest.ScalarIPV4)
-				scalarType = defaultScalarTypes[rest.ScalarIPV4]
-			case "ipv6":
-				scalarName = string(rest.ScalarIPV6)
-				scalarType = defaultScalarTypes[rest.ScalarIPV6]
-			default:
-				scalarName = string(rest.ScalarString)
-				scalarType = defaultScalarTypes[rest.ScalarString]
-			}
-		default:
-			scalarName = string(rest.ScalarJSON)
-			scalarType = defaultScalarTypes[rest.ScalarJSON]
-		}
+		scalarName, scalarType = getScalarFromNamedType(sm, names, format, enumNodes, apiPath, fieldPaths)
 	}
 
 	if _, ok := sm.ScalarTypes[scalarName]; !ok {
 		sm.ScalarTypes[scalarName] = *scalarType
 	}
-	return scalarName
+
+	return scalarName, nullable
+}
+
+func getScalarFromNamedType(sm *rest.NDCHttpSchema, names []string, format string, enumNodes []*yaml.Node, apiPath string, fieldPaths []string) (string, *schema.ScalarType) {
+	var scalarName string
+	var scalarType *schema.ScalarType
+
+	switch names[0] {
+	case "boolean":
+		scalarName = string(rest.ScalarBoolean)
+		scalarType = defaultScalarTypes[rest.ScalarBoolean]
+	case "integer":
+		switch format {
+		case "unix-time":
+			scalarName = string(rest.ScalarUnixTime)
+			scalarType = defaultScalarTypes[rest.ScalarUnixTime]
+		case "int64":
+			scalarName = string(rest.ScalarInt64)
+			scalarType = defaultScalarTypes[rest.ScalarInt64]
+		default:
+			scalarName = string(rest.ScalarInt32)
+			scalarType = defaultScalarTypes[rest.ScalarInt32]
+		}
+	case "long":
+		scalarName = string(rest.ScalarInt64)
+		scalarType = defaultScalarTypes[rest.ScalarInt64]
+	case "number":
+		switch format {
+		case "float":
+			scalarName = string(rest.ScalarFloat32)
+			scalarType = defaultScalarTypes[rest.ScalarFloat32]
+		default:
+			scalarName = string(rest.ScalarFloat64)
+			scalarType = defaultScalarTypes[rest.ScalarFloat64]
+		}
+	case "file":
+		scalarName = string(rest.ScalarBinary)
+		scalarType = defaultScalarTypes[rest.ScalarBinary]
+	case "string":
+		schemaEnumLength := len(enumNodes)
+		if schemaEnumLength > 0 {
+			enums := make([]string, schemaEnumLength)
+			for i, enum := range enumNodes {
+				enums[i] = enum.Value
+			}
+			scalarType = schema.NewScalarType()
+			scalarType.Representation = schema.NewTypeRepresentationEnum(enums).Encode()
+
+			// build scalar name strategies
+			// 1. combine resource name and field name
+			apiPath = strings.TrimPrefix(apiPath, "/")
+			if apiPath != "" {
+				apiPaths := strings.Split(apiPath, "/")
+				resourceName := fieldPaths[0]
+				if len(apiPaths) > 0 {
+					resourceName = apiPaths[0]
+				}
+				enumName := "Enum"
+				if len(fieldPaths) > 1 {
+					enumName = fieldPaths[len(fieldPaths)-1]
+				}
+
+				scalarName = utils.StringSliceToPascalCase([]string{resourceName, enumName})
+				if canSetEnumToSchema(sm, scalarName, enums) {
+					return scalarName, scalarType
+				}
+			}
+
+			// 2. if the scalar type exists, fallback to field paths
+			scalarName = utils.StringSliceToPascalCase(fieldPaths)
+			if canSetEnumToSchema(sm, scalarName, enums) {
+				return scalarName, scalarType
+			}
+
+			// 3. Reuse above name with Enum suffix
+			scalarName += "Enum"
+
+			return scalarName, scalarType
+		}
+
+		switch format {
+		case "date":
+			scalarName = string(rest.ScalarDate)
+			scalarType = defaultScalarTypes[rest.ScalarDate]
+		case "date-time":
+			scalarName = string(rest.ScalarTimestampTZ)
+			scalarType = defaultScalarTypes[rest.ScalarTimestampTZ]
+		case "byte", "base64":
+			scalarName = string(rest.ScalarBytes)
+			scalarType = defaultScalarTypes[rest.ScalarBytes]
+		case "binary":
+			scalarName = string(rest.ScalarBinary)
+			scalarType = defaultScalarTypes[rest.ScalarBinary]
+		case "uuid":
+			scalarName = string(rest.ScalarUUID)
+			scalarType = defaultScalarTypes[rest.ScalarUUID]
+		case "uri":
+			scalarName = string(rest.ScalarURI)
+			scalarType = defaultScalarTypes[rest.ScalarURI]
+		case "ipv4":
+			scalarName = string(rest.ScalarIPV4)
+			scalarType = defaultScalarTypes[rest.ScalarIPV4]
+		case "ipv6":
+			scalarName = string(rest.ScalarIPV6)
+			scalarType = defaultScalarTypes[rest.ScalarIPV6]
+		default:
+			scalarName = string(rest.ScalarString)
+			scalarType = defaultScalarTypes[rest.ScalarString]
+		}
+	default:
+		scalarName = string(rest.ScalarJSON)
+		scalarType = defaultScalarTypes[rest.ScalarJSON]
+	}
+
+	return scalarName, scalarType
 }
 
 func canSetEnumToSchema(sm *rest.NDCHttpSchema, scalarName string, enums []string) bool {
@@ -188,12 +205,26 @@ func canSetEnumToSchema(sm *rest.NDCHttpSchema, scalarName string, enums []strin
 	return false
 }
 
+// remove nullable types from raw OpenAPI types
+func evaluateOpenAPITypes(input []string) []string {
+	var typeNames []string
+	for _, t := range input {
+		if t != "null" {
+			typeNames = append(typeNames, t)
+		}
+	}
+
+	return typeNames
+}
+
 func createSchemaFromOpenAPISchema(input *base.Schema) *rest.TypeSchema {
-	ps := &rest.TypeSchema{}
+	ps := &rest.TypeSchema{
+		Type: []string{},
+	}
 	if input == nil {
 		return ps
 	}
-	ps.Type = input.Type
+	ps.Type = evaluateOpenAPITypes(input.Type)
 	ps.Format = input.Format
 	ps.Pattern = input.Pattern
 	ps.Maximum = input.Maximum
@@ -221,6 +252,7 @@ func getMethodAlias(inputs ...map[string]string) map[string]string {
 			methodAlias[k] = alias
 		}
 	}
+
 	return methodAlias
 }
 
@@ -232,6 +264,7 @@ func convertSecurities(securities []*base.SecurityRequirement) rest.AuthSecuriti
 			results = append(results, s)
 		}
 	}
+
 	return results
 }
 
@@ -247,16 +280,18 @@ func convertSecurity(security *base.SecurityRequirement) rest.AuthSecurity {
 		}
 		results[s.Key()] = v
 	}
+
 	return results
 }
 
 // check if the OAS type is a scalar
 func isPrimitiveScalar(names []string) bool {
 	for _, name := range names {
-		if !slices.Contains([]string{"boolean", "integer", "number", "string", "file", "long"}, name) {
+		if !slices.Contains([]string{"boolean", "integer", "number", "string", "file", "long", "null"}, name) {
 			return false
 		}
 	}
+
 	return true
 }
 
@@ -269,6 +304,7 @@ func getNamedType(typeSchema schema.TypeEncoder, recursive bool, defaultValue st
 		if !recursive {
 			return defaultValue
 		}
+
 		return getNamedType(ty.ElementType.Interface(), recursive, defaultValue)
 	case *schema.NamedType:
 		return ty.Name
@@ -279,6 +315,7 @@ func getNamedType(typeSchema schema.TypeEncoder, recursive bool, defaultValue st
 
 func isNullableType(input schema.TypeEncoder) bool {
 	_, ok := input.(*schema.NullableType)
+
 	return ok
 }
 
@@ -301,15 +338,13 @@ func evalSchemaProxiesSlice(schemaProxies []*base.SchemaProxy, location rest.Par
 			continue
 		}
 
-		switch location {
-		case rest.InQuery:
-			// empty string enum is considered as nullable, e.g. key1=&key2=
-			// however, it's redundant and prevents the tool converting correct types
-			if sc.Type[0] == "string" && len(sc.Enum) == 1 && (sc.Enum[0] == nil || sc.Enum[0].Value == "") {
-				nullable = true
-				continue
-			}
+		// empty string enum is considered as nullable, e.g. key1=&key2=
+		// however, it's redundant and prevents the tool converting correct types
+		if location == rest.InQuery && (sc.Type[0] == "string" && len(sc.Enum) == 1 && (sc.Enum[0] == nil || sc.Enum[0].Value == "")) {
+			nullable = true
+			continue
 		}
+
 		results = append(results, proxy)
 		if len(sc.Type) == 0 {
 			typeNames = append(typeNames, "any")
@@ -329,39 +364,6 @@ func evalSchemaProxiesSlice(schemaProxies []*base.SchemaProxy, location rest.Par
 	return results, nil, nullable
 }
 
-func cleanUnusedSchemaTypes(schema *rest.NDCHttpSchema, usageCounter *TypeUsageCounter) {
-	for key := range schema.ObjectTypes {
-		cleanUnusedObjectType(schema, usageCounter, key)
-	}
-	for key := range schema.ScalarTypes {
-		if usageCounter.Get(key) == 0 {
-			delete(schema.ScalarTypes, key)
-		}
-	}
-}
-
-// recursively clean unused objects as well as their inner properties
-func cleanUnusedObjectType(schema *rest.NDCHttpSchema, usageCounter *TypeUsageCounter, key string) {
-	object, ok := schema.ObjectTypes[key]
-	if !ok {
-		return
-	}
-	if usageCounter.Get(key) > 0 {
-		return
-	}
-	delete(schema.ObjectTypes, key)
-	for _, elem := range object.Fields {
-		elemName := getNamedType(elem.Type.Interface(), true, "")
-		if elemName == "" {
-			continue
-		}
-		usageCounter.Add(elemName, -1)
-		if usageCounter.Get(elemName) <= 0 {
-			cleanUnusedObjectType(schema, usageCounter, elemName)
-		}
-	}
-}
-
 func formatWriteObjectName(name string) string {
 	return name + "Input"
 }
@@ -373,4 +375,28 @@ func errParameterSchemaEmpty(fieldPaths []string) error {
 // redirection and information response status codes aren't supported
 func isUnsupportedResponseCodes[T int | int64](code T) bool {
 	return code < 200 || (code >= 300 && code < 400)
+}
+
+// format the operation name and remove special characters
+func formatOperationName(input string) string {
+	if input == "" {
+		return ""
+	}
+
+	sb := strings.Builder{}
+	for i, c := range input {
+		if unicode.IsLetter(c) {
+			sb.WriteRune(c)
+			continue
+		}
+
+		if unicode.IsNumber(c) && i > 0 {
+			sb.WriteRune(c)
+			continue
+		}
+
+		sb.WriteRune('_')
+	}
+
+	return sb.String()
 }

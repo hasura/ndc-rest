@@ -24,8 +24,7 @@ type OAS3Builder struct {
 	// some undefined schema types aren't stored in either object nor scalar,
 	// or self-reference types that haven't added into the object_types map yet.
 	// This cache temporarily stores them to avoid infinite recursive reference.
-	schemaCache      map[string]SchemaInfoCache
-	typeUsageCounter TypeUsageCounter
+	schemaCache map[string]SchemaInfoCache
 }
 
 // SchemaInfoCache stores prebuilt information of component schema types.
@@ -38,10 +37,9 @@ type SchemaInfoCache struct {
 // NewOAS3Builder creates an OAS3Builder instance
 func NewOAS3Builder(schema *rest.NDCHttpSchema, options ConvertOptions) *OAS3Builder {
 	builder := &OAS3Builder{
-		schema:           schema,
-		schemaCache:      make(map[string]SchemaInfoCache),
-		typeUsageCounter: TypeUsageCounter{},
-		ConvertOptions:   applyConvertOptions(options),
+		schema:         schema,
+		schemaCache:    make(map[string]SchemaInfoCache),
+		ConvertOptions: applyConvertOptions(options),
 	}
 
 	return builder
@@ -86,7 +84,10 @@ func (oc *OAS3Builder) BuildDocumentModel(docModel *libopenapi.DocumentModel[v3.
 	// reevaluate write argument types
 	oc.schemaCache = make(map[string]SchemaInfoCache)
 	oc.transformWriteSchema()
-	cleanUnusedSchemaTypes(oc.schema, &oc.typeUsageCounter)
+
+	if err := cleanUnusedSchemaTypes(oc.schema); err != nil {
+		return err
+	}
 
 	return nil
 }
@@ -203,7 +204,7 @@ func (oc *OAS3Builder) pathToNDCOperations(pathItem orderedmap.Pair[string, *v3.
 	pathValue := pathItem.Value()
 
 	if pathValue.Get != nil {
-		funcGet, funcName, err := newOAS3OperationBuilder(oc, pathKey, "get").BuildFunction(pathValue.Get)
+		funcGet, funcName, err := newOAS3OperationBuilder(oc, pathKey, "get", pathValue.Parameters).BuildFunction(pathValue.Get)
 		if err != nil {
 			return err
 		}
@@ -212,7 +213,7 @@ func (oc *OAS3Builder) pathToNDCOperations(pathItem orderedmap.Pair[string, *v3.
 		}
 	}
 
-	procPost, procPostName, err := newOAS3OperationBuilder(oc, pathKey, "post").BuildProcedure(pathValue.Post)
+	procPost, procPostName, err := newOAS3OperationBuilder(oc, pathKey, "post", pathValue.Parameters).BuildProcedure(pathValue.Post)
 	if err != nil {
 		return err
 	}
@@ -220,7 +221,7 @@ func (oc *OAS3Builder) pathToNDCOperations(pathItem orderedmap.Pair[string, *v3.
 		oc.schema.Procedures[procPostName] = *procPost
 	}
 
-	procPut, procPutName, err := newOAS3OperationBuilder(oc, pathKey, "put").BuildProcedure(pathValue.Put)
+	procPut, procPutName, err := newOAS3OperationBuilder(oc, pathKey, "put", pathValue.Parameters).BuildProcedure(pathValue.Put)
 	if err != nil {
 		return err
 	}
@@ -228,7 +229,7 @@ func (oc *OAS3Builder) pathToNDCOperations(pathItem orderedmap.Pair[string, *v3.
 		oc.schema.Procedures[procPutName] = *procPut
 	}
 
-	procPatch, procPutName, err := newOAS3OperationBuilder(oc, pathKey, "patch").BuildProcedure(pathValue.Patch)
+	procPatch, procPutName, err := newOAS3OperationBuilder(oc, pathKey, "patch", pathValue.Parameters).BuildProcedure(pathValue.Patch)
 	if err != nil {
 		return err
 	}
@@ -236,7 +237,7 @@ func (oc *OAS3Builder) pathToNDCOperations(pathItem orderedmap.Pair[string, *v3.
 		oc.schema.Procedures[procPutName] = *procPatch
 	}
 
-	procDelete, procDeleteName, err := newOAS3OperationBuilder(oc, pathKey, "delete").BuildProcedure(pathValue.Delete)
+	procDelete, procDeleteName, err := newOAS3OperationBuilder(oc, pathKey, "delete", pathValue.Parameters).BuildProcedure(pathValue.Delete)
 	if err != nil {
 		return err
 	}
@@ -259,7 +260,7 @@ func (oc *OAS3Builder) convertComponentSchemas(schemaItem orderedmap.Pair[string
 	if _, ok := oc.schema.ObjectTypes[typeKey]; ok {
 		return nil
 	}
-	typeEncoder, schemaResult, _, err := newOAS3SchemaBuilder(oc, "", rest.InBody, false).
+	typeEncoder, schemaResult, err := newOAS3SchemaBuilder(oc, "", rest.InBody, false).
 		getSchemaType(typeSchema, []string{typeKey})
 	if err != nil {
 		return err
@@ -353,8 +354,6 @@ func (oc *OAS3Builder) populateWriteSchemaType(schemaType schema.Type) (schema.T
 
 		writeName := formatWriteObjectName(ty.Name)
 		if _, ok := oc.schema.ObjectTypes[writeName]; ok {
-			oc.typeUsageCounter.Add(writeName, 1)
-			oc.typeUsageCounter.Add(ty.Name, -1)
 			return schema.NewNamedType(writeName).Encode(), writeName, true
 		}
 		if evaluated {
@@ -386,8 +385,6 @@ func (oc *OAS3Builder) populateWriteSchemaType(schemaType schema.Type) (schema.T
 			}
 		}
 		if hasWriteField {
-			oc.typeUsageCounter.Add(writeName, 1)
-			oc.typeUsageCounter.Add(ty.Name, -1)
 			oc.schema.ObjectTypes[writeName] = writeObject
 			return schema.NewNamedType(writeName).Encode(), writeName, true
 		}

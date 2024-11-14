@@ -4,8 +4,8 @@
     "servers": [
       {
         "url": {
-          "env": "SERVER_URL",
-          "value": "https://onesignal.com/api/v1"
+          "value": "https://onesignal.com/api/v1",
+          "env": "SERVER_URL"
         }
       }
     ],
@@ -54,12 +54,14 @@
             "name": "app_id",
             "in": "query",
             "schema": {
-              "type": ["string"]
+              "type": [
+                "string"
+              ]
             }
           }
         },
         "kind": {
-          "description": "Kind of notifications returned:\n  * unset - All notification types (default)\n  * `0` - Dashboard only\n  * `1` - API only\n  * `3` - Automated only\n",
+          "description": "Kind of notifications returned:   * unset - All notification types (default)   * `0` - Dashboard only   * `1` - API only   * `3` - Automated only ",
           "type": {
             "type": "nullable",
             "underlying_type": {
@@ -71,7 +73,9 @@
             "name": "kind",
             "in": "query",
             "schema": {
-              "type": ["integer"]
+              "type": [
+                "integer"
+              ]
             }
           }
         },
@@ -88,7 +92,9 @@
             "name": "limit",
             "in": "query",
             "schema": {
-              "type": ["integer"]
+              "type": [
+                "integer"
+              ]
             }
           }
         },
@@ -105,13 +111,14 @@
             "name": "offset",
             "in": "query",
             "schema": {
-              "type": ["integer"]
+              "type": [
+                "integer"
+              ]
             }
           }
         }
       },
       "description": "View notifications",
-      "name": "hasuraOneSignalGetNotifications",
       "result_type": {
         "name": "NotificationSlice",
         "type": "named"
@@ -142,7 +149,9 @@
             }
           },
           "http": {
-            "type": ["string"]
+            "type": [
+              "string"
+            ]
           }
         },
         "id": {
@@ -154,7 +163,9 @@
             }
           },
           "http": {
-            "type": ["string"]
+            "type": [
+              "string"
+            ]
           }
         },
         "recipients": {
@@ -166,7 +177,9 @@
             }
           },
           "http": {
-            "type": ["integer"]
+            "type": [
+              "integer"
+            ]
           }
         }
       }
@@ -183,7 +196,9 @@
             }
           },
           "http": {
-            "type": ["integer"]
+            "type": [
+              "integer"
+            ]
           }
         },
         "errored": {
@@ -196,7 +211,9 @@
             }
           },
           "http": {
-            "type": ["integer"]
+            "type": [
+              "integer"
+            ]
           }
         },
         "failed": {
@@ -209,7 +226,9 @@
             }
           },
           "http": {
-            "type": ["integer"]
+            "type": [
+              "integer"
+            ]
           }
         },
         "received": {
@@ -222,7 +241,9 @@
             }
           },
           "http": {
-            "type": ["integer"]
+            "type": [
+              "integer"
+            ]
           }
         },
         "successful": {
@@ -235,7 +256,9 @@
             }
           },
           "http": {
-            "type": ["integer"]
+            "type": [
+              "integer"
+            ]
           }
         }
       }
@@ -249,7 +272,9 @@
             "type": "named"
           },
           "http": {
-            "type": ["string"]
+            "type": [
+              "string"
+            ]
           }
         },
         "key": {
@@ -262,7 +287,9 @@
             }
           },
           "http": {
-            "type": ["string"]
+            "type": [
+              "string"
+            ]
           }
         },
         "relation": {
@@ -272,7 +299,9 @@
             "type": "named"
           },
           "http": {
-            "type": ["string"]
+            "type": [
+              "string"
+            ]
           }
         },
         "value": {
@@ -285,7 +314,9 @@
             }
           },
           "http": {
-            "type": ["string"]
+            "type": [
+              "string"
+            ]
           }
         }
       }
@@ -301,7 +332,9 @@
             }
           },
           "http": {
-            "type": ["object"]
+            "type": [
+              "object"
+            ]
           }
         },
         "custom_data": {
@@ -313,11 +346,13 @@
             }
           },
           "http": {
-            "type": ["object"]
+            "type": [
+              "object"
+            ]
           }
         },
         "data": {
-          "description": "Channel: Push Notifications\nPlatform: Huawei\nA custom map of data that is passed back to your app. Same as using Additional Data within the dashboard. Can use up to 2048 bytes of data.\nExample: {\"abc\": 123, \"foo\": \"bar\", \"event_performed\": true, \"amount\": 12.1}\n",
+          "description": "Channel: Push Notifications Platform: Huawei A custom map of data that is passed back to your app. Same as using Additional Data within the dashboard. Can use up to 2048 bytes of data. Example: {\"abc\": 123, \"foo\": \"bar\", \"event_performed\": true, \"amount\": 12.1} ",
           "type": {
             "type": "nullable",
             "underlying_type": {
@@ -326,7 +361,9 @@
             }
           },
           "http": {
-            "type": ["object"]
+            "type": [
+              "object"
+            ]
           }
         },
         "filters": {
@@ -341,7 +378,9 @@
             }
           },
           "http": {
-            "type": ["array"]
+            "type": [
+              "array"
+            ]
           }
         },
         "headings": {
@@ -353,7 +392,9 @@
             }
           },
           "http": {
-            "type": ["object"]
+            "type": [
+              "object"
+            ]
           }
         },
         "id": {
@@ -365,7 +406,9 @@
             }
           },
           "http": {
-            "type": ["string"]
+            "type": [
+              "string"
+            ]
           }
         },
         "send_after": {
@@ -377,7 +420,9 @@
             }
           },
           "http": {
-            "type": ["string"],
+            "type": [
+              "string"
+            ],
             "format": "date-time"
           }
         },
@@ -390,7 +435,9 @@
             }
           },
           "http": {
-            "type": ["object"]
+            "type": [
+              "object"
+            ]
           }
         }
       }
@@ -406,7 +453,9 @@
             }
           },
           "http": {
-            "type": ["integer"]
+            "type": [
+              "integer"
+            ]
           }
         },
         "notifications": {
@@ -421,7 +470,9 @@
             }
           },
           "http": {
-            "type": ["array"]
+            "type": [
+              "array"
+            ]
           }
         },
         "offset": {
@@ -433,7 +484,9 @@
             }
           },
           "http": {
-            "type": ["integer"]
+            "type": [
+              "integer"
+            ]
           }
         },
         "total_count": {
@@ -445,7 +498,9 @@
             }
           },
           "http": {
-            "type": ["integer"]
+            "type": [
+              "integer"
+            ]
           }
         }
       }
@@ -462,7 +517,9 @@
             }
           },
           "http": {
-            "type": ["integer"],
+            "type": [
+              "integer"
+            ],
             "format": "int64"
           }
         },
@@ -475,7 +532,9 @@
             }
           },
           "http": {
-            "type": ["object"]
+            "type": [
+              "object"
+            ]
           }
         },
         "converted": {
@@ -488,7 +547,9 @@
             }
           },
           "http": {
-            "type": ["integer"]
+            "type": [
+              "integer"
+            ]
           }
         },
         "errored": {
@@ -501,7 +562,9 @@
             }
           },
           "http": {
-            "type": ["integer"]
+            "type": [
+              "integer"
+            ]
           }
         },
         "excluded_segments": {
@@ -516,9 +579,13 @@
             }
           },
           "http": {
-            "type": ["array"],
+            "type": [
+              "array"
+            ],
             "items": {
-              "type": ["string"]
+              "type": [
+                "string"
+              ]
             }
           }
         },
@@ -532,7 +599,9 @@
             }
           },
           "http": {
-            "type": ["integer"]
+            "type": [
+              "integer"
+            ]
           }
         },
         "filters": {
@@ -547,7 +616,9 @@
             }
           },
           "http": {
-            "type": ["array"]
+            "type": [
+              "array"
+            ]
           }
         },
         "headings": {
@@ -559,7 +630,9 @@
             }
           },
           "http": {
-            "type": ["object"]
+            "type": [
+              "object"
+            ]
           }
         },
         "id": {
@@ -571,7 +644,9 @@
             }
           },
           "http": {
-            "type": ["string"]
+            "type": [
+              "string"
+            ]
           }
         },
         "include_player_ids": {
@@ -586,9 +661,13 @@
             }
           },
           "http": {
-            "type": ["array"],
+            "type": [
+              "array"
+            ],
             "items": {
-              "type": ["string"]
+              "type": [
+                "string"
+              ]
             }
           }
         },
@@ -604,9 +683,13 @@
             }
           },
           "http": {
-            "type": ["array"],
+            "type": [
+              "array"
+            ],
             "items": {
-              "type": ["string"]
+              "type": [
+                "string"
+              ]
             }
           }
         },
@@ -622,7 +705,9 @@
             }
           },
           "http": {
-            "type": ["array"]
+            "type": [
+              "array"
+            ]
           }
         },
         "platform_delivery_stats": {
@@ -635,7 +720,9 @@
             }
           },
           "http": {
-            "type": ["object"]
+            "type": [
+              "object"
+            ]
           }
         },
         "queued_at": {
@@ -648,7 +735,9 @@
             }
           },
           "http": {
-            "type": ["integer"],
+            "type": [
+              "integer"
+            ],
             "format": "int64"
           }
         },
@@ -662,7 +751,9 @@
             }
           },
           "http": {
-            "type": ["integer"]
+            "type": [
+              "integer"
+            ]
           }
         },
         "remaining": {
@@ -675,7 +766,9 @@
             }
           },
           "http": {
-            "type": ["integer"]
+            "type": [
+              "integer"
+            ]
           }
         },
         "send_after": {
@@ -688,7 +781,9 @@
             }
           },
           "http": {
-            "type": ["integer"],
+            "type": [
+              "integer"
+            ],
             "format": "int64"
           }
         },
@@ -701,7 +796,9 @@
             }
           },
           "http": {
-            "type": ["object"]
+            "type": [
+              "object"
+            ]
           }
         },
         "successful": {
@@ -714,7 +811,9 @@
             }
           },
           "http": {
-            "type": ["integer"]
+            "type": [
+              "integer"
+            ]
           }
         },
         "target_channel": {
@@ -726,7 +825,9 @@
             }
           },
           "http": {
-            "type": ["string"]
+            "type": [
+              "string"
+            ]
           }
         },
         "throttle_rate_per_minute": {
@@ -739,7 +840,9 @@
             }
           },
           "http": {
-            "type": ["integer"]
+            "type": [
+              "integer"
+            ]
           }
         }
       }
@@ -752,7 +855,9 @@
             "type": "named"
           },
           "http": {
-            "type": ["string"]
+            "type": [
+              "string"
+            ]
           }
         },
         "id": {
@@ -761,7 +866,9 @@
             "type": "named"
           },
           "http": {
-            "type": ["string"]
+            "type": [
+              "string"
+            ]
           }
         },
         "value": {
@@ -770,7 +877,9 @@
             "type": "named"
           },
           "http": {
-            "type": ["integer"]
+            "type": [
+              "integer"
+            ]
           }
         }
       }
@@ -787,7 +896,9 @@
             }
           },
           "http": {
-            "type": ["object"]
+            "type": [
+              "object"
+            ]
           }
         },
         "chrome_web_push": {
@@ -799,7 +910,9 @@
             }
           },
           "http": {
-            "type": ["object"]
+            "type": [
+              "object"
+            ]
           }
         },
         "edge_web_push": {
@@ -811,7 +924,9 @@
             }
           },
           "http": {
-            "type": ["object"]
+            "type": [
+              "object"
+            ]
           }
         },
         "email": {
@@ -823,7 +938,9 @@
             }
           },
           "http": {
-            "type": ["object"]
+            "type": [
+              "object"
+            ]
           }
         },
         "firefox_web_push": {
@@ -835,7 +952,9 @@
             }
           },
           "http": {
-            "type": ["object"]
+            "type": [
+              "object"
+            ]
           }
         },
         "ios": {
@@ -847,7 +966,9 @@
             }
           },
           "http": {
-            "type": ["object"]
+            "type": [
+              "object"
+            ]
           }
         },
         "safari_web_push": {
@@ -859,7 +980,9 @@
             }
           },
           "http": {
-            "type": ["object"]
+            "type": [
+              "object"
+            ]
           }
         },
         "sms": {
@@ -871,7 +994,9 @@
             }
           },
           "http": {
-            "type": ["object"]
+            "type": [
+              "object"
+            ]
           }
         }
       }
@@ -888,7 +1013,9 @@
             }
           },
           "http": {
-            "type": ["string"]
+            "type": [
+              "string"
+            ]
           }
         }
       }
@@ -924,7 +1051,6 @@
         }
       },
       "description": "Create notification",
-      "name": "hasuraOneSignalCreateNotification",
       "result_type": {
         "name": "CreateNotificationSuccessResponse",
         "type": "named"
@@ -981,7 +1107,10 @@
       "aggregate_functions": {},
       "comparison_operators": {},
       "representation": {
-        "one_of": ["sum", "count"],
+        "one_of": [
+          "sum",
+          "count"
+        ],
         "type": "enum"
       }
     },
@@ -989,7 +1118,11 @@
       "aggregate_functions": {},
       "comparison_operators": {},
       "representation": {
-        "one_of": ["push", "email", "sms"],
+        "one_of": [
+          "push",
+          "email",
+          "sms"
+        ],
         "type": "enum"
       }
     },

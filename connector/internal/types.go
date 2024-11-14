@@ -28,8 +28,8 @@ var sensitiveHeaderRegex = regexp.MustCompile(`auth|key|secret|token`)
 
 // HTTPOptions represent execution options for HTTP requests
 type HTTPOptions struct {
-	Servers  []string `json:"serverIds"  yaml:"serverIds"`
-	Parallel bool     `json:"parallel" yaml:"parallel"`
+	Servers  []string `json:"serverIds" yaml:"serverIds"`
+	Parallel bool     `json:"parallel"  yaml:"parallel"`
 
 	Explain     bool                  `json:"-" yaml:"-"`
 	Distributed bool                  `json:"-" yaml:"-"`

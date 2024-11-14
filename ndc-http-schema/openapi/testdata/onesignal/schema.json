@@ -33,7 +33,7 @@
           }
         },
         "kind": {
-          "description": "Kind of notifications returned:\n  * unset - All notification types (default)\n  * `0` - Dashboard only\n  * `1` - API only\n  * `3` - Automated only\n",
+          "description": "Kind of notifications returned:   * unset - All notification types (default)   * `0` - Dashboard only   * `1` - API only   * `3` - Automated only ",
           "type": {
             "type": "nullable",
             "underlying_type": {
@@ -293,7 +293,7 @@
           }
         },
         "data": {
-          "description": "Channel: Push Notifications\nPlatform: Huawei\nA custom map of data that is passed back to your app. Same as using Additional Data within the dashboard. Can use up to 2048 bytes of data.\nExample: {\"abc\": 123, \"foo\": \"bar\", \"event_performed\": true, \"amount\": 12.1}\n",
+          "description": "Channel: Push Notifications Platform: Huawei A custom map of data that is passed back to your app. Same as using Additional Data within the dashboard. Can use up to 2048 bytes of data. Example: {\"abc\": 123, \"foo\": \"bar\", \"event_performed\": true, \"amount\": 12.1} ",
           "type": {
             "type": "nullable",
             "underlying_type": {

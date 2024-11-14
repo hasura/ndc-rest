@@ -1,10 +1,8 @@
 package internal
 
 import (
-	"errors"
 	"fmt"
 	"log/slog"
-	"slices"
 	"strings"
 
 	rest "github.com/hasura/ndc-http/ndc-http-schema/schema"
@@ -21,16 +19,20 @@ import (
 type OAS2Builder struct {
 	*ConvertOptions
 
-	schema           *rest.NDCHttpSchema
-	typeUsageCounter TypeUsageCounter
+	schema *rest.NDCHttpSchema
+	// stores prebuilt and evaluating information of component schema types.
+	// some undefined schema types aren't stored in either object nor scalar,
+	// or self-reference types that haven't added into the object_types map yet.
+	// This cache temporarily stores them to avoid infinite recursive reference.
+	schemaCache map[string]SchemaInfoCache
 }
 
 // NewOAS2Builder creates an OAS3Builder instance
 func NewOAS2Builder(schema *rest.NDCHttpSchema, options ConvertOptions) *OAS2Builder {
 	builder := &OAS2Builder{
-		schema:           schema,
-		typeUsageCounter: TypeUsageCounter{},
-		ConvertOptions:   applyConvertOptions(options),
+		schema:         schema,
+		schemaCache:    make(map[string]SchemaInfoCache),
+		ConvertOptions: applyConvertOptions(options),
 	}
 
 	return builder
@@ -86,7 +88,9 @@ func (oc *OAS2Builder) BuildDocumentModel(docModel *libopenapi.DocumentModel[v2.
 	}
 
 	oc.schema.Settings.Security = convertSecurities(docModel.Model.Security)
-	cleanUnusedSchemaTypes(oc.schema, &oc.typeUsageCounter)
+	if err := cleanUnusedSchemaTypes(oc.schema); err != nil {
+		return err
+	}
 
 	return nil
 }
@@ -163,7 +167,7 @@ func (oc *OAS2Builder) pathToNDCOperations(pathItem orderedmap.Pair[string, *v2.
 	pathKey := pathItem.Key()
 	pathValue := pathItem.Value()
 
-	funcGet, funcName, err := newOAS2OperationBuilder(oc).BuildFunction(pathKey, pathValue.Get)
+	funcGet, funcName, err := newOAS2OperationBuilder(oc).BuildFunction(pathKey, pathValue.Get, pathValue.Parameters)
 	if err != nil {
 		return err
 	}
@@ -171,7 +175,7 @@ func (oc *OAS2Builder) pathToNDCOperations(pathItem orderedmap.Pair[string, *v2.
 		oc.schema.Functions[funcName] = *funcGet
 	}
 
-	procPost, procPostName, err := newOAS2OperationBuilder(oc).BuildProcedure(pathKey, "post", pathValue.Post)
+	procPost, procPostName, err := newOAS2OperationBuilder(oc).BuildProcedure(pathKey, "post", pathValue.Post, pathValue.Parameters)
 	if err != nil {
 		return err
 	}
@@ -179,7 +183,7 @@ func (oc *OAS2Builder) pathToNDCOperations(pathItem orderedmap.Pair[string, *v2.
 		oc.schema.Procedures[procPostName] = *procPost
 	}
 
-	procPut, procPutName, err := newOAS2OperationBuilder(oc).BuildProcedure(pathKey, "put", pathValue.Put)
+	procPut, procPutName, err := newOAS2OperationBuilder(oc).BuildProcedure(pathKey, "put", pathValue.Put, pathValue.Parameters)
 	if err != nil {
 		return err
 	}
@@ -187,7 +191,7 @@ func (oc *OAS2Builder) pathToNDCOperations(pathItem orderedmap.Pair[string, *v2.
 		oc.schema.Procedures[procPutName] = *procPut
 	}
 
-	procPatch, procPatchName, err := newOAS2OperationBuilder(oc).BuildProcedure(pathKey, "patch", pathValue.Patch)
+	procPatch, procPatchName, err := newOAS2OperationBuilder(oc).BuildProcedure(pathKey, "patch", pathValue.Patch, pathValue.Parameters)
 	if err != nil {
 		return err
 	}
@@ -195,7 +199,7 @@ func (oc *OAS2Builder) pathToNDCOperations(pathItem orderedmap.Pair[string, *v2.
 		oc.schema.Procedures[procPatchName] = *procPatch
 	}
 
-	procDelete, procDeleteName, err := newOAS2OperationBuilder(oc).BuildProcedure(pathKey, "delete", pathValue.Delete)
+	procDelete, procDeleteName, err := newOAS2OperationBuilder(oc).BuildProcedure(pathKey, "delete", pathValue.Delete, pathValue.Parameters)
 	if err != nil {
 		return err
 	}
@@ -205,208 +209,42 @@ func (oc *OAS2Builder) pathToNDCOperations(pathItem orderedmap.Pair[string, *v2.
 	return nil
 }
 
-// get and convert an OpenAPI data type to a NDC type
-func (oc *OAS2Builder) getSchemaTypeFromProxy(schemaProxy *base.SchemaProxy, nullable bool, apiPath string, fieldPaths []string) (schema.TypeEncoder, *rest.TypeSchema, error) {
-	if schemaProxy == nil {
-		return nil, nil, errParameterSchemaEmpty(fieldPaths)
-	}
-
-	innerSchema := schemaProxy.Schema()
-	if innerSchema == nil {
-		return nil, nil, fmt.Errorf("cannot get schema from proxy: %s", schemaProxy.GetReference())
-	}
-	var ndcType schema.TypeEncoder
-	var typeSchema *rest.TypeSchema
-	var err error
-
-	refName := getSchemaRefTypeNameV2(schemaProxy.GetReference())
-	// return early object from ref
-	if refName != "" && len(innerSchema.Type) > 0 && innerSchema.Type[0] == "object" {
-		refName = utils.ToPascalCase(refName)
-		ndcType = schema.NewNamedType(refName)
-		typeSchema = createSchemaFromOpenAPISchema(innerSchema)
-	} else {
-		if innerSchema.Title != "" && !strings.Contains(innerSchema.Title, " ") {
-			fieldPaths = []string{utils.ToPascalCase(innerSchema.Title)}
-		}
-		ndcType, typeSchema, err = oc.getSchemaType(innerSchema, apiPath, fieldPaths)
-		if err != nil {
-			return nil, nil, err
-		}
-	}
-	if nullable {
-		if !isNullableType(ndcType) {
-			ndcType = schema.NewNullableType(ndcType)
-		}
-	}
-	return ndcType, typeSchema, nil
-}
-
-// get and convert an OpenAPI data type to a NDC type from parameter
-func (oc *OAS2Builder) getSchemaTypeFromParameter(param *v2.Parameter, apiPath string, fieldPaths []string) (schema.TypeEncoder, error) {
-	var result schema.TypeEncoder
-	if param.Type == "" {
-		if oc.Strict {
-			return nil, errParameterSchemaEmpty(fieldPaths)
-		}
-		result = oc.buildScalarJSON()
-	} else if isPrimitiveScalar([]string{param.Type}) {
-		scalarName := getScalarFromType(oc.schema, []string{param.Type}, param.Format, param.Enum, oc.trimPathPrefix(apiPath), fieldPaths)
-		result = schema.NewNamedType(scalarName)
-	} else {
-		switch param.Type {
-		case "object":
-			return nil, errors.New("unsupported object parameter")
-		case "array":
-			if param.Items == nil && param.Items.Type == "" {
-				if oc.Strict {
-					return nil, errors.New("array item is empty")
-				}
-				result = schema.NewArrayType(oc.buildScalarJSON())
-			} else {
-				itemName := getScalarFromType(oc.schema, []string{param.Items.Type}, param.Format, param.Enum, oc.trimPathPrefix(apiPath), fieldPaths)
-				result = schema.NewArrayType(schema.NewNamedType(itemName))
-			}
-		default:
-			return nil, fmt.Errorf("unsupported schema type %s", param.Type)
-		}
-	}
-
-	if param.Required == nil || !*param.Required {
-		return schema.NewNullableType(result), nil
-	}
-	return result, nil
-}
-
-// get and convert an OpenAPI data type to a NDC type
-func (oc *OAS2Builder) getSchemaType(typeSchema *base.Schema, apiPath string, fieldPaths []string) (schema.TypeEncoder, *rest.TypeSchema, error) {
-	if typeSchema == nil {
-		return nil, nil, errParameterSchemaEmpty(fieldPaths)
-	}
-
-	var typeResult *rest.TypeSchema
-	if len(typeSchema.AnyOf) > 0 || typeSchema.AdditionalProperties != nil || len(typeSchema.Type) > 1 {
-		scalarName := string(rest.ScalarJSON)
-		if _, ok := oc.schema.ScalarTypes[scalarName]; !ok {
-			oc.schema.ScalarTypes[scalarName] = *defaultScalarTypes[rest.ScalarJSON]
-		}
-		typeResult = createSchemaFromOpenAPISchema(typeSchema)
-		return schema.NewNamedType(scalarName), typeResult, nil
-	}
-
-	var result schema.TypeEncoder
-	if len(typeSchema.Type) == 0 {
-		if oc.Strict {
-			return nil, nil, errParameterSchemaEmpty(fieldPaths)
-		}
-		result = oc.buildScalarJSON()
-		typeResult = createSchemaFromOpenAPISchema(typeSchema)
-	} else {
-		typeName := typeSchema.Type[0]
-		if isPrimitiveScalar(typeSchema.Type) {
-			scalarName := getScalarFromType(oc.schema, typeSchema.Type, typeSchema.Format, typeSchema.Enum, oc.trimPathPrefix(apiPath), fieldPaths)
-			result = schema.NewNamedType(scalarName)
-			typeResult = createSchemaFromOpenAPISchema(typeSchema)
-		} else {
-			typeResult = createSchemaFromOpenAPISchema(typeSchema)
-			switch typeName {
-			case "object":
-				refName := utils.StringSliceToPascalCase(fieldPaths)
-
-				if typeSchema.Properties == nil || typeSchema.Properties.IsZero() {
-					// treat no-property objects as a JSON scalar
-					oc.schema.ScalarTypes[refName] = *defaultScalarTypes[rest.ScalarJSON]
-				} else {
-					object := rest.ObjectType{
-						Fields: make(map[string]rest.ObjectField),
-					}
-					if typeSchema.Description != "" {
-						object.Description = &typeSchema.Description
-					}
-
-					for prop := typeSchema.Properties.First(); prop != nil; prop = prop.Next() {
-						propName := prop.Key()
-						nullable := !slices.Contains(typeSchema.Required, propName)
-						propType, propApiSchema, err := oc.getSchemaTypeFromProxy(prop.Value(), nullable, apiPath, append(fieldPaths, propName))
-						if err != nil {
-							return nil, nil, err
-						}
-						objField := rest.ObjectField{
-							ObjectField: schema.ObjectField{
-								Type: propType.Encode(),
-							},
-							HTTP: propApiSchema,
-						}
-						if propApiSchema.Description != "" {
-							objField.Description = &propApiSchema.Description
-						}
-						object.Fields[propName] = objField
-
-						oc.typeUsageCounter.Add(getNamedType(propType, true, ""), 1)
-					}
-
-					oc.schema.ObjectTypes[refName] = object
-				}
-				result = schema.NewNamedType(refName)
-			case "array":
-				if typeSchema.Items == nil || typeSchema.Items.A == nil {
-					if oc.ConvertOptions.Strict {
-						return nil, nil, errors.New("array item is empty")
-					}
-					result = schema.NewArrayType(oc.buildScalarJSON())
-				} else {
-					itemName := getSchemaRefTypeNameV2(typeSchema.Items.A.GetReference())
-					if itemName != "" {
-						itemName := utils.ToPascalCase(itemName)
-						result = schema.NewArrayType(schema.NewNamedType(itemName))
-					} else {
-						itemSchemaA := typeSchema.Items.A.Schema()
-						if itemSchemaA != nil {
-							itemSchema, propType, err := oc.getSchemaType(itemSchemaA, apiPath, fieldPaths)
-							if err != nil {
-								return nil, nil, err
-							}
-
-							typeResult.Items = propType
-							result = schema.NewArrayType(itemSchema)
-						}
-					}
-
-					if result == nil {
-						return nil, nil, fmt.Errorf("cannot parse type reference name: %s", typeSchema.Items.A.GetReference())
-					}
-				}
-
-			default:
-				return nil, nil, fmt.Errorf("unsupported schema type %s", typeName)
-			}
-		}
-	}
-
-	if typeSchema.Nullable != nil && *typeSchema.Nullable {
-		return schema.NewNullableType(result), typeResult, nil
-	}
-	return result, typeResult, nil
-}
-
 func (oc *OAS2Builder) convertComponentSchemas(schemaItem orderedmap.Pair[string, *base.SchemaProxy]) error {
 	typeKey := schemaItem.Key()
 	typeValue := schemaItem.Value()
 	typeSchema := typeValue.Schema()
 
 	oc.Logger.Debug("component schema", slog.String("name", typeKey))
-	if typeSchema == nil || !slices.Contains(typeSchema.Type, "object") {
+	if typeSchema == nil {
 		return nil
 	}
-	_, _, err := oc.getSchemaType(typeSchema, "", []string{typeKey})
-	return err
-}
+	typeEncoder, schemaResult, err := newOAS2SchemaBuilder(oc, "", rest.InBody).getSchemaType(typeSchema, []string{typeKey})
 
-func (oc *OAS2Builder) trimPathPrefix(input string) string {
-	if oc.ConvertOptions.TrimPrefix == "" {
-		return input
+	var typeName string
+	if typeEncoder != nil {
+		typeName = getNamedType(typeEncoder, true, "")
 	}
-	return strings.TrimPrefix(input, oc.ConvertOptions.TrimPrefix)
+	cacheKey := "#/definitions/" + typeKey
+	// treat no-property objects as a Arbitrary JSON scalar
+	if typeEncoder == nil || typeName == string(rest.ScalarJSON) {
+		refName := utils.ToPascalCase(typeKey)
+		scalar := schema.NewScalarType()
+		scalar.Representation = schema.NewTypeRepresentationJSON().Encode()
+		oc.schema.ScalarTypes[refName] = *scalar
+		oc.schemaCache[cacheKey] = SchemaInfoCache{
+			Name:       refName,
+			Schema:     schema.NewNamedType(refName),
+			TypeSchema: schemaResult,
+		}
+	} else {
+		oc.schemaCache[cacheKey] = SchemaInfoCache{
+			Name:       typeName,
+			Schema:     typeEncoder,
+			TypeSchema: schemaResult,
+		}
+	}
+
+	return err
 }
 
 // build a named type for JSON scalar

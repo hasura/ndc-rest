@@ -638,6 +638,12 @@
             "description": "The owner of the clients to filter by.",
             "name": "owner",
             "in": "query"
+          },
+          {
+            "type": "null",
+            "description": "The date that the IP address was entered into warmup.",
+            "name": "start_date",
+            "in": "query"
           }
         ],
         "responses": {
@@ -683,6 +689,198 @@
           }
         }
       }
+    },
+    "/contactdb/lists/{list_id}/recipients": {
+      "parameters": [
+        {
+          "name": "list_id",
+          "in": "path",
+          "description": "The id of the list of recipients you want to retrieve.",
+          "required": true,
+          "type": "integer"
+        }
+      ],
+      "get": {
+        "operationId": "GET_contactdb-lists-list_id-recipients",
+        "parameters": [
+          {
+            "$ref": "#/parameters/trait:onBehalfOfSubuser:on-behalf-of"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "recipients": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/definitions/contactdb_recipient"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "Authorization": []
+          }
+        ]
+      }
+    },
+    "/browsers/stats": {
+      "get": {
+        "operationId": "GET_browsers-stats",
+        "description": "**This endpoint allows you to retrieve your email statistics segmented by browser type.**\n\n**We only store up to 7 days of email activity in our database.** By default, 500 items will be returned per request via the Advanced Stats API endpoints.\n\nAdvanced Stats provide a more in-depth view of your email statistics and the actions taken by your recipients. You can segment these statistics by geographic location, device type, client type, browser, and mailbox provider. For more information about statistics, please see our [Statistics Overview](https://sendgrid.com/docs/ui/analytics-and-reporting/stats-overview/).",
+        "parameters": [
+          {
+            "name": "browsers",
+            "in": "query",
+            "description": "The browsers to get statistics for. You can include up to 10 different browsers by including this parameter multiple times.",
+            "type": "string"
+          },
+          {
+            "$ref": "#/parameters/trait:onBehalfOfSubuser:on-behalf-of"
+          },
+          {
+            "$ref": "#/parameters/trait:statsAdvancedQueryStringsLimitOffset:limit"
+          },
+          {
+            "$ref": "#/parameters/trait:statsAdvancedQueryStringsLimitOffset:offset"
+          },
+          {
+            "$ref": "#/parameters/trait:statsAdvancedQueryStringsLimitOffset:aggregated_by"
+          },
+          {
+            "$ref": "#/parameters/trait:statsAdvancedQueryStringsLimitOffset:start_date"
+          },
+          {
+            "$ref": "#/parameters/trait:statsAdvancedQueryStringsLimitOffset:end_date"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "date": {
+                    "type": "string",
+                    "description": "The date that the statistics were gathered."
+                  },
+                  "stats": {
+                    "type": "array",
+                    "description": "The list of statistics.",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "type": {
+                          "type": "string",
+                          "description": "The type of segmentation."
+                        },
+                        "name": {
+                          "type": "string",
+                          "description": "The name of the specific segmentation."
+                        },
+                        "metrics": {
+                          "$ref": "#/definitions/advanced_stats_clicks"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "Authorization": []
+          }
+        ]
+      }
+    },
+    "/geo/stats": {
+      "get": {
+        "operationId": "GET_geo-stats",
+        "parameters": [
+          {
+            "$ref": "#/parameters/trait:onBehalfOfSubuser:on-behalf-of"
+          }
+        ],
+        "responses": {
+          "200": {
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "date": {
+                    "type": "string",
+                    "description": "The date that the statistics were gathered."
+                  },
+                  "stats": {
+                    "type": "array",
+                    "description": "The list of statistics.",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "type": {
+                          "type": "string",
+                          "description": "The type of segmentation."
+                        },
+                        "name": {
+                          "type": "string",
+                          "description": "The name of the specific segmentation."
+                        },
+                        "metrics": {
+                          "$ref": "#/definitions/advanced_stats_clicks_opens"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "Authorization": []
+          }
+        ]
+      }
+    },
+    "/whitelabel/domains/subuser": {
+      "get": {
+        "operationId": "GET_whitelabel-domains-subuser",
+        "parameters": [
+          {
+            "name": "username",
+            "in": "query",
+            "description": "Username for the subuser to find associated authenticated domain.",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/domain_authentication:domain_spf"
+            }
+          }
+        },
+        "security": [
+          {
+            "Authorization": []
+          }
+        ]
+      }
     }
   },
   "securityDefinitions": {
@@ -709,6 +907,50 @@
           "$ref": "#/definitions/oAuth2Client"
         }
       }
+    }
+  },
+  "parameters": {
+    "trait:onBehalfOfSubuser:on-behalf-of": {
+      "name": "on-behalf-of",
+      "in": "header",
+      "type": "string",
+      "default": "The subuser's username. This header generates the API call as if the subuser account was making the call."
+    },
+    "trait:statsAdvancedQueryStringsLimitOffset:limit": {
+      "name": "limit",
+      "in": "query",
+      "description": "The number of results to return.",
+      "required": false,
+      "type": "integer"
+    },
+    "trait:statsAdvancedQueryStringsLimitOffset:offset": {
+      "name": "offset",
+      "in": "query",
+      "description": "The point in the list to begin retrieving results.",
+      "required": false,
+      "type": "integer"
+    },
+    "trait:statsAdvancedQueryStringsLimitOffset:aggregated_by": {
+      "name": "aggregated_by",
+      "in": "query",
+      "description": "How to group the statistics. Must be either \"day\", \"week\", or \"month\".",
+      "required": false,
+      "type": "string",
+      "enum": ["day", "week", "month"]
+    },
+    "trait:statsAdvancedQueryStringsLimitOffset:start_date": {
+      "name": "start_date",
+      "in": "query",
+      "description": "The starting date of the statistics to retrieve. Must follow format YYYY-MM-DD.",
+      "required": true,
+      "type": "string"
+    },
+    "trait:statsAdvancedQueryStringsLimitOffset:end_date": {
+      "name": "end_date",
+      "in": "query",
+      "description": "The end date of the statistics to retrieve. Defaults to today. Must follow format YYYY-MM-DD.",
+      "required": false,
+      "type": "string"
     }
   },
   "definitions": {
@@ -743,6 +985,10 @@
         "id": { "type": "integer", "format": "int64" },
         "category": { "$ref": "#/definitions/Category" },
         "name": { "type": "string", "example": "doggie" },
+        "field": {
+          "type": "null",
+          "description": "This empty field is returned instead of the list of scopes if the user making the call doesn't have the authorization required."
+        },
         "photoUrls": {
           "type": "array",
           "xml": { "wrapped": true },
@@ -867,7 +1113,287 @@
         }
       }
     },
-    "DefaultError": {}
+    "DefaultError": {},
+    "contactdb_recipient": {
+      "title": "ContactDB: Recipient",
+      "type": "object",
+      "properties": {
+        "recipients": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "custom_fields": {
+                "type": "array",
+                "description": "The custom fields assigned to this recipient and their values.",
+                "items": {
+                  "$ref": "#/definitions/contactdb_custom_field_with_id_value"
+                }
+              },
+              "first_name": {
+                "type": ["string", "null"],
+                "description": "The first name of this recipient. This is a default custom field that SendGrid provides."
+              }
+            },
+            "required": ["email"]
+          }
+        }
+      }
+    },
+    "contactdb_custom_field_with_id_value": {
+      "title": "ContactDB Custom field schema.",
+      "allOf": [
+        {
+          "$ref": "#/definitions/contactdb_custom_field_with_id"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "value": {
+              "type": ["string", "null"],
+              "description": "The value of this recipient's custom field"
+            }
+          }
+        }
+      ]
+    },
+    "contactdb_custom_field_with_id": {
+      "title": "ContactDB Custom field schema with ID.",
+      "allOf": [
+        {
+          "$ref": "#/definitions/contactdb_custom_field"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "number",
+              "description": "The ID of the custom field."
+            }
+          }
+        }
+      ]
+    },
+    "contactdb_custom_field": {
+      "title": "ContactDB Custom field schema.",
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "The name of the field"
+        },
+        "type": {
+          "type": "string",
+          "description": "The type of the field.",
+          "enum": ["date", "text", "number"]
+        }
+      }
+    },
+    "advanced_stats_clicks": {
+      "title": "Stats: Advanced Stats with Clicks",
+      "type": "object",
+      "description": "The individual events and their stats.",
+      "properties": {
+        "clicks": {
+          "type": "integer",
+          "description": "The number of links that were clicked in your emails."
+        },
+        "unique_clicks": {
+          "type": "integer",
+          "description": "The number of unique recipients who clicked links in your emails."
+        }
+      }
+    },
+    "advanced_stats_clicks_opens": {
+      "title": "Stats: Advanced Stats with Clicks and Opens",
+      "description": "The individual events and their stats.",
+      "allOf": [
+        {
+          "$ref": "#/definitions/advanced_stats_clicks"
+        },
+        {
+          "$ref": "#/definitions/advanced_stats_opens"
+        }
+      ]
+    },
+    "advanced_stats_opens": {
+      "title": "Stats: Advanced Stats with Opens",
+      "type": "object",
+      "description": "The individual events and their stats.",
+      "properties": {
+        "opens": {
+          "type": "integer",
+          "description": "The total number of times your emails were opened by recipients."
+        },
+        "unique_opens": {
+          "type": "integer",
+          "description": "The number of unique recipients who opened your emails."
+        }
+      }
+    },
+    "domain_authentication:domain_spf": {
+      "title": "Domain Authentication",
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "integer",
+          "description": "The ID of the authenticated domain."
+        },
+        "domain": {
+          "type": "string",
+          "description": "The domain authenticated."
+        },
+        "subdomain": {
+          "type": "string",
+          "description": "The subdomain that was used to create this authenticated domain."
+        },
+        "username": {
+          "type": "string",
+          "description": "The username of the account that this authenticated domain is associated with."
+        },
+        "user_id": {
+          "type": "integer",
+          "description": "The user_id of the account that this authenticated domain is associated with."
+        },
+        "ips": {
+          "type": "array",
+          "description": "The IP addresses that are included in the SPF record for this authenticated domain.",
+          "items": {}
+        },
+        "custom_spf": {
+          "type": "boolean",
+          "description": "Indicates if this authenticated domain uses custom SPF."
+        },
+        "default": {
+          "type": "boolean",
+          "description": "Indicates if this is the default domain."
+        },
+        "legacy": {
+          "type": "boolean",
+          "description": "Indicates if this authenticated domain was created using the legacy whitelabel tool. If it is a legacy whitelabel, it will still function, but you'll need to create a new authenticated domain if you need to update it."
+        },
+        "automatic_security": {
+          "type": "boolean",
+          "description": "Indicates if this authenticated domain uses automated security."
+        },
+        "valid": {
+          "type": "boolean",
+          "description": "Indicates if this is a valid authenticated domain ."
+        },
+        "dns": {
+          "type": "object",
+          "description": "The DNS records for this authenticated domain.",
+          "required": ["mail_server", "subdomain_spf", "domain_spf", "dkim"],
+          "properties": {
+            "mail_server": {
+              "type": "object",
+              "description": "Designates which mail server is responsible for accepting messages from a domain.",
+              "required": ["host", "type", "data", "valid"],
+              "properties": {
+                "host": {
+                  "type": "string",
+                  "description": "The domain sending the messages."
+                },
+                "type": {
+                  "type": "string",
+                  "description": "They type of DNS record."
+                },
+                "data": {
+                  "type": "string",
+                  "description": "The mail server responsible for accepting messages from the sending domain."
+                },
+                "valid": {
+                  "type": "boolean",
+                  "description": "Indicates if this is a valid DNS record."
+                }
+              }
+            },
+            "subdomain_spf": {
+              "type": "object",
+              "description": "The SPF record for the subdomain used to create this authenticated domain.",
+              "required": ["host", "type", "data", "valid"],
+              "properties": {
+                "host": {
+                  "type": "string",
+                  "description": "The domain that this SPF record will be used to authenticate."
+                },
+                "type": {
+                  "type": "string",
+                  "description": "The type of data in the SPF record."
+                },
+                "data": {
+                  "type": "string",
+                  "description": "The SPF record."
+                },
+                "valid": {
+                  "type": "boolean",
+                  "description": "Indicates if this is a valid SPF record."
+                }
+              }
+            },
+            "domain_spf": {
+              "type": "object",
+              "description": "The SPF record for the root domain.",
+              "required": ["host", "type", "data", "valid"],
+              "properties": {
+                "host": {
+                  "type": "string",
+                  "description": "The root domain that this SPF record will be used to authenticate."
+                },
+                "type": {
+                  "type": "string",
+                  "description": "The type of data in the SPF record."
+                },
+                "data": {
+                  "type": "string",
+                  "description": "The SPF record."
+                },
+                "valid": {
+                  "type": "boolean",
+                  "description": "Indicates if the SPF record is valid."
+                }
+              }
+            },
+            "dkim": {
+              "type": "object",
+              "description": "The DKIM record for messages sent using this authenticated domain.",
+              "required": ["host", "type", "data", "valid"],
+              "properties": {
+                "host": {
+                  "type": "string",
+                  "description": "The DNS labels for the DKIM signature."
+                },
+                "type": {
+                  "type": "string",
+                  "description": "The type of data in the DKIM record."
+                },
+                "data": {
+                  "type": "string",
+                  "description": "The DKIM record."
+                },
+                "valid": {
+                  "type": "boolean",
+                  "description": "Indicates if the DKIM record is valid."
+                }
+              }
+            }
+          }
+        }
+      },
+      "required": [
+        "id",
+        "domain",
+        "username",
+        "user_id",
+        "ips",
+        "custom_spf",
+        "default",
+        "legacy",
+        "automatic_security",
+        "valid",
+        "dns"
+      ]
+    }
   },
   "externalDocs": {
     "description": "Find out more about Swagger",

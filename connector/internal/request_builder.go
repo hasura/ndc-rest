@@ -44,7 +44,6 @@ func (c *RequestBuilder) Build() (*RetryableRequest, error) {
 	}
 
 	rawRequest := c.Operation.Request
-	contentType := rest.ContentTypeJSON
 
 	request := &RetryableRequest{
 		URL:        *endpoint,
@@ -53,69 +52,9 @@ func (c *RequestBuilder) Build() (*RetryableRequest, error) {
 		Runtime:    c.Runtime,
 	}
 
-	if rawRequest.RequestBody != nil {
-		contentType = rawRequest.RequestBody.ContentType
-		bodyInfo, infoOk := c.Operation.Arguments[rest.BodyKey]
-		bodyData, ok := c.Arguments[rest.BodyKey]
-		if ok && bodyData != nil {
-			var err error
-			binaryBody := c.getRequestUploadBody(c.Operation.Request, &bodyInfo)
-			if binaryBody != nil {
-				b64, err := utils.DecodeString(bodyData)
-				if err != nil {
-					return nil, err
-				}
-				dataURI, err := DecodeDataURI(b64)
-				if err != nil {
-					return nil, err
-				}
-				r := bytes.NewReader([]byte(dataURI.Data))
-				request.ContentLength = r.Size()
-				request.Body = r
-			} else if strings.HasPrefix(contentType, "text/") {
-				r := bytes.NewReader([]byte(fmt.Sprint(bodyData)))
-				request.ContentLength = r.Size()
-				request.Body = r
-			} else if strings.HasPrefix(contentType, "multipart/") {
-				var r *bytes.Reader
-				r, contentType, err = c.createMultipartForm(bodyData)
-				if err != nil {
-					return nil, err
-				}
-				request.ContentLength = r.Size()
-				request.Body = r
-			} else {
-				switch contentType {
-				case rest.ContentTypeFormURLEncoded:
-					r, err := c.createFormURLEncoded(&bodyInfo, bodyData)
-					if err != nil {
-						return nil, err
-					}
-					request.Body = r
-				case rest.ContentTypeJSON, "":
-					bodyBytes, err := json.Marshal(bodyData)
-					if err != nil {
-						return nil, err
-					}
-
-					request.ContentLength = int64(len(bodyBytes))
-					request.Body = bytes.NewReader(bodyBytes)
-				default:
-					return nil, fmt.Errorf("unsupported content type %s", contentType)
-				}
-			}
-		} else if infoOk {
-			ty, err := bodyInfo.Type.Type()
-			if err != nil {
-				return nil, err
-			}
-			if ty != schema.TypeNullable {
-				return nil, errRequestBodyRequired
-			}
-		}
+	if err := c.buildRequestBody(request, rawRequest); err != nil {
+		return nil, err
 	}
-
-	request.ContentType = contentType
 
 	if rawRequest.RuntimeSettings != nil {
 		if rawRequest.RuntimeSettings.Timeout > 0 {
@@ -136,6 +75,88 @@ func (c *RequestBuilder) Build() (*RetryableRequest, error) {
 	}
 
 	return request, nil
+}
+
+func (c *RequestBuilder) buildRequestBody(request *RetryableRequest, rawRequest *rest.Request) error {
+	if rawRequest.RequestBody == nil {
+		request.ContentType = rest.ContentTypeJSON
+
+		return nil
+	}
+
+	contentType := rawRequest.RequestBody.ContentType
+	request.ContentType = contentType
+	bodyInfo, infoOk := c.Operation.Arguments[rest.BodyKey]
+	bodyData, ok := c.Arguments[rest.BodyKey]
+
+	if ok && bodyData != nil {
+		binaryBody := c.getRequestUploadBody(c.Operation.Request, &bodyInfo)
+
+		switch {
+		case binaryBody != nil:
+			b64, err := utils.DecodeString(bodyData)
+			if err != nil {
+				return err
+			}
+			dataURI, err := DecodeDataURI(b64)
+			if err != nil {
+				return err
+			}
+			r := bytes.NewReader([]byte(dataURI.Data))
+			request.ContentLength = r.Size()
+			request.Body = r
+
+			return nil
+		case strings.HasPrefix(contentType, "text/"):
+			r := bytes.NewReader([]byte(fmt.Sprint(bodyData)))
+			request.ContentLength = r.Size()
+			request.Body = r
+
+			return nil
+		case strings.HasPrefix(contentType, "multipart/"):
+			r, contentType, err := c.createMultipartForm(bodyData)
+			if err != nil {
+				return err
+			}
+
+			request.ContentType = contentType
+			request.ContentLength = r.Size()
+			request.Body = r
+
+			return nil
+		case contentType == rest.ContentTypeFormURLEncoded:
+			r, err := c.createFormURLEncoded(&bodyInfo, bodyData)
+			if err != nil {
+				return err
+			}
+			request.Body = r
+
+			return nil
+		case contentType == rest.ContentTypeJSON || contentType == "":
+
+			bodyBytes, err := json.Marshal(bodyData)
+			if err != nil {
+				return err
+			}
+
+			request.ContentLength = int64(len(bodyBytes))
+			request.Body = bytes.NewReader(bodyBytes)
+
+			return nil
+		default:
+			return fmt.Errorf("unsupported content type %s", contentType)
+		}
+	} else if infoOk {
+		ty, err := bodyInfo.Type.Type()
+		if err != nil {
+			return err
+		}
+		if ty != schema.TypeNullable {
+			return errRequestBodyRequired
+		}
+	}
+
+	return nil
 }
 
 func (c *RequestBuilder) createFormURLEncoded(bodyInfo *rest.ArgumentInfo, bodyData any) (io.ReadSeeker, error) {
@@ -298,6 +319,7 @@ func (c *RequestBuilder) evalMultipartFieldValueRecursive(w *MultipartWriter, na
 		if !notNull {
 			return nil
 		}
+
 		return c.evalMultipartFieldValueRecursive(w, name, underlyingValue, &rest.ObjectField{
 			ObjectField: schema.ObjectField{
 				Type: argType.UnderlyingType,
@@ -316,10 +338,12 @@ func (c *RequestBuilder) evalMultipartFieldValueRecursive(w *MultipartWriter, na
 				return err
 			}
 		}
+
 		if iScalar, ok := c.Schema.ScalarTypes[argType.Name]; ok {
 			switch iScalar.Representation.Interface().(type) {
 			case *schema.TypeRepresentationBytes:
 				return w.WriteDataURI(name, value.Interface(), headers)
+			default:
 			}
 		}
 

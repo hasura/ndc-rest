@@ -9,7 +9,7 @@ import (
 
 // UpdateCommandArguments represent input arguments of the `update` command
 type UpdateCommandArguments struct {
-	Dir string `help:"The directory where the config.yaml file is present" short:"d" env:"HASURA_PLUGIN_CONNECTOR_CONTEXT_PATH" default:"."`
+	Dir string `default:"." env:"HASURA_PLUGIN_CONNECTOR_CONTEXT_PATH" help:"The directory where the config.yaml file is present" short:"d"`
 }
 
 // UpdateConfiguration updates the configuration for the HTTP connector

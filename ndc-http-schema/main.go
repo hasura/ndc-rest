@@ -38,7 +38,7 @@ func main() {
 	case "json2yaml":
 		err = command.Json2Yaml(&cli.Json2Yaml, logger)
 	case "version":
-		_, _ = fmt.Print(version.BuildVersion)
+		_, _ = fmt.Fprint(os.Stdout, version.BuildVersion)
 	default:
 		logger.Error(fmt.Sprintf("unknown command <%s>", cmd.Command()))
 		os.Exit(1)

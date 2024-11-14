@@ -12,8 +12,8 @@ import (
 
 // NDCHttpSettings represent global settings of the HTTP API, including base URL, headers, etc...
 type NDCHttpSettings struct {
-	Servers         []ServerConfig             `json:"servers"           mapstructure:"servers" yaml:"servers"`
-	Headers         map[string]utils.EnvString `json:"headers,omitempty" mapstructure:"headers" yaml:"headers,omitempty"`
+	Servers         []ServerConfig             `json:"servers"                   mapstructure:"servers"         yaml:"servers"`
+	Headers         map[string]utils.EnvString `json:"headers,omitempty"         mapstructure:"headers"         yaml:"headers,omitempty"`
 	SecuritySchemes map[string]SecurityScheme  `json:"securitySchemes,omitempty" mapstructure:"securitySchemes" yaml:"securitySchemes,omitempty"`
 	Security        AuthSecurities             `json:"security,omitempty"        mapstructure:"security"        yaml:"security,omitempty"`
 	Version         string                     `json:"version,omitempty"         mapstructure:"version"         yaml:"version,omitempty"`
@@ -71,9 +71,9 @@ func (rs NDCHttpSettings) GetHeaders() map[string]string {
 
 // ServerConfig contains server configurations
 type ServerConfig struct {
-	URL             utils.EnvString            `json:"url"               mapstructure:"url"     yaml:"url"`
-	ID              string                     `json:"id,omitempty"      mapstructure:"id"      yaml:"id,omitempty"`
-	Headers         map[string]utils.EnvString `json:"headers,omitempty" mapstructure:"headers" yaml:"headers,omitempty"`
+	URL             utils.EnvString            `json:"url"                       mapstructure:"url"             yaml:"url"`
+	ID              string                     `json:"id,omitempty"              mapstructure:"id"              yaml:"id,omitempty"`
+	Headers         map[string]utils.EnvString `json:"headers,omitempty"         mapstructure:"headers"         yaml:"headers,omitempty"`
 	SecuritySchemes map[string]SecurityScheme  `json:"securitySchemes,omitempty" mapstructure:"securitySchemes" yaml:"securitySchemes,omitempty"`
 	Security        AuthSecurities             `json:"security,omitempty"        mapstructure:"security"        yaml:"security,omitempty"`
 	TLS             *TLSConfig                 `json:"tls,omitempty"             mapstructure:"tls"             yaml:"tls,omitempty"`

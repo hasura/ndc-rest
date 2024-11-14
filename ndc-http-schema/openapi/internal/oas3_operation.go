@@ -14,25 +14,28 @@ import (
 )
 
 type oas3OperationBuilder struct {
-	builder   *OAS3Builder
-	pathKey   string
-	method    string
 	Arguments map[string]rest.ArgumentInfo
+
+	builder      *OAS3Builder
+	pathKey      string
+	method       string
+	commonParams []*v3.Parameter
 }
 
-func newOAS3OperationBuilder(builder *OAS3Builder, pathKey string, method string) *oas3OperationBuilder {
+func newOAS3OperationBuilder(builder *OAS3Builder, pathKey string, method string, commonParams []*v3.Parameter) *oas3OperationBuilder {
 	return &oas3OperationBuilder{
-		builder:   builder,
-		pathKey:   pathKey,
-		method:    method,
-		Arguments: make(map[string]rest.ArgumentInfo),
+		builder:      builder,
+		pathKey:      pathKey,
+		method:       method,
+		commonParams: commonParams,
+		Arguments:    make(map[string]rest.ArgumentInfo),
 	}
 }
 
 // BuildFunction build a HTTP NDC function information from OpenAPI v3 operation
 func (oc *oas3OperationBuilder) BuildFunction(itemGet *v3.Operation) (*rest.OperationInfo, string, error) {
 	start := time.Now()
-	funcName := itemGet.OperationId
+	funcName := formatOperationName(itemGet.OperationId)
 	if funcName == "" {
 		funcName = buildPathMethodName(oc.pathKey, "get", oc.builder.ConvertOptions)
 	}
@@ -84,7 +87,7 @@ func (oc *oas3OperationBuilder) BuildProcedure(operation *v3.Operation) (*rest.O
 		return nil, "", nil
 	}
 	start := time.Now()
-	procName := operation.OperationId
+	procName := formatOperationName(operation.OperationId)
 	if procName == "" {
 		procName = buildPathMethodName(oc.pathKey, oc.method, oc.builder.ConvertOptions)
 	}
@@ -157,11 +160,11 @@ func (oc *oas3OperationBuilder) BuildProcedure(operation *v3.Operation) (*rest.O
 }
 
 func (oc *oas3OperationBuilder) convertParameters(params []*v3.Parameter, apiPath string, fieldPaths []string) error {
-	if len(params) == 0 {
+	if len(params) == 0 && len(oc.commonParams) == 0 {
 		return nil
 	}
 
-	for _, param := range params {
+	for _, param := range append(params, oc.commonParams...) {
 		if param == nil {
 			continue
 		}
@@ -173,9 +176,8 @@ func (oc *oas3OperationBuilder) convertParameters(params []*v3.Parameter, apiPat
 		if param.Required != nil && *param.Required {
 			paramRequired = true
 		}
-		paramPaths := append(fieldPaths, paramName)
-		schemaType, apiSchema, _, err := newOAS3SchemaBuilder(oc.builder, apiPath, rest.ParameterLocation(param.In), true).
-			getSchemaTypeFromProxy(param.Schema, !paramRequired, paramPaths)
+		schemaType, apiSchema, err := newOAS3SchemaBuilder(oc.builder, apiPath, rest.ParameterLocation(param.In), true).
+			getSchemaTypeFromProxy(param.Schema, !paramRequired, append(fieldPaths, paramName))
 		if err != nil {
 			return err
 		}
@@ -197,7 +199,6 @@ func (oc *oas3OperationBuilder) convertParameters(params []*v3.Parameter, apiPat
 			encoding.Style = style
 		}
 
-		oc.builder.typeUsageCounter.Add(getNamedType(schemaType, true, ""), 1)
 		argument := rest.ArgumentInfo{
 			ArgumentInfo: schema.ArgumentInfo{
 				Type: schemaType.Encode(),
@@ -240,7 +241,7 @@ func (oc *oas3OperationBuilder) convertRequestBody(reqBody *v3.RequestBody, apiP
 	if contentType == rest.ContentTypeFormURLEncoded {
 		location = rest.InQuery
 	}
-	schemaType, typeSchema, _, err := newOAS3SchemaBuilder(oc.builder, apiPath, location, true).
+	schemaType, typeSchema, err := newOAS3SchemaBuilder(oc.builder, apiPath, location, true).
 		getSchemaTypeFromProxy(content.Schema, !bodyRequired, fieldPaths)
 	if err != nil {
 		return nil, nil, err
@@ -250,85 +251,86 @@ func (oc *oas3OperationBuilder) convertRequestBody(reqBody *v3.RequestBody, apiP
 		return nil, nil, nil
 	}
 
-	oc.builder.typeUsageCounter.Add(getNamedType(schemaType, true, ""), 1)
 	bodyResult := &rest.RequestBody{
 		ContentType: contentType,
 	}
 
-	if content.Encoding != nil && content.Encoding.Len() > 0 {
-		bodyResult.Encoding = make(map[string]rest.EncodingObject)
-		for iter := content.Encoding.First(); iter != nil; iter = iter.Next() {
-			encodingValue := iter.Value()
-			if encodingValue == nil {
-				continue
-			}
+	if content.Encoding == nil || content.Encoding.Len() == 0 {
+		return bodyResult, schemaType, nil
+	}
 
-			item := rest.EncodingObject{
-				ContentType:   utils.SplitStringsAndTrimSpaces(encodingValue.ContentType, ","),
-				AllowReserved: encodingValue.AllowReserved,
-				Explode:       encodingValue.Explode,
-			}
+	bodyResult.Encoding = make(map[string]rest.EncodingObject)
+	for iter := content.Encoding.First(); iter != nil; iter = iter.Next() {
+		encodingValue := iter.Value()
+		if encodingValue == nil {
+			continue
+		}
 
-			if encodingValue.Style != "" {
-				style, err := rest.ParseParameterEncodingStyle(encodingValue.Style)
+		item := rest.EncodingObject{
+			ContentType:   utils.SplitStringsAndTrimSpaces(encodingValue.ContentType, ","),
+			AllowReserved: encodingValue.AllowReserved,
+			Explode:       encodingValue.Explode,
+		}
+
+		if encodingValue.Style != "" {
+			style, err := rest.ParseParameterEncodingStyle(encodingValue.Style)
+			if err != nil {
+				return nil, nil, err
+			}
+			item.Style = style
+		}
+
+		if encodingValue.Headers != nil && encodingValue.Headers.Len() > 0 {
+			item.Headers = make(map[string]rest.RequestParameter)
+			for encodingHeader := encodingValue.Headers.First(); encodingHeader != nil; encodingHeader = encodingHeader.Next() {
+				key := strings.TrimSpace(encodingHeader.Key())
+				header := encodingHeader.Value()
+				if key == "" || header == nil {
+					continue
+				}
+
+				ndcType, typeSchema, err := newOAS3SchemaBuilder(oc.builder, apiPath, rest.InHeader, true).
+					getSchemaTypeFromProxy(header.Schema, header.AllowEmptyValue, append(fieldPaths, key))
 				if err != nil {
 					return nil, nil, err
 				}
-				item.Style = style
-			}
 
-			if encodingValue.Headers != nil && encodingValue.Headers.Len() > 0 {
-				item.Headers = make(map[string]rest.RequestParameter)
-				for encodingHeader := encodingValue.Headers.First(); encodingHeader != nil; encodingHeader = encodingHeader.Next() {
-					key := strings.TrimSpace(encodingHeader.Key())
-					header := encodingHeader.Value()
-					if key == "" || header == nil {
-						continue
-					}
+				headerEncoding := rest.EncodingObject{
+					AllowReserved: header.AllowReserved,
+					Explode:       &header.Explode,
+				}
 
-					ndcType, typeSchema, _, err := newOAS3SchemaBuilder(oc.builder, apiPath, rest.InHeader, true).
-						getSchemaTypeFromProxy(header.Schema, header.AllowEmptyValue, append(fieldPaths, key))
+				if header.Style != "" {
+					style, err := rest.ParseParameterEncodingStyle(header.Style)
 					if err != nil {
 						return nil, nil, err
 					}
+					headerEncoding.Style = style
+				}
 
-					headerEncoding := rest.EncodingObject{
-						AllowReserved: header.AllowReserved,
-						Explode:       &header.Explode,
-					}
+				argumentName := encodeHeaderArgumentName(key)
+				headerParam := rest.RequestParameter{
+					ArgumentName:   argumentName,
+					Schema:         typeSchema,
+					EncodingObject: headerEncoding,
+				}
 
-					if header.Style != "" {
-						style, err := rest.ParseParameterEncodingStyle(header.Style)
-						if err != nil {
-							return nil, nil, err
-						}
-						headerEncoding.Style = style
-					}
-
-					argumentName := encodeHeaderArgumentName(key)
-					headerParam := rest.RequestParameter{
-						ArgumentName:   argumentName,
-						Schema:         typeSchema,
-						EncodingObject: headerEncoding,
-					}
-
-					oc.builder.typeUsageCounter.Add(getNamedType(ndcType, true, ""), 1)
-					argument := schema.ArgumentInfo{
-						Type: ndcType.Encode(),
-					}
-					if header.Description != "" {
-						argument.Description = &header.Description
-					}
-					item.Headers[key] = headerParam
-					oc.Arguments[argumentName] = rest.ArgumentInfo{
-						ArgumentInfo: argument,
-						HTTP:         &headerParam,
-					}
+				argument := schema.ArgumentInfo{
+					Type: ndcType.Encode(),
+				}
+				if header.Description != "" {
+					argument.Description = &header.Description
+				}
+				item.Headers[key] = headerParam
+				oc.Arguments[argumentName] = rest.ArgumentInfo{
+					ArgumentInfo: argument,
+					HTTP:         &headerParam,
 				}
 			}
-			bodyResult.Encoding[iter.Key()] = item
 		}
+		bodyResult.Encoding[iter.Key()] = item
 	}
+
 	return bodyResult, schemaType, nil
 }
 
@@ -360,7 +362,10 @@ func (oc *oas3OperationBuilder) convertResponse(responses *v3.Responses, apiPath
 	// return nullable boolean type if the response content is null
 	if resp == nil || resp.Content == nil {
 		scalarName := string(rest.ScalarBoolean)
-		oc.builder.typeUsageCounter.Add(scalarName, 1)
+		if _, ok := oc.builder.schema.ScalarTypes[scalarName]; !ok {
+			oc.builder.schema.ScalarTypes[scalarName] = *defaultScalarTypes[rest.ScalarBoolean]
+		}
+
 		return schema.NewNullableNamedType(scalarName), &rest.Response{
 			ContentType: rest.ContentTypeJSON,
 		}, nil
@@ -389,12 +394,11 @@ func (oc *oas3OperationBuilder) convertResponse(responses *v3.Responses, apiPath
 		return nil, nil, nil
 	}
 
-	schemaType, _, _, err := newOAS3SchemaBuilder(oc.builder, apiPath, rest.InBody, false).
+	schemaType, _, err := newOAS3SchemaBuilder(oc.builder, apiPath, rest.InBody, false).
 		getSchemaTypeFromProxy(bodyContent.Schema, false, fieldPaths)
 	if err != nil {
 		return nil, nil, err
 	}
-	oc.builder.typeUsageCounter.Add(getNamedType(schemaType, true, ""), 1)
 
 	schemaResponse := &rest.Response{
 		ContentType: contentType,
