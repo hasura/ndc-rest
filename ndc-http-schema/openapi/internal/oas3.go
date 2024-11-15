@@ -142,55 +142,54 @@ func (oc *OAS3Builder) convertSecuritySchemes(scheme orderedmap.Pair[string, *v3
 	if err != nil {
 		return err
 	}
-	result := rest.SecurityScheme{
-		Type: securityType,
-	}
+	result := rest.SecurityScheme{}
 	switch securityType {
 	case rest.APIKeyScheme:
 		inLocation, err := rest.ParseAPIKeyLocation(security.In)
 		if err != nil {
 			return err
 		}
-		apiConfig := rest.APIKeyAuthConfig{
-			In:   inLocation,
-			Name: security.Name,
-		}
-		valueEnv := sdkUtils.NewEnvStringVariable(utils.StringSliceToConstantCase([]string{oc.EnvPrefix, key}))
-		result.Value = &valueEnv
-		result.APIKeyAuthConfig = &apiConfig
-	case rest.HTTPAuthScheme:
-		httpConfig := rest.HTTPAuthConfig{
-			Scheme: security.Scheme,
-			Header: "Authorization",
-		}
 
-		valueEnv := sdkUtils.NewEnvStringVariable(utils.StringSliceToConstantCase([]string{oc.EnvPrefix, key, "TOKEN"}))
-		result.Value = &valueEnv
-		result.HTTPAuthConfig = &httpConfig
+		if inLocation == rest.APIKeyInCookie {
+			result.SecuritySchemer = rest.NewCookieAuthConfig()
+		} else {
+			valueEnv := sdkUtils.NewEnvStringVariable(utils.StringSliceToConstantCase([]string{oc.EnvPrefix, key}))
+			result.SecuritySchemer = rest.NewAPIKeyAuthConfig(security.Name, inLocation, valueEnv)
+		}
+	case rest.HTTPAuthScheme:
+		switch security.Scheme {
+		case string(rest.BasicAuthScheme):
+			user := sdkUtils.NewEnvStringVariable(utils.StringSliceToConstantCase([]string{oc.EnvPrefix, key, "USER"}))
+			password := sdkUtils.NewEnvStringVariable(utils.StringSliceToConstantCase([]string{oc.EnvPrefix, key, "PASSWORD"}))
+			result.SecuritySchemer = rest.NewBasicAuthConfig(user, password)
+		default:
+			valueEnv := sdkUtils.NewEnvStringVariable(utils.StringSliceToConstantCase([]string{oc.EnvPrefix, key, "TOKEN"}))
+			result.SecuritySchemer = rest.NewHTTPAuthConfig(security.Scheme, rest.AuthorizationHeader, valueEnv)
+		}
 	case rest.OAuth2Scheme:
 		if security.Flows == nil {
 			return fmt.Errorf("flows of security scheme %s is required", key)
 		}
-		oauthConfig := rest.OAuth2Config{
-			Flows: make(map[rest.OAuthFlowType]rest.OAuthFlow),
-		}
+
+		flows := make(map[rest.OAuthFlowType]rest.OAuthFlow)
 		if security.Flows.Implicit != nil {
-			oauthConfig.Flows[rest.ImplicitFlow] = *convertV3OAuthFLow(security.Flows.Implicit)
+			flows[rest.ImplicitFlow] = *convertV3OAuthFLow(security.Flows.Implicit)
 		}
 		if security.Flows.AuthorizationCode != nil {
-			oauthConfig.Flows[rest.AuthorizationCodeFlow] = *convertV3OAuthFLow(security.Flows.AuthorizationCode)
+			flows[rest.AuthorizationCodeFlow] = *convertV3OAuthFLow(security.Flows.AuthorizationCode)
 		}
 		if security.Flows.ClientCredentials != nil {
-			oauthConfig.Flows[rest.ClientCredentialsFlow] = *convertV3OAuthFLow(security.Flows.ClientCredentials)
+			flows[rest.ClientCredentialsFlow] = *convertV3OAuthFLow(security.Flows.ClientCredentials)
 		}
 		if security.Flows.Password != nil {
-			oauthConfig.Flows[rest.PasswordFlow] = *convertV3OAuthFLow(security.Flows.Password)
+			flows[rest.PasswordFlow] = *convertV3OAuthFLow(security.Flows.Password)
 		}
-		result.OAuth2Config = &oauthConfig
+
+		result.SecuritySchemer = rest.NewOAuth2Config(flows)
 	case rest.OpenIDConnectScheme:
-		result.OpenIDConfig = &rest.OpenIDConfig{
-			OpenIDConnectURL: security.OpenIdConnectUrl,
-		}
+		result.SecuritySchemer = rest.NewOpenIDConnectConfig(security.OpenIdConnectUrl)
+	case rest.MutualTLSScheme:
+		result.SecuritySchemer = rest.NewMutualTLSAuthConfig()
 	default:
 		return fmt.Errorf("invalid security scheme: %s", security.Type)
 	}

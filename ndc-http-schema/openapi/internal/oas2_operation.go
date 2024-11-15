@@ -2,7 +2,6 @@ package internal
 
 import (
 	"fmt"
-	"log"
 	"log/slog"
 	"slices"
 	"strconv"
@@ -230,7 +229,6 @@ func (oc *oas2OperationBuilder) convertParameters(operation *v2.Operation, apiPa
 			return nil, err
 		}
 
-		log.Println("type != ''", apiPath, fieldPaths, typeEncoder)
 		schemaType := typeEncoder.Encode()
 		argument := rest.ArgumentInfo{
 			ArgumentInfo: schema.ArgumentInfo{

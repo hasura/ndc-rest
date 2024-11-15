@@ -537,7 +537,7 @@
               ]
             },
             "value": {
-              "type": "string"
+              "$ref": "#/$defs/EnvString"
             },
             "in": {
               "type": "string",
@@ -564,11 +564,33 @@
             "type": {
               "type": "string",
               "enum": [
+                "basic"
+              ]
+            },
+            "user": {
+              "$ref": "#/$defs/EnvString"
+            },
+            "password": {
+              "$ref": "#/$defs/EnvString"
+            }
+          },
+          "type": "object",
+          "required": [
+            "type",
+            "user",
+            "password"
+          ]
+        },
+        {
+          "properties": {
+            "type": {
+              "type": "string",
+              "enum": [
                 "http"
               ]
             },
             "value": {
-              "type": "string"
+              "$ref": "#/$defs/EnvString"
             },
             "header": {
               "type": "string"
@@ -620,6 +642,34 @@
           "required": [
             "type",
             "openIdConnectUrl"
+          ]
+        },
+        {
+          "properties": {
+            "type": {
+              "type": "string",
+              "enum": [
+                "cookie"
+              ]
+            }
+          },
+          "type": "object",
+          "required": [
+            "type"
+          ]
+        },
+        {
+          "properties": {
+            "type": {
+              "type": "string",
+              "enum": [
+                "mutualTLS"
+              ]
+            }
+          },
+          "type": "object",
+          "required": [
+            "type"
           ]
         }
       ]

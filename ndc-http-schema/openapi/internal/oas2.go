@@ -101,30 +101,20 @@ func (oc *OAS2Builder) convertSecuritySchemes(scheme orderedmap.Pair[string, *v2
 	if security == nil {
 		return nil
 	}
+
 	result := rest.SecurityScheme{}
 	switch security.Type {
-	case "apiKey":
-		result.Type = rest.APIKeyScheme
+	case string(rest.APIKeyScheme):
 		inLocation, err := rest.ParseAPIKeyLocation(security.In)
 		if err != nil {
 			return err
 		}
-		apiConfig := rest.APIKeyAuthConfig{
-			In:   inLocation,
-			Name: security.Name,
-		}
 		valueEnv := sdkUtils.NewEnvStringVariable(utils.StringSliceToConstantCase([]string{oc.EnvPrefix, key}))
-		result.Value = &valueEnv
-		result.APIKeyAuthConfig = &apiConfig
-	case "basic":
-		result.Type = rest.HTTPAuthScheme
-		httpConfig := rest.HTTPAuthConfig{
-			Scheme: "Basic",
-			Header: "Authorization",
-		}
-		valueEnv := sdkUtils.NewEnvStringVariable(utils.StringSliceToConstantCase([]string{oc.EnvPrefix, key, "TOKEN"}))
-		result.Value = &valueEnv
-		result.HTTPAuthConfig = &httpConfig
+		result.SecuritySchemer = rest.NewAPIKeyAuthConfig(security.Name, inLocation, valueEnv)
+	case string(rest.BasicAuthScheme):
+		user := sdkUtils.NewEnvStringVariable(utils.StringSliceToConstantCase([]string{oc.EnvPrefix, key, "USER"}))
+		password := sdkUtils.NewEnvStringVariable(utils.StringSliceToConstantCase([]string{oc.EnvPrefix, key, "PASSWORD"}))
+		result.SecuritySchemer = rest.NewBasicAuthConfig(user, password)
 	case "oauth2":
 		var flowType rest.OAuthFlowType
 		switch security.Flow {
@@ -149,12 +139,10 @@ func (oc *OAS2Builder) convertSecuritySchemes(scheme orderedmap.Pair[string, *v2
 			}
 			flow.Scopes = scopes
 		}
-		result.Type = rest.OAuth2Scheme
-		result.OAuth2Config = &rest.OAuth2Config{
-			Flows: map[rest.OAuthFlowType]rest.OAuthFlow{
-				flowType: flow,
-			},
-		}
+
+		result.SecuritySchemer = rest.NewOAuth2Config(map[rest.OAuthFlowType]rest.OAuthFlow{
+			flowType: flow,
+		})
 	default:
 		return fmt.Errorf("invalid security scheme: %s", security.Type)
 	}

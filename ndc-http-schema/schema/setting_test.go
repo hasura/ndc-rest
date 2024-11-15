@@ -11,6 +11,7 @@ import (
 )
 
 func TestNDCHttpSettings(t *testing.T) {
+	t.Setenv("PET_STORE_API_KEY", "api_key")
 	testCases := []struct {
 		name     string
 		input    string
@@ -40,6 +41,12 @@ func TestNDCHttpSettings(t *testing.T) {
 						},
 						"in": "header",
 						"name": "api_key"
+					},
+					"cookie": {
+						"type": "cookie"
+					},
+					"mutualTLS": {
+						"type": "mutualTLS"
 					},
 					"petstore_auth": {
 						"type": "oauth2",
@@ -73,16 +80,23 @@ func TestNDCHttpSettings(t *testing.T) {
 				},
 				SecuritySchemes: map[string]SecurityScheme{
 					"api_key": {
-						Type:  APIKeyScheme,
-						Value: utils.ToPtr(utils.NewEnvStringVariable("PET_STORE_API_KEY")),
-						APIKeyAuthConfig: &APIKeyAuthConfig{
-							In:   APIKeyInHeader,
-							Name: "api_key",
+						SecuritySchemer: &APIKeyAuthConfig{
+							Type:  APIKeyScheme,
+							In:    APIKeyInHeader,
+							Name:  "api_key",
+							Value: utils.NewEnvStringVariable("PET_STORE_API_KEY"),
+							value: utils.ToPtr("api_key"),
 						},
 					},
+					"cookie": {
+						SecuritySchemer: NewCookieAuthConfig(),
+					},
+					"mutualTLS": {
+						SecuritySchemer: NewMutualTLSAuthConfig(),
+					},
 					"petstore_auth": {
-						Type: OAuth2Scheme,
-						OAuth2Config: &OAuth2Config{
+						SecuritySchemer: &OAuth2Config{
+							Type: OAuth2Scheme,
 							Flows: map[OAuthFlowType]OAuthFlow{
 								ImplicitFlow: {
 									AuthorizationURL: "https://petstore3.swagger.io/oauth/authorize",

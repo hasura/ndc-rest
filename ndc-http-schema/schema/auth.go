@@ -11,11 +11,22 @@ import (
 	orderedmap "github.com/wk8/go-ordered-map/v2"
 )
 
+const (
+	HTTPAuthSchemeBearer = "bearer"
+	AuthorizationHeader  = "Authorization"
+)
+
+var (
+	errSecuritySchemerRequired = errors.New("SecuritySchemer is required")
+)
+
 // SecuritySchemeType represents the authentication scheme enum
 type SecuritySchemeType string
 
 const (
 	APIKeyScheme        SecuritySchemeType = "apiKey"
+	BasicAuthScheme     SecuritySchemeType = "basic"
+	CookieAuthScheme    SecuritySchemeType = "cookie"
 	HTTPAuthScheme      SecuritySchemeType = "http"
 	OAuth2Scheme        SecuritySchemeType = "oauth2"
 	OpenIDConnectScheme SecuritySchemeType = "openIdConnect"
@@ -25,6 +36,8 @@ const (
 var securityScheme_enums = []SecuritySchemeType{
 	APIKeyScheme,
 	HTTPAuthScheme,
+	BasicAuthScheme,
+	CookieAuthScheme,
 	OAuth2Scheme,
 	OpenIDConnectScheme,
 	MutualTLSScheme,
@@ -107,31 +120,31 @@ func ParseAPIKeyLocation(value string) (APIKeyLocation, error) {
 	return result, nil
 }
 
+// SecuritySchemer abstracts an interface of SecurityScheme.
+type SecuritySchemer interface {
+	GetType() SecuritySchemeType
+	Validate() error
+}
+
 // SecurityScheme contains authentication configurations.
 // The schema follows [OpenAPI 3] specification
 //
 // [OpenAPI 3]: https://swagger.io/docs/specification/authentication
 type SecurityScheme struct {
-	Type              SecuritySchemeType `json:"type"            mapstructure:"type"  yaml:"type"`
-	Value             *utils.EnvString   `json:"value,omitempty" mapstructure:"value" yaml:"value,omitempty"`
-	*APIKeyAuthConfig `yaml:",inline"`
-	*HTTPAuthConfig   `yaml:",inline"`
-	*OAuth2Config     `yaml:",inline"`
-	*OpenIDConfig     `yaml:",inline"`
-
-	value *string
+	SecuritySchemer
 }
 
 // JSONSchema is used to generate a custom jsonschema
 func (j SecurityScheme) JSONSchema() *jsonschema.Schema {
+	envStringRef := &jsonschema.Schema{
+		Ref: "#/$defs/EnvString",
+	}
 	apiKeySchema := orderedmap.New[string, *jsonschema.Schema]()
 	apiKeySchema.Set("type", &jsonschema.Schema{
 		Type: "string",
 		Enum: []any{APIKeyScheme},
 	})
-	apiKeySchema.Set("value", &jsonschema.Schema{
-		Type: "string",
-	})
+	apiKeySchema.Set("value", envStringRef)
 	apiKeySchema.Set("in", (APIKeyLocation("")).JSONSchema())
 	apiKeySchema.Set("name", &jsonschema.Schema{
 		Type: "string",
@@ -142,15 +155,21 @@ func (j SecurityScheme) JSONSchema() *jsonschema.Schema {
 		Type: "string",
 		Enum: []any{HTTPAuthScheme},
 	})
-	httpAuthSchema.Set("value", &jsonschema.Schema{
-		Type: "string",
-	})
+	httpAuthSchema.Set("value", envStringRef)
 	httpAuthSchema.Set("header", &jsonschema.Schema{
 		Type: "string",
 	})
 	httpAuthSchema.Set("scheme", &jsonschema.Schema{
 		Type: "string",
 	})
+
+	basicAuthSchema := orderedmap.New[string, *jsonschema.Schema]()
+	basicAuthSchema.Set("type", &jsonschema.Schema{
+		Type: "string",
+		Enum: []any{BasicAuthScheme},
+	})
+	basicAuthSchema.Set("user", envStringRef)
+	basicAuthSchema.Set("password", envStringRef)
 
 	oauth2Schema := orderedmap.New[string, *jsonschema.Schema]()
 	oauth2Schema.Set("type", &jsonschema.Schema{
@@ -171,12 +190,29 @@ func (j SecurityScheme) JSONSchema() *jsonschema.Schema {
 		Type: "string",
 	})
 
+	cookieSchema := orderedmap.New[string, *jsonschema.Schema]()
+	cookieSchema.Set("type", &jsonschema.Schema{
+		Type: "string",
+		Enum: []any{CookieAuthScheme},
+	})
+
+	mutualTLSSchema := orderedmap.New[string, *jsonschema.Schema]()
+	mutualTLSSchema.Set("type", &jsonschema.Schema{
+		Type: "string",
+		Enum: []any{MutualTLSScheme},
+	})
+
 	return &jsonschema.Schema{
 		OneOf: []*jsonschema.Schema{
 			{
 				Type:       "object",
 				Required:   []string{"type", "value", "in", "name"},
 				Properties: apiKeySchema,
+			},
+			{
+				Type:       "object",
+				Properties: basicAuthSchema,
+				Required:   []string{"type", "user", "password"},
 			},
 			{
 				Type:       "object",
@@ -193,118 +229,296 @@ func (j SecurityScheme) JSONSchema() *jsonschema.Schema {
 				Properties: oidcSchema,
 				Required:   []string{"type", "openIdConnectUrl"},
 			},
+			{
+				Type:       "object",
+				Properties: cookieSchema,
+				Required:   []string{"type"},
+			},
+			{
+				Type:       "object",
+				Properties: mutualTLSSchema,
+				Required:   []string{"type"},
+			},
 		},
 	}
 }
 
+type rawSecurityScheme struct {
+	Type SecuritySchemeType `json:"type" yaml:"type"`
+}
+
 // UnmarshalJSON implements json.Unmarshaler.
 func (j *SecurityScheme) UnmarshalJSON(b []byte) error {
-	type Plain SecurityScheme
-
-	var raw Plain
-	if err := json.Unmarshal(b, &raw); err != nil {
+	var rawScheme rawSecurityScheme
+	if err := json.Unmarshal(b, &rawScheme); err != nil {
 		return err
 	}
 
-	result := SecurityScheme(raw)
-
-	if err := result.Validate(); err != nil {
-		return err
+	switch rawScheme.Type {
+	case APIKeyScheme:
+		var config APIKeyAuthConfig
+		if err := json.Unmarshal(b, &config); err != nil {
+			return err
+		}
+		_ = config.Validate()
+		j.SecuritySchemer = &config
+	case BasicAuthScheme:
+		var config BasicAuthConfig
+		if err := json.Unmarshal(b, &config); err != nil {
+			return err
+		}
+		_ = config.Validate()
+		j.SecuritySchemer = &config
+	case HTTPAuthScheme:
+		var config HTTPAuthConfig
+		if err := json.Unmarshal(b, &config); err != nil {
+			return err
+		}
+		_ = config.Validate()
+		j.SecuritySchemer = &config
+	case OAuth2Scheme:
+		var config OAuth2Config
+		if err := json.Unmarshal(b, &config); err != nil {
+			return err
+		}
+		_ = config.Validate()
+		j.SecuritySchemer = &config
+	case OpenIDConnectScheme:
+		var config OpenIDConnectConfig
+		if err := json.Unmarshal(b, &config); err != nil {
+			return err
+		}
+		_ = config.Validate()
+		j.SecuritySchemer = &config
+	case CookieAuthScheme:
+		j.SecuritySchemer = &CookieAuthConfig{
+			Type: rawScheme.Type,
+		}
+	case MutualTLSScheme:
+		j.SecuritySchemer = &MutualTLSAuthConfig{
+			Type: rawScheme.Type,
+		}
 	}
-	*j = result
+
 	return nil
+}
+
+// MarshalJSON implements json.Marshaler.
+func (j SecurityScheme) MarshalJSON() ([]byte, error) {
+	return json.Marshal(j.SecuritySchemer)
 }
 
 // Validate if the current instance is valid
 func (ss *SecurityScheme) Validate() error {
-	if _, err := ParseSecuritySchemeType(string(ss.Type)); err != nil {
-		return err
-	}
-	switch ss.Type {
-	case APIKeyScheme:
-		if ss.APIKeyAuthConfig == nil {
-			ss.APIKeyAuthConfig = &APIKeyAuthConfig{}
-		}
-		return ss.APIKeyAuthConfig.Validate()
-	case HTTPAuthScheme:
-		if ss.HTTPAuthConfig == nil {
-			ss.HTTPAuthConfig = &HTTPAuthConfig{}
-		}
-		return ss.HTTPAuthConfig.Validate()
-	case OAuth2Scheme:
-		if ss.OAuth2Config == nil {
-			ss.OAuth2Config = &OAuth2Config{}
-		}
-		return ss.OAuth2Config.Validate()
-	case OpenIDConnectScheme:
-		if ss.OpenIDConfig == nil {
-			ss.OpenIDConfig = &OpenIDConfig{}
-		}
-		return ss.OpenIDConfig.Validate()
+	if ss.SecuritySchemer == nil {
+		return errSecuritySchemerRequired
 	}
 
-	if ss.Value != nil {
-		value, err := ss.Value.Get()
-		if err != nil {
-			return fmt.Errorf("SecurityScheme.Value: %w", err)
-		}
-		if value != "" {
-			ss.value = &value
-		}
-	}
-
-	return nil
-}
-
-// GetValue get the authentication credential value
-func (ss SecurityScheme) GetValue() string {
-	if ss.value != nil {
-		return *ss.value
-	}
-
-	if ss.Value != nil {
-		value, _ := ss.Value.Get()
-		return value
-	}
-
-	return ""
+	return ss.SecuritySchemer.Validate()
 }
 
 // APIKeyAuthConfig contains configurations for [apiKey authentication]
 //
 // [apiKey authentication]: https://swagger.io/docs/specification/authentication/api-keys/
 type APIKeyAuthConfig struct {
-	In   APIKeyLocation `json:"in"   mapstructure:"in"   yaml:"in"`
-	Name string         `json:"name" mapstructure:"name" yaml:"name"`
+	Type  SecuritySchemeType `json:"type"  mapstructure:"type"  yaml:"type"`
+	In    APIKeyLocation     `json:"in"    mapstructure:"in"    yaml:"in"`
+	Name  string             `json:"name"  mapstructure:"name"  yaml:"name"`
+	Value utils.EnvString    `json:"value" mapstructure:"value" yaml:"value"`
+
+	// cached values
+	value *string
+}
+
+var _ SecuritySchemer = &APIKeyAuthConfig{}
+
+// NewAPIKeyAuthConfig creates a new APIKeyAuthConfig instance.
+func NewAPIKeyAuthConfig(name string, in APIKeyLocation, value utils.EnvString) *APIKeyAuthConfig {
+	return &APIKeyAuthConfig{
+		Type:  APIKeyScheme,
+		Name:  name,
+		In:    in,
+		Value: value,
+	}
+}
+
+// UnmarshalJSON implements json.Unmarshaler.
+func (j *APIKeyAuthConfig) UnmarshalJSON(b []byte) error {
+	type Plain APIKeyAuthConfig
+
+	var raw Plain
+	if err := json.Unmarshal(b, &raw); err != nil {
+		return err
+	}
+
+	result := APIKeyAuthConfig(raw)
+	_ = result.Validate()
+	*j = result
+
+	return nil
 }
 
 // Validate if the current instance is valid
-func (ss APIKeyAuthConfig) Validate() error {
+func (ss *APIKeyAuthConfig) Validate() error {
 	if ss.Name == "" {
 		return errors.New("name is required for apiKey security")
 	}
 	if _, err := ParseAPIKeyLocation(string(ss.In)); err != nil {
 		return err
 	}
+
+	value, err := ss.Value.Get()
+	if err != nil {
+		return fmt.Errorf("APIKeyAuthConfig.Value: %w", err)
+	}
+	if value != "" {
+		ss.value = &value
+	}
+
 	return nil
+}
+
+// GetValue get the authentication credential value
+func (ss APIKeyAuthConfig) GetType() SecuritySchemeType {
+	return ss.Type
+}
+
+// GetValue get the authentication credential value
+func (ss APIKeyAuthConfig) GetValue() string {
+	if ss.value != nil {
+		return *ss.value
+	}
+
+	value, _ := ss.Value.Get()
+
+	return value
 }
 
 // HTTPAuthConfig contains configurations for http authentication
-// If the scheme is [basic] or [bearer], the authenticator follows OpenAPI 3 specification.
+// If the scheme is [bearer], the authenticator follows OpenAPI 3 specification.
 //
-// [basic]: https://swagger.io/docs/specification/authentication/basic-authentication
 // [bearer]: https://swagger.io/docs/specification/authentication/bearer-authentication
 type HTTPAuthConfig struct {
-	Header string `json:"header" mapstructure:"header" yaml:"header"`
-	Scheme string `json:"scheme" mapstructure:"scheme" yaml:"scheme"`
+	Type   SecuritySchemeType `json:"type"  mapstructure:"type"  yaml:"type"`
+	Header string             `json:"header" mapstructure:"header" yaml:"header"`
+	Scheme string             `json:"scheme" mapstructure:"scheme" yaml:"scheme"`
+	Value  utils.EnvString    `json:"value"  mapstructure:"value"  yaml:"value"`
+
+	// cached values
+	value *string
+}
+
+var _ SecuritySchemer = &HTTPAuthConfig{}
+
+// NewHTTPAuthConfig creates a new HTTPAuthConfig instance.
+func NewHTTPAuthConfig(scheme string, header string, value utils.EnvString) *HTTPAuthConfig {
+	return &HTTPAuthConfig{
+		Type:   HTTPAuthScheme,
+		Header: header,
+		Scheme: scheme,
+		Value:  value,
+	}
 }
 
 // Validate if the current instance is valid
-func (ss HTTPAuthConfig) Validate() error {
+func (ss *HTTPAuthConfig) Validate() error {
 	if ss.Scheme == "" {
 		return errors.New("schema is required for http security")
 	}
+
+	value, err := ss.Value.Get()
+	if err != nil {
+		return fmt.Errorf("APIKeyAuthConfig.Value: %w", err)
+	}
+	if value != "" {
+		ss.value = &value
+	}
+
 	return nil
+}
+
+// GetValue get the authentication credential value
+func (ss HTTPAuthConfig) GetType() SecuritySchemeType {
+	return ss.Type
+}
+
+// GetValue get the authentication credential value
+func (ss HTTPAuthConfig) GetValue() string {
+	if ss.value != nil {
+		return *ss.value
+	}
+
+	value, _ := ss.Value.Get()
+
+	return value
+}
+
+// BasicAuthConfig contains configurations for the [basic] authentication.
+//
+// [basic]: https://swagger.io/docs/specification/authentication/basic-authentication
+type BasicAuthConfig struct {
+	Type     SecuritySchemeType `json:"type"  mapstructure:"type"  yaml:"type"`
+	User     utils.EnvString    `json:"user"     mapstructure:"user"     yaml:"user"`
+	Password utils.EnvString    `json:"password" mapstructure:"password" yaml:"password"`
+
+	// cached values
+	user     *string
+	password *string
+}
+
+// NewBasicAuthConfig creates a new BasicAuthConfig instance.
+func NewBasicAuthConfig(user, password utils.EnvString) *BasicAuthConfig {
+	return &BasicAuthConfig{
+		Type:     BasicAuthScheme,
+		User:     user,
+		Password: password,
+	}
+}
+
+// Validate if the current instance is valid
+func (ss *BasicAuthConfig) Validate() error {
+	user, err := ss.User.Get()
+	if err != nil {
+		return fmt.Errorf("BasicAuthConfig.User: %w", err)
+	}
+
+	// user and password can be empty.
+	ss.user = &user
+
+	password, err := ss.Password.Get()
+	if err != nil {
+		return fmt.Errorf("BasicAuthConfig.Password: %w", err)
+	}
+	ss.password = &password
+
+	return nil
+}
+
+// GetValue get the authentication credential value
+func (ss BasicAuthConfig) GetType() SecuritySchemeType {
+	return ss.Type
+}
+
+// GetUsername get the username value
+func (ss BasicAuthConfig) GetUsername() string {
+	if ss.user != nil {
+		return *ss.user
+	}
+
+	value, _ := ss.User.Get()
+
+	return value
+}
+
+// GetPassword get the password value
+func (ss BasicAuthConfig) GetPassword() string {
+	if ss.password != nil {
+		return *ss.password
+	}
+
+	value, _ := ss.Password.Get()
+
+	return value
 }
 
 // OAuthFlowType represents the OAuth flow type enum
@@ -388,7 +602,23 @@ func (ss OAuthFlow) Validate(flowType OAuthFlowType) error {
 //
 // [OAuth 2.0]: https://swagger.io/docs/specification/authentication/oauth2
 type OAuth2Config struct {
+	Type  SecuritySchemeType          `json:"type"  mapstructure:"type"  yaml:"type"`
 	Flows map[OAuthFlowType]OAuthFlow `json:"flows" mapstructure:"flows" yaml:"flows"`
+}
+
+var _ SecuritySchemer = &OAuth2Config{}
+
+// NewOAuth2Config creates a new OAuth2Config instance.
+func NewOAuth2Config(flows map[OAuthFlowType]OAuthFlow) *OAuth2Config {
+	return &OAuth2Config{
+		Type:  OAuth2Scheme,
+		Flows: flows,
+	}
+}
+
+// GetValue get the authentication credential value
+func (ss OAuth2Config) GetType() SecuritySchemeType {
+	return ss.Type
 }
 
 // Validate if the current instance is valid
@@ -405,15 +635,31 @@ func (ss OAuth2Config) Validate() error {
 	return nil
 }
 
-// OpenIDConfig contains configurations for [OpenID Connect] API specification
+// OpenIDConnectConfig contains configurations for [OpenID Connect] API specification
 //
 // [OpenID Connect]: https://swagger.io/docs/specification/authentication/openid-connect-discovery
-type OpenIDConfig struct {
-	OpenIDConnectURL string `json:"openIdConnectUrl" mapstructure:"openIdConnectUrl" yaml:"openIdConnectUrl"`
+type OpenIDConnectConfig struct {
+	Type             SecuritySchemeType `json:"type"  mapstructure:"type"  yaml:"type"`
+	OpenIDConnectURL string             `json:"openIdConnectUrl" mapstructure:"openIdConnectUrl" yaml:"openIdConnectUrl"`
+}
+
+var _ SecuritySchemer = &OpenIDConnectConfig{}
+
+// NewOpenIDConnectConfig creates a new OpenIDConnectConfig instance.
+func NewOpenIDConnectConfig(oidcURL string) *OpenIDConnectConfig {
+	return &OpenIDConnectConfig{
+		Type:             OpenIDConnectScheme,
+		OpenIDConnectURL: oidcURL,
+	}
+}
+
+// GetValue get the authentication credential value
+func (ss OpenIDConnectConfig) GetType() SecuritySchemeType {
+	return ss.Type
 }
 
 // Validate if the current instance is valid
-func (ss OpenIDConfig) Validate() error {
+func (ss OpenIDConnectConfig) Validate() error {
 	if ss.OpenIDConnectURL == "" {
 		return errors.New("openIdConnectUrl is required for oidc security")
 	}
@@ -421,6 +667,54 @@ func (ss OpenIDConfig) Validate() error {
 	if _, err := parseRelativeOrHttpURL(ss.OpenIDConnectURL); err != nil {
 		return fmt.Errorf("openIdConnectUrl: %w", err)
 	}
+	return nil
+}
+
+// CookieAuthConfig represents a cookie authentication configuration.
+type CookieAuthConfig struct {
+	Type SecuritySchemeType `json:"type"  mapstructure:"type"  yaml:"type"`
+}
+
+var _ SecuritySchemer = &CookieAuthConfig{}
+
+// NewCookieAuthConfig creates a new CookieAuthConfig instance.
+func NewCookieAuthConfig() *CookieAuthConfig {
+	return &CookieAuthConfig{
+		Type: CookieAuthScheme,
+	}
+}
+
+// GetValue get the authentication credential value
+func (ss CookieAuthConfig) GetType() SecuritySchemeType {
+	return ss.Type
+}
+
+// Validate if the current instance is valid
+func (ss CookieAuthConfig) Validate() error {
+	return nil
+}
+
+// MutualTLSAuthConfig represents a mutualTLS authentication configuration.
+type MutualTLSAuthConfig struct {
+	Type SecuritySchemeType `json:"type"  mapstructure:"type"  yaml:"type"`
+}
+
+var _ SecuritySchemer = &MutualTLSAuthConfig{}
+
+// NewMutualTLSAuthConfig creates a new MutualTLSAuthConfig instance.
+func NewMutualTLSAuthConfig() *MutualTLSAuthConfig {
+	return &MutualTLSAuthConfig{
+		Type: MutualTLSScheme,
+	}
+}
+
+// GetValue get the authentication credential value
+func (ss MutualTLSAuthConfig) GetType() SecuritySchemeType {
+	return ss.Type
+}
+
+// Validate if the current instance is valid
+func (ss MutualTLSAuthConfig) Validate() error {
 	return nil
 }
 

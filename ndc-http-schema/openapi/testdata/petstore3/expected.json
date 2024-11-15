@@ -18,19 +18,20 @@
     "securitySchemes": {
       "api_key": {
         "type": "apiKey",
+        "in": "header",
+        "name": "api_key",
         "value": {
           "env": "PET_STORE_API_KEY"
-        },
-        "in": "header",
-        "name": "api_key"
+        }
       },
       "basic": {
-        "type": "http",
-        "value": {
-          "env": "PET_STORE_BASIC_TOKEN"
+        "type": "basic",
+        "user": {
+          "env": "PET_STORE_BASIC_USER"
         },
-        "header": "Authorization",
-        "scheme": "basic"
+        "password": {
+          "env": "PET_STORE_BASIC_PASSWORD"
+        }
       },
       "petstore_auth": {
         "type": "oauth2",
