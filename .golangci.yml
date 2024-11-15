@@ -5,9 +5,7 @@ linters:
     - err113
     - lll
     - gocognit
-    - execinquery
     - exportloopref
-    - gomnd
     - funlen
     - godot
     - gofumpt

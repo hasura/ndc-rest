@@ -42,11 +42,32 @@ func TestNDCHttpSettings(t *testing.T) {
 						"in": "header",
 						"name": "api_key"
 					},
+					"http": {
+						"type": "http",
+						"value": {
+							"env": "PET_STORE_API_KEY"
+						},
+						"scheme": "bearer",
+						"header": "Authorization"
+					},
+					"basic": {
+						"type": "basic",
+						"username": {
+							"value": "user"
+						},
+						"password": {
+							"value": "password"
+						}
+					},
 					"cookie": {
 						"type": "cookie"
 					},
 					"mutualTLS": {
 						"type": "mutualTLS"
+					},
+					"oidc": {
+						"type": "openIdConnect",
+						"openIdConnectUrl": "http://localhost:8080/oauth/token"
 					},
 					"petstore_auth": {
 						"type": "oauth2",
@@ -88,11 +109,32 @@ func TestNDCHttpSettings(t *testing.T) {
 							value: utils.ToPtr("api_key"),
 						},
 					},
+					"basic": {
+						SecuritySchemer: &BasicAuthConfig{
+							Type:     BasicAuthScheme,
+							Username: utils.NewEnvStringValue("user"),
+							Password: utils.NewEnvStringValue("password"),
+							username: utils.ToPtr("user"),
+							password: utils.ToPtr("password"),
+						},
+					},
+					"http": {
+						SecuritySchemer: &HTTPAuthConfig{
+							Type:   HTTPAuthScheme,
+							Header: "Authorization",
+							Scheme: "bearer",
+							Value:  utils.NewEnvStringVariable("PET_STORE_API_KEY"),
+							value:  utils.ToPtr("api_key"),
+						},
+					},
 					"cookie": {
 						SecuritySchemer: NewCookieAuthConfig(),
 					},
 					"mutualTLS": {
 						SecuritySchemer: NewMutualTLSAuthConfig(),
+					},
+					"oidc": {
+						SecuritySchemer: NewOpenIDConnectConfig("http://localhost:8080/oauth/token"),
 					},
 					"petstore_auth": {
 						SecuritySchemer: &OAuth2Config{
@@ -131,7 +173,12 @@ func TestNDCHttpSettings(t *testing.T) {
 			}
 			assert.DeepEqual(t, tc.expected.Headers, result.Headers)
 			assert.DeepEqual(t, tc.expected.Security, result.Security)
-			assert.DeepEqual(t, tc.expected.SecuritySchemes, result.SecuritySchemes, cmp.Exporter(func(t reflect.Type) bool { return true }))
+			for key, expectedSS := range tc.expected.SecuritySchemes {
+				ss := result.SecuritySchemes[key]
+				ss.JSONSchema()
+				assert.Equal(t, expectedSS.GetType(), ss.GetType())
+				assert.DeepEqual(t, expectedSS.SecuritySchemer, ss.SecuritySchemer, cmp.Exporter(func(t reflect.Type) bool { return true }))
+			}
 			assert.DeepEqual(t, tc.expected.Version, result.Version)
 
 			_, err := json.Marshal(tc.expected)

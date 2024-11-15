@@ -567,7 +567,7 @@
                 "basic"
               ]
             },
-            "user": {
+            "username": {
               "$ref": "#/$defs/EnvString"
             },
             "password": {
@@ -577,7 +577,7 @@
           "type": "object",
           "required": [
             "type",
-            "user",
+            "username",
             "password"
           ]
         },
@@ -593,7 +593,15 @@
               "$ref": "#/$defs/EnvString"
             },
             "header": {
-              "type": "string"
+              "oneOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Request contains a header field in the form of Authorization: Basic \u003ccredentials\u003e"
             },
             "scheme": {
               "type": "string"

@@ -3,6 +3,7 @@ package internal
 import (
 	"bytes"
 	"context"
+	"encoding/base64"
 	"fmt"
 	"io"
 	"math/rand/v2"
@@ -203,7 +204,12 @@ func (req *RetryableRequest) applySecurityScheme(securityScheme rest.SecuritySch
 	case *rest.BasicAuthConfig:
 		username := config.GetUsername()
 		password := config.GetPassword()
-		req.URL.User = url.UserPassword(username, password)
+		if config.Header != "" {
+			b64Value := base64.StdEncoding.EncodeToString([]byte(username + ":" + password))
+			req.Headers.Set(rest.AuthorizationHeader, "Basic "+b64Value)
+		} else {
+			req.URL.User = url.UserPassword(username, password)
+		}
 
 		return true, nil
 	case *rest.HTTPAuthConfig:

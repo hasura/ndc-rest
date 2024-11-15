@@ -15,6 +15,14 @@ settings:
       value:
         env: PET_STORE_BEARER_TOKEN
       scheme: bearer
+    basic:
+      type: basic
+      header: Authorization
+      username:
+        value: user
+      password:
+        value: password
+      scheme: bearer
     petstore_auth:
       type: oauth2
       flows:
@@ -113,6 +121,8 @@ procedures:
     request:
       url: /model
       method: post
+      security:
+        - basic: []
       requestBody:
         contentType: application/json
       response:

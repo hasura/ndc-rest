@@ -654,8 +654,9 @@ func createMockServer(t *testing.T, apiKey string, bearerToken string) *httptest
 	mux.HandleFunc("/model", func(w http.ResponseWriter, r *http.Request) {
 		switch r.Method {
 		case http.MethodPost:
-			if r.Header.Get("api_key") != apiKey {
-				t.Errorf("invalid api key, expected %s, got %s", apiKey, r.Header.Get("api_key"))
+			user, password, ok := r.BasicAuth()
+			if !ok || user != "user" || password != "password" {
+				t.Errorf("invalid basic auth, expected user:password, got %s:%s", user, password)
 				t.FailNow()
 				return
 			}

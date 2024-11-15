@@ -168,8 +168,15 @@ func (j SecurityScheme) JSONSchema() *jsonschema.Schema {
 		Type: "string",
 		Enum: []any{BasicAuthScheme},
 	})
-	basicAuthSchema.Set("user", envStringRef)
+	basicAuthSchema.Set("username", envStringRef)
 	basicAuthSchema.Set("password", envStringRef)
+	httpAuthSchema.Set("header", &jsonschema.Schema{
+		Description: "Request contains a header field in the form of Authorization: Basic <credentials>",
+		OneOf: []*jsonschema.Schema{
+			{Type: "string"},
+			{Type: "null"},
+		},
+	})
 
 	oauth2Schema := orderedmap.New[string, *jsonschema.Schema]()
 	oauth2Schema.Set("type", &jsonschema.Schema{
@@ -212,7 +219,7 @@ func (j SecurityScheme) JSONSchema() *jsonschema.Schema {
 			{
 				Type:       "object",
 				Properties: basicAuthSchema,
-				Required:   []string{"type", "user", "password"},
+				Required:   []string{"type", "username", "password"},
 			},
 			{
 				Type:       "object",
@@ -399,7 +406,7 @@ func (ss APIKeyAuthConfig) GetValue() string {
 //
 // [bearer]: https://swagger.io/docs/specification/authentication/bearer-authentication
 type HTTPAuthConfig struct {
-	Type   SecuritySchemeType `json:"type"  mapstructure:"type"  yaml:"type"`
+	Type   SecuritySchemeType `json:"type"   mapstructure:"type"   yaml:"type"`
 	Header string             `json:"header" mapstructure:"header" yaml:"header"`
 	Scheme string             `json:"scheme" mapstructure:"scheme" yaml:"scheme"`
 	Value  utils.EnvString    `json:"value"  mapstructure:"value"  yaml:"value"`
@@ -457,33 +464,34 @@ func (ss HTTPAuthConfig) GetValue() string {
 //
 // [basic]: https://swagger.io/docs/specification/authentication/basic-authentication
 type BasicAuthConfig struct {
-	Type     SecuritySchemeType `json:"type"  mapstructure:"type"  yaml:"type"`
-	User     utils.EnvString    `json:"user"     mapstructure:"user"     yaml:"user"`
+	Type     SecuritySchemeType `json:"type"     mapstructure:"type"     yaml:"type"`
+	Header   string             `json:"header"   mapstructure:"header"   yaml:"header"`
+	Username utils.EnvString    `json:"username" mapstructure:"username" yaml:"username"`
 	Password utils.EnvString    `json:"password" mapstructure:"password" yaml:"password"`
 
 	// cached values
-	user     *string
+	username *string
 	password *string
 }
 
 // NewBasicAuthConfig creates a new BasicAuthConfig instance.
-func NewBasicAuthConfig(user, password utils.EnvString) *BasicAuthConfig {
+func NewBasicAuthConfig(username, password utils.EnvString) *BasicAuthConfig {
 	return &BasicAuthConfig{
 		Type:     BasicAuthScheme,
-		User:     user,
+		Username: username,
 		Password: password,
 	}
 }
 
 // Validate if the current instance is valid
 func (ss *BasicAuthConfig) Validate() error {
-	user, err := ss.User.Get()
+	user, err := ss.Username.Get()
 	if err != nil {
 		return fmt.Errorf("BasicAuthConfig.User: %w", err)
 	}
 
 	// user and password can be empty.
-	ss.user = &user
+	ss.username = &user
 
 	password, err := ss.Password.Get()
 	if err != nil {
@@ -501,11 +509,11 @@ func (ss BasicAuthConfig) GetType() SecuritySchemeType {
 
 // GetUsername get the username value
 func (ss BasicAuthConfig) GetUsername() string {
-	if ss.user != nil {
-		return *ss.user
+	if ss.username != nil {
+		return *ss.username
 	}
 
-	value, _ := ss.User.Get()
+	value, _ := ss.Username.Get()
 
 	return value
 }
@@ -632,6 +640,7 @@ func (ss OAuth2Config) Validate() error {
 			return fmt.Errorf("%s: %w", key, err)
 		}
 	}
+
 	return nil
 }
 
@@ -639,7 +648,7 @@ func (ss OAuth2Config) Validate() error {
 //
 // [OpenID Connect]: https://swagger.io/docs/specification/authentication/openid-connect-discovery
 type OpenIDConnectConfig struct {
-	Type             SecuritySchemeType `json:"type"  mapstructure:"type"  yaml:"type"`
+	Type             SecuritySchemeType `json:"type"             mapstructure:"type"             yaml:"type"`
 	OpenIDConnectURL string             `json:"openIdConnectUrl" mapstructure:"openIdConnectUrl" yaml:"openIdConnectUrl"`
 }
 
@@ -672,7 +681,7 @@ func (ss OpenIDConnectConfig) Validate() error {
 
 // CookieAuthConfig represents a cookie authentication configuration.
 type CookieAuthConfig struct {
-	Type SecuritySchemeType `json:"type"  mapstructure:"type"  yaml:"type"`
+	Type SecuritySchemeType `json:"type" mapstructure:"type" yaml:"type"`
 }
 
 var _ SecuritySchemer = &CookieAuthConfig{}
@@ -696,7 +705,7 @@ func (ss CookieAuthConfig) Validate() error {
 
 // MutualTLSAuthConfig represents a mutualTLS authentication configuration.
 type MutualTLSAuthConfig struct {
-	Type SecuritySchemeType `json:"type"  mapstructure:"type"  yaml:"type"`
+	Type SecuritySchemeType `json:"type" mapstructure:"type" yaml:"type"`
 }
 
 var _ SecuritySchemer = &MutualTLSAuthConfig{}
