@@ -1,7 +1,6 @@
 package utils
 
 import (
-	"fmt"
 	"regexp"
 	"slices"
 	"strings"
@@ -29,7 +28,7 @@ func ToCamelCase(input string) string {
 
 // StringSliceToCamelCase convert a slice of strings to camelCase
 func StringSliceToCamelCase(inputs []string) string {
-	return fmt.Sprintf("%s%s", ToCamelCase(inputs[0]), StringSliceToPascalCase(inputs[1:]))
+	return ToCamelCase(inputs[0]) + StringSliceToPascalCase(inputs[1:])
 }
 
 // ToPascalCase convert a string to PascalCase
@@ -182,6 +181,7 @@ func StripHTMLTags(str string) string {
 		in = false
 		end = i + 1
 	}
+
 	return strings.TrimSpace(builder.String())
 }
 

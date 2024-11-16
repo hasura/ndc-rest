@@ -28,9 +28,9 @@ type OAS2Builder struct {
 }
 
 // NewOAS2Builder creates an OAS3Builder instance
-func NewOAS2Builder(schema *rest.NDCHttpSchema, options ConvertOptions) *OAS2Builder {
+func NewOAS2Builder(options ConvertOptions) *OAS2Builder {
 	builder := &OAS2Builder{
-		schema:         schema,
+		schema:         rest.NewNDCHttpSchema(),
 		schemaCache:    make(map[string]SchemaInfoCache),
 		ConvertOptions: applyConvertOptions(options),
 	}
@@ -38,12 +38,7 @@ func NewOAS2Builder(schema *rest.NDCHttpSchema, options ConvertOptions) *OAS2Bui
 	return builder
 }
 
-// Schema returns the inner NDC HTTP schema
-func (oc *OAS2Builder) Schema() *rest.NDCHttpSchema {
-	return oc.schema
-}
-
-func (oc *OAS2Builder) BuildDocumentModel(docModel *libopenapi.DocumentModel[v2.Swagger]) error {
+func (oc *OAS2Builder) BuildDocumentModel(docModel *libopenapi.DocumentModel[v2.Swagger]) (*rest.NDCHttpSchema, error) {
 	if docModel.Model.Info != nil {
 		oc.schema.Settings.Version = docModel.Model.Info.Version
 	}
@@ -65,14 +60,14 @@ func (oc *OAS2Builder) BuildDocumentModel(docModel *libopenapi.DocumentModel[v2.
 
 	for iterPath := docModel.Model.Paths.PathItems.First(); iterPath != nil; iterPath = iterPath.Next() {
 		if err := oc.pathToNDCOperations(iterPath); err != nil {
-			return err
+			return nil, err
 		}
 	}
 
 	if docModel.Model.Definitions != nil {
 		for cSchema := docModel.Model.Definitions.Definitions.First(); cSchema != nil; cSchema = cSchema.Next() {
 			if err := oc.convertComponentSchemas(cSchema); err != nil {
-				return err
+				return nil, err
 			}
 		}
 	}
@@ -82,17 +77,14 @@ func (oc *OAS2Builder) BuildDocumentModel(docModel *libopenapi.DocumentModel[v2.
 		for scheme := docModel.Model.SecurityDefinitions.Definitions.First(); scheme != nil; scheme = scheme.Next() {
 			err := oc.convertSecuritySchemes(scheme)
 			if err != nil {
-				return err
+				return nil, err
 			}
 		}
 	}
 
 	oc.schema.Settings.Security = convertSecurities(docModel.Model.Security)
-	if err := cleanUnusedSchemaTypes(oc.schema); err != nil {
-		return err
-	}
 
-	return nil
+	return NewNDCBuilder(oc.schema, *oc.ConvertOptions).Build()
 }
 
 func (oc *OAS2Builder) convertSecuritySchemes(scheme orderedmap.Pair[string, *v2.SecurityScheme]) error {

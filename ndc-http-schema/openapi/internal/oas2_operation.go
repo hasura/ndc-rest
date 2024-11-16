@@ -34,9 +34,6 @@ func (oc *oas2OperationBuilder) BuildFunction(pathKey string, operation *v2.Oper
 	if funcName == "" {
 		funcName = buildPathMethodName(pathKey, "get", oc.builder.ConvertOptions)
 	}
-	if oc.builder.Prefix != "" {
-		funcName = utils.StringSliceToCamelCase([]string{oc.builder.Prefix, funcName})
-	}
 	oc.builder.Logger.Info("function",
 		slog.String("name", funcName),
 		slog.String("path", pathKey),
@@ -96,9 +93,6 @@ func (oc *oas2OperationBuilder) BuildProcedure(pathKey string, method string, op
 		procName = buildPathMethodName(pathKey, method, oc.builder.ConvertOptions)
 	}
 
-	if oc.builder.Prefix != "" {
-		procName = utils.StringSliceToCamelCase([]string{oc.builder.Prefix, procName})
-	}
 	oc.builder.Logger.Info("procedure",
 		slog.String("name", procName),
 		slog.String("path", pathKey),

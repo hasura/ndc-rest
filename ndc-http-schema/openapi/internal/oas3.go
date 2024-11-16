@@ -35,9 +35,9 @@ type SchemaInfoCache struct {
 }
 
 // NewOAS3Builder creates an OAS3Builder instance
-func NewOAS3Builder(schema *rest.NDCHttpSchema, options ConvertOptions) *OAS3Builder {
+func NewOAS3Builder(options ConvertOptions) *OAS3Builder {
 	builder := &OAS3Builder{
-		schema:         schema,
+		schema:         rest.NewNDCHttpSchema(),
 		schemaCache:    make(map[string]SchemaInfoCache),
 		ConvertOptions: applyConvertOptions(options),
 	}
@@ -45,12 +45,7 @@ func NewOAS3Builder(schema *rest.NDCHttpSchema, options ConvertOptions) *OAS3Bui
 	return builder
 }
 
-// Schema returns the inner NDC HTTP schema
-func (oc *OAS3Builder) Schema() *rest.NDCHttpSchema {
-	return oc.schema
-}
-
-func (oc *OAS3Builder) BuildDocumentModel(docModel *libopenapi.DocumentModel[v3.Document]) error {
+func (oc *OAS3Builder) BuildDocumentModel(docModel *libopenapi.DocumentModel[v3.Document]) (*rest.NDCHttpSchema, error) {
 	if docModel.Model.Info != nil {
 		oc.schema.Settings.Version = docModel.Model.Info.Version
 	}
@@ -60,13 +55,13 @@ func (oc *OAS3Builder) BuildDocumentModel(docModel *libopenapi.DocumentModel[v3.
 	if docModel.Model.Components != nil && docModel.Model.Components.Schemas != nil {
 		for cSchema := docModel.Model.Components.Schemas.First(); cSchema != nil; cSchema = cSchema.Next() {
 			if err := oc.convertComponentSchemas(cSchema); err != nil {
-				return err
+				return nil, err
 			}
 		}
 	}
 	for iterPath := docModel.Model.Paths.PathItems.First(); iterPath != nil; iterPath = iterPath.Next() {
 		if err := oc.pathToNDCOperations(iterPath); err != nil {
-			return err
+			return nil, err
 		}
 	}
 
@@ -75,7 +70,7 @@ func (oc *OAS3Builder) BuildDocumentModel(docModel *libopenapi.DocumentModel[v3.
 		for scheme := docModel.Model.Components.SecuritySchemes.First(); scheme != nil; scheme = scheme.Next() {
 			err := oc.convertSecuritySchemes(scheme)
 			if err != nil {
-				return err
+				return nil, err
 			}
 		}
 	}
@@ -85,11 +80,7 @@ func (oc *OAS3Builder) BuildDocumentModel(docModel *libopenapi.DocumentModel[v3.
 	oc.schemaCache = make(map[string]SchemaInfoCache)
 	oc.transformWriteSchema()
 
-	if err := cleanUnusedSchemaTypes(oc.schema); err != nil {
-		return err
-	}
-
-	return nil
+	return NewNDCBuilder(oc.schema, *oc.ConvertOptions).Build()
 }
 
 func (oc *OAS3Builder) convertServers(servers []*v3.Server) []rest.ServerConfig {

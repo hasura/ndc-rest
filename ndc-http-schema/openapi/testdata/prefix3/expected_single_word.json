@@ -120,19 +120,19 @@
       },
       "description": "View notifications",
       "result_type": {
-        "name": "NotificationSlice",
+        "name": "HasuraNotificationSlice",
         "type": "named"
       }
     }
   },
   "object_types": {
-    "CreateNotificationSuccessResponse": {
+    "HasuraCreateNotificationSuccessResponse": {
       "fields": {
         "errors": {
           "type": {
             "type": "nullable",
             "underlying_type": {
-              "name": "Notification200Errors",
+              "name": "HasuraNotification200Errors",
               "type": "named"
             }
           },
@@ -184,7 +184,7 @@
         }
       }
     },
-    "DeliveryData": {
+    "HasuraDeliveryData": {
       "fields": {
         "converted": {
           "description": "Number of messages that were clicked.",
@@ -263,7 +263,7 @@
         }
       }
     },
-    "Filter": {
+    "HasuraFilter": {
       "fields": {
         "field": {
           "description": "Name of the field to use as the first operand in the filter expression.",
@@ -295,7 +295,7 @@
         "relation": {
           "description": "Operator of a filter expression.",
           "type": {
-            "name": "FilterRelation",
+            "name": "HasuraFilterRelation",
             "type": "named"
           },
           "http": {
@@ -321,13 +321,13 @@
         }
       }
     },
-    "NotificationInput": {
+    "HasuraNotificationInput": {
       "fields": {
         "contents": {
           "type": {
             "type": "nullable",
             "underlying_type": {
-              "name": "StringMap",
+              "name": "HasuraStringMap",
               "type": "named"
             }
           },
@@ -371,7 +371,7 @@
             "type": "nullable",
             "underlying_type": {
               "element_type": {
-                "name": "Filter",
+                "name": "HasuraFilter",
                 "type": "named"
               },
               "type": "array"
@@ -387,7 +387,7 @@
           "type": {
             "type": "nullable",
             "underlying_type": {
-              "name": "StringMap",
+              "name": "HasuraStringMap",
               "type": "named"
             }
           },
@@ -430,7 +430,7 @@
           "type": {
             "type": "nullable",
             "underlying_type": {
-              "name": "StringMap",
+              "name": "HasuraStringMap",
               "type": "named"
             }
           },
@@ -442,7 +442,7 @@
         }
       }
     },
-    "NotificationSlice": {
+    "HasuraNotificationSlice": {
       "fields": {
         "limit": {
           "type": {
@@ -463,7 +463,7 @@
             "type": "nullable",
             "underlying_type": {
               "element_type": {
-                "name": "NotificationWithMeta",
+                "name": "HasuraNotificationWithMeta",
                 "type": "named"
               },
               "type": "array"
@@ -505,7 +505,7 @@
         }
       }
     },
-    "NotificationWithMeta": {
+    "HasuraNotificationWithMeta": {
       "fields": {
         "completed_at": {
           "description": "Unix timestamp indicating when notification delivery completed. The delivery duration from start to finish can be calculated with completed_at - send_after.",
@@ -527,7 +527,7 @@
           "type": {
             "type": "nullable",
             "underlying_type": {
-              "name": "StringMap",
+              "name": "HasuraStringMap",
               "type": "named"
             }
           },
@@ -609,7 +609,7 @@
             "type": "nullable",
             "underlying_type": {
               "element_type": {
-                "name": "Filter",
+                "name": "HasuraFilter",
                 "type": "named"
               },
               "type": "array"
@@ -625,7 +625,7 @@
           "type": {
             "type": "nullable",
             "underlying_type": {
-              "name": "StringMap",
+              "name": "HasuraStringMap",
               "type": "named"
             }
           },
@@ -698,7 +698,7 @@
             "type": "nullable",
             "underlying_type": {
               "element_type": {
-                "name": "OutcomeData",
+                "name": "HasuraOutcomeData",
                 "type": "named"
               },
               "type": "array"
@@ -715,7 +715,7 @@
           "type": {
             "type": "nullable",
             "underlying_type": {
-              "name": "PlatformDeliveryData",
+              "name": "HasuraPlatformDeliveryData",
               "type": "named"
             }
           },
@@ -791,7 +791,7 @@
           "type": {
             "type": "nullable",
             "underlying_type": {
-              "name": "StringMap",
+              "name": "HasuraStringMap",
               "type": "named"
             }
           },
@@ -820,7 +820,7 @@
           "type": {
             "type": "nullable",
             "underlying_type": {
-              "name": "PlayerNotificationTargetTargetChannel",
+              "name": "HasuraPlayerNotificationTargetTargetChannel",
               "type": "named"
             }
           },
@@ -847,11 +847,11 @@
         }
       }
     },
-    "OutcomeData": {
+    "HasuraOutcomeData": {
       "fields": {
         "aggregation": {
           "type": {
-            "name": "OutcomeDataAggregation",
+            "name": "HasuraOutcomeDataAggregation",
             "type": "named"
           },
           "http": {
@@ -884,14 +884,14 @@
         }
       }
     },
-    "PlatformDeliveryData": {
+    "HasuraPlatformDeliveryData": {
       "description": "Hash of delivery statistics broken out by target device platform.",
       "fields": {
         "android": {
           "type": {
             "type": "nullable",
             "underlying_type": {
-              "name": "DeliveryData",
+              "name": "HasuraDeliveryData",
               "type": "named"
             }
           },
@@ -905,7 +905,7 @@
           "type": {
             "type": "nullable",
             "underlying_type": {
-              "name": "DeliveryData",
+              "name": "HasuraDeliveryData",
               "type": "named"
             }
           },
@@ -919,7 +919,7 @@
           "type": {
             "type": "nullable",
             "underlying_type": {
-              "name": "DeliveryData",
+              "name": "HasuraDeliveryData",
               "type": "named"
             }
           },
@@ -933,7 +933,7 @@
           "type": {
             "type": "nullable",
             "underlying_type": {
-              "name": "DeliveryData",
+              "name": "HasuraDeliveryData",
               "type": "named"
             }
           },
@@ -947,7 +947,7 @@
           "type": {
             "type": "nullable",
             "underlying_type": {
-              "name": "DeliveryData",
+              "name": "HasuraDeliveryData",
               "type": "named"
             }
           },
@@ -961,7 +961,7 @@
           "type": {
             "type": "nullable",
             "underlying_type": {
-              "name": "DeliveryData",
+              "name": "HasuraDeliveryData",
               "type": "named"
             }
           },
@@ -975,7 +975,7 @@
           "type": {
             "type": "nullable",
             "underlying_type": {
-              "name": "DeliveryData",
+              "name": "HasuraDeliveryData",
               "type": "named"
             }
           },
@@ -989,7 +989,7 @@
           "type": {
             "type": "nullable",
             "underlying_type": {
-              "name": "DeliveryData",
+              "name": "HasuraDeliveryData",
               "type": "named"
             }
           },
@@ -1001,7 +1001,7 @@
         }
       }
     },
-    "StringMap": {
+    "HasuraStringMap": {
       "fields": {
         "en": {
           "description": "Text in English.  Will be used as a fallback",
@@ -1042,7 +1042,7 @@
         "body": {
           "description": "Request body of POST /notifications",
           "type": {
-            "name": "NotificationInput",
+            "name": "HasuraNotificationInput",
             "type": "named"
           },
           "http": {
@@ -1052,13 +1052,13 @@
       },
       "description": "Create notification",
       "result_type": {
-        "name": "CreateNotificationSuccessResponse",
+        "name": "HasuraCreateNotificationSuccessResponse",
         "type": "named"
       }
     }
   },
   "scalar_types": {
-    "FilterRelation": {
+    "HasuraFilterRelation": {
       "aggregate_functions": {},
       "comparison_operators": {},
       "representation": {
@@ -1071,6 +1071,36 @@
           "not_exists",
           "time_elapsed_gt",
           "time_elapsed_lt"
+        ],
+        "type": "enum"
+      }
+    },
+    "HasuraNotification200Errors": {
+      "aggregate_functions": {},
+      "comparison_operators": {},
+      "representation": {
+        "type": "json"
+      }
+    },
+    "HasuraOutcomeDataAggregation": {
+      "aggregate_functions": {},
+      "comparison_operators": {},
+      "representation": {
+        "one_of": [
+          "sum",
+          "count"
+        ],
+        "type": "enum"
+      }
+    },
+    "HasuraPlayerNotificationTargetTargetChannel": {
+      "aggregate_functions": {},
+      "comparison_operators": {},
+      "representation": {
+        "one_of": [
+          "push",
+          "email",
+          "sms"
         ],
         "type": "enum"
       }
@@ -1094,36 +1124,6 @@
       "comparison_operators": {},
       "representation": {
         "type": "json"
-      }
-    },
-    "Notification200Errors": {
-      "aggregate_functions": {},
-      "comparison_operators": {},
-      "representation": {
-        "type": "json"
-      }
-    },
-    "OutcomeDataAggregation": {
-      "aggregate_functions": {},
-      "comparison_operators": {},
-      "representation": {
-        "one_of": [
-          "sum",
-          "count"
-        ],
-        "type": "enum"
-      }
-    },
-    "PlayerNotificationTargetTargetChannel": {
-      "aggregate_functions": {},
-      "comparison_operators": {},
-      "representation": {
-        "one_of": [
-          "push",
-          "email",
-          "sms"
-        ],
-        "type": "enum"
       }
     },
     "String": {
