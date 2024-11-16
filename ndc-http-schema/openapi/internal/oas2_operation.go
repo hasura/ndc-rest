@@ -236,7 +236,10 @@ func (oc *oas2OperationBuilder) convertParameters(operation *v2.Operation, apiPa
 			},
 		}
 		if param.Description != "" {
-			argument.Description = &param.Description
+			description := utils.StripHTMLTags(param.Description)
+			if description != "" {
+				argument.Description = &description
+			}
 		}
 
 		switch paramLocation {
@@ -251,13 +254,20 @@ func (oc *oas2OperationBuilder) convertParameters(operation *v2.Operation, apiPa
 			}
 		case rest.InFormData:
 			if typeSchema != nil {
-				formDataObject.Fields[paramName] = rest.ObjectField{
+				param := rest.ObjectField{
 					ObjectField: schema.ObjectField{
-						Type:        argument.Type,
-						Description: argument.Description,
+						Type: argument.Type,
 					},
 					HTTP: typeSchema,
 				}
+
+				if argument.Description != nil {
+					desc := utils.StripHTMLTags(*argument.Description)
+					if desc != "" {
+						param.ObjectField.Description = &desc
+					}
+				}
+				formDataObject.Fields[paramName] = param
 			}
 		default:
 			argument.HTTP = &rest.RequestParameter{

@@ -100,6 +100,7 @@ func (oc *oas3SchemaBuilder) getSchemaType(typeSchema *base.Schema, fieldPaths [
 		return nil, nil, errParameterSchemaEmpty(fieldPaths)
 	}
 
+	description := utils.StripHTMLTags(typeSchema.Description)
 	nullable := typeSchema.Nullable != nil && *typeSchema.Nullable
 	if len(typeSchema.AllOf) > 0 {
 		enc, ty, err := oc.buildAllOfAnyOfSchemaType(typeSchema.AllOf, nullable, fieldPaths)
@@ -107,7 +108,7 @@ func (oc *oas3SchemaBuilder) getSchemaType(typeSchema *base.Schema, fieldPaths [
 			return nil, nil, err
 		}
 		if ty != nil {
-			ty.Description = typeSchema.Description
+			ty.Description = description
 		}
 
 		return enc, ty, nil
@@ -119,7 +120,7 @@ func (oc *oas3SchemaBuilder) getSchemaType(typeSchema *base.Schema, fieldPaths [
 			return nil, nil, err
 		}
 		if ty != nil {
-			ty.Description = typeSchema.Description
+			ty.Description = description
 		}
 
 		return enc, ty, nil
@@ -132,7 +133,7 @@ func (oc *oas3SchemaBuilder) getSchemaType(typeSchema *base.Schema, fieldPaths [
 			return nil, nil, err
 		}
 		if ty != nil {
-			ty.Description = typeSchema.Description
+			ty.Description = description
 		}
 
 		return enc, ty, nil
@@ -184,10 +185,11 @@ func (oc *oas3SchemaBuilder) getSchemaType(typeSchema *base.Schema, fieldPaths [
 		writeObject := rest.ObjectType{
 			Fields: make(map[string]rest.ObjectField),
 		}
-		if typeSchema.Description != "" {
-			object.Description = &typeSchema.Description
-			readObject.Description = &typeSchema.Description
-			writeObject.Description = &typeSchema.Description
+
+		if description != "" {
+			object.Description = &description
+			readObject.Description = &description
+			writeObject.Description = &description
 		}
 
 		for prop := typeSchema.Properties.First(); prop != nil; prop = prop.Next() {

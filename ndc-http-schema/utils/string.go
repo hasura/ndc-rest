@@ -143,6 +143,10 @@ func SplitStringsAndTrimSpaces(input string, sep string) []string {
 
 // StripHTMLTags aggressively strips HTML tags from a string. It will only keep anything between `>` and `<`.
 func StripHTMLTags(str string) string {
+	if str == "" {
+		return ""
+	}
+
 	// Setup a string builder and allocate enough memory for the new string.
 	var builder strings.Builder
 	builder.Grow(len(str) + utf8.UTFMax)
@@ -178,7 +182,7 @@ func StripHTMLTags(str string) string {
 		in = false
 		end = i + 1
 	}
-	return builder.String()
+	return strings.TrimSpace(builder.String())
 }
 
 // RemoveYAMLSpecialCharacters remote special characters to avoid YAML unmarshaling error

@@ -26,7 +26,8 @@
       },
       "basic": {
         "type": "basic",
-        "user": {
+        "header": "",
+        "username": {
           "env": "PET_STORE_BASIC_USER"
         },
         "password": {
@@ -528,7 +529,7 @@
       },
       "arguments": {
         "username": {
-          "description": "The name that needs to be fetched. Use user1 for testing. ",
+          "description": "The name that needs to be fetched. Use user1 for testing.",
           "type": {
             "name": "String",
             "type": "named"

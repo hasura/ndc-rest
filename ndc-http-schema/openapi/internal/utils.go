@@ -231,7 +231,7 @@ func createSchemaFromOpenAPISchema(input *base.Schema) *rest.TypeSchema {
 	ps.Minimum = input.Minimum
 	ps.MaxLength = input.MaxLength
 	ps.MinLength = input.MinLength
-	ps.Description = input.Description
+	ps.Description = utils.StripHTMLTags(input.Description)
 	ps.ReadOnly = input.ReadOnly != nil && *input.ReadOnly
 	ps.WriteOnly = input.WriteOnly != nil && *input.WriteOnly
 

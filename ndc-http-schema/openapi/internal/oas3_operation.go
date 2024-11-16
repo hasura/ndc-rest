@@ -210,8 +210,9 @@ func (oc *oas3OperationBuilder) convertParameters(params []*v3.Parameter, apiPat
 				EncodingObject: encoding,
 			},
 		}
-		if param.Description != "" {
-			argument.Description = &param.Description
+		paramDescription := utils.StripHTMLTags(param.Description)
+		if paramDescription != "" {
+			argument.Description = &paramDescription
 		}
 
 		oc.Arguments[paramName] = argument
@@ -318,8 +319,9 @@ func (oc *oas3OperationBuilder) convertRequestBody(reqBody *v3.RequestBody, apiP
 				argument := schema.ArgumentInfo{
 					Type: ndcType.Encode(),
 				}
-				if header.Description != "" {
-					argument.Description = &header.Description
+				headerDesc := utils.StripHTMLTags(header.Description)
+				if headerDesc != "" {
+					argument.Description = &headerDesc
 				}
 				item.Headers[key] = headerParam
 				oc.Arguments[argumentName] = rest.ArgumentInfo{
