@@ -112,7 +112,7 @@ func (oc *OAS2Builder) convertSecuritySchemes(scheme orderedmap.Pair[string, *v2
 		valueEnv := sdkUtils.NewEnvStringVariable(utils.StringSliceToConstantCase([]string{oc.EnvPrefix, key}))
 		result.SecuritySchemer = rest.NewAPIKeyAuthConfig(security.Name, inLocation, valueEnv)
 	case string(rest.BasicAuthScheme):
-		user := sdkUtils.NewEnvStringVariable(utils.StringSliceToConstantCase([]string{oc.EnvPrefix, key, "USER"}))
+		user := sdkUtils.NewEnvStringVariable(utils.StringSliceToConstantCase([]string{oc.EnvPrefix, key, "USERNAME"}))
 		password := sdkUtils.NewEnvStringVariable(utils.StringSliceToConstantCase([]string{oc.EnvPrefix, key, "PASSWORD"}))
 		result.SecuritySchemer = rest.NewBasicAuthConfig(user, password)
 	case "oauth2":

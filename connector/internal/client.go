@@ -10,6 +10,7 @@ import (
 	"log/slog"
 	"math"
 	"net/http"
+	"net/url"
 	"slices"
 	"strconv"
 	"strings"
@@ -250,12 +251,21 @@ func (client *HTTPClient) doRequest(ctx context.Context, request *RetryableReque
 	ctx, span := client.tracer.Start(ctx, fmt.Sprintf("%s %s", method, request.RawRequest.URL), trace.WithSpanKind(trace.SpanKindClient))
 	defer span.End()
 
-	requestURL := request.URL.String()
+	urlAttr := cloneURL(&request.URL)
+	password, hasPassword := urlAttr.User.Password()
+	if urlAttr.User.String() != "" || hasPassword {
+		maskedUser := MaskString(urlAttr.User.Username())
+		if hasPassword {
+			urlAttr.User = url.UserPassword(maskedUser, MaskString(password))
+		} else {
+			urlAttr.User = url.User(maskedUser)
+		}
+	}
 
 	span.SetAttributes(
 		attribute.String("db.system", "http"),
 		attribute.String("http.request.method", method),
-		attribute.String("url.full", requestURL),
+		attribute.String("url.full", urlAttr.String()),
 		attribute.String("server.address", request.URL.Hostname()),
 		attribute.Int("server.port", port),
 		attribute.String("network.protocol.name", "http"),

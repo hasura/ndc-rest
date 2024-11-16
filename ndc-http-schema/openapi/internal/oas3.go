@@ -159,7 +159,7 @@ func (oc *OAS3Builder) convertSecuritySchemes(scheme orderedmap.Pair[string, *v3
 	case rest.HTTPAuthScheme:
 		switch security.Scheme {
 		case string(rest.BasicAuthScheme):
-			user := sdkUtils.NewEnvStringVariable(utils.StringSliceToConstantCase([]string{oc.EnvPrefix, key, "USER"}))
+			user := sdkUtils.NewEnvStringVariable(utils.StringSliceToConstantCase([]string{oc.EnvPrefix, key, "USERNAME"}))
 			password := sdkUtils.NewEnvStringVariable(utils.StringSliceToConstantCase([]string{oc.EnvPrefix, key, "PASSWORD"}))
 			result.SecuritySchemer = rest.NewBasicAuthConfig(user, password)
 		default:
