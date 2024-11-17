@@ -136,8 +136,17 @@ func (oc *oas2SchemaBuilder) getSchemaType(typeSchema *base.Schema, fieldPaths [
 					// treat no-property objects as a JSON scalar
 					oc.builder.schema.ScalarTypes[refName] = *defaultScalarTypes[rest.ScalarJSON]
 				} else {
+					xmlSchema := typeResult.XML
+					if xmlSchema == nil {
+						xmlSchema = &rest.XMLSchema{}
+					}
+
+					if xmlSchema.Name == "" {
+						xmlSchema.Name = fieldPaths[0]
+					}
 					object := rest.ObjectType{
 						Fields: make(map[string]rest.ObjectField),
+						XML:    xmlSchema,
 					}
 					if description != "" {
 						object.Description = &description

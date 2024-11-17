@@ -4141,6 +4141,23 @@
     {
       "arguments": {
         "body": {
+          "description": "Request body of PUT /pet/xml",
+          "type": {
+            "name": "Pet",
+            "type": "named"
+          }
+        }
+      },
+      "description": "Update an existing pet",
+      "name": "putPetXml",
+      "result_type": {
+        "name": "Pet",
+        "type": "named"
+      }
+    },
+    {
+      "arguments": {
+        "body": {
           "description": "Request body of PUT /pet",
           "type": {
             "name": "Pet",

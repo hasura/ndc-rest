@@ -19,7 +19,8 @@ import (
 type OAS2Builder struct {
 	*ConvertOptions
 
-	schema *rest.NDCHttpSchema
+	schema            *rest.NDCHttpSchema
+	hasContentTypeXML bool
 	// stores prebuilt and evaluating information of component schema types.
 	// some undefined schema types aren't stored in either object nor scalar,
 	// or self-reference types that haven't added into the object_types map yet.
@@ -59,17 +60,17 @@ func (oc *OAS2Builder) BuildDocumentModel(docModel *libopenapi.DocumentModel[v2.
 		})
 	}
 
-	for iterPath := docModel.Model.Paths.PathItems.First(); iterPath != nil; iterPath = iterPath.Next() {
-		if err := oc.pathToNDCOperations(iterPath); err != nil {
-			return nil, err
-		}
-	}
-
 	if docModel.Model.Definitions != nil {
 		for cSchema := docModel.Model.Definitions.Definitions.First(); cSchema != nil; cSchema = cSchema.Next() {
 			if err := oc.convertComponentSchemas(cSchema); err != nil {
 				return nil, err
 			}
+		}
+	}
+
+	for iterPath := docModel.Model.Paths.PathItems.First(); iterPath != nil; iterPath = iterPath.Next() {
+		if err := oc.pathToNDCOperations(iterPath); err != nil {
+			return nil, err
 		}
 	}
 
@@ -149,7 +150,7 @@ func (oc *OAS2Builder) pathToNDCOperations(pathItem orderedmap.Pair[string, *v2.
 	pathKey := pathItem.Key()
 	pathValue := pathItem.Value()
 
-	funcGet, funcName, err := newOAS2OperationBuilder(oc).BuildFunction(pathKey, pathValue.Get, pathValue.Parameters)
+	funcGet, funcName, err := newOAS2OperationBuilder(oc, pathKey, "get").BuildFunction(pathValue.Get, pathValue.Parameters)
 	if err != nil {
 		return err
 	}
@@ -157,7 +158,7 @@ func (oc *OAS2Builder) pathToNDCOperations(pathItem orderedmap.Pair[string, *v2.
 		oc.schema.Functions[funcName] = *funcGet
 	}
 
-	procPost, procPostName, err := newOAS2OperationBuilder(oc).BuildProcedure(pathKey, "post", pathValue.Post, pathValue.Parameters)
+	procPost, procPostName, err := newOAS2OperationBuilder(oc, pathKey, "post").BuildProcedure(pathValue.Post, pathValue.Parameters)
 	if err != nil {
 		return err
 	}
@@ -165,7 +166,7 @@ func (oc *OAS2Builder) pathToNDCOperations(pathItem orderedmap.Pair[string, *v2.
 		oc.schema.Procedures[procPostName] = *procPost
 	}
 
-	procPut, procPutName, err := newOAS2OperationBuilder(oc).BuildProcedure(pathKey, "put", pathValue.Put, pathValue.Parameters)
+	procPut, procPutName, err := newOAS2OperationBuilder(oc, pathKey, "put").BuildProcedure(pathValue.Put, pathValue.Parameters)
 	if err != nil {
 		return err
 	}
@@ -173,7 +174,7 @@ func (oc *OAS2Builder) pathToNDCOperations(pathItem orderedmap.Pair[string, *v2.
 		oc.schema.Procedures[procPutName] = *procPut
 	}
 
-	procPatch, procPatchName, err := newOAS2OperationBuilder(oc).BuildProcedure(pathKey, "patch", pathValue.Patch, pathValue.Parameters)
+	procPatch, procPatchName, err := newOAS2OperationBuilder(oc, pathKey, "patch").BuildProcedure(pathValue.Patch, pathValue.Parameters)
 	if err != nil {
 		return err
 	}
@@ -181,7 +182,7 @@ func (oc *OAS2Builder) pathToNDCOperations(pathItem orderedmap.Pair[string, *v2.
 		oc.schema.Procedures[procPatchName] = *procPatch
 	}
 
-	procDelete, procDeleteName, err := newOAS2OperationBuilder(oc).BuildProcedure(pathKey, "delete", pathValue.Delete, pathValue.Parameters)
+	procDelete, procDeleteName, err := newOAS2OperationBuilder(oc, pathKey, "delete").BuildProcedure(pathValue.Delete, pathValue.Parameters)
 	if err != nil {
 		return err
 	}
@@ -207,6 +208,7 @@ func (oc *OAS2Builder) convertComponentSchemas(schemaItem orderedmap.Pair[string
 	if typeEncoder != nil {
 		typeName = getNamedType(typeEncoder, true, "")
 	}
+
 	cacheKey := "#/definitions/" + typeKey
 	// treat no-property objects as a Arbitrary JSON scalar
 	if typeEncoder == nil || typeName == string(rest.ScalarJSON) {

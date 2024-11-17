@@ -143,6 +143,16 @@ func (c *RequestBuilder) buildRequestBody(request *RetryableRequest, rawRequest 
 			request.Body = bytes.NewReader(bodyBytes)
 
 			return nil
+		case contentType == rest.ContentTypeXML:
+			bodyBytes, err := c.createXMLBody(&bodyInfo, bodyData)
+			if err != nil {
+				return err
+			}
+
+			request.ContentLength = int64(len(bodyBytes))
+			request.Body = bytes.NewReader(bodyBytes)
+
+			return nil
 		default:
 			return fmt.Errorf("unsupported content type %s", contentType)
 		}

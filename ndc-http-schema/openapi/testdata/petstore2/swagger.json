@@ -119,6 +119,29 @@
         "security": [{ "petstore_auth": ["write:pets", "read:pets"] }]
       }
     },
+
+    "/pet/xml": {
+      "put": {
+        "operationId": "updatePet",
+        "consumes": ["application/xml"],
+        "produces": ["application/xml"],
+        "parameters": [
+          {
+            "in": "body",
+            "name": "body",
+            "description": "Pet object that needs to be added to the store",
+            "required": true,
+            "schema": { "$ref": "#/definitions/Pet" }
+          }
+        ],
+        "responses": {
+          "400": { "description": "Invalid ID supplied" },
+          "404": { "description": "Pet not found" },
+          "405": { "description": "Validation exception" }
+        },
+        "security": [{ "petstore_auth": ["write:pets", "read:pets"] }]
+      }
+    },
     "/pet/findByStatus": {
       "get": {
         "tags": ["pet"],

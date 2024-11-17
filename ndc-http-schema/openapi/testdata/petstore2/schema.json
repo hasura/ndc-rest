@@ -1459,6 +1459,26 @@
           }
         }
       },
+      "description": "PUT /pet/xml",
+      "name": "putPetXml",
+      "result_type": {
+        "type": "nullable",
+        "underlying_type": {
+          "name": "Boolean",
+          "type": "named"
+        }
+      }
+    },
+    {
+      "arguments": {
+        "body": {
+          "description": "Pet object that needs to be added to the store",
+          "type": {
+            "name": "Pet",
+            "type": "named"
+          }
+        }
+      },
       "description": "Update an existing pet",
       "name": "updatePet",
       "result_type": {

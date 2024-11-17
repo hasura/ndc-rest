@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"net/http"
 	"net/url"
+	"reflect"
+	"strconv"
 	"strings"
 
 	"github.com/hasura/ndc-sdk-go/schema"
@@ -79,5 +81,24 @@ func cloneURL(input *url.URL) *url.URL {
 		RawQuery:    input.RawQuery,
 		Fragment:    input.Fragment,
 		RawFragment: input.RawFragment,
+	}
+}
+
+func marshalSimple(val reflect.Value) (string, error) {
+	switch val.Kind() {
+	case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64:
+		return strconv.FormatInt(val.Int(), 10), nil
+	case reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64, reflect.Uintptr:
+		return strconv.FormatUint(val.Uint(), 10), nil
+	case reflect.Float32, reflect.Float64:
+		return strconv.FormatFloat(val.Float(), 'g', -1, val.Type().Bits()), nil
+	case reflect.String:
+		return val.String(), nil
+	case reflect.Bool:
+		return strconv.FormatBool(val.Bool()), nil
+	case reflect.Interface:
+		return fmt.Sprint(val.Interface()), nil
+	default:
+		return "", fmt.Errorf("invalid value: %v", val.Interface())
 	}
 }

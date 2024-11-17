@@ -148,6 +148,7 @@ type TypeSchema struct {
 	MaxLength   *int64      `json:"maxLength,omitempty" mapstructure:"maxLength" yaml:"maxLength,omitempty"`
 	MinLength   *int64      `json:"minLength,omitempty" mapstructure:"minLength" yaml:"minLength,omitempty"`
 	Items       *TypeSchema `json:"items,omitempty"     mapstructure:"items"     yaml:"items,omitempty"`
+	XML         *XMLSchema  `json:"xml,omitempty"       mapstructure:"xml"       yaml:"xml,omitempty"`
 	Description string      `json:"-"                   yaml:"-"`
 	ReadOnly    bool        `json:"-"                   yaml:"-"`
 	WriteOnly   bool        `json:"-"                   yaml:"-"`
@@ -309,6 +310,8 @@ type ObjectType struct {
 	Description *string `json:"description,omitempty" mapstructure:"description,omitempty" yaml:"description,omitempty"`
 	// Fields defined on this object type
 	Fields map[string]ObjectField `json:"fields" mapstructure:"fields" yaml:"fields"`
+	// XML schema
+	XML *XMLSchema `json:"xml,omitempty" mapstructure:"xml" yaml:"xml,omitempty"`
 }
 
 // Schema returns schema the object field
@@ -419,6 +422,24 @@ func (j *ArgumentInfo) UnmarshalJSON(b []byte) error {
 	}
 
 	return nil
+}
+
+// XMLSchema represents a XML schema.
+type XMLSchema struct {
+	Name      string `json:"name,omitempty"      mapstructure:"name"      yaml:"name,omitempty"`
+	Prefix    string `json:"prefix,omitempty"    mapstructure:"prefix"    yaml:"prefix,omitempty"`
+	Namespace string `json:"namespace,omitempty" mapstructure:"namespace" yaml:"namespace,omitempty"`
+	Wrapped   bool   `json:"wrapped,omitempty"   mapstructure:"wrapped"   yaml:"wrapped,omitempty"`
+}
+
+// Clone a new XMLSchema with the same property values.
+func (xs XMLSchema) Clone() XMLSchema {
+	return XMLSchema{
+		Name:      xs.Name,
+		Prefix:    xs.Prefix,
+		Namespace: xs.Namespace,
+		Wrapped:   xs.Wrapped,
+	}
 }
 
 func toAnySlice[T any](values []T) []any {

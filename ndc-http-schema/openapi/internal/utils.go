@@ -239,6 +239,15 @@ func createSchemaFromOpenAPISchema(input *base.Schema) *rest.TypeSchema {
 	ps.ReadOnly = input.ReadOnly != nil && *input.ReadOnly
 	ps.WriteOnly = input.WriteOnly != nil && *input.WriteOnly
 
+	if input.XML != nil {
+		ps.XML = &rest.XMLSchema{
+			Name:      input.XML.Name,
+			Prefix:    input.XML.Prefix,
+			Namespace: input.XML.Namespace,
+			Wrapped:   input.XML.Wrapped,
+		}
+	}
+
 	return ps
 }
 
@@ -406,4 +415,21 @@ func formatOperationName(input string) string {
 	}
 
 	return sb.String()
+}
+
+func buildUniqueOperationName(httpSchema *rest.NDCHttpSchema, operationId, pathKey, method string, options *ConvertOptions) string {
+	opName := formatOperationName(operationId)
+	exists := opName == ""
+	if !exists {
+		_, exists = httpSchema.Functions[opName]
+		if !exists {
+			_, exists = httpSchema.Procedures[opName]
+		}
+	}
+
+	if exists {
+		opName = buildPathMethodName(pathKey, method, options)
+	}
+
+	return opName
 }

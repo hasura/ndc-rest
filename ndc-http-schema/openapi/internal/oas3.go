@@ -19,7 +19,8 @@ import (
 type OAS3Builder struct {
 	*ConvertOptions
 
-	schema *rest.NDCHttpSchema
+	schema            *rest.NDCHttpSchema
+	hasContentTypeXML bool
 	// stores prebuilt and evaluating information of component schema types.
 	// some undefined schema types aren't stored in either object nor scalar,
 	// or self-reference types that haven't added into the object_types map yet.
@@ -262,6 +263,7 @@ func (oc *OAS3Builder) convertComponentSchemas(schemaItem orderedmap.Pair[string
 	if typeEncoder != nil {
 		typeName = getNamedType(typeEncoder, true, "")
 	}
+
 	cacheKey := "#/components/schemas/" + typeKey
 	// treat no-property objects as a Arbitrary JSON scalar
 	if typeEncoder == nil || typeName == string(rest.ScalarJSON) {

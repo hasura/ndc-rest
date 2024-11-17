@@ -35,10 +35,7 @@ func newOAS3OperationBuilder(builder *OAS3Builder, pathKey string, method string
 // BuildFunction build a HTTP NDC function information from OpenAPI v3 operation
 func (oc *oas3OperationBuilder) BuildFunction(itemGet *v3.Operation) (*rest.OperationInfo, string, error) {
 	start := time.Now()
-	funcName := formatOperationName(itemGet.OperationId)
-	if funcName == "" {
-		funcName = buildPathMethodName(oc.pathKey, "get", oc.builder.ConvertOptions)
-	}
+	funcName := buildUniqueOperationName(oc.builder.schema, itemGet.OperationId, oc.pathKey, oc.method, oc.builder.ConvertOptions)
 
 	defer func() {
 		oc.builder.Logger.Info("function",
@@ -53,6 +50,9 @@ func (oc *oas3OperationBuilder) BuildFunction(itemGet *v3.Operation) (*rest.Oper
 	if err != nil {
 		return nil, "", fmt.Errorf("%s: %w", oc.pathKey, err)
 	}
+
+	oc.builder.hasContentTypeXML = oc.builder.hasContentTypeXML || schemaResponse.ContentType == rest.ContentTypeXML
+
 	if resultType == nil {
 		return nil, "", nil
 	}
@@ -84,10 +84,7 @@ func (oc *oas3OperationBuilder) BuildProcedure(operation *v3.Operation) (*rest.O
 		return nil, "", nil
 	}
 	start := time.Now()
-	procName := formatOperationName(operation.OperationId)
-	if procName == "" {
-		procName = buildPathMethodName(oc.pathKey, oc.method, oc.builder.ConvertOptions)
-	}
+	procName := buildUniqueOperationName(oc.builder.schema, operation.OperationId, oc.pathKey, oc.method, oc.builder.ConvertOptions)
 
 	defer func() {
 		oc.builder.Logger.Info("procedure",
@@ -106,6 +103,7 @@ func (oc *oas3OperationBuilder) BuildProcedure(operation *v3.Operation) (*rest.O
 	if resultType == nil {
 		return nil, "", nil
 	}
+	oc.builder.hasContentTypeXML = oc.builder.hasContentTypeXML || schemaResponse.ContentType == rest.ContentTypeXML
 
 	err = oc.convertParameters(operation.Parameters, oc.pathKey, []string{procName})
 	if err != nil {
@@ -132,6 +130,8 @@ func (oc *oas3OperationBuilder) BuildProcedure(operation *v3.Operation) (*rest.O
 				In: rest.InBody,
 			},
 		}
+
+		oc.builder.hasContentTypeXML = oc.builder.hasContentTypeXML || reqBody.ContentType == rest.ContentTypeXML
 	}
 
 	description := oc.getOperationDescription(operation)
