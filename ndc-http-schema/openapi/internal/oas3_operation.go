@@ -349,6 +349,7 @@ func (oc *oas3OperationBuilder) convertResponse(responses *v3.Responses, apiPath
 				return nil, nil, nil
 			} else if code >= 200 && code < 300 {
 				resp = r.Value()
+
 				break
 			}
 		}
@@ -379,6 +380,7 @@ func (oc *oas3OperationBuilder) convertResponse(responses *v3.Responses, apiPath
 				bodyContent, present = resp.Content.Get(ct)
 				if present {
 					contentType = ct
+
 					break
 				}
 			}
@@ -415,5 +417,6 @@ func (oc *oas3OperationBuilder) getOperationDescription(operation *v3.Operation)
 	if operation.Description != "" {
 		return utils.StripHTMLTags(operation.Description)
 	}
+
 	return strings.ToUpper(oc.method) + " " + oc.pathKey
 }

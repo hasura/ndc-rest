@@ -32,5 +32,6 @@ func OpenAPIv2ToNDCSchema(input []byte, options ConvertOptions) (*rest.NDCHttpSc
 	if err != nil {
 		return nil, append(errs, err)
 	}
+
 	return result, nil
 }

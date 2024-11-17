@@ -74,6 +74,7 @@ func (j *ForwardHeadersSettings) UnmarshalJSON(b []byte) error {
 	}
 
 	*j = ForwardHeadersSettings(rawResult)
+
 	return nil
 }
 
@@ -130,6 +131,7 @@ func (rs RetryPolicySetting) Validate() (*rest.RetryPolicy, error) {
 	for _, status := range rs.HTTPStatus {
 		if status < 400 || status >= 600 {
 			errs = append(errs, errors.New("retry http status must be in between 400 and 599"))
+
 			break
 		}
 	}
@@ -143,6 +145,7 @@ func (rs RetryPolicySetting) Validate() (*rest.RetryPolicy, error) {
 	if len(errs) > 0 {
 		return result, errors.Join(errs...)
 	}
+
 	return result, nil
 }
 

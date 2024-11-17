@@ -365,12 +365,14 @@ func evalHTTPResponse(ctx context.Context, span trace.Span, resp *http.Response,
 		if len(respBody) == 0 {
 			return nil, resp.Header, nil
 		}
+
 		return string(respBody), resp.Header, nil
 	case "text/plain", "text/html":
 		respBody, err := io.ReadAll(resp.Body)
 		if err != nil {
 			return nil, nil, schema.NewConnectorError(http.StatusInternalServerError, err.Error(), nil)
 		}
+
 		return string(respBody), resp.Header, nil
 	case rest.ContentTypeJSON:
 		if len(resultType) > 0 {
@@ -388,6 +390,7 @@ func evalHTTPResponse(ctx context.Context, span trace.Span, resp *http.Response,
 					// fallback to raw string response if the result type is String
 					return string(respBytes), resp.Header, nil
 				}
+
 				return strResult, resp.Header, nil
 			}
 		}
@@ -405,6 +408,7 @@ func evalHTTPResponse(ctx context.Context, span trace.Span, resp *http.Response,
 		if err != nil {
 			return nil, nil, schema.InternalServerError(err.Error(), nil)
 		}
+
 		return result, resp.Header, nil
 	case rest.ContentTypeNdJSON:
 		var results []any
@@ -425,6 +429,7 @@ func evalHTTPResponse(ctx context.Context, span trace.Span, resp *http.Response,
 		if err != nil {
 			return nil, nil, schema.InternalServerError(err.Error(), nil)
 		}
+
 		return result, resp.Header, nil
 	default:
 		return nil, nil, schema.NewConnectorError(http.StatusInternalServerError, "failed to evaluate response", map[string]any{
@@ -438,5 +443,6 @@ func parseContentType(input string) string {
 		return ""
 	}
 	parts := strings.Split(input, ";")
+
 	return strings.TrimSpace(parts[0])
 }

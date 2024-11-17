@@ -64,6 +64,7 @@ func (j *SecuritySchemeType) UnmarshalJSON(b []byte) error {
 	}
 
 	*j = result
+
 	return nil
 }
 
@@ -73,6 +74,7 @@ func ParseSecuritySchemeType(value string) (SecuritySchemeType, error) {
 	if !slices.Contains(securityScheme_enums, result) {
 		return result, fmt.Errorf("invalid SecuritySchemeType. Expected %+v, got <%s>", securityScheme_enums, value)
 	}
+
 	return result, nil
 }
 
@@ -108,6 +110,7 @@ func (j *APIKeyLocation) UnmarshalJSON(b []byte) error {
 	}
 
 	*j = result
+
 	return nil
 }
 
@@ -117,6 +120,7 @@ func ParseAPIKeyLocation(value string) (APIKeyLocation, error) {
 	if !slices.Contains(apiKeyLocation_enums, result) {
 		return result, fmt.Errorf("invalid APIKeyLocation. Expected %+v, got <%s>", apiKeyLocation_enums, value)
 	}
+
 	return result, nil
 }
 
@@ -559,6 +563,7 @@ func (j *OAuthFlowType) UnmarshalJSON(b []byte) error {
 	}
 
 	*j = result
+
 	return nil
 }
 
@@ -568,6 +573,7 @@ func ParseOAuthFlowType(value string) (OAuthFlowType, error) {
 	if !slices.Contains(oauthFlow_enums, result) {
 		return result, fmt.Errorf("invalid OAuthFlowType. Expected %+v, got <%s>", oauthFlow_enums, value)
 	}
+
 	return result, nil
 }
 
@@ -603,6 +609,7 @@ func (ss OAuthFlow) Validate(flowType OAuthFlowType) error {
 			return fmt.Errorf("refreshUrl: %w", err)
 		}
 	}
+
 	return nil
 }
 
@@ -676,6 +683,7 @@ func (ss OpenIDConnectConfig) Validate() error {
 	if _, err := parseRelativeOrHttpURL(ss.OpenIDConnectURL); err != nil {
 		return fmt.Errorf("openIdConnectUrl: %w", err)
 	}
+
 	return nil
 }
 
@@ -744,6 +752,7 @@ func (as AuthSecurity) Name() string {
 			return k
 		}
 	}
+
 	return ""
 }
 
@@ -754,6 +763,7 @@ func (as AuthSecurity) Scopes() []string {
 			return scopes
 		}
 	}
+
 	return []string{}
 }
 
@@ -775,11 +785,13 @@ func (ass AuthSecurities) IsOptional() bool {
 	if ass.IsEmpty() {
 		return true
 	}
+
 	for _, as := range ass {
 		if as.IsOptional() {
 			return true
 		}
 	}
+
 	return false
 }
 
@@ -795,6 +807,7 @@ func (ass AuthSecurities) Get(name string) AuthSecurity {
 			return as
 		}
 	}
+
 	return nil
 }
 
@@ -803,5 +816,6 @@ func (ass AuthSecurities) First() AuthSecurity {
 	for _, as := range ass {
 		return as
 	}
+
 	return nil
 }

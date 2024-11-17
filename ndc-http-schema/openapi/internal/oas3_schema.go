@@ -91,6 +91,7 @@ func (oc *oas3SchemaBuilder) getSchemaTypeFromProxy(schemaProxy *base.SchemaProx
 			ndcType = schema.NewNullableType(ndcType)
 		}
 	}
+
 	return ndcType, typeSchema, nil
 }
 
@@ -328,6 +329,7 @@ func (oc *oas3SchemaBuilder) buildAllOfAnyOfSchemaType(schemaProxies []*base.Sch
 				Description: ty.Description,
 				Type:        []string{},
 			}
+
 			return oc.builder.buildScalarJSON(), ty, nil
 		}
 

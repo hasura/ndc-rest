@@ -186,6 +186,7 @@ func (oc *OAS3Builder) convertSecuritySchemes(scheme orderedmap.Pair[string, *v3
 	}
 
 	oc.schema.Settings.SecuritySchemes[key] = result
+
 	return nil
 }
 
@@ -234,6 +235,7 @@ func (oc *OAS3Builder) pathToNDCOperations(pathItem orderedmap.Pair[string, *v3.
 	if procDelete != nil {
 		oc.schema.Procedures[procDeleteName] = *procDelete
 	}
+
 	return nil
 }
 
@@ -287,6 +289,7 @@ func (oc *OAS3Builder) trimPathPrefix(input string) string {
 	if oc.ConvertOptions.TrimPrefix == "" {
 		return input
 	}
+
 	return strings.TrimPrefix(input, oc.ConvertOptions.TrimPrefix)
 }
 
@@ -296,6 +299,7 @@ func (oc *OAS3Builder) buildScalarJSON() *schema.NamedType {
 	if _, ok := oc.schema.ScalarTypes[scalarName]; !ok {
 		oc.schema.ScalarTypes[scalarName] = *defaultScalarTypes[rest.ScalarJSON]
 	}
+
 	return schema.NewNamedType(scalarName)
 }
 
@@ -326,9 +330,11 @@ func (oc *OAS3Builder) populateWriteSchemaType(schemaType schema.Type) (schema.T
 	switch ty := schemaType.Interface().(type) {
 	case *schema.NullableType:
 		ut, name, isInput := oc.populateWriteSchemaType(ty.UnderlyingType)
+
 		return schema.NewNullableType(ut.Interface()).Encode(), name, isInput
 	case *schema.ArrayType:
 		ut, name, isInput := oc.populateWriteSchemaType(ty.ElementType)
+
 		return schema.NewArrayType(ut.Interface()).Encode(), name, isInput
 	case *schema.NamedType:
 		_, evaluated := oc.schemaCache[ty.Name]
@@ -376,8 +382,10 @@ func (oc *OAS3Builder) populateWriteSchemaType(schemaType schema.Type) (schema.T
 		}
 		if hasWriteField {
 			oc.schema.ObjectTypes[writeName] = writeObject
+
 			return schema.NewNamedType(writeName).Encode(), writeName, true
 		}
+
 		return schemaType, ty.Name, false
 	default:
 		return schemaType, getNamedType(schemaType.Interface(), true, ""), false

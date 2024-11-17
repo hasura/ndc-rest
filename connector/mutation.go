@@ -78,6 +78,7 @@ func (c *HTTPConnector) explainProcedure(operation *schema.MutationOperation) (*
 	}
 
 	httpOptions.Settings = metadata.Settings
+
 	return httpRequest, procedure, httpOptions, nil
 }
 

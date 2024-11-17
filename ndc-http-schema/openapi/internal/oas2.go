@@ -48,6 +48,7 @@ func (oc *OAS2Builder) BuildDocumentModel(docModel *libopenapi.DocumentModel[v2.
 		for _, s := range docModel.Model.Schemes {
 			if strings.HasPrefix(s, "http") {
 				scheme = s
+
 				break
 			}
 		}
@@ -140,6 +141,7 @@ func (oc *OAS2Builder) convertSecuritySchemes(scheme orderedmap.Pair[string, *v2
 	}
 
 	oc.schema.Settings.SecuritySchemes[key] = result
+
 	return nil
 }
 
@@ -186,6 +188,7 @@ func (oc *OAS2Builder) pathToNDCOperations(pathItem orderedmap.Pair[string, *v2.
 	if procDelete != nil {
 		oc.schema.Procedures[procDeleteName] = *procDelete
 	}
+
 	return nil
 }
 
@@ -233,5 +236,6 @@ func (oc *OAS2Builder) buildScalarJSON() *schema.NamedType {
 	if _, ok := oc.schema.ScalarTypes[scalarName]; !ok {
 		oc.schema.ScalarTypes[scalarName] = *defaultScalarTypes[rest.ScalarJSON]
 	}
+
 	return schema.NewNamedType(scalarName)
 }

@@ -85,6 +85,7 @@ func MergeNDCHttpSchemas(config *Configuration, schemas []NDCHttpRuntimeSchema) 
 	for i, item := range schemas {
 		if item.NDCHttpSchema == nil {
 			errors[item.Name] = []string{fmt.Sprintf("schema of the item %d (%s) is empty", i, item.Name)}
+
 			return nil, nil, errors
 		}
 		settings := item.Settings
@@ -153,6 +154,7 @@ func MergeNDCHttpSchemas(config *Configuration, schemas []NDCHttpRuntimeSchema) 
 			req, err := validateRequestSchema(fnItem.Request, "get")
 			if err != nil {
 				errs = append(errs, fmt.Sprintf("function %s: %s", fnName, err))
+
 				continue
 			}
 
@@ -173,6 +175,7 @@ func MergeNDCHttpSchemas(config *Configuration, schemas []NDCHttpRuntimeSchema) 
 			req, err := validateRequestSchema(procItem.Request, "")
 			if err != nil {
 				errs = append(errs, fmt.Sprintf("procedure %s: %s", procName, err))
+
 				continue
 			}
 
@@ -188,6 +191,7 @@ func MergeNDCHttpSchemas(config *Configuration, schemas []NDCHttpRuntimeSchema) 
 
 		if len(errs) > 0 {
 			errors[item.Name] = errs
+
 			continue
 		}
 		appliedSchemas[i] = meta

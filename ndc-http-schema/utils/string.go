@@ -22,6 +22,7 @@ func ToCamelCase(input string) string {
 	if pascalCase == "" {
 		return pascalCase
 	}
+
 	return strings.ToLower(pascalCase[:1]) + pascalCase[1:]
 }
 
@@ -43,6 +44,7 @@ func ToPascalCase(input string) string {
 		}
 		parts[i] = strings.ToUpper(parts[i][:1]) + parts[i][1:]
 	}
+
 	return strings.Join(parts, "")
 }
 
@@ -60,6 +62,7 @@ func stringSliceToCase(inputs []string, convert func(string) string, sep string)
 		}
 		results = append(results, convert(trimmed))
 	}
+
 	return strings.Join(results, sep)
 }
 
@@ -76,22 +79,26 @@ func ToSnakeCase(input string) string {
 		char := rune(input[i])
 		if char == '_' || char == '-' {
 			sb.WriteRune('_')
+
 			continue
 		}
 		if unicode.IsDigit(char) || unicode.IsLower(char) {
 			sb.WriteRune(char)
+
 			continue
 		}
 
 		if unicode.IsUpper(char) {
 			if i == 0 {
 				sb.WriteRune(unicode.ToLower(char))
+
 				continue
 			}
 			prevChar := rune(input[i-1])
 			if unicode.IsDigit(prevChar) || unicode.IsLower(prevChar) {
 				sb.WriteRune('_')
 				sb.WriteRune(unicode.ToLower(char))
+
 				continue
 			}
 			if i < inputLen-1 {
@@ -99,6 +106,7 @@ func ToSnakeCase(input string) string {
 				if unicode.IsUpper(prevChar) && unicode.IsLetter(nextChar) && !unicode.IsUpper(nextChar) {
 					sb.WriteRune('_')
 					sb.WriteRune(unicode.ToLower(char))
+
 					continue
 				}
 			}
@@ -106,6 +114,7 @@ func ToSnakeCase(input string) string {
 			sb.WriteRune(unicode.ToLower(char))
 		}
 	}
+
 	return sb.String()
 }
 
@@ -174,6 +183,7 @@ func StripHTMLTags(str string) string {
 				builder.WriteString(str[end:start])
 			}
 			in = true
+
 			continue
 		}
 		// else c == htmlTagEnd
@@ -213,7 +223,7 @@ func RemoveYAMLSpecialCharacters(input []byte) []byte {
 		}
 	}
 
-	return []byte(strings.ToValidUTF8(string(sb.String()), ""))
+	return []byte(strings.ToValidUTF8(sb.String(), ""))
 }
 
 // getu4 decodes \uXXXX from the beginning of s, returning the hex value,
@@ -228,7 +238,7 @@ func getu4(s []byte) rune {
 	for _, c := range s[2:6] {
 		switch {
 		case '0' <= c && c <= '9':
-			c = c - '0'
+			c -= '0'
 		case 'a' <= c && c <= 'f':
 			c = c - 'a' + 10
 		case 'A' <= c && c <= 'F':
@@ -238,5 +248,6 @@ func getu4(s []byte) rune {
 		}
 		r = r*16 + rune(c)
 	}
+
 	return r
 }

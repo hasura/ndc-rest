@@ -249,6 +249,7 @@ func (c *RequestBuilder) evalMultipartForm(w *MultipartWriter, bodyInfo *rest.Ar
 					return err
 				}
 			}
+
 			return nil
 		case reflect.Struct:
 			reflectType := bodyData.Type()
@@ -272,6 +273,7 @@ func (c *RequestBuilder) evalMultipartForm(w *MultipartWriter, bodyInfo *rest.Ar
 					return err
 				}
 			}
+
 			return nil
 		}
 	}
@@ -296,8 +298,10 @@ func (c *RequestBuilder) evalMultipartFieldValueRecursive(w *MultipartWriter, na
 					return err
 				}
 			}
+
 			return w.WriteJSON(name, value.Interface(), headers)
 		}
+
 		if !slices.Contains([]reflect.Kind{reflect.Slice, reflect.Array}, value.Kind()) {
 			return fmt.Errorf("%s: expected array type, got %v", name, value.Kind())
 		}
@@ -314,6 +318,7 @@ func (c *RequestBuilder) evalMultipartFieldValueRecursive(w *MultipartWriter, na
 				return err
 			}
 		}
+
 		return nil
 	case *schema.NullableType:
 		if !notNull {

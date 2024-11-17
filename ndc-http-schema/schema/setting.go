@@ -34,6 +34,7 @@ func (j *NDCHttpSettings) UnmarshalJSON(b []byte) error {
 	_ = result.Validate()
 
 	*j = result
+
 	return nil
 }
 
@@ -167,6 +168,7 @@ func parseRelativeOrHttpURL(input string) (*url.URL, error) {
 	if strings.HasPrefix(input, "/") {
 		return &url.URL{Path: input}, nil
 	}
+
 	return parseHttpURL(input)
 }
 

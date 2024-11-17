@@ -76,10 +76,12 @@ func getBaseURLFromServers(servers []rest.ServerConfig, serverIDs []string) (*ur
 		return nil, ""
 	case 1:
 		result := results[0]
+
 		return &result, selectedServerIDs[0]
 	default:
 		index := rand.IntN(len(results) - 1)
 		host := results[index]
+
 		return &host, selectedServerIDs[index]
 	}
 }
@@ -99,6 +101,7 @@ func BuildDistributedRequestsWithOptions(request *RetryableRequest, httpOptions 
 		if err := request.applySettings(httpOptions.Settings, httpOptions.Explain); err != nil {
 			return nil, err
 		}
+
 		return []RetryableRequest{*request}, nil
 	}
 
@@ -142,6 +145,7 @@ func BuildDistributedRequestsWithOptions(request *RetryableRequest, httpOptions 
 		}
 		requests = append(requests, req)
 	}
+
 	return requests, nil
 }
 

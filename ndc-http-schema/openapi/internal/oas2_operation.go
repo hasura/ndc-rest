@@ -48,6 +48,7 @@ func (oc *oas2OperationBuilder) BuildFunction(pathKey string, operation *v2.Oper
 			slog.Any("produces", operation.Produces),
 			slog.Any("consumes", operation.Consumes),
 		)
+
 		return nil, "", nil
 	}
 
@@ -108,6 +109,7 @@ func (oc *oas2OperationBuilder) BuildProcedure(pathKey string, method string, op
 			slog.Any("produces", operation.Produces),
 			slog.Any("consumes", operation.Consumes),
 		)
+
 		return nil, "", nil
 	}
 
@@ -319,6 +321,7 @@ func (oc *oas2OperationBuilder) convertResponse(responses *v2.Responses, apiPath
 				return nil, nil
 			} else if code >= 200 && code < 300 {
 				resp = r.Value()
+
 				break
 			}
 		}

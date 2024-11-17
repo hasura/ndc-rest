@@ -19,6 +19,7 @@ func UnwrapNullableType(input schema.Type) (schema.TypeEncoder, bool, error) {
 		if err != nil {
 			return nil, false, err
 		}
+
 		return childType, true, nil
 	case *schema.NamedType, *schema.ArrayType:
 		return ty, false, nil
@@ -32,6 +33,7 @@ func eitherMaskSecret(input string, shouldMask bool) string {
 	if !shouldMask {
 		return input
 	}
+
 	return MaskString(input)
 }
 

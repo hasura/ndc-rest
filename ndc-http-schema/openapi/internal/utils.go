@@ -19,6 +19,7 @@ func applyConvertOptions(opts ConvertOptions) *ConvertOptions {
 		opts.Logger = slog.Default()
 	}
 	opts.MethodAlias = getMethodAlias(opts.MethodAlias)
+
 	return &opts
 }
 
@@ -30,6 +31,7 @@ func buildPathMethodName(apiPath string, method string, options *ConvertOptions)
 	if alias, ok := options.MethodAlias[method]; ok {
 		method = alias
 	}
+
 	return utils.ToCamelCase(method + encodedPath)
 }
 
@@ -38,6 +40,7 @@ func getSchemaRefTypeNameV2(name string) string {
 	if len(result) < 2 {
 		return ""
 	}
+
 	return result[1]
 }
 
@@ -46,6 +49,7 @@ func getSchemaRefTypeNameV3(name string) string {
 	if len(result) < 2 {
 		return ""
 	}
+
 	return result[1]
 }
 
@@ -342,6 +346,7 @@ func evalSchemaProxiesSlice(schemaProxies []*base.SchemaProxy, location rest.Par
 		// however, it's redundant and prevents the tool converting correct types
 		if location == rest.InQuery && (sc.Type[0] == "string" && len(sc.Enum) == 1 && (sc.Enum[0] == nil || sc.Enum[0].Value == "")) {
 			nullable = true
+
 			continue
 		}
 
@@ -387,11 +392,13 @@ func formatOperationName(input string) string {
 	for i, c := range input {
 		if unicode.IsLetter(c) {
 			sb.WriteRune(c)
+
 			continue
 		}
 
 		if unicode.IsNumber(c) && i > 0 {
 			sb.WriteRune(c)
+
 			continue
 		}
 

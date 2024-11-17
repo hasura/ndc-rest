@@ -18,7 +18,6 @@ linters:
     - wsl
     - wrapcheck
     - varnamelen
-    - nlreturn
     - exhaustive
     - exhaustruct
     - gocyclo

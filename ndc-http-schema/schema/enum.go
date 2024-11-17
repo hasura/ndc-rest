@@ -44,6 +44,7 @@ func (j *SchemaSpecType) UnmarshalJSON(b []byte) error {
 	}
 
 	*j = result
+
 	return nil
 }
 
@@ -53,6 +54,7 @@ func ParseSchemaSpecType(value string) (SchemaSpecType, error) {
 	if !slices.Contains(schemaSpecType_enums, result) {
 		return result, fmt.Errorf("invalid SchemaSpecType. Expected %+v, got <%s>", schemaSpecType_enums, value)
 	}
+
 	return result, nil
 }
 
@@ -87,6 +89,7 @@ func (j *SchemaFileFormat) UnmarshalJSON(b []byte) error {
 	}
 
 	*j = result
+
 	return nil
 }
 
@@ -101,6 +104,7 @@ func ParseSchemaFileFormat(extension string) (SchemaFileFormat, error) {
 	if !result.IsValid() {
 		return result, fmt.Errorf("invalid SchemaFileFormat. Expected %+v, got <%s>", schemaFileFormat_enums, extension)
 	}
+
 	return result, nil
 }
 
@@ -142,6 +146,7 @@ func (j *ParameterLocation) UnmarshalJSON(b []byte) error {
 	}
 
 	*j = result
+
 	return nil
 }
 
@@ -156,6 +161,7 @@ func ParseParameterLocation(input string) (ParameterLocation, error) {
 	if !result.IsValid() {
 		return result, fmt.Errorf("invalid ParameterLocation. Expected %+v, got <%s>", parameterLocation_enums, input)
 	}
+
 	return result, nil
 }
 
@@ -275,6 +281,7 @@ func (j *ParameterEncodingStyle) UnmarshalJSON(b []byte) error {
 	}
 
 	*j = result
+
 	return nil
 }
 
@@ -289,5 +296,6 @@ func ParseParameterEncodingStyle(input string) (ParameterEncodingStyle, error) {
 	if !result.IsValid() {
 		return result, fmt.Errorf("invalid ParameterEncodingStyle. Expected %+v, got <%s>", parameterEncodingStyle_enums, input)
 	}
+
 	return result, nil
 }

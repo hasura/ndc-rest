@@ -204,6 +204,7 @@ func (oc *oas2SchemaBuilder) getSchemaType(typeSchema *base.Schema, fieldPaths [
 	if nullable {
 		return schema.NewNullableType(result), typeResult, nil
 	}
+
 	return result, typeResult, nil
 }
 
@@ -315,6 +316,7 @@ func (oc *oas2SchemaBuilder) buildAllOfAnyOfSchemaType(schemaProxies []*base.Sch
 				Description: ty.Description,
 				Type:        []string{},
 			}
+
 			return oc.builder.buildScalarJSON(), ty, nil
 		}
 
@@ -365,5 +367,6 @@ func (oc *oas2SchemaBuilder) trimPathPrefix(input string) string {
 	if oc.builder.ConvertOptions.TrimPrefix == "" {
 		return input
 	}
+
 	return strings.TrimPrefix(input, oc.builder.ConvertOptions.TrimPrefix)
 }

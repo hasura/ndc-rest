@@ -45,6 +45,7 @@ func (c *RequestBuilder) evalURLAndHeaderParameters() (*url.URL, http.Header, er
 			return nil, nil, fmt.Errorf("%s: %w", argumentKey, err)
 		}
 	}
+
 	return endpoint, headers, nil
 }
 
@@ -87,6 +88,7 @@ func (c *RequestBuilder) evalURLAndHeaderParameterBySchema(endpoint *url.URL, he
 			endpoint.Path = strings.ReplaceAll(endpoint.Path, "{"+argumentKey+"}", strings.Join(defaultParam.Values(), ","))
 		}
 	}
+
 	return nil
 }
 
@@ -101,6 +103,7 @@ func (c *RequestBuilder) encodeParameterValues(objectField *rest.ObjectField, re
 		if !nonNull {
 			return results, nil
 		}
+
 		return c.encodeParameterValues(&rest.ObjectField{
 			ObjectField: schema.ObjectField{
 				Type: ty.UnderlyingType,
@@ -188,8 +191,10 @@ func (c *RequestBuilder) encodeParameterValues(objectField *rest.ObjectField, re
 		default:
 			return nil, fmt.Errorf("%s: failed to evaluate object, got %s", strings.Join(fieldPaths, ""), kind)
 		}
+
 		return results, nil
 	}
+
 	return nil, fmt.Errorf("%s: invalid type %v", strings.Join(fieldPaths, ""), objectField.Type)
 }
 
@@ -200,6 +205,7 @@ func encodeScalarParameterReflectionValues(reflectValue reflect.Value, scalar *s
 		if err != nil {
 			return nil, fmt.Errorf("%s: %w", strings.Join(fieldPaths, ""), err)
 		}
+
 		return []ParameterItem{
 			NewParameterItem([]Key{}, []string{strconv.FormatBool(value)}),
 		}, nil
@@ -208,12 +214,14 @@ func encodeScalarParameterReflectionValues(reflectValue reflect.Value, scalar *s
 		if err != nil {
 			return nil, fmt.Errorf("%s: %w", strings.Join(fieldPaths, ""), err)
 		}
+
 		return []ParameterItem{NewParameterItem([]Key{}, []string{value})}, nil
 	case *schema.TypeRepresentationInteger, *schema.TypeRepresentationInt8, *schema.TypeRepresentationInt16, *schema.TypeRepresentationInt32, *schema.TypeRepresentationInt64, *schema.TypeRepresentationBigInteger: //nolint:all
 		value, err := utils.DecodeIntReflection[int64](reflectValue)
 		if err != nil {
 			return nil, fmt.Errorf("%s: %w", strings.Join(fieldPaths, ""), err)
 		}
+
 		return []ParameterItem{
 			NewParameterItem([]Key{}, []string{strconv.FormatInt(value, 10)}),
 		}, nil
@@ -222,6 +230,7 @@ func encodeScalarParameterReflectionValues(reflectValue reflect.Value, scalar *s
 		if err != nil {
 			return nil, fmt.Errorf("%s: %w", strings.Join(fieldPaths, ""), err)
 		}
+
 		return []ParameterItem{
 			NewParameterItem([]Key{}, []string{fmt.Sprint(value)}),
 		}, nil
@@ -230,15 +239,18 @@ func encodeScalarParameterReflectionValues(reflectValue reflect.Value, scalar *s
 		if err != nil {
 			return nil, fmt.Errorf("%s: %w", strings.Join(fieldPaths, ""), err)
 		}
+
 		if !slices.Contains(sl.OneOf, value) {
 			return nil, fmt.Errorf("%s: the value must be one of %v, got %s", strings.Join(fieldPaths, ""), sl.OneOf, value)
 		}
+
 		return []ParameterItem{NewParameterItem([]Key{}, []string{value})}, nil
 	case *schema.TypeRepresentationDate:
 		value, err := utils.DecodeDateTimeReflection(reflectValue)
 		if err != nil {
 			return nil, fmt.Errorf("%s: %w", strings.Join(fieldPaths, ""), err)
 		}
+
 		return []ParameterItem{
 			NewParameterItem([]Key{}, []string{value.Format(time.DateOnly)}),
 		}, nil
@@ -247,6 +259,7 @@ func encodeScalarParameterReflectionValues(reflectValue reflect.Value, scalar *s
 		if err != nil {
 			return nil, fmt.Errorf("%s: %w", strings.Join(fieldPaths, ""), err)
 		}
+
 		return []ParameterItem{
 			NewParameterItem([]Key{}, []string{value.Format(time.RFC3339)}),
 		}, nil
@@ -255,10 +268,12 @@ func encodeScalarParameterReflectionValues(reflectValue reflect.Value, scalar *s
 		if err != nil {
 			return nil, fmt.Errorf("%s: %w", strings.Join(fieldPaths, ""), err)
 		}
+
 		_, err = uuid.Parse(rawValue)
 		if err != nil {
 			return nil, fmt.Errorf("%s: %w", strings.Join(fieldPaths, ""), err)
 		}
+
 		return []ParameterItem{NewParameterItem([]Key{}, []string{rawValue})}, nil
 	default:
 		return encodeParameterReflectionValues(reflectValue, fieldPaths)
@@ -388,11 +403,13 @@ func buildParamQueryKey(name string, encObject rest.EncodingObject, keys Keys, v
 		for i, key := range keys {
 			if len(resultKeys) == 0 {
 				resultKeys = append(resultKeys, key.String())
+
 				continue
 			}
 			if i == len(keys)-1 && key.Index() != nil {
 				// the last element of array in the deepObject style doesn't have index
 				resultKeys = append(resultKeys, "[]")
+
 				continue
 			}
 
@@ -413,6 +430,7 @@ func evalQueryParameterURL(q *url.Values, name string, encObject rest.EncodingOb
 		for _, value := range values {
 			q.Add(paramKey, value)
 		}
+
 		return
 	}
 
@@ -449,6 +467,7 @@ func encodeQueryValues(qValues url.Values, allowReserved bool) string {
 		}
 		index++
 	}
+
 	return builder.String()
 }
 
@@ -457,6 +476,7 @@ func setHeaderParameters(header *http.Header, param *rest.RequestParameter, quer
 	// the param is an array
 	if defaultParam != nil {
 		header.Set(param.Name, strings.Join(defaultParam.Values(), ","))
+
 		return
 	}
 
@@ -466,6 +486,7 @@ func setHeaderParameters(header *http.Header, param *rest.RequestParameter, quer
 			headerValues = append(headerValues, fmt.Sprintf("%s=%s", pair.Keys().String(), strings.Join(pair.Values(), ",")))
 		}
 		header.Set(param.Name, strings.Join(headerValues, ","))
+
 		return
 	}
 
