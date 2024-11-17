@@ -2,7 +2,6 @@ package utils
 
 import (
 	"regexp"
-	"slices"
 	"strings"
 	"unicode"
 	"unicode/utf8"
@@ -191,26 +190,53 @@ func RemoveYAMLSpecialCharacters(input []byte) []byte {
 	inputLength := len(input)
 	for i := 0; i < inputLength; i++ {
 		c := input[i]
-		switch c {
-		case '\n', '\t':
+		r := rune(c)
+		switch {
+		case unicode.IsSpace(r):
 			sb.WriteRune(' ')
-		case '\\':
-			if i < inputLength-1 {
-				if slices.Contains([]byte{'n', 's', 't'}, input[i+1]) {
-					sb.WriteRune(' ')
-				} else {
-					sb.WriteByte(c)
-					sb.WriteByte(input[i+1])
-				}
+		case c == '\\' && i < inputLength-1:
+			switch input[i+1] {
+			case 'b', 'n', 'r', 't', 'f':
+				sb.WriteRune(' ')
 				i++
-			}
-		default:
-			r := rune(c)
-			if !unicode.IsControl(r) && utf8.ValidRune(r) && r != utf8.RuneError {
+			case 'u':
+				u := getu4(input[i:])
+				if u > -1 && utf8.ValidRune(u) {
+					sb.WriteRune(u)
+				}
+				i += 5
+			default:
 				sb.WriteByte(c)
 			}
+		case !unicode.IsControl(r) && unicode.IsPrint(r) && utf8.ValidRune(r) && r != utf8.RuneError:
+			sb.WriteByte(c)
 		}
 	}
 
-	return []byte(strings.ToValidUTF8(sb.String(), ""))
+	return []byte(strings.ToValidUTF8(string(sb.String()), ""))
+}
+
+// getu4 decodes \uXXXX from the beginning of s, returning the hex value,
+// or it returns -1. Borrow from the standard [JSON decoder] library
+//
+// [JSON decoder](https://github.com/golang/go/blob/0a6f05e30f58023bf45f747a79c20751db2bcfe7/src/encoding/json/decode.go#L1151)
+func getu4(s []byte) rune {
+	if len(s) < 6 || s[0] != '\\' || s[1] != 'u' {
+		return -1
+	}
+	var r rune
+	for _, c := range s[2:6] {
+		switch {
+		case '0' <= c && c <= '9':
+			c = c - '0'
+		case 'a' <= c && c <= 'f':
+			c = c - 'a' + 10
+		case 'A' <= c && c <= 'F':
+			c = c - 'A' + 10
+		default:
+			return -1
+		}
+		r = r*16 + rune(c)
+	}
+	return r
 }
