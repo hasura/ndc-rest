@@ -22,12 +22,14 @@ func Json2Yaml(args *Json2YamlCommandArguments, logger *slog.Logger) error {
 	rawContent, err := utils.ReadFileFromPath(args.File)
 	if err != nil {
 		slog.Error(err.Error())
+
 		return err
 	}
 
 	var jsonContent any
 	if err := json.Unmarshal(rawContent, &jsonContent); err != nil {
 		slog.Error(err.Error())
+
 		return err
 	}
 
@@ -36,15 +38,18 @@ func Json2Yaml(args *Json2YamlCommandArguments, logger *slog.Logger) error {
 	encoder.SetIndent(2)
 	if err := encoder.Encode(jsonContent); err != nil {
 		slog.Error(err.Error())
+
 		return err
 	}
 
 	if args.Output != "" {
 		if err := os.WriteFile(args.Output, buf.Bytes(), 0664); err != nil {
 			slog.Error(err.Error())
+
 			return err
 		}
 		logger.Info("generated successfully to " + args.Output)
+
 		return nil
 	}
 

@@ -55,6 +55,7 @@ func ReadConfigurationFile(configurationDir string) (*Configuration, error) {
 		if err = json.Unmarshal(jsonBytes, &config); err != nil {
 			return nil, err
 		}
+
 		return &config, nil
 	}
 

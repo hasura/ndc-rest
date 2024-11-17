@@ -71,6 +71,7 @@ func (c *HTTPConnector) ParseConfiguration(ctx context.Context, configurationDir
 		schemas, errs = configuration.BuildSchemaFromConfig(config, configurationDir, logger)
 		if len(errs) > 0 {
 			printSchemaValidationError(logger, errs)
+
 			return nil, errBuildSchemaFailed
 		}
 	}

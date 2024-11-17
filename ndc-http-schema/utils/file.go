@@ -81,6 +81,7 @@ func ReadFileFromPath(filePath string) ([]byte, error) {
 			if errorMsg == "" {
 				errorMsg = resp.Status
 			}
+
 			return nil, fmt.Errorf("failed to download file from %s: %s", filePath, errorMsg)
 		}
 	} else {
@@ -119,11 +120,13 @@ func WalkFiles(filePath string, callback func(data []byte) error) error {
 			if errorMsg == "" {
 				errorMsg = resp.Status
 			}
+
 			return fmt.Errorf("failed to download file from %s: %s", filePath, errorMsg)
 		}
 		if len(result) == 0 {
 			return fmt.Errorf("failed to read file from %s: no content", filePath)
 		}
+
 		return callback(result)
 	}
 
@@ -140,6 +143,7 @@ func WalkFiles(filePath string, callback func(data []byte) error) error {
 		if len(result) == 0 {
 			return fmt.Errorf("failed to read file from %s: no content", p)
 		}
+
 		return callback(result)
 	}
 
@@ -166,5 +170,6 @@ func ResolveFilePath(dir string, filePath string) string {
 	if !strings.HasPrefix(filePath, "/") && !strings.HasPrefix(filePath, "\\") && !strings.HasPrefix(filePath, "http") {
 		return path.Join(dir, filePath)
 	}
+
 	return filePath
 }

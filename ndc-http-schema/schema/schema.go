@@ -61,6 +61,7 @@ func (ndc NDCHttpSchema) ToSchemaResponse() *schema.SchemaResponse {
 	for key, object := range ndc.ObjectTypes {
 		objectTypes[key] = object.Schema()
 	}
+
 	return &schema.SchemaResponse{
 		Collections: []schema.CollectionInfo{},
 		ScalarTypes: ndc.ScalarTypes,
@@ -205,6 +206,7 @@ func (eo *EncodingObject) GetHeader(key string) *RequestParameter {
 	if !ok {
 		return nil
 	}
+
 	return &result
 }
 
@@ -277,6 +279,7 @@ func (j OperationInfo) FunctionSchema(name string) schema.FunctionInfo {
 	for key, argument := range j.Arguments {
 		arguments[key] = argument.ArgumentInfo
 	}
+
 	return schema.FunctionInfo{
 		Name:        name,
 		Arguments:   arguments,
@@ -291,6 +294,7 @@ func (j OperationInfo) ProcedureSchema(name string) schema.ProcedureInfo {
 	for key, argument := range j.Arguments {
 		arguments[key] = argument.ArgumentInfo
 	}
+
 	return schema.ProcedureInfo{
 		Name:        name,
 		Arguments:   arguments,
@@ -317,6 +321,7 @@ func (of ObjectType) Schema() schema.ObjectType {
 	for key, field := range of.Fields {
 		result.Fields[key] = field.Schema()
 	}
+
 	return result
 }
 
@@ -421,5 +426,6 @@ func toAnySlice[T any](values []T) []any {
 	for i, v := range values {
 		results[i] = v
 	}
+
 	return results
 }

@@ -80,6 +80,7 @@ func (de DistributedError) Error() string {
 	if err != nil {
 		bs = []byte("")
 	}
+
 	return fmt.Sprintf("%s: %s", de.Server, string(bs))
 }
 

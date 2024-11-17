@@ -29,10 +29,11 @@ func OpenAPIv3ToNDCSchema(input []byte, options ConvertOptions) (*rest.NDCHttpSc
 		return nil, append(errs, errors.New("there is no API to be converted"))
 	}
 
-	converter := internal.NewOAS3Builder(rest.NewNDCHttpSchema(), internal.ConvertOptions(options))
-	if err := converter.BuildDocumentModel(docModel); err != nil {
+	converter := internal.NewOAS3Builder(internal.ConvertOptions(options))
+	result, err := converter.BuildDocumentModel(docModel)
+	if err != nil {
 		return nil, append(errs, err)
 	}
 
-	return converter.Schema(), nil
+	return result, nil
 }

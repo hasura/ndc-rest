@@ -55,6 +55,7 @@ func ApplyPatchToHTTPSchema(input *schema.NDCHttpSchema, patchFiles []PatchConfi
 	if err := json.Unmarshal(rawResult, &result); err != nil {
 		return nil, err
 	}
+
 	return &result, nil
 }
 
@@ -130,6 +131,7 @@ func convertMaybeYAMLToJSONBytes(input []byte) ([]byte, error) {
 	if err := yaml.Unmarshal(input, &anyOutput); err != nil {
 		return nil, fmt.Errorf("input bytes are not in either yaml or json format: %w", err)
 	}
+
 	return json.Marshal(anyOutput)
 }
 
@@ -144,5 +146,6 @@ func guessPatchStrategy(runes []byte) (PatchStrategy, error) {
 	if runes[0] == '[' && runes[len(runes)-1] == ']' {
 		return PatchStrategyJSON6902, nil
 	}
+
 	return "", errUnknownPatchStrategy
 }

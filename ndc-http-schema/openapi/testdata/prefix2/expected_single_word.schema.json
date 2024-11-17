@@ -28,7 +28,7 @@
       "name": "hasuraGetPosts",
       "result_type": {
         "element_type": {
-          "name": "Post",
+          "name": "HasuraPost",
           "type": "named"
         },
         "type": "array"
@@ -36,7 +36,7 @@
     }
   ],
   "object_types": {
-    "Post": {
+    "HasuraPost": {
       "fields": {
         "body": {
           "type": {
@@ -83,7 +83,7 @@
         "body": {
           "description": "Post object that needs to be added",
           "type": {
-            "name": "Post",
+            "name": "HasuraPost",
             "type": "named"
           }
         }
@@ -91,7 +91,7 @@
       "description": "Create a post",
       "name": "hasuraCreatePost",
       "result_type": {
-        "name": "Post",
+        "name": "HasuraPost",
         "type": "named"
       }
     }

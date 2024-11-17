@@ -558,6 +558,7 @@ func TestCreateFormURLEncoded(t *testing.T) {
 	parseQueryAndSort := func(input string) []string {
 		items := strings.Split(input, "&")
 		slices.Sort(items)
+
 		return items
 	}
 
@@ -593,5 +594,6 @@ func createMockSchema(t *testing.T) *rest.NDCHttpSchema {
 	rawSchemaBytes, err := os.ReadFile("../../ndc-http-schema/openapi/testdata/petstore3/expected.json")
 	assert.NilError(t, err)
 	assert.NilError(t, json.Unmarshal(rawSchemaBytes, &ndcSchema))
+
 	return &ndcSchema
 }

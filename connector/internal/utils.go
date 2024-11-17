@@ -3,6 +3,7 @@ package internal
 import (
 	"fmt"
 	"net/http"
+	"net/url"
 	"strings"
 
 	"github.com/hasura/ndc-sdk-go/schema"
@@ -18,6 +19,7 @@ func UnwrapNullableType(input schema.Type) (schema.TypeEncoder, bool, error) {
 		if err != nil {
 			return nil, false, err
 		}
+
 		return childType, true, nil
 	case *schema.NamedType, *schema.ArrayType:
 		return ty, false, nil
@@ -31,6 +33,7 @@ func eitherMaskSecret(input string, shouldMask bool) string {
 	if !shouldMask {
 		return input
 	}
+
 	return MaskString(input)
 }
 
@@ -60,5 +63,21 @@ func setHeaderAttributes(span trace.Span, prefix string, httpHeaders http.Header
 			}
 		}
 		span.SetAttributes(attribute.StringSlice(prefix+strings.ToLower(key), values))
+	}
+}
+
+func cloneURL(input *url.URL) *url.URL {
+	return &url.URL{
+		Scheme:      input.Scheme,
+		Opaque:      input.Opaque,
+		User:        input.User,
+		Host:        input.Host,
+		Path:        input.Path,
+		RawPath:     input.RawPath,
+		OmitHost:    input.OmitHost,
+		ForceQuery:  input.ForceQuery,
+		RawQuery:    input.RawQuery,
+		Fragment:    input.Fragment,
+		RawFragment: input.RawFragment,
 	}
 }

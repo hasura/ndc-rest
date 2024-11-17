@@ -1,9 +1,7 @@
 package utils
 
 import (
-	"fmt"
 	"regexp"
-	"slices"
 	"strings"
 	"unicode"
 	"unicode/utf8"
@@ -24,12 +22,13 @@ func ToCamelCase(input string) string {
 	if pascalCase == "" {
 		return pascalCase
 	}
+
 	return strings.ToLower(pascalCase[:1]) + pascalCase[1:]
 }
 
 // StringSliceToCamelCase convert a slice of strings to camelCase
 func StringSliceToCamelCase(inputs []string) string {
-	return fmt.Sprintf("%s%s", ToCamelCase(inputs[0]), StringSliceToPascalCase(inputs[1:]))
+	return ToCamelCase(inputs[0]) + StringSliceToPascalCase(inputs[1:])
 }
 
 // ToPascalCase convert a string to PascalCase
@@ -45,6 +44,7 @@ func ToPascalCase(input string) string {
 		}
 		parts[i] = strings.ToUpper(parts[i][:1]) + parts[i][1:]
 	}
+
 	return strings.Join(parts, "")
 }
 
@@ -62,6 +62,7 @@ func stringSliceToCase(inputs []string, convert func(string) string, sep string)
 		}
 		results = append(results, convert(trimmed))
 	}
+
 	return strings.Join(results, sep)
 }
 
@@ -78,22 +79,26 @@ func ToSnakeCase(input string) string {
 		char := rune(input[i])
 		if char == '_' || char == '-' {
 			sb.WriteRune('_')
+
 			continue
 		}
 		if unicode.IsDigit(char) || unicode.IsLower(char) {
 			sb.WriteRune(char)
+
 			continue
 		}
 
 		if unicode.IsUpper(char) {
 			if i == 0 {
 				sb.WriteRune(unicode.ToLower(char))
+
 				continue
 			}
 			prevChar := rune(input[i-1])
 			if unicode.IsDigit(prevChar) || unicode.IsLower(prevChar) {
 				sb.WriteRune('_')
 				sb.WriteRune(unicode.ToLower(char))
+
 				continue
 			}
 			if i < inputLen-1 {
@@ -101,6 +106,7 @@ func ToSnakeCase(input string) string {
 				if unicode.IsUpper(prevChar) && unicode.IsLetter(nextChar) && !unicode.IsUpper(nextChar) {
 					sb.WriteRune('_')
 					sb.WriteRune(unicode.ToLower(char))
+
 					continue
 				}
 			}
@@ -108,6 +114,7 @@ func ToSnakeCase(input string) string {
 			sb.WriteRune(unicode.ToLower(char))
 		}
 	}
+
 	return sb.String()
 }
 
@@ -143,6 +150,10 @@ func SplitStringsAndTrimSpaces(input string, sep string) []string {
 
 // StripHTMLTags aggressively strips HTML tags from a string. It will only keep anything between `>` and `<`.
 func StripHTMLTags(str string) string {
+	if str == "" {
+		return ""
+	}
+
 	// Setup a string builder and allocate enough memory for the new string.
 	var builder strings.Builder
 	builder.Grow(len(str) + utf8.UTFMax)
@@ -172,13 +183,15 @@ func StripHTMLTags(str string) string {
 				builder.WriteString(str[end:start])
 			}
 			in = true
+
 			continue
 		}
 		// else c == htmlTagEnd
 		in = false
 		end = i + 1
 	}
-	return builder.String()
+
+	return strings.TrimSpace(builder.String())
 }
 
 // RemoveYAMLSpecialCharacters remote special characters to avoid YAML unmarshaling error
@@ -187,26 +200,54 @@ func RemoveYAMLSpecialCharacters(input []byte) []byte {
 	inputLength := len(input)
 	for i := 0; i < inputLength; i++ {
 		c := input[i]
-		switch c {
-		case '\n', '\t':
+		r := rune(c)
+		switch {
+		case unicode.IsSpace(r):
 			sb.WriteRune(' ')
-		case '\\':
-			if i < inputLength-1 {
-				if slices.Contains([]byte{'n', 's', 't'}, input[i+1]) {
-					sb.WriteRune(' ')
-				} else {
-					sb.WriteByte(c)
-					sb.WriteByte(input[i+1])
-				}
+		case c == '\\' && i < inputLength-1:
+			switch input[i+1] {
+			case 'b', 'n', 'r', 't', 'f':
+				sb.WriteRune(' ')
 				i++
-			}
-		default:
-			r := rune(c)
-			if !unicode.IsControl(r) && utf8.ValidRune(r) && r != utf8.RuneError {
+			case 'u':
+				u := getu4(input[i:])
+				if u > -1 && utf8.ValidRune(u) {
+					sb.WriteRune(u)
+				}
+				i += 5
+			default:
 				sb.WriteByte(c)
 			}
+		case !unicode.IsControl(r) && unicode.IsPrint(r) && utf8.ValidRune(r) && r != utf8.RuneError:
+			sb.WriteByte(c)
 		}
 	}
 
 	return []byte(strings.ToValidUTF8(sb.String(), ""))
+}
+
+// getu4 decodes \uXXXX from the beginning of s, returning the hex value,
+// or it returns -1. Borrow from the standard [JSON decoder] library
+//
+// [JSON decoder](https://github.com/golang/go/blob/0a6f05e30f58023bf45f747a79c20751db2bcfe7/src/encoding/json/decode.go#L1151)
+func getu4(s []byte) rune {
+	if len(s) < 6 || s[0] != '\\' || s[1] != 'u' {
+		return -1
+	}
+	var r rune
+	for _, c := range s[2:6] {
+		switch {
+		case '0' <= c && c <= '9':
+			c -= '0'
+		case 'a' <= c && c <= 'f':
+			c = c - 'a' + 10
+		case 'A' <= c && c <= 'F':
+			c = c - 'A' + 10
+		default:
+			return -1
+		}
+		r = r*16 + rune(c)
+	}
+
+	return r
 }

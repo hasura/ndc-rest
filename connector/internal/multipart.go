@@ -79,6 +79,7 @@ func (w *MultipartWriter) WriteJSON(fieldName string, value any, headers http.He
 	}
 
 	_, err = p.Write(bs)
+
 	return err
 }
 
@@ -90,6 +91,7 @@ func (w *MultipartWriter) WriteField(fieldName, value string, headers http.Heade
 		return err
 	}
 	_, err = p.Write([]byte(value))
+
 	return err
 }
 
@@ -100,5 +102,6 @@ func createFieldMIMEHeader(fieldName string, headers http.Header) textproto.MIME
 	}
 	h.Set("Content-Disposition",
 		fmt.Sprintf(`form-data; name="%s"`, escapeQuotes(fieldName)))
+
 	return h
 }

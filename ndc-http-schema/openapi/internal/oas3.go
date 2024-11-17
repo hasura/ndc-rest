@@ -35,9 +35,9 @@ type SchemaInfoCache struct {
 }
 
 // NewOAS3Builder creates an OAS3Builder instance
-func NewOAS3Builder(schema *rest.NDCHttpSchema, options ConvertOptions) *OAS3Builder {
+func NewOAS3Builder(options ConvertOptions) *OAS3Builder {
 	builder := &OAS3Builder{
-		schema:         schema,
+		schema:         rest.NewNDCHttpSchema(),
 		schemaCache:    make(map[string]SchemaInfoCache),
 		ConvertOptions: applyConvertOptions(options),
 	}
@@ -45,12 +45,7 @@ func NewOAS3Builder(schema *rest.NDCHttpSchema, options ConvertOptions) *OAS3Bui
 	return builder
 }
 
-// Schema returns the inner NDC HTTP schema
-func (oc *OAS3Builder) Schema() *rest.NDCHttpSchema {
-	return oc.schema
-}
-
-func (oc *OAS3Builder) BuildDocumentModel(docModel *libopenapi.DocumentModel[v3.Document]) error {
+func (oc *OAS3Builder) BuildDocumentModel(docModel *libopenapi.DocumentModel[v3.Document]) (*rest.NDCHttpSchema, error) {
 	if docModel.Model.Info != nil {
 		oc.schema.Settings.Version = docModel.Model.Info.Version
 	}
@@ -60,13 +55,13 @@ func (oc *OAS3Builder) BuildDocumentModel(docModel *libopenapi.DocumentModel[v3.
 	if docModel.Model.Components != nil && docModel.Model.Components.Schemas != nil {
 		for cSchema := docModel.Model.Components.Schemas.First(); cSchema != nil; cSchema = cSchema.Next() {
 			if err := oc.convertComponentSchemas(cSchema); err != nil {
-				return err
+				return nil, err
 			}
 		}
 	}
 	for iterPath := docModel.Model.Paths.PathItems.First(); iterPath != nil; iterPath = iterPath.Next() {
 		if err := oc.pathToNDCOperations(iterPath); err != nil {
-			return err
+			return nil, err
 		}
 	}
 
@@ -75,7 +70,7 @@ func (oc *OAS3Builder) BuildDocumentModel(docModel *libopenapi.DocumentModel[v3.
 		for scheme := docModel.Model.Components.SecuritySchemes.First(); scheme != nil; scheme = scheme.Next() {
 			err := oc.convertSecuritySchemes(scheme)
 			if err != nil {
-				return err
+				return nil, err
 			}
 		}
 	}
@@ -85,11 +80,7 @@ func (oc *OAS3Builder) BuildDocumentModel(docModel *libopenapi.DocumentModel[v3.
 	oc.schemaCache = make(map[string]SchemaInfoCache)
 	oc.transformWriteSchema()
 
-	if err := cleanUnusedSchemaTypes(oc.schema); err != nil {
-		return err
-	}
-
-	return nil
+	return NewNDCBuilder(oc.schema, *oc.ConvertOptions).Build()
 }
 
 func (oc *OAS3Builder) convertServers(servers []*v3.Server) []rest.ServerConfig {
@@ -142,60 +133,60 @@ func (oc *OAS3Builder) convertSecuritySchemes(scheme orderedmap.Pair[string, *v3
 	if err != nil {
 		return err
 	}
-	result := rest.SecurityScheme{
-		Type: securityType,
-	}
+	result := rest.SecurityScheme{}
 	switch securityType {
 	case rest.APIKeyScheme:
 		inLocation, err := rest.ParseAPIKeyLocation(security.In)
 		if err != nil {
 			return err
 		}
-		apiConfig := rest.APIKeyAuthConfig{
-			In:   inLocation,
-			Name: security.Name,
-		}
-		valueEnv := sdkUtils.NewEnvStringVariable(utils.StringSliceToConstantCase([]string{oc.EnvPrefix, key}))
-		result.Value = &valueEnv
-		result.APIKeyAuthConfig = &apiConfig
-	case rest.HTTPAuthScheme:
-		httpConfig := rest.HTTPAuthConfig{
-			Scheme: security.Scheme,
-			Header: "Authorization",
-		}
 
-		valueEnv := sdkUtils.NewEnvStringVariable(utils.StringSliceToConstantCase([]string{oc.EnvPrefix, key, "TOKEN"}))
-		result.Value = &valueEnv
-		result.HTTPAuthConfig = &httpConfig
+		if inLocation == rest.APIKeyInCookie {
+			result.SecuritySchemer = rest.NewCookieAuthConfig()
+		} else {
+			valueEnv := sdkUtils.NewEnvStringVariable(utils.StringSliceToConstantCase([]string{oc.EnvPrefix, key}))
+			result.SecuritySchemer = rest.NewAPIKeyAuthConfig(security.Name, inLocation, valueEnv)
+		}
+	case rest.HTTPAuthScheme:
+		switch security.Scheme {
+		case string(rest.BasicAuthScheme):
+			user := sdkUtils.NewEnvStringVariable(utils.StringSliceToConstantCase([]string{oc.EnvPrefix, key, "USERNAME"}))
+			password := sdkUtils.NewEnvStringVariable(utils.StringSliceToConstantCase([]string{oc.EnvPrefix, key, "PASSWORD"}))
+			result.SecuritySchemer = rest.NewBasicAuthConfig(user, password)
+		default:
+			valueEnv := sdkUtils.NewEnvStringVariable(utils.StringSliceToConstantCase([]string{oc.EnvPrefix, key, "TOKEN"}))
+			result.SecuritySchemer = rest.NewHTTPAuthConfig(security.Scheme, rest.AuthorizationHeader, valueEnv)
+		}
 	case rest.OAuth2Scheme:
 		if security.Flows == nil {
 			return fmt.Errorf("flows of security scheme %s is required", key)
 		}
-		oauthConfig := rest.OAuth2Config{
-			Flows: make(map[rest.OAuthFlowType]rest.OAuthFlow),
-		}
+
+		flows := make(map[rest.OAuthFlowType]rest.OAuthFlow)
 		if security.Flows.Implicit != nil {
-			oauthConfig.Flows[rest.ImplicitFlow] = *convertV3OAuthFLow(security.Flows.Implicit)
+			flows[rest.ImplicitFlow] = *convertV3OAuthFLow(security.Flows.Implicit)
 		}
 		if security.Flows.AuthorizationCode != nil {
-			oauthConfig.Flows[rest.AuthorizationCodeFlow] = *convertV3OAuthFLow(security.Flows.AuthorizationCode)
+			flows[rest.AuthorizationCodeFlow] = *convertV3OAuthFLow(security.Flows.AuthorizationCode)
 		}
 		if security.Flows.ClientCredentials != nil {
-			oauthConfig.Flows[rest.ClientCredentialsFlow] = *convertV3OAuthFLow(security.Flows.ClientCredentials)
+			flows[rest.ClientCredentialsFlow] = *convertV3OAuthFLow(security.Flows.ClientCredentials)
 		}
 		if security.Flows.Password != nil {
-			oauthConfig.Flows[rest.PasswordFlow] = *convertV3OAuthFLow(security.Flows.Password)
+			flows[rest.PasswordFlow] = *convertV3OAuthFLow(security.Flows.Password)
 		}
-		result.OAuth2Config = &oauthConfig
+
+		result.SecuritySchemer = rest.NewOAuth2Config(flows)
 	case rest.OpenIDConnectScheme:
-		result.OpenIDConfig = &rest.OpenIDConfig{
-			OpenIDConnectURL: security.OpenIdConnectUrl,
-		}
+		result.SecuritySchemer = rest.NewOpenIDConnectConfig(security.OpenIdConnectUrl)
+	case rest.MutualTLSScheme:
+		result.SecuritySchemer = rest.NewMutualTLSAuthConfig()
 	default:
 		return fmt.Errorf("invalid security scheme: %s", security.Type)
 	}
 
 	oc.schema.Settings.SecuritySchemes[key] = result
+
 	return nil
 }
 
@@ -244,6 +235,7 @@ func (oc *OAS3Builder) pathToNDCOperations(pathItem orderedmap.Pair[string, *v3.
 	if procDelete != nil {
 		oc.schema.Procedures[procDeleteName] = *procDelete
 	}
+
 	return nil
 }
 
@@ -297,6 +289,7 @@ func (oc *OAS3Builder) trimPathPrefix(input string) string {
 	if oc.ConvertOptions.TrimPrefix == "" {
 		return input
 	}
+
 	return strings.TrimPrefix(input, oc.ConvertOptions.TrimPrefix)
 }
 
@@ -306,6 +299,7 @@ func (oc *OAS3Builder) buildScalarJSON() *schema.NamedType {
 	if _, ok := oc.schema.ScalarTypes[scalarName]; !ok {
 		oc.schema.ScalarTypes[scalarName] = *defaultScalarTypes[rest.ScalarJSON]
 	}
+
 	return schema.NewNamedType(scalarName)
 }
 
@@ -336,9 +330,11 @@ func (oc *OAS3Builder) populateWriteSchemaType(schemaType schema.Type) (schema.T
 	switch ty := schemaType.Interface().(type) {
 	case *schema.NullableType:
 		ut, name, isInput := oc.populateWriteSchemaType(ty.UnderlyingType)
+
 		return schema.NewNullableType(ut.Interface()).Encode(), name, isInput
 	case *schema.ArrayType:
 		ut, name, isInput := oc.populateWriteSchemaType(ty.ElementType)
+
 		return schema.NewArrayType(ut.Interface()).Encode(), name, isInput
 	case *schema.NamedType:
 		_, evaluated := oc.schemaCache[ty.Name]
@@ -386,8 +382,10 @@ func (oc *OAS3Builder) populateWriteSchemaType(schemaType schema.Type) (schema.T
 		}
 		if hasWriteField {
 			oc.schema.ObjectTypes[writeName] = writeObject
+
 			return schema.NewNamedType(writeName).Encode(), writeName, true
 		}
+
 		return schemaType, ty.Name, false
 	default:
 		return schemaType, getNamedType(schemaType.Interface(), true, ""), false

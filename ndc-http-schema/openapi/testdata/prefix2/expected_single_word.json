@@ -63,7 +63,7 @@
       "description": "Get all available posts",
       "result_type": {
         "element_type": {
-          "name": "Post",
+          "name": "HasuraPost",
           "type": "named"
         },
         "type": "array"
@@ -71,7 +71,7 @@
     }
   },
   "object_types": {
-    "Post": {
+    "HasuraPost": {
       "fields": {
         "body": {
           "type": {
@@ -150,7 +150,7 @@
         "body": {
           "description": "Post object that needs to be added",
           "type": {
-            "name": "Post",
+            "name": "HasuraPost",
             "type": "named"
           },
           "http": {
@@ -165,7 +165,7 @@
       },
       "description": "Create a post",
       "result_type": {
-        "name": "Post",
+        "name": "HasuraPost",
         "type": "named"
       }
     }

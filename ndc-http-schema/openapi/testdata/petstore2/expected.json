@@ -12,19 +12,21 @@
     "securitySchemes": {
       "api_key": {
         "type": "apiKey",
+        "in": "header",
+        "name": "api_key",
         "value": {
           "env": "API_KEY"
-        },
-        "in": "header",
-        "name": "api_key"
+        }
       },
       "basic": {
-        "type": "http",
-        "value": {
-          "env": "BASIC_TOKEN"
+        "type": "basic",
+        "header": "",
+        "username": {
+          "env": "BASIC_USERNAME"
         },
-        "header": "Authorization",
-        "scheme": "Basic"
+        "password": {
+          "env": "BASIC_PASSWORD"
+        }
       },
       "petstore_auth": {
         "type": "oauth2",
@@ -69,9 +71,7 @@
             "name": "aggregated_by",
             "in": "query",
             "schema": {
-              "type": [
-                "string"
-              ]
+              "type": ["string"]
             }
           }
         },
@@ -88,9 +88,7 @@
             "name": "browsers",
             "in": "query",
             "schema": {
-              "type": [
-                "string"
-              ]
+              "type": ["string"]
             }
           }
         },
@@ -107,9 +105,7 @@
             "name": "end_date",
             "in": "query",
             "schema": {
-              "type": [
-                "string"
-              ]
+              "type": ["string"]
             }
           }
         },
@@ -126,9 +122,7 @@
             "name": "limit",
             "in": "query",
             "schema": {
-              "type": [
-                "integer"
-              ]
+              "type": ["integer"]
             }
           }
         },
@@ -145,9 +139,7 @@
             "name": "offset",
             "in": "query",
             "schema": {
-              "type": [
-                "integer"
-              ]
+              "type": ["integer"]
             }
           }
         },
@@ -163,9 +155,7 @@
             "name": "on-behalf-of",
             "in": "header",
             "schema": {
-              "type": [
-                "string"
-              ]
+              "type": ["string"]
             }
           }
         },
@@ -179,9 +169,7 @@
             "name": "start_date",
             "in": "query",
             "schema": {
-              "type": [
-                "string"
-              ]
+              "type": ["string"]
             }
           }
         }
@@ -219,9 +207,7 @@
             "name": "list_id",
             "in": "path",
             "schema": {
-              "type": [
-                "integer"
-              ]
+              "type": ["integer"]
             }
           }
         },
@@ -237,9 +223,7 @@
             "name": "on-behalf-of",
             "in": "header",
             "schema": {
-              "type": [
-                "string"
-              ]
+              "type": ["string"]
             }
           }
         }
@@ -276,9 +260,7 @@
             "name": "on-behalf-of",
             "in": "header",
             "schema": {
-              "type": [
-                "string"
-              ]
+              "type": ["string"]
             }
           }
         }
@@ -316,9 +298,7 @@
             "name": "username",
             "in": "query",
             "schema": {
-              "type": [
-                "string"
-              ]
+              "type": ["string"]
             }
           }
         }
@@ -335,10 +315,7 @@
         "method": "get",
         "security": [
           {
-            "petstore_auth": [
-              "write:pets",
-              "read:pets"
-            ]
+            "petstore_auth": ["write:pets", "read:pets"]
           }
         ],
         "response": {
@@ -359,9 +336,7 @@
             "name": "status",
             "in": "query",
             "schema": {
-              "type": [
-                "array"
-              ]
+              "type": ["array"]
             }
           }
         }
@@ -381,10 +356,7 @@
         "method": "get",
         "security": [
           {
-            "petstore_auth": [
-              "write:pets",
-              "read:pets"
-            ]
+            "petstore_auth": ["write:pets", "read:pets"]
           }
         ],
         "response": {
@@ -405,9 +377,7 @@
             "name": "tags",
             "in": "query",
             "schema": {
-              "type": [
-                "array"
-              ]
+              "type": ["array"]
             }
           }
         }
@@ -460,9 +430,7 @@
             "name": "orderId",
             "in": "path",
             "schema": {
-              "type": [
-                "integer"
-              ],
+              "type": ["integer"],
               "maximum": 10,
               "minimum": 1
             }
@@ -499,9 +467,7 @@
             "name": "petId",
             "in": "path",
             "schema": {
-              "type": [
-                "integer"
-              ]
+              "type": ["integer"]
             }
           }
         }
@@ -537,7 +503,7 @@
       },
       "arguments": {
         "username": {
-          "description": "The name that needs to be fetched. Use user1 for testing. ",
+          "description": "The name that needs to be fetched. Use user1 for testing.",
           "type": {
             "name": "String",
             "type": "named"
@@ -546,9 +512,7 @@
             "name": "username",
             "in": "path",
             "schema": {
-              "type": [
-                "string"
-              ]
+              "type": ["string"]
             }
           }
         }
@@ -581,9 +545,7 @@
             "name": "client_name",
             "in": "query",
             "schema": {
-              "type": [
-                "string"
-              ]
+              "type": ["string"]
             }
           }
         },
@@ -600,9 +562,7 @@
             "name": "limit",
             "in": "query",
             "schema": {
-              "type": [
-                "integer"
-              ]
+              "type": ["integer"]
             }
           }
         },
@@ -619,9 +579,7 @@
             "name": "offset",
             "in": "query",
             "schema": {
-              "type": [
-                "integer"
-              ]
+              "type": ["integer"]
             }
           }
         },
@@ -638,9 +596,7 @@
             "name": "owner",
             "in": "query",
             "schema": {
-              "type": [
-                "string"
-              ]
+              "type": ["string"]
             }
           }
         },
@@ -690,9 +646,7 @@
             "name": "password",
             "in": "query",
             "schema": {
-              "type": [
-                "string"
-              ]
+              "type": ["string"]
             }
           }
         },
@@ -706,9 +660,7 @@
             "name": "username",
             "in": "query",
             "schema": {
-              "type": [
-                "string"
-              ]
+              "type": ["string"]
             }
           }
         }
@@ -734,9 +686,7 @@
             }
           },
           "http": {
-            "type": [
-              "integer"
-            ]
+            "type": ["integer"]
           }
         },
         "unique_clicks": {
@@ -749,9 +699,7 @@
             }
           },
           "http": {
-            "type": [
-              "integer"
-            ]
+            "type": ["integer"]
           }
         }
       }
@@ -769,9 +717,7 @@
             }
           },
           "http": {
-            "type": [
-              "integer"
-            ]
+            "type": ["integer"]
           }
         },
         "opens": {
@@ -784,9 +730,7 @@
             }
           },
           "http": {
-            "type": [
-              "integer"
-            ]
+            "type": ["integer"]
           }
         },
         "unique_clicks": {
@@ -799,9 +743,7 @@
             }
           },
           "http": {
-            "type": [
-              "integer"
-            ]
+            "type": ["integer"]
           }
         },
         "unique_opens": {
@@ -814,9 +756,7 @@
             }
           },
           "http": {
-            "type": [
-              "integer"
-            ]
+            "type": ["integer"]
           }
         }
       }
@@ -832,9 +772,7 @@
             }
           },
           "http": {
-            "type": [
-              "integer"
-            ],
+            "type": ["integer"],
             "format": "int32"
           }
         },
@@ -847,9 +785,7 @@
             }
           },
           "http": {
-            "type": [
-              "string"
-            ]
+            "type": ["string"]
           }
         },
         "type": {
@@ -861,9 +797,7 @@
             }
           },
           "http": {
-            "type": [
-              "string"
-            ]
+            "type": ["string"]
           }
         }
       }
@@ -879,9 +813,7 @@
             }
           },
           "http": {
-            "type": [
-              "integer"
-            ],
+            "type": ["integer"],
             "format": "int64"
           }
         },
@@ -894,9 +826,7 @@
             }
           },
           "http": {
-            "type": [
-              "string"
-            ]
+            "type": ["string"]
           }
         }
       }
@@ -913,9 +843,7 @@
             }
           },
           "http": {
-            "type": [
-              "number"
-            ]
+            "type": ["number"]
           }
         },
         "name": {
@@ -928,9 +856,7 @@
             }
           },
           "http": {
-            "type": [
-              "string"
-            ]
+            "type": ["string"]
           }
         },
         "type": {
@@ -943,9 +869,7 @@
             }
           },
           "http": {
-            "type": [
-              "string"
-            ]
+            "type": ["string"]
           }
         },
         "value": {
@@ -958,9 +882,7 @@
             }
           },
           "http": {
-            "type": [
-              "string"
-            ]
+            "type": ["string"]
           }
         }
       }
@@ -979,13 +901,9 @@
             }
           },
           "http": {
-            "type": [
-              "array"
-            ],
+            "type": ["array"],
             "items": {
-              "type": [
-                "object"
-              ]
+              "type": ["object"]
             }
           }
         }
@@ -1006,9 +924,7 @@
             }
           },
           "http": {
-            "type": [
-              "array"
-            ]
+            "type": ["array"]
           }
         },
         "first_name": {
@@ -1021,9 +937,7 @@
             }
           },
           "http": {
-            "type": [
-              "string"
-            ]
+            "type": ["string"]
           }
         }
       }
@@ -1037,9 +951,7 @@
             "type": "named"
           },
           "http": {
-            "type": [
-              "boolean"
-            ]
+            "type": ["boolean"]
           }
         },
         "custom_spf": {
@@ -1049,9 +961,7 @@
             "type": "named"
           },
           "http": {
-            "type": [
-              "boolean"
-            ]
+            "type": ["boolean"]
           }
         },
         "default": {
@@ -1061,9 +971,7 @@
             "type": "named"
           },
           "http": {
-            "type": [
-              "boolean"
-            ]
+            "type": ["boolean"]
           }
         },
         "dns": {
@@ -1073,9 +981,7 @@
             "type": "named"
           },
           "http": {
-            "type": [
-              "object"
-            ]
+            "type": ["object"]
           }
         },
         "domain": {
@@ -1085,9 +991,7 @@
             "type": "named"
           },
           "http": {
-            "type": [
-              "string"
-            ]
+            "type": ["string"]
           }
         },
         "id": {
@@ -1097,9 +1001,7 @@
             "type": "named"
           },
           "http": {
-            "type": [
-              "integer"
-            ]
+            "type": ["integer"]
           }
         },
         "ips": {
@@ -1112,9 +1014,7 @@
             "type": "array"
           },
           "http": {
-            "type": [
-              "array"
-            ],
+            "type": ["array"],
             "items": {
               "type": null
             }
@@ -1127,9 +1027,7 @@
             "type": "named"
           },
           "http": {
-            "type": [
-              "boolean"
-            ]
+            "type": ["boolean"]
           }
         },
         "subdomain": {
@@ -1142,9 +1040,7 @@
             }
           },
           "http": {
-            "type": [
-              "string"
-            ]
+            "type": ["string"]
           }
         },
         "user_id": {
@@ -1154,9 +1050,7 @@
             "type": "named"
           },
           "http": {
-            "type": [
-              "integer"
-            ]
+            "type": ["integer"]
           }
         },
         "username": {
@@ -1166,9 +1060,7 @@
             "type": "named"
           },
           "http": {
-            "type": [
-              "string"
-            ]
+            "type": ["string"]
           }
         },
         "valid": {
@@ -1178,9 +1070,7 @@
             "type": "named"
           },
           "http": {
-            "type": [
-              "boolean"
-            ]
+            "type": ["boolean"]
           }
         }
       }
@@ -1195,9 +1085,7 @@
             "type": "named"
           },
           "http": {
-            "type": [
-              "object"
-            ]
+            "type": ["object"]
           }
         },
         "domain_spf": {
@@ -1207,9 +1095,7 @@
             "type": "named"
           },
           "http": {
-            "type": [
-              "object"
-            ]
+            "type": ["object"]
           }
         },
         "mail_server": {
@@ -1219,9 +1105,7 @@
             "type": "named"
           },
           "http": {
-            "type": [
-              "object"
-            ]
+            "type": ["object"]
           }
         },
         "subdomain_spf": {
@@ -1231,9 +1115,7 @@
             "type": "named"
           },
           "http": {
-            "type": [
-              "object"
-            ]
+            "type": ["object"]
           }
         }
       }
@@ -1248,9 +1130,7 @@
             "type": "named"
           },
           "http": {
-            "type": [
-              "string"
-            ]
+            "type": ["string"]
           }
         },
         "host": {
@@ -1260,9 +1140,7 @@
             "type": "named"
           },
           "http": {
-            "type": [
-              "string"
-            ]
+            "type": ["string"]
           }
         },
         "type": {
@@ -1272,9 +1150,7 @@
             "type": "named"
           },
           "http": {
-            "type": [
-              "string"
-            ]
+            "type": ["string"]
           }
         },
         "valid": {
@@ -1284,9 +1160,7 @@
             "type": "named"
           },
           "http": {
-            "type": [
-              "boolean"
-            ]
+            "type": ["boolean"]
           }
         }
       }
@@ -1301,9 +1175,7 @@
             "type": "named"
           },
           "http": {
-            "type": [
-              "string"
-            ]
+            "type": ["string"]
           }
         },
         "host": {
@@ -1313,9 +1185,7 @@
             "type": "named"
           },
           "http": {
-            "type": [
-              "string"
-            ]
+            "type": ["string"]
           }
         },
         "type": {
@@ -1325,9 +1195,7 @@
             "type": "named"
           },
           "http": {
-            "type": [
-              "string"
-            ]
+            "type": ["string"]
           }
         },
         "valid": {
@@ -1337,9 +1205,7 @@
             "type": "named"
           },
           "http": {
-            "type": [
-              "boolean"
-            ]
+            "type": ["boolean"]
           }
         }
       }
@@ -1354,9 +1220,7 @@
             "type": "named"
           },
           "http": {
-            "type": [
-              "string"
-            ]
+            "type": ["string"]
           }
         },
         "host": {
@@ -1366,9 +1230,7 @@
             "type": "named"
           },
           "http": {
-            "type": [
-              "string"
-            ]
+            "type": ["string"]
           }
         },
         "type": {
@@ -1378,9 +1240,7 @@
             "type": "named"
           },
           "http": {
-            "type": [
-              "string"
-            ]
+            "type": ["string"]
           }
         },
         "valid": {
@@ -1390,9 +1250,7 @@
             "type": "named"
           },
           "http": {
-            "type": [
-              "boolean"
-            ]
+            "type": ["boolean"]
           }
         }
       }
@@ -1407,9 +1265,7 @@
             "type": "named"
           },
           "http": {
-            "type": [
-              "string"
-            ]
+            "type": ["string"]
           }
         },
         "host": {
@@ -1419,9 +1275,7 @@
             "type": "named"
           },
           "http": {
-            "type": [
-              "string"
-            ]
+            "type": ["string"]
           }
         },
         "type": {
@@ -1431,9 +1285,7 @@
             "type": "named"
           },
           "http": {
-            "type": [
-              "string"
-            ]
+            "type": ["string"]
           }
         },
         "valid": {
@@ -1443,9 +1295,7 @@
             "type": "named"
           },
           "http": {
-            "type": [
-              "boolean"
-            ]
+            "type": ["boolean"]
           }
         }
       }
@@ -1462,9 +1312,7 @@
             }
           },
           "http": {
-            "type": [
-              "string"
-            ]
+            "type": ["string"]
           }
         },
         "stats": {
@@ -1480,13 +1328,9 @@
             }
           },
           "http": {
-            "type": [
-              "array"
-            ],
+            "type": ["array"],
             "items": {
-              "type": [
-                "object"
-              ]
+              "type": ["object"]
             }
           }
         }
@@ -1504,9 +1348,7 @@
             }
           },
           "http": {
-            "type": [
-              "object"
-            ]
+            "type": ["object"]
           }
         },
         "name": {
@@ -1519,9 +1361,7 @@
             }
           },
           "http": {
-            "type": [
-              "string"
-            ]
+            "type": ["string"]
           }
         },
         "type": {
@@ -1534,9 +1374,7 @@
             }
           },
           "http": {
-            "type": [
-              "string"
-            ]
+            "type": ["string"]
           }
         }
       }
@@ -1555,9 +1393,7 @@
             }
           },
           "http": {
-            "type": [
-              "array"
-            ]
+            "type": ["array"]
           }
         }
       }
@@ -1574,9 +1410,7 @@
             }
           },
           "http": {
-            "type": [
-              "string"
-            ]
+            "type": ["string"]
           }
         },
         "stats": {
@@ -1592,13 +1426,9 @@
             }
           },
           "http": {
-            "type": [
-              "array"
-            ],
+            "type": ["array"],
             "items": {
-              "type": [
-                "object"
-              ]
+              "type": ["object"]
             }
           }
         }
@@ -1616,9 +1446,7 @@
             }
           },
           "http": {
-            "type": [
-              "object"
-            ]
+            "type": ["object"]
           }
         },
         "name": {
@@ -1631,9 +1459,7 @@
             }
           },
           "http": {
-            "type": [
-              "string"
-            ]
+            "type": ["string"]
           }
         },
         "type": {
@@ -1646,9 +1472,7 @@
             }
           },
           "http": {
-            "type": [
-              "string"
-            ]
+            "type": ["string"]
           }
         }
       }
@@ -1665,9 +1489,7 @@
             }
           },
           "http": {
-            "type": [
-              "string"
-            ]
+            "type": ["string"]
           }
         },
         "client_name": {
@@ -1680,9 +1502,7 @@
             }
           },
           "http": {
-            "type": [
-              "string"
-            ]
+            "type": ["string"]
           }
         },
         "client_secret": {
@@ -1695,9 +1515,7 @@
             }
           },
           "http": {
-            "type": [
-              "string"
-            ]
+            "type": ["string"]
           }
         },
         "client_secret_expires_at": {
@@ -1710,9 +1528,7 @@
             }
           },
           "http": {
-            "type": [
-              "integer"
-            ],
+            "type": ["integer"],
             "format": "int64"
           }
         },
@@ -1726,9 +1542,7 @@
             }
           },
           "http": {
-            "type": [
-              "string"
-            ]
+            "type": ["string"]
           }
         }
       }
@@ -1744,9 +1558,7 @@
             }
           },
           "http": {
-            "type": [
-              "boolean"
-            ]
+            "type": ["boolean"]
           }
         },
         "id": {
@@ -1758,9 +1570,7 @@
             }
           },
           "http": {
-            "type": [
-              "integer"
-            ],
+            "type": ["integer"],
             "format": "int64"
           }
         },
@@ -1773,9 +1583,7 @@
             }
           },
           "http": {
-            "type": [
-              "integer"
-            ],
+            "type": ["integer"],
             "format": "int64"
           }
         },
@@ -1788,9 +1596,7 @@
             }
           },
           "http": {
-            "type": [
-              "integer"
-            ],
+            "type": ["integer"],
             "format": "int32"
           }
         },
@@ -1803,9 +1609,7 @@
             }
           },
           "http": {
-            "type": [
-              "string"
-            ],
+            "type": ["string"],
             "format": "date-time"
           }
         },
@@ -1819,9 +1623,7 @@
             }
           },
           "http": {
-            "type": [
-              "string"
-            ]
+            "type": ["string"]
           }
         }
       }
@@ -1837,9 +1639,7 @@
             }
           },
           "http": {
-            "type": [
-              "object"
-            ]
+            "type": ["object"]
           }
         },
         "field": {
@@ -1864,9 +1664,7 @@
             }
           },
           "http": {
-            "type": [
-              "integer"
-            ],
+            "type": ["integer"],
             "format": "int64"
           }
         },
@@ -1876,9 +1674,7 @@
             "type": "named"
           },
           "http": {
-            "type": [
-              "string"
-            ]
+            "type": ["string"]
           }
         },
         "photoUrls": {
@@ -1890,13 +1686,9 @@
             "type": "array"
           },
           "http": {
-            "type": [
-              "array"
-            ],
+            "type": ["array"],
             "items": {
-              "type": [
-                "string"
-              ]
+              "type": ["string"]
             }
           }
         },
@@ -1910,9 +1702,7 @@
             }
           },
           "http": {
-            "type": [
-              "string"
-            ]
+            "type": ["string"]
           }
         },
         "tags": {
@@ -1927,9 +1717,7 @@
             }
           },
           "http": {
-            "type": [
-              "array"
-            ]
+            "type": ["array"]
           }
         }
       }
@@ -1957,9 +1745,7 @@
             }
           },
           "http": {
-            "type": [
-              "integer"
-            ],
+            "type": ["integer"],
             "format": "int64"
           }
         },
@@ -1972,9 +1758,7 @@
             }
           },
           "http": {
-            "type": [
-              "string"
-            ]
+            "type": ["string"]
           }
         }
       }
@@ -1990,9 +1774,7 @@
             }
           },
           "http": {
-            "type": [
-              "integer"
-            ],
+            "type": ["integer"],
             "format": "int64"
           }
         },
@@ -2005,9 +1787,7 @@
             }
           },
           "http": {
-            "type": [
-              "string"
-            ]
+            "type": ["string"]
           }
         }
       }
@@ -2024,9 +1804,7 @@
             }
           },
           "http": {
-            "type": [
-              "string"
-            ]
+            "type": ["string"]
           }
         },
         "status": {
@@ -2039,9 +1817,7 @@
             }
           },
           "http": {
-            "type": [
-              "string"
-            ]
+            "type": ["string"]
           }
         }
       }
@@ -2058,9 +1834,7 @@
             }
           },
           "http": {
-            "type": [
-              "string"
-            ]
+            "type": ["string"]
           }
         },
         "file": {
@@ -2073,9 +1847,7 @@
             }
           },
           "http": {
-            "type": [
-              "file"
-            ]
+            "type": ["file"]
           }
         }
       }
@@ -2091,9 +1863,7 @@
             }
           },
           "http": {
-            "type": [
-              "string"
-            ]
+            "type": ["string"]
           }
         },
         "firstName": {
@@ -2105,9 +1875,7 @@
             }
           },
           "http": {
-            "type": [
-              "string"
-            ]
+            "type": ["string"]
           }
         },
         "id": {
@@ -2119,9 +1887,7 @@
             }
           },
           "http": {
-            "type": [
-              "integer"
-            ],
+            "type": ["integer"],
             "format": "int64"
           }
         },
@@ -2134,9 +1900,7 @@
             }
           },
           "http": {
-            "type": [
-              "string"
-            ]
+            "type": ["string"]
           }
         },
         "password": {
@@ -2148,9 +1912,7 @@
             }
           },
           "http": {
-            "type": [
-              "string"
-            ]
+            "type": ["string"]
           }
         },
         "phone": {
@@ -2162,9 +1924,7 @@
             }
           },
           "http": {
-            "type": [
-              "string"
-            ]
+            "type": ["string"]
           }
         },
         "userStatus": {
@@ -2177,9 +1937,7 @@
             }
           },
           "http": {
-            "type": [
-              "integer"
-            ],
+            "type": ["integer"],
             "format": "int32"
           }
         },
@@ -2192,9 +1950,7 @@
             }
           },
           "http": {
-            "type": [
-              "string"
-            ]
+            "type": ["string"]
           }
         }
       }
@@ -2207,10 +1963,7 @@
         "method": "post",
         "security": [
           {
-            "petstore_auth": [
-              "write:pets",
-              "read:pets"
-            ]
+            "petstore_auth": ["write:pets", "read:pets"]
           }
         ],
         "requestBody": {
@@ -2230,9 +1983,7 @@
           "http": {
             "in": "body",
             "schema": {
-              "type": [
-                "object"
-              ]
+              "type": ["object"]
             }
           }
         }
@@ -2280,9 +2031,7 @@
             "name": "orderId",
             "in": "path",
             "schema": {
-              "type": [
-                "integer"
-              ],
+              "type": ["integer"],
               "minimum": 1
             }
           }
@@ -2303,10 +2052,7 @@
         "method": "delete",
         "security": [
           {
-            "petstore_auth": [
-              "write:pets",
-              "read:pets"
-            ]
+            "petstore_auth": ["write:pets", "read:pets"]
           }
         ],
         "response": {
@@ -2326,9 +2072,7 @@
             "name": "api_key",
             "in": "header",
             "schema": {
-              "type": [
-                "string"
-              ]
+              "type": ["string"]
             }
           }
         },
@@ -2342,9 +2086,7 @@
             "name": "petId",
             "in": "path",
             "schema": {
-              "type": [
-                "integer"
-              ]
+              "type": ["integer"]
             }
           }
         }
@@ -2377,9 +2119,7 @@
             "name": "username",
             "in": "path",
             "schema": {
-              "type": [
-                "string"
-              ]
+              "type": ["string"]
             }
           }
         }
@@ -2413,9 +2153,7 @@
           "http": {
             "in": "body",
             "schema": {
-              "type": [
-                "object"
-              ]
+              "type": ["object"]
             }
           }
         }
@@ -2447,9 +2185,7 @@
           "http": {
             "in": "body",
             "schema": {
-              "type": [
-                "object"
-              ]
+              "type": ["object"]
             }
           }
         }
@@ -2466,10 +2202,7 @@
         "method": "put",
         "security": [
           {
-            "petstore_auth": [
-              "write:pets",
-              "read:pets"
-            ]
+            "petstore_auth": ["write:pets", "read:pets"]
           }
         ],
         "requestBody": {
@@ -2489,9 +2222,7 @@
           "http": {
             "in": "body",
             "schema": {
-              "type": [
-                "object"
-              ]
+              "type": ["object"]
             }
           }
         }
@@ -2511,10 +2242,7 @@
         "method": "post",
         "security": [
           {
-            "petstore_auth": [
-              "write:pets",
-              "read:pets"
-            ]
+            "petstore_auth": ["write:pets", "read:pets"]
           }
         ],
         "requestBody": {
@@ -2534,9 +2262,7 @@
           "http": {
             "in": "formData",
             "schema": {
-              "type": [
-                "object"
-              ]
+              "type": ["object"]
             }
           }
         },
@@ -2550,9 +2276,7 @@
             "name": "petId",
             "in": "path",
             "schema": {
-              "type": [
-                "integer"
-              ]
+              "type": ["integer"]
             }
           }
         }
@@ -2587,9 +2311,7 @@
           "http": {
             "in": "body",
             "schema": {
-              "type": [
-                "object"
-              ]
+              "type": ["object"]
             }
           }
         },
@@ -2603,9 +2325,7 @@
             "name": "username",
             "in": "path",
             "schema": {
-              "type": [
-                "string"
-              ]
+              "type": ["string"]
             }
           }
         }
@@ -2625,10 +2345,7 @@
         "method": "post",
         "security": [
           {
-            "petstore_auth": [
-              "write:pets",
-              "read:pets"
-            ]
+            "petstore_auth": ["write:pets", "read:pets"]
           }
         ],
         "requestBody": {
@@ -2648,9 +2365,7 @@
           "http": {
             "in": "formData",
             "schema": {
-              "type": [
-                "object"
-              ]
+              "type": ["object"]
             }
           }
         },
@@ -2664,9 +2379,7 @@
             "name": "petId",
             "in": "path",
             "schema": {
-              "type": [
-                "integer"
-              ]
+              "type": ["integer"]
             }
           }
         }
@@ -2697,11 +2410,7 @@
       "aggregate_functions": {},
       "comparison_operators": {},
       "representation": {
-        "one_of": [
-          "day",
-          "week",
-          "month"
-        ],
+        "one_of": ["day", "week", "month"],
         "type": "enum"
       }
     },
@@ -2709,11 +2418,7 @@
       "aggregate_functions": {},
       "comparison_operators": {},
       "representation": {
-        "one_of": [
-          "date",
-          "text",
-          "number"
-        ],
+        "one_of": ["date", "text", "number"],
         "type": "enum"
       }
     },
@@ -2756,11 +2461,7 @@
       "aggregate_functions": {},
       "comparison_operators": {},
       "representation": {
-        "one_of": [
-          "placed",
-          "approved",
-          "delivered"
-        ],
+        "one_of": ["placed", "approved", "delivered"],
         "type": "enum"
       }
     },
@@ -2768,11 +2469,7 @@
       "aggregate_functions": {},
       "comparison_operators": {},
       "representation": {
-        "one_of": [
-          "available",
-          "pending",
-          "sold"
-        ],
+        "one_of": ["available", "pending", "sold"],
         "type": "enum"
       }
     },

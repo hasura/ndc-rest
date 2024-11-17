@@ -23,6 +23,7 @@ func (ssp ParameterItems) String() string {
 		str := item.String()
 		results = append(results, str)
 	}
+
 	return strings.Join(results, "&")
 }
 
@@ -30,6 +31,7 @@ func (ssp *ParameterItems) Add(keys []Key, values []string) {
 	index := ssp.FindIndex(keys)
 	if index == -1 {
 		*ssp = append(*ssp, NewParameterItem(keys, values))
+
 		return
 	}
 	(*ssp)[index].AddValues(values)
@@ -41,16 +43,19 @@ func (ssp ParameterItems) FindDefault() *ParameterItem {
 		return item
 	}
 	item, _ = ssp.find([]Key{})
+
 	return item
 }
 
 func (ssp ParameterItems) Find(keys []Key) *ParameterItem {
 	item, _ := ssp.find(keys)
+
 	return item
 }
 
 func (ssp ParameterItems) FindIndex(keys []Key) int {
 	_, i := ssp.find(keys)
+
 	return i
 }
 
@@ -73,6 +78,7 @@ func (ssp ParameterItems) find(keys []Key) (*ParameterItem, int) {
 			return &item, i
 		}
 	}
+
 	return nil, -1
 }
 
@@ -89,6 +95,7 @@ func (ks Keys) String() string {
 	for i, k := range ks {
 		if k.index != nil {
 			sb.WriteString(fmt.Sprintf("[%d]", *k.index))
+
 			continue
 		}
 		if k.key != "" {
@@ -98,6 +105,7 @@ func (ks Keys) String() string {
 			sb.WriteString(k.key)
 		}
 	}
+
 	return sb.String()
 }
 
@@ -137,6 +145,7 @@ func (k Key) String() string {
 	if k.index != nil {
 		return strconv.Itoa(*k.index)
 	}
+
 	return k.key
 }
 
@@ -161,6 +170,7 @@ func (ssp ParameterItem) String() string {
 	if key == "" {
 		return value
 	}
+
 	return fmt.Sprintf("%s=%s", key, value)
 }
 

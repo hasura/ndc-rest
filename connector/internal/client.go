@@ -10,6 +10,7 @@ import (
 	"log/slog"
 	"math"
 	"net/http"
+	"net/url"
 	"slices"
 	"strconv"
 	"strings"
@@ -250,12 +251,21 @@ func (client *HTTPClient) doRequest(ctx context.Context, request *RetryableReque
 	ctx, span := client.tracer.Start(ctx, fmt.Sprintf("%s %s", method, request.RawRequest.URL), trace.WithSpanKind(trace.SpanKindClient))
 	defer span.End()
 
-	requestURL := request.URL.String()
+	urlAttr := cloneURL(&request.URL)
+	password, hasPassword := urlAttr.User.Password()
+	if urlAttr.User.String() != "" || hasPassword {
+		maskedUser := MaskString(urlAttr.User.Username())
+		if hasPassword {
+			urlAttr.User = url.UserPassword(maskedUser, MaskString(password))
+		} else {
+			urlAttr.User = url.User(maskedUser)
+		}
+	}
 
 	span.SetAttributes(
 		attribute.String("db.system", "http"),
 		attribute.String("http.request.method", method),
-		attribute.String("url.full", requestURL),
+		attribute.String("url.full", urlAttr.String()),
 		attribute.String("server.address", request.URL.Hostname()),
 		attribute.Int("server.port", port),
 		attribute.String("network.protocol.name", "http"),
@@ -355,12 +365,14 @@ func evalHTTPResponse(ctx context.Context, span trace.Span, resp *http.Response,
 		if len(respBody) == 0 {
 			return nil, resp.Header, nil
 		}
+
 		return string(respBody), resp.Header, nil
 	case "text/plain", "text/html":
 		respBody, err := io.ReadAll(resp.Body)
 		if err != nil {
 			return nil, nil, schema.NewConnectorError(http.StatusInternalServerError, err.Error(), nil)
 		}
+
 		return string(respBody), resp.Header, nil
 	case rest.ContentTypeJSON:
 		if len(resultType) > 0 {
@@ -378,6 +390,7 @@ func evalHTTPResponse(ctx context.Context, span trace.Span, resp *http.Response,
 					// fallback to raw string response if the result type is String
 					return string(respBytes), resp.Header, nil
 				}
+
 				return strResult, resp.Header, nil
 			}
 		}
@@ -395,6 +408,7 @@ func evalHTTPResponse(ctx context.Context, span trace.Span, resp *http.Response,
 		if err != nil {
 			return nil, nil, schema.InternalServerError(err.Error(), nil)
 		}
+
 		return result, resp.Header, nil
 	case rest.ContentTypeNdJSON:
 		var results []any
@@ -415,6 +429,7 @@ func evalHTTPResponse(ctx context.Context, span trace.Span, resp *http.Response,
 		if err != nil {
 			return nil, nil, schema.InternalServerError(err.Error(), nil)
 		}
+
 		return result, resp.Header, nil
 	default:
 		return nil, nil, schema.NewConnectorError(http.StatusInternalServerError, "failed to evaluate response", map[string]any{
@@ -428,5 +443,6 @@ func parseContentType(input string) string {
 		return ""
 	}
 	parts := strings.Split(input, ";")
+
 	return strings.TrimSpace(parts[0])
 }

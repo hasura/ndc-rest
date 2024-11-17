@@ -34,6 +34,7 @@ func DecodeDataURI(input string) (*DataURI, error) {
 		if err != nil {
 			return nil, err
 		}
+
 		return &DataURI{
 			Data: string(rawDecodedBytes),
 		}, nil

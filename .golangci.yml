@@ -5,9 +5,7 @@ linters:
     - err113
     - lll
     - gocognit
-    - execinquery
     - exportloopref
-    - gomnd
     - funlen
     - godot
     - gofumpt
@@ -20,7 +18,6 @@ linters:
     - wsl
     - wrapcheck
     - varnamelen
-    - nlreturn
     - exhaustive
     - exhaustruct
     - gocyclo

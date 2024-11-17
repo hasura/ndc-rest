@@ -17,6 +17,7 @@ func (rms MetadataCollection) GetFunction(name string) (*rest.OperationInfo, con
 			return fn, rm, nil
 		}
 	}
+
 	return nil, configuration.NDCHttpRuntimeSchema{}, schema.UnprocessableContentError("unsupported query: "+name, nil)
 }
 
@@ -28,5 +29,6 @@ func (rms MetadataCollection) GetProcedure(name string) (*rest.OperationInfo, co
 			return fn, rm, nil
 		}
 	}
+
 	return nil, configuration.NDCHttpRuntimeSchema{}, schema.UnprocessableContentError("unsupported mutation: "+name, nil)
 }

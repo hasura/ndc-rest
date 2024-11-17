@@ -3,6 +3,7 @@ package internal
 import (
 	"bytes"
 	"context"
+	"encoding/base64"
 	"fmt"
 	"io"
 	"math/rand/v2"
@@ -13,7 +14,6 @@ import (
 	"time"
 
 	rest "github.com/hasura/ndc-http/ndc-http-schema/schema"
-	"github.com/hasura/ndc-http/ndc-http-schema/utils"
 )
 
 // RetryableRequest wraps the raw request with retryable
@@ -76,10 +76,12 @@ func getBaseURLFromServers(servers []rest.ServerConfig, serverIDs []string) (*ur
 		return nil, ""
 	case 1:
 		result := results[0]
+
 		return &result, selectedServerIDs[0]
 	default:
 		index := rand.IntN(len(results) - 1)
 		host := results[index]
+
 		return &host, selectedServerIDs[index]
 	}
 }
@@ -99,6 +101,7 @@ func BuildDistributedRequestsWithOptions(request *RetryableRequest, httpOptions 
 		if err := request.applySettings(httpOptions.Settings, httpOptions.Explain); err != nil {
 			return nil, err
 		}
+
 		return []RetryableRequest{*request}, nil
 	}
 
@@ -142,6 +145,7 @@ func BuildDistributedRequestsWithOptions(request *RetryableRequest, httpOptions 
 		}
 		requests = append(requests, req)
 	}
+
 	return requests, nil
 }
 
@@ -176,77 +180,96 @@ func (req *RetryableRequest) applySecurity(serverConfig *rest.ServerConfig, isEx
 		return nil
 	}
 
-	var securityScheme *rest.SecurityScheme
 	for _, security := range securities {
 		sc, ok := securitySchemes[security.Name()]
 		if !ok {
 			continue
 		}
 
-		securityScheme = &sc
-		if slices.Contains([]rest.SecuritySchemeType{rest.HTTPAuthScheme, rest.APIKeyScheme}, sc.Type) &&
-			sc.Value != nil && sc.GetValue() != "" {
-			break
+		hasAuth, err := req.applySecurityScheme(sc, isExplain)
+		if hasAuth || err != nil {
+			return err
 		}
 	}
 
-	return req.applySecurityScheme(securityScheme, isExplain)
+	return nil
 }
 
-func (req *RetryableRequest) applySecurityScheme(securityScheme *rest.SecurityScheme, isExplain bool) error {
-	if securityScheme == nil {
-		return nil
+func (req *RetryableRequest) applySecurityScheme(securityScheme rest.SecurityScheme, isExplain bool) (bool, error) {
+	if securityScheme.SecuritySchemer == nil {
+		return false, nil
 	}
 
 	if req.Headers == nil {
 		req.Headers = http.Header{}
 	}
 
-	switch securityScheme.Type {
-	case rest.HTTPAuthScheme:
-		headerName := securityScheme.Header
+	switch config := securityScheme.SecuritySchemer.(type) {
+	case *rest.BasicAuthConfig:
+		username := config.GetUsername()
+		password := config.GetPassword()
+		if config.Header != "" {
+			b64Value := base64.StdEncoding.EncodeToString([]byte(username + ":" + password))
+			req.Headers.Set(rest.AuthorizationHeader, "Basic "+b64Value)
+		} else {
+			req.URL.User = url.UserPassword(username, password)
+		}
+
+		return true, nil
+	case *rest.HTTPAuthConfig:
+		headerName := config.Header
 		if headerName == "" {
-			headerName = "Authorization"
+			headerName = rest.AuthorizationHeader
 		}
-		scheme := securityScheme.Scheme
-		if scheme == "bearer" || scheme == "basic" {
-			scheme = utils.ToPascalCase(securityScheme.Scheme)
+		scheme := config.Scheme
+		if scheme == "bearer" {
+			scheme = "Bearer"
 		}
-		v := securityScheme.GetValue()
+		v := config.GetValue()
 		if v != "" {
 			req.Headers.Set(headerName, fmt.Sprintf("%s %s", scheme, eitherMaskSecret(v, isExplain)))
+
+			return true, nil
 		}
-	case rest.APIKeyScheme:
-		switch securityScheme.In {
+	case *rest.APIKeyAuthConfig:
+		switch config.In {
 		case rest.APIKeyInHeader:
-			if securityScheme.Value != nil {
-				value := securityScheme.GetValue()
-				if value != "" {
-					req.Headers.Set(securityScheme.Name, eitherMaskSecret(value, isExplain))
-				}
+			value := config.GetValue()
+			if value != "" {
+				req.Headers.Set(config.Name, eitherMaskSecret(value, isExplain))
+
+				return true, nil
 			}
 		case rest.APIKeyInQuery:
-			value := securityScheme.GetValue()
+			value := config.GetValue()
 			if value != "" {
 				endpoint := req.URL
 				q := endpoint.Query()
-				q.Add(securityScheme.Name, eitherMaskSecret(value, isExplain))
+				q.Add(config.Name, eitherMaskSecret(value, isExplain))
 				endpoint.RawQuery = q.Encode()
 				req.URL = endpoint
+
+				return true, nil
 			}
 		case rest.APIKeyInCookie:
 			// Cookie header should be forwarded from Hasura engine
+			return true, nil
 		default:
-			return fmt.Errorf("unsupported location for apiKey scheme: %s", securityScheme.In)
+			return false, fmt.Errorf("unsupported location for apiKey scheme: %s", config.In)
 		}
 	// TODO: support OAuth and OIDC
 	// Authentication headers can be forwarded from Hasura engine
-	case rest.OAuth2Scheme, rest.OpenIDConnectScheme:
+	case *rest.OAuth2Config, *rest.OpenIDConnectConfig:
+	case *rest.CookieAuthConfig:
+		return true, nil
+	case *rest.MutualTLSAuthConfig:
+		// the server may require not only mutualTLS authentication
+		return false, nil
 	default:
-		return fmt.Errorf("unsupported security scheme: %s", securityScheme.Type)
+		return false, fmt.Errorf("unsupported security scheme: %s", securityScheme.GetType())
 	}
 
-	return nil
+	return false, nil
 }
 
 func (req *RetryableRequest) applySettings(settings *rest.NDCHttpSettings, isExplain bool) error {

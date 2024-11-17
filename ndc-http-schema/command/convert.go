@@ -37,12 +37,14 @@ func CommandConvertToNDCSchema(args *configuration.ConvertCommandArguments, logg
 	if args.File == "" && args.Config == "" {
 		err := errors.New("--config or --file argument is required")
 		logger.Error(err.Error())
+
 		return err
 	}
 
 	configDir, err := os.Getwd()
 	if err != nil {
 		logger.Error("failed to get work dir: " + err.Error())
+
 		return err
 	}
 
@@ -51,10 +53,12 @@ func CommandConvertToNDCSchema(args *configuration.ConvertCommandArguments, logg
 		rawConfig, err := utils.ReadFileFromPath(args.Config)
 		if err != nil {
 			logger.Error(err.Error())
+
 			return err
 		}
 		if err := yaml.Unmarshal(rawConfig, &config); err != nil {
 			logger.Error(err.Error())
+
 			return err
 		}
 		configDir = filepath.Dir(args.Config)
@@ -65,6 +69,7 @@ func CommandConvertToNDCSchema(args *configuration.ConvertCommandArguments, logg
 
 	if err != nil {
 		logger.Error(err.Error())
+
 		return err
 	}
 
@@ -76,10 +81,12 @@ func CommandConvertToNDCSchema(args *configuration.ConvertCommandArguments, logg
 		}
 		if err != nil {
 			logger.Error("failed to write schema file", slog.String("error", err.Error()))
+
 			return err
 		}
 
 		logger.Info("generated successfully", slog.Duration("execution_time", time.Since(start)))
+
 		return nil
 	}
 

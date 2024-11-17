@@ -52,7 +52,7 @@ func TestOpenAPIv2ToRESTSchema(t *testing.T) {
 		// go run ./ndc-http-schema convert -f ./ndc-http-schema/openapi/testdata/prefix2/source.json -o ./ndc-http-schema/openapi/testdata/prefix2/expected_multi_words.json --spec oas2 --prefix hasura_mock_json
 		// go run ./ndc-http-schema convert -f ./ndc-http-schema/openapi/testdata/prefix2/source.json -o ./ndc-http-schema/openapi/testdata/prefix2/expected_multi_words.schema.json --pure --spec oas2 --prefix hasura_mock_json
 		{
-			Name:     "prefix2_single_word",
+			Name:     "prefix2_multi_word",
 			Source:   "testdata/prefix2/source.json",
 			Expected: "testdata/prefix2/expected_multi_words.json",
 			Schema:   "testdata/prefix2/expected_multi_words.schema.json",

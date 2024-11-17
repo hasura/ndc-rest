@@ -11,7 +11,7 @@
           }
         },
         "kind": {
-          "description": "Kind of notifications returned:   * unset - All notification types (default)   * `0` - Dashboard only   * `1` - API only   * `3` - Automated only ",
+          "description": "Kind of notifications returned:   * unset - All notification types (default)   * `0` - Dashboard only   * `1` - API only   * `3` - Automated only",
           "type": {
             "type": "nullable",
             "underlying_type": {
@@ -44,19 +44,19 @@
       "description": "View notifications",
       "name": "hasuraOneSignalGetNotifications",
       "result_type": {
-        "name": "NotificationSlice",
+        "name": "HasuraOneSignalNotificationSlice",
         "type": "named"
       }
     }
   ],
   "object_types": {
-    "CreateNotificationSuccessResponse": {
+    "HasuraOneSignalCreateNotificationSuccessResponse": {
       "fields": {
         "errors": {
           "type": {
             "type": "nullable",
             "underlying_type": {
-              "name": "Notification200Errors",
+              "name": "HasuraOneSignalNotification200Errors",
               "type": "named"
             }
           }
@@ -90,7 +90,7 @@
         }
       }
     },
-    "DeliveryData": {
+    "HasuraOneSignalDeliveryData": {
       "fields": {
         "converted": {
           "description": "Number of messages that were clicked.",
@@ -144,7 +144,7 @@
         }
       }
     },
-    "Filter": {
+    "HasuraOneSignalFilter": {
       "fields": {
         "field": {
           "description": "Name of the field to use as the first operand in the filter expression.",
@@ -166,7 +166,7 @@
         "relation": {
           "description": "Operator of a filter expression.",
           "type": {
-            "name": "FilterRelation",
+            "name": "HasuraOneSignalFilterRelation",
             "type": "named"
           }
         },
@@ -182,13 +182,13 @@
         }
       }
     },
-    "NotificationInput": {
+    "HasuraOneSignalNotificationInput": {
       "fields": {
         "contents": {
           "type": {
             "type": "nullable",
             "underlying_type": {
-              "name": "StringMap",
+              "name": "HasuraOneSignalStringMap",
               "type": "named"
             }
           }
@@ -203,7 +203,7 @@
           }
         },
         "data": {
-          "description": "Channel: Push Notifications Platform: Huawei A custom map of data that is passed back to your app. Same as using Additional Data within the dashboard. Can use up to 2048 bytes of data. Example: {\"abc\": 123, \"foo\": \"bar\", \"event_performed\": true, \"amount\": 12.1} ",
+          "description": "Channel: Push Notifications Platform: Huawei A custom map of data that is passed back to your app. Same as using Additional Data within the dashboard. Can use up to 2048 bytes of data. Example: {\"abc\": 123, \"foo\": \"bar\", \"event_performed\": true, \"amount\": 12.1}",
           "type": {
             "type": "nullable",
             "underlying_type": {
@@ -217,7 +217,7 @@
             "type": "nullable",
             "underlying_type": {
               "element_type": {
-                "name": "Filter",
+                "name": "HasuraOneSignalFilter",
                 "type": "named"
               },
               "type": "array"
@@ -228,7 +228,7 @@
           "type": {
             "type": "nullable",
             "underlying_type": {
-              "name": "StringMap",
+              "name": "HasuraOneSignalStringMap",
               "type": "named"
             }
           }
@@ -255,14 +255,14 @@
           "type": {
             "type": "nullable",
             "underlying_type": {
-              "name": "StringMap",
+              "name": "HasuraOneSignalStringMap",
               "type": "named"
             }
           }
         }
       }
     },
-    "NotificationSlice": {
+    "HasuraOneSignalNotificationSlice": {
       "fields": {
         "limit": {
           "type": {
@@ -278,7 +278,7 @@
             "type": "nullable",
             "underlying_type": {
               "element_type": {
-                "name": "NotificationWithMeta",
+                "name": "HasuraOneSignalNotificationWithMeta",
                 "type": "named"
               },
               "type": "array"
@@ -305,7 +305,7 @@
         }
       }
     },
-    "NotificationWithMeta": {
+    "HasuraOneSignalNotificationWithMeta": {
       "fields": {
         "completed_at": {
           "description": "Unix timestamp indicating when notification delivery completed. The delivery duration from start to finish can be calculated with completed_at - send_after.",
@@ -321,7 +321,7 @@
           "type": {
             "type": "nullable",
             "underlying_type": {
-              "name": "StringMap",
+              "name": "HasuraOneSignalStringMap",
               "type": "named"
             }
           }
@@ -373,7 +373,7 @@
             "type": "nullable",
             "underlying_type": {
               "element_type": {
-                "name": "Filter",
+                "name": "HasuraOneSignalFilter",
                 "type": "named"
               },
               "type": "array"
@@ -384,7 +384,7 @@
           "type": {
             "type": "nullable",
             "underlying_type": {
-              "name": "StringMap",
+              "name": "HasuraOneSignalStringMap",
               "type": "named"
             }
           }
@@ -427,7 +427,7 @@
             "type": "nullable",
             "underlying_type": {
               "element_type": {
-                "name": "OutcomeData",
+                "name": "HasuraOneSignalOutcomeData",
                 "type": "named"
               },
               "type": "array"
@@ -439,7 +439,7 @@
           "type": {
             "type": "nullable",
             "underlying_type": {
-              "name": "PlatformDeliveryData",
+              "name": "HasuraOneSignalPlatformDeliveryData",
               "type": "named"
             }
           }
@@ -488,7 +488,7 @@
           "type": {
             "type": "nullable",
             "underlying_type": {
-              "name": "StringMap",
+              "name": "HasuraOneSignalStringMap",
               "type": "named"
             }
           }
@@ -507,7 +507,7 @@
           "type": {
             "type": "nullable",
             "underlying_type": {
-              "name": "PlayerNotificationTargetTargetChannel",
+              "name": "HasuraOneSignalPlayerNotificationTargetTargetChannel",
               "type": "named"
             }
           }
@@ -524,11 +524,11 @@
         }
       }
     },
-    "OutcomeData": {
+    "HasuraOneSignalOutcomeData": {
       "fields": {
         "aggregation": {
           "type": {
-            "name": "OutcomeDataAggregation",
+            "name": "HasuraOneSignalOutcomeDataAggregation",
             "type": "named"
           }
         },
@@ -546,14 +546,14 @@
         }
       }
     },
-    "PlatformDeliveryData": {
+    "HasuraOneSignalPlatformDeliveryData": {
       "description": "Hash of delivery statistics broken out by target device platform.",
       "fields": {
         "android": {
           "type": {
             "type": "nullable",
             "underlying_type": {
-              "name": "DeliveryData",
+              "name": "HasuraOneSignalDeliveryData",
               "type": "named"
             }
           }
@@ -562,7 +562,7 @@
           "type": {
             "type": "nullable",
             "underlying_type": {
-              "name": "DeliveryData",
+              "name": "HasuraOneSignalDeliveryData",
               "type": "named"
             }
           }
@@ -571,7 +571,7 @@
           "type": {
             "type": "nullable",
             "underlying_type": {
-              "name": "DeliveryData",
+              "name": "HasuraOneSignalDeliveryData",
               "type": "named"
             }
           }
@@ -580,7 +580,7 @@
           "type": {
             "type": "nullable",
             "underlying_type": {
-              "name": "DeliveryData",
+              "name": "HasuraOneSignalDeliveryData",
               "type": "named"
             }
           }
@@ -589,7 +589,7 @@
           "type": {
             "type": "nullable",
             "underlying_type": {
-              "name": "DeliveryData",
+              "name": "HasuraOneSignalDeliveryData",
               "type": "named"
             }
           }
@@ -598,7 +598,7 @@
           "type": {
             "type": "nullable",
             "underlying_type": {
-              "name": "DeliveryData",
+              "name": "HasuraOneSignalDeliveryData",
               "type": "named"
             }
           }
@@ -607,7 +607,7 @@
           "type": {
             "type": "nullable",
             "underlying_type": {
-              "name": "DeliveryData",
+              "name": "HasuraOneSignalDeliveryData",
               "type": "named"
             }
           }
@@ -616,14 +616,14 @@
           "type": {
             "type": "nullable",
             "underlying_type": {
-              "name": "DeliveryData",
+              "name": "HasuraOneSignalDeliveryData",
               "type": "named"
             }
           }
         }
       }
     },
-    "StringMap": {
+    "HasuraOneSignalStringMap": {
       "fields": {
         "en": {
           "description": "Text in English.  Will be used as a fallback",
@@ -644,7 +644,7 @@
         "body": {
           "description": "Request body of POST /notifications",
           "type": {
-            "name": "NotificationInput",
+            "name": "HasuraOneSignalNotificationInput",
             "type": "named"
           }
         }
@@ -652,13 +652,13 @@
       "description": "Create notification",
       "name": "hasuraOneSignalCreateNotification",
       "result_type": {
-        "name": "CreateNotificationSuccessResponse",
+        "name": "HasuraOneSignalCreateNotificationSuccessResponse",
         "type": "named"
       }
     }
   ],
   "scalar_types": {
-    "FilterRelation": {
+    "HasuraOneSignalFilterRelation": {
       "aggregate_functions": {},
       "comparison_operators": {},
       "representation": {
@@ -671,6 +671,36 @@
           "not_exists",
           "time_elapsed_gt",
           "time_elapsed_lt"
+        ],
+        "type": "enum"
+      }
+    },
+    "HasuraOneSignalNotification200Errors": {
+      "aggregate_functions": {},
+      "comparison_operators": {},
+      "representation": {
+        "type": "json"
+      }
+    },
+    "HasuraOneSignalOutcomeDataAggregation": {
+      "aggregate_functions": {},
+      "comparison_operators": {},
+      "representation": {
+        "one_of": [
+          "sum",
+          "count"
+        ],
+        "type": "enum"
+      }
+    },
+    "HasuraOneSignalPlayerNotificationTargetTargetChannel": {
+      "aggregate_functions": {},
+      "comparison_operators": {},
+      "representation": {
+        "one_of": [
+          "push",
+          "email",
+          "sms"
         ],
         "type": "enum"
       }
@@ -694,36 +724,6 @@
       "comparison_operators": {},
       "representation": {
         "type": "json"
-      }
-    },
-    "Notification200Errors": {
-      "aggregate_functions": {},
-      "comparison_operators": {},
-      "representation": {
-        "type": "json"
-      }
-    },
-    "OutcomeDataAggregation": {
-      "aggregate_functions": {},
-      "comparison_operators": {},
-      "representation": {
-        "one_of": [
-          "sum",
-          "count"
-        ],
-        "type": "enum"
-      }
-    },
-    "PlayerNotificationTargetTargetChannel": {
-      "aggregate_functions": {},
-      "comparison_operators": {},
-      "representation": {
-        "one_of": [
-          "push",
-          "email",
-          "sms"
-        ],
-        "type": "enum"
       }
     },
     "String": {
