@@ -1,7 +1,7 @@
 package internal
 
 import (
-	"encoding/json"
+	"bytes"
 	"testing"
 
 	rest "github.com/hasura/ndc-http/ndc-http-schema/schema"
@@ -10,33 +10,30 @@ import (
 
 func TestCreateXMLForm(t *testing.T) {
 	testCases := []struct {
-		Name         string
-		RawArguments string
-		Expected     string
+		Name string
+		Body map[string]any
+
+		Expected string
 	}{
 		{
 			Name: "putPetXml",
-			RawArguments: `{
-				"body": {
-					"id": 10,
-					"name": "doggie",
-					"category": {
-						"id": 1,
-						"name": "Dogs"
+			Body: map[string]any{
+				"id":   int64(10),
+				"name": "doggie",
+				"category": map[string]any{
+					"id":   int64(1),
+					"name": "Dogs",
+				},
+				"photoUrls": []any{"string"},
+				"tags": []any{
+					map[string]any{
+						"id":   int64(0),
+						"name": "string",
 					},
-					"photoUrls": [
-						"string"
-					],
-					"tags": [
-						{
-							"id": 0,
-							"name": "string"
-						}
-					],
-					"status": "available"
-				}
-			}`,
-			Expected: "<pet><category><id>1</id><name>Dogs</name></category><id>10</id><name>doggie</name><photoUrls><photoUrl>string</photoUrl></photoUrls><status>available</status><tags><tag><id>0</id><name>string</name></tag></tags></pet>",
+				},
+				"status": "available",
+			},
+			Expected: "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<pet><category><id>1</id><name>Dogs</name></category><id>10</id><name>doggie</name><photoUrls><photoUrl>string</photoUrl></photoUrls><status>available</status><tags><tag><id>0</id><name>string</name></tag></tags></pet>",
 		},
 	}
 
@@ -51,17 +48,16 @@ func TestCreateXMLForm(t *testing.T) {
 				}
 			}
 			assert.Assert(t, info != nil)
-			var arguments map[string]any
-			assert.NilError(t, json.Unmarshal([]byte(tc.RawArguments), &arguments))
 			argumentInfo := info.Arguments["body"]
-			builder := RequestBuilder{
-				Schema:    ndcSchema,
-				Operation: info,
-				Arguments: arguments,
-			}
-			result, err := builder.createXMLBody(&argumentInfo, arguments["body"])
+			result, err := NewXMLEncoder(ndcSchema).Encode(&argumentInfo, tc.Body)
 			assert.NilError(t, err)
 			assert.DeepEqual(t, tc.Expected, string(result))
+
+			dec := NewXMLDecoder(ndcSchema)
+			parsedResult, err := dec.Decode(bytes.NewBuffer([]byte(tc.Expected)), info.ResultType)
+			assert.NilError(t, err)
+
+			assert.DeepEqual(t, tc.Body, parsedResult)
 		})
 	}
 }

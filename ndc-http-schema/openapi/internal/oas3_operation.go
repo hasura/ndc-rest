@@ -51,8 +51,6 @@ func (oc *oas3OperationBuilder) BuildFunction(itemGet *v3.Operation) (*rest.Oper
 		return nil, "", fmt.Errorf("%s: %w", oc.pathKey, err)
 	}
 
-	oc.builder.hasContentTypeXML = oc.builder.hasContentTypeXML || schemaResponse.ContentType == rest.ContentTypeXML
-
 	if resultType == nil {
 		return nil, "", nil
 	}
@@ -103,7 +101,6 @@ func (oc *oas3OperationBuilder) BuildProcedure(operation *v3.Operation) (*rest.O
 	if resultType == nil {
 		return nil, "", nil
 	}
-	oc.builder.hasContentTypeXML = oc.builder.hasContentTypeXML || schemaResponse.ContentType == rest.ContentTypeXML
 
 	err = oc.convertParameters(operation.Parameters, oc.pathKey, []string{procName})
 	if err != nil {
@@ -130,8 +127,6 @@ func (oc *oas3OperationBuilder) BuildProcedure(operation *v3.Operation) (*rest.O
 				In: rest.InBody,
 			},
 		}
-
-		oc.builder.hasContentTypeXML = oc.builder.hasContentTypeXML || reqBody.ContentType == rest.ContentTypeXML
 	}
 
 	description := oc.getOperationDescription(operation)

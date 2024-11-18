@@ -54,8 +54,6 @@ func (oc *oas2OperationBuilder) BuildFunction(operation *v2.Operation, commonPar
 		return nil, "", nil
 	}
 
-	oc.builder.hasContentTypeXML = oc.builder.hasContentTypeXML || responseContentType == rest.ContentTypeXML
-
 	resultType, err := oc.convertResponse(operation.Responses, []string{funcName, "Result"})
 	if err != nil {
 		return nil, "", fmt.Errorf("%s: %w", oc.pathKey, err)
@@ -114,8 +112,6 @@ func (oc *oas2OperationBuilder) BuildProcedure(operation *v2.Operation, commonPa
 		return nil, "", nil
 	}
 
-	oc.builder.hasContentTypeXML = oc.builder.hasContentTypeXML || responseContentType == rest.ContentTypeXML
-
 	resultType, err := oc.convertResponse(operation.Responses, []string{procName, "Result"})
 	if err != nil {
 		return nil, "", fmt.Errorf("%s: %w", oc.pathKey, err)
@@ -129,8 +125,6 @@ func (oc *oas2OperationBuilder) BuildProcedure(operation *v2.Operation, commonPa
 	if err != nil {
 		return nil, "", fmt.Errorf("%s: %w", oc.pathKey, err)
 	}
-
-	oc.builder.hasContentTypeXML = oc.builder.hasContentTypeXML || (reqBody != nil && reqBody.ContentType == rest.ContentTypeXML)
 
 	description := oc.getOperationDescription(operation)
 	procedure := rest.OperationInfo{

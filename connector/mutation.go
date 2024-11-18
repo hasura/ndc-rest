@@ -32,7 +32,7 @@ func (c *HTTPConnector) MutationExplain(ctx context.Context, configuration *conf
 	operation := request.Operations[0]
 	switch operation.Type {
 	case schema.MutationOperationProcedure:
-		httpRequest, _, httpOptions, err := c.explainProcedure(&operation)
+		httpRequest, _, _, httpOptions, err := c.explainProcedure(&operation)
 		if err != nil {
 			return nil, err
 		}
@@ -43,16 +43,16 @@ func (c *HTTPConnector) MutationExplain(ctx context.Context, configuration *conf
 	}
 }
 
-func (c *HTTPConnector) explainProcedure(operation *schema.MutationOperation) (*internal.RetryableRequest, *rest.OperationInfo, *internal.HTTPOptions, error) {
+func (c *HTTPConnector) explainProcedure(operation *schema.MutationOperation) (*internal.RetryableRequest, *rest.OperationInfo, *configuration.NDCHttpRuntimeSchema, *internal.HTTPOptions, error) {
 	procedure, metadata, err := c.metadata.GetProcedure(operation.Name)
 	if err != nil {
-		return nil, nil, nil, err
+		return nil, nil, nil, nil, err
 	}
 
 	// 1. resolve arguments, evaluate URL and query parameters
 	var rawArgs map[string]any
 	if err := json.Unmarshal(operation.Arguments, &rawArgs); err != nil {
-		return nil, nil, nil, schema.BadRequestError("failed to decode arguments", map[string]any{
+		return nil, nil, nil, nil, schema.BadRequestError("failed to decode arguments", map[string]any{
 			"cause": err.Error(),
 		})
 	}
@@ -61,25 +61,25 @@ func (c *HTTPConnector) explainProcedure(operation *schema.MutationOperation) (*
 	builder := internal.NewRequestBuilder(c.schema, procedure, rawArgs, metadata.Runtime)
 	httpRequest, err := builder.Build()
 	if err != nil {
-		return nil, nil, nil, err
+		return nil, nil, nil, nil, err
 	}
 
 	if err := c.evalForwardedHeaders(httpRequest, rawArgs); err != nil {
-		return nil, nil, nil, schema.UnprocessableContentError("invalid forwarded headers", map[string]any{
+		return nil, nil, nil, nil, schema.UnprocessableContentError("invalid forwarded headers", map[string]any{
 			"cause": err.Error(),
 		})
 	}
 
 	httpOptions, err := c.parseHTTPOptionsFromArguments(procedure.Arguments, rawArgs)
 	if err != nil {
-		return nil, nil, nil, schema.UnprocessableContentError("invalid http options", map[string]any{
+		return nil, nil, nil, nil, schema.UnprocessableContentError("invalid http options", map[string]any{
 			"cause": err.Error(),
 		})
 	}
 
 	httpOptions.Settings = metadata.Settings
 
-	return httpRequest, procedure, httpOptions, nil
+	return httpRequest, procedure, &metadata, httpOptions, nil
 }
 
 func (c *HTTPConnector) execMutationSync(ctx context.Context, state *State, request *schema.MutationRequest) (*schema.MutationResponse, error) {
@@ -130,7 +130,7 @@ func (c *HTTPConnector) execMutationOperation(parentCtx context.Context, state *
 	ctx, span := state.Tracer.Start(parentCtx, fmt.Sprintf("Execute Operation %d", index))
 	defer span.End()
 
-	httpRequest, procedure, httpOptions, err := c.explainProcedure(&operation)
+	httpRequest, procedure, metadata, httpOptions, err := c.explainProcedure(&operation)
 	if err != nil {
 		span.SetStatus(codes.Error, "failed to explain mutation")
 		span.RecordError(err)
@@ -139,7 +139,8 @@ func (c *HTTPConnector) execMutationOperation(parentCtx context.Context, state *
 	}
 
 	httpOptions.Concurrency = c.config.Concurrency.HTTP
-	result, headers, err := c.client.Send(ctx, httpRequest, operation.Fields, procedure.ResultType, httpOptions)
+	client := internal.NewHTTPClient(c.client, metadata.NDCHttpSchema, state.Tracer)
+	result, headers, err := client.Send(ctx, httpRequest, operation.Fields, procedure.ResultType, httpOptions)
 	if err != nil {
 		span.SetStatus(codes.Error, "failed to execute mutation")
 		span.RecordError(err)

@@ -19,7 +19,7 @@ type HTTPConnector struct {
 	capabilities *schema.RawCapabilitiesResponse
 	rawSchema    *schema.RawSchemaResponse
 	schema       *rest.NDCHttpSchema
-	client       *internal.HTTPClient
+	client       internal.Doer
 }
 
 // NewHTTPConnector creates a HTTP connector instance
@@ -29,7 +29,7 @@ func NewHTTPConnector(opts ...Option) *HTTPConnector {
 	}
 
 	return &HTTPConnector{
-		client: internal.NewHTTPClient(defaultOptions.client),
+		client: defaultOptions.client,
 	}
 }
 
@@ -93,8 +93,6 @@ func (c *HTTPConnector) ParseConfiguration(ctx context.Context, configurationDir
 // In addition, this function should register any
 // connector-specific metrics with the metrics registry.
 func (c *HTTPConnector) TryInitState(ctx context.Context, configuration *configuration.Configuration, metrics *connector.TelemetryState) (*State, error) {
-	c.client.SetTracer(metrics.Tracer)
-
 	return &State{
 		Tracer: metrics.Tracer,
 	}, nil

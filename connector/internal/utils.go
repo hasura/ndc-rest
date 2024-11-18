@@ -84,8 +84,8 @@ func cloneURL(input *url.URL) *url.URL {
 	}
 }
 
-func marshalSimple(val reflect.Value) (string, error) {
-	switch val.Kind() {
+func marshalSimpleScalar(val reflect.Value, kind reflect.Kind) (string, error) {
+	switch kind {
 	case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64:
 		return strconv.FormatInt(val.Int(), 10), nil
 	case reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64, reflect.Uintptr:

@@ -19,8 +19,7 @@ import (
 type OAS3Builder struct {
 	*ConvertOptions
 
-	schema            *rest.NDCHttpSchema
-	hasContentTypeXML bool
+	schema *rest.NDCHttpSchema
 	// stores prebuilt and evaluating information of component schema types.
 	// some undefined schema types aren't stored in either object nor scalar,
 	// or self-reference types that haven't added into the object_types map yet.
@@ -363,6 +362,7 @@ func (oc *OAS3Builder) populateWriteSchemaType(schemaType schema.Type) (schema.T
 		}
 		writeObject := rest.ObjectType{
 			Description: objectType.Description,
+			XML:         objectType.XML,
 			Fields:      make(map[string]rest.ObjectField),
 		}
 		var hasWriteField bool

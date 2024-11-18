@@ -144,7 +144,7 @@ func (c *RequestBuilder) buildRequestBody(request *RetryableRequest, rawRequest 
 
 			return nil
 		case contentType == rest.ContentTypeXML:
-			bodyBytes, err := c.createXMLBody(&bodyInfo, bodyData)
+			bodyBytes, err := NewXMLEncoder(c.Schema).Encode(&bodyInfo, bodyData)
 			if err != nil {
 				return err
 			}

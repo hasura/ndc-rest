@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"io"
 	"log"
+	"log/slog"
 	"net/http"
 	"net/http/httptest"
 	"os"
@@ -99,7 +100,7 @@ func TestHTTPConnector_emptyServer(t *testing.T) {
 func TestHTTPConnector_authentication(t *testing.T) {
 	apiKey := "random_api_key"
 	bearerToken := "random_bearer_token"
-	// slog.SetLogLoggerLevel(slog.LevelDebug)
+	slog.SetLogLoggerLevel(slog.LevelDebug)
 	server := createMockServer(t, apiKey, bearerToken)
 	defer server.Close()
 
@@ -321,6 +322,136 @@ func TestHTTPConnector_authentication(t *testing.T) {
 		})
 	})
 
+	// t.Run("encoding-xml", func(t *testing.T) {
+	// 	reqBody := []byte(`{
+	// 		"operations": [
+	// 			{
+	// 				"type": "procedure",
+	// 				"name": "putPetXml",
+	// 				"arguments": {
+	// 					"body": {
+	// 						"id":   10,
+	// 						"name": "doggie",
+	// 						"category": {
+	// 							"id":   1,
+	// 							"name": "Dogs"
+	// 						},
+	// 						"photoUrls": ["string"],
+	// 						"tags": [
+	// 							{
+	// 								"id":   0,
+	// 								"name": "string"
+	// 							}
+	// 						],
+	// 						"status": "available"
+	// 					}
+	// 				},
+	// 				"fields": {
+	// 					"fields": {
+	// 						"headers": {
+	// 							"column": "headers",
+	// 							"type": "column"
+	// 						},
+	// 						"response": {
+	// 							"column": "response",
+	// 							"fields": {
+	// 								"fields": {
+	// 									"category": {
+	// 										"column": "category",
+	// 										"fields": {
+	// 											"fields": {
+	// 												"id": {
+	// 													"column": "id",
+	// 													"type": "column"
+	// 												},
+	// 												"name": {
+	// 													"column": "name",
+	// 													"type": "column"
+	// 												}
+	// 											},
+	// 											"type": "object"
+	// 										},
+	// 										"type": "column"
+	// 									},
+	// 									"field": {
+	// 										"column": "field",
+	// 										"type": "column"
+	// 									},
+	// 									"id": {
+	// 										"column": "id",
+	// 										"type": "column"
+	// 									},
+	// 									"name": {
+	// 										"column": "name",
+	// 										"type": "column"
+	// 									},
+	// 									"photoUrls": {
+	// 										"column": "photoUrls",
+	// 										"type": "column"
+	// 									},
+	// 									"status": {
+	// 										"column": "status",
+	// 										"type": "column"
+	// 									},
+	// 									"tags": {
+	// 										"column": "tags",
+	// 										"fields": {
+	// 											"fields": {
+	// 												"fields": {
+	// 													"id": {
+	// 														"column": "id",
+	// 														"type": "column"
+	// 													},
+	// 													"name": {
+	// 														"column": "name",
+	// 														"type": "column"
+	// 													}
+	// 												},
+	// 												"type": "object"
+	// 											},
+	// 											"type": "array"
+	// 										},
+	// 										"type": "column"
+	// 									}
+	// 								},
+	// 								"type": "object"
+	// 							},
+	// 							"type": "column"
+	// 						}
+	// 					},
+	// 					"type": "object"
+	// 				}
+	// 			}
+	// 		],
+	// 		"collection_relationships": {}
+	// 	}`)
+
+	// 	res, err := http.Post(fmt.Sprintf("%s/mutation", testServer.URL), "application/json", bytes.NewBuffer(reqBody))
+	// 	assert.NilError(t, err)
+	// 	assertHTTPResponse(t, res, http.StatusOK, schema.MutationResponse{
+	// 		OperationResults: []schema.MutationOperationResults{
+	// 			schema.NewProcedureResult(map[string]any{
+	// 				"headers": map[string]any{"Content-Type": string("application/xml")},
+	// 				"response": map[string]any{"headers": nil, "response": map[string]any{
+	// 					"id":   int64(10),
+	// 					"name": "doggie",
+	// 					"category": map[string]any{
+	// 						"id":   int64(1),
+	// 						"name": "Dogs",
+	// 					},
+	// 					"photoUrls": []any{"string"},
+	// 					"tags": []any{
+	// 						map[string]any{
+	// 							"id":   int64(0),
+	// 							"name": "string",
+	// 						},
+	// 					},
+	// 					"status": "available",
+	// 				}},
+	// 			}).Encode(),
+	// 		},
+	// 	})
+	// })
 }
 
 func TestHTTPConnector_distribution(t *testing.T) {
@@ -665,6 +796,18 @@ func createMockServer(t *testing.T, apiKey string, bearerToken string) *httptest
 			w.WriteHeader(http.StatusOK)
 			_, _ = w.Write([]byte(`{"completed": 1, "status": "OK"}
 {"completed": 0, "status": "FAILED"}`))
+		default:
+			w.WriteHeader(http.StatusMethodNotAllowed)
+		}
+	})
+
+	mux.HandleFunc("/pet/xml", func(w http.ResponseWriter, r *http.Request) {
+		switch r.Method {
+		case http.MethodPut:
+			w.Header().Add("Content-Type", "application/xml")
+			w.WriteHeader(http.StatusOK)
+
+			_, _ = w.Write([]byte("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<pet><category><id>1</id><name>Dogs</name></category><id>10</id><name>doggie</name><photoUrls><photoUrl>string</photoUrl></photoUrls><status>available</status><tags><tag><id>0</id><name>string</name></tag></tags></pet>"))
 		default:
 			w.WriteHeader(http.StatusMethodNotAllowed)
 		}

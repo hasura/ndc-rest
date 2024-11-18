@@ -37,14 +37,17 @@ type Doer interface {
 // HTTPClient represents a http client wrapper with advanced methods
 type HTTPClient struct {
 	client     Doer
+	schema     *rest.NDCHttpSchema
 	tracer     *connector.Tracer
 	propagator propagation.TextMapPropagator
 }
 
 // NewHTTPClient creates a http client wrapper
-func NewHTTPClient(client Doer) *HTTPClient {
+func NewHTTPClient(client Doer, httpSchema *rest.NDCHttpSchema, tracer *connector.Tracer) *HTTPClient {
 	return &HTTPClient{
 		client:     client,
+		tracer:     tracer,
+		schema:     httpSchema,
 		propagator: otel.GetTextMapPropagator(),
 	}
 }
@@ -235,7 +238,7 @@ func (client *HTTPClient) sendSingle(ctx context.Context, request *RetryableRequ
 		return nil, nil, schema.NewConnectorError(resp.StatusCode, resp.Status, details)
 	}
 
-	result, headers, evalErr := evalHTTPResponse(ctx, span, resp, contentType, selection, resultType, logger)
+	result, headers, evalErr := client.evalHTTPResponse(ctx, span, resp, contentType, selection, resultType, logger)
 	if evalErr != nil {
 		span.SetStatus(codes.Error, "failed to decode the http response")
 		span.RecordError(evalErr)
@@ -317,7 +320,7 @@ func (client *HTTPClient) doRequest(ctx context.Context, request *RetryableReque
 	return resp, body, cancel, nil
 }
 
-func evalHTTPResponse(ctx context.Context, span trace.Span, resp *http.Response, contentType string, selection schema.NestedField, resultType schema.Type, logger *slog.Logger) (any, http.Header, *schema.ConnectorError) {
+func (client *HTTPClient) evalHTTPResponse(ctx context.Context, span trace.Span, resp *http.Response, contentType string, selection schema.NestedField, resultType schema.Type, logger *slog.Logger) (any, http.Header, *schema.ConnectorError) {
 	if logger.Enabled(ctx, slog.LevelDebug) {
 		logAttrs := []any{
 			slog.Int("http_status", resp.StatusCode),
@@ -374,6 +377,18 @@ func evalHTTPResponse(ctx context.Context, span trace.Span, resp *http.Response,
 		}
 
 		return string(respBody), resp.Header, nil
+	case "application/xml":
+		rawResult, err := NewXMLDecoder(client.schema).Decode(resp.Body, resultType)
+		if err != nil {
+			return nil, nil, schema.NewConnectorError(http.StatusInternalServerError, err.Error(), nil)
+		}
+
+		result, err := utils.EvalNestedColumnFields(selection, rawResult)
+		if err != nil {
+			return nil, nil, schema.InternalServerError(err.Error(), nil)
+		}
+
+		return result, resp.Header, nil
 	case rest.ContentTypeJSON:
 		if len(resultType) > 0 {
 			namedType, err := resultType.AsNamed()

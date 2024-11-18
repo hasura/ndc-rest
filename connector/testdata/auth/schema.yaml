@@ -139,6 +139,27 @@ procedures:
         name: ProgressResponse
         type: named
       type: array
+  putPetXml:
+    request:
+      url: "/pet/xml"
+      method: put
+      security: []
+      requestBody:
+        contentType: application/xml
+      response:
+        contentType: application/xml
+    arguments:
+      body:
+        description: Request body of PUT /pet/xml
+        type:
+          name: PetXml
+          type: named
+        http:
+          in: body
+    description: Update an existing pet
+    result_type:
+      name: PetXml
+      type: named
 object_types:
   Pet:
     fields:
@@ -152,6 +173,136 @@ object_types:
         type:
           name: String
           type: named
+  PetXml:
+    fields:
+      category:
+        type:
+          type: nullable
+          underlying_type:
+            name: Category
+            type: named
+        http:
+          type:
+            - object
+          xml:
+            name: category
+      field:
+        description:
+          This empty field is returned instead of the list of scopes if the
+          user making the call doesn't have the authorization required.
+        type:
+          type: nullable
+          underlying_type:
+            name: JSON
+            type: named
+        http:
+          type:
+      id:
+        type:
+          type: nullable
+          underlying_type:
+            name: Int64
+            type: named
+        http:
+          type:
+            - integer
+          format: int64
+      name:
+        type:
+          name: String
+          type: named
+        http:
+          type:
+            - string
+      photoUrls:
+        type:
+          element_type:
+            name: String
+            type: named
+          type: array
+        http:
+          type:
+            - array
+          items:
+            type:
+              - string
+            xml:
+              name: photoUrl
+          xml:
+            name: ""
+            wrapped: true
+      status:
+        description: pet status in the store
+        type:
+          type: nullable
+          underlying_type:
+            name: String
+            type: named
+        http:
+          type:
+            - string
+      tags:
+        type:
+          type: nullable
+          underlying_type:
+            element_type:
+              name: Tag
+              type: named
+            type: array
+        http:
+          type:
+            - array
+          xml:
+            name: ""
+            wrapped: true
+    xml:
+      name: pet
+  Tag:
+    fields:
+      id:
+        type:
+          type: nullable
+          underlying_type:
+            name: Int64
+            type: named
+        http:
+          type:
+            - integer
+          format: int64
+      name:
+        type:
+          type: nullable
+          underlying_type:
+            name: String
+            type: named
+        http:
+          type:
+            - string
+    xml:
+      name: tag
+  Category:
+    fields:
+      id:
+        type:
+          type: nullable
+          underlying_type:
+            name: Int64
+            type: named
+        http:
+          type:
+            - integer
+          format: int64
+      name:
+        type:
+          type: nullable
+          underlying_type:
+            name: String
+            type: named
+        http:
+          type:
+            - string
+    xml:
+      name: category
   CreateModelRequest:
     fields:
       model:
@@ -181,12 +332,30 @@ scalar_types:
   Boolean:
     aggregate_functions: {}
     comparison_operators: {}
+    representation:
+      type: boolean
   Int:
     aggregate_functions: {}
     comparison_operators: {}
+    representation:
+      type: int32
+  Int32:
+    aggregate_functions: {}
+    comparison_operators: {}
+    representation:
+      type: int32
+  Int64:
+    aggregate_functions: {}
+    comparison_operators: {}
+    representation:
+      type: int64
   JSON:
     aggregate_functions: {}
     comparison_operators: {}
+    representation:
+      type: json
   String:
     aggregate_functions: {}
     comparison_operators: {}
+    representation:
+      type: string
