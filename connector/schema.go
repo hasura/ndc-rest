@@ -5,8 +5,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"log/slog"
-	"net/http"
-	"slices"
 
 	"github.com/go-viper/mapstructure/v2"
 	"github.com/hasura/ndc-http/connector/internal"
@@ -89,25 +87,4 @@ func (c *HTTPConnector) evalForwardedHeaders(req *internal.RetryableRequest, raw
 	}
 
 	return nil
-}
-
-func (c *HTTPConnector) createHeaderForwardingResponse(result any, rawHeaders http.Header) any {
-	if !c.config.ForwardHeaders.Enabled || c.config.ForwardHeaders.ResponseHeaders == nil {
-		return result
-	}
-
-	headers := make(map[string]string)
-	for key, values := range rawHeaders {
-		if len(c.config.ForwardHeaders.ResponseHeaders.ForwardHeaders) > 0 && !slices.Contains(c.config.ForwardHeaders.ResponseHeaders.ForwardHeaders, key) {
-			continue
-		}
-		if len(values) > 0 && values[0] != "" {
-			headers[key] = values[0]
-		}
-	}
-
-	return map[string]any{
-		c.config.ForwardHeaders.ResponseHeaders.HeadersField: headers,
-		c.config.ForwardHeaders.ResponseHeaders.ResultField:  result,
-	}
 }

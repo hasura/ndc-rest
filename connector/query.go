@@ -154,8 +154,8 @@ func (c *HTTPConnector) execQuery(ctx context.Context, state *State, request *sc
 	}
 
 	httpOptions.Concurrency = c.config.Concurrency.HTTP
-	client := internal.NewHTTPClient(c.client, metadata.NDCHttpSchema, state.Tracer)
-	result, headers, err := client.Send(ctx, httpRequest, queryFields, function.ResultType, httpOptions)
+	client := internal.NewHTTPClient(c.client, metadata.NDCHttpSchema, c.config.ForwardHeaders, state.Tracer)
+	result, _, err := client.Send(ctx, httpRequest, queryFields, function.ResultType, httpOptions)
 	if err != nil {
 		span.SetStatus(codes.Error, "failed to execute the http request")
 		span.RecordError(err)
@@ -163,7 +163,7 @@ func (c *HTTPConnector) execQuery(ctx context.Context, state *State, request *sc
 		return nil, err
 	}
 
-	return c.createHeaderForwardingResponse(result, headers), nil
+	return result, nil
 }
 
 func serializeExplainResponse(httpRequest *internal.RetryableRequest, httpOptions *internal.HTTPOptions) (*schema.ExplainResponse, error) {

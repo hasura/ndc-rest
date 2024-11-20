@@ -167,6 +167,19 @@ func TestHTTPConnector_authentication(t *testing.T) {
 					"body": {
 						"name": "pet"
 					}
+				},
+				"fields": {
+					"type": "object",
+					"fields": {
+						"headers": {
+							"column": "headers",
+							"type": "column"
+						},
+						"response": {
+							"column": "response",
+							"type": "column"
+						}
+					}
 				}
 			}
 		],
@@ -288,19 +301,32 @@ func TestHTTPConnector_authentication(t *testing.T) {
 					},
 					"fields": {
 						"fields": {
-							"fields": {
-								"completed": {
-									"column": "completed",
-									"type": "column"
-								},
-								"status": {
-									"column": "status",
-									"type": "column"
-								}
+							"headers": {
+								"column": "headers",
+								"type": "column"
 							},
-							"type": "object"
+							"response": {
+								"column": "response",
+								"type": "column",
+								"fields": {
+									"type": "array",
+									"fields": {
+										"fields": {
+											"completed": {
+												"column": "completed",
+												"type": "column"
+											},
+											"status": {
+												"column": "status",
+												"type": "column"
+											}
+										},
+										"type": "object"
+									}
+								}
+							}
 						},
-						"type": "array"
+						"type": "object"
 					}
 				}
 			],
@@ -322,136 +348,137 @@ func TestHTTPConnector_authentication(t *testing.T) {
 		})
 	})
 
-	// t.Run("encoding-xml", func(t *testing.T) {
-	// 	reqBody := []byte(`{
-	// 		"operations": [
-	// 			{
-	// 				"type": "procedure",
-	// 				"name": "putPetXml",
-	// 				"arguments": {
-	// 					"body": {
-	// 						"id":   10,
-	// 						"name": "doggie",
-	// 						"category": {
-	// 							"id":   1,
-	// 							"name": "Dogs"
-	// 						},
-	// 						"photoUrls": ["string"],
-	// 						"tags": [
-	// 							{
-	// 								"id":   0,
-	// 								"name": "string"
-	// 							}
-	// 						],
-	// 						"status": "available"
-	// 					}
-	// 				},
-	// 				"fields": {
-	// 					"fields": {
-	// 						"headers": {
-	// 							"column": "headers",
-	// 							"type": "column"
-	// 						},
-	// 						"response": {
-	// 							"column": "response",
-	// 							"fields": {
-	// 								"fields": {
-	// 									"category": {
-	// 										"column": "category",
-	// 										"fields": {
-	// 											"fields": {
-	// 												"id": {
-	// 													"column": "id",
-	// 													"type": "column"
-	// 												},
-	// 												"name": {
-	// 													"column": "name",
-	// 													"type": "column"
-	// 												}
-	// 											},
-	// 											"type": "object"
-	// 										},
-	// 										"type": "column"
-	// 									},
-	// 									"field": {
-	// 										"column": "field",
-	// 										"type": "column"
-	// 									},
-	// 									"id": {
-	// 										"column": "id",
-	// 										"type": "column"
-	// 									},
-	// 									"name": {
-	// 										"column": "name",
-	// 										"type": "column"
-	// 									},
-	// 									"photoUrls": {
-	// 										"column": "photoUrls",
-	// 										"type": "column"
-	// 									},
-	// 									"status": {
-	// 										"column": "status",
-	// 										"type": "column"
-	// 									},
-	// 									"tags": {
-	// 										"column": "tags",
-	// 										"fields": {
-	// 											"fields": {
-	// 												"fields": {
-	// 													"id": {
-	// 														"column": "id",
-	// 														"type": "column"
-	// 													},
-	// 													"name": {
-	// 														"column": "name",
-	// 														"type": "column"
-	// 													}
-	// 												},
-	// 												"type": "object"
-	// 											},
-	// 											"type": "array"
-	// 										},
-	// 										"type": "column"
-	// 									}
-	// 								},
-	// 								"type": "object"
-	// 							},
-	// 							"type": "column"
-	// 						}
-	// 					},
-	// 					"type": "object"
-	// 				}
-	// 			}
-	// 		],
-	// 		"collection_relationships": {}
-	// 	}`)
+	t.Run("encoding-xml", func(t *testing.T) {
+		reqBody := []byte(`{
+			"operations": [
+				{
+					"type": "procedure",
+					"name": "putPetXml",
+					"arguments": {
+						"body": {
+							"id":   10,
+							"name": "doggie",
+							"category": {
+								"id":   1,
+								"name": "Dogs"
+							},
+							"photoUrls": ["string"],
+							"tags": [
+								{
+									"id":   0,
+									"name": "string"
+								}
+							],
+							"status": "available"
+						}
+					},
+					"fields": {
+						"fields": {
+							"headers": {
+								"column": "headers",
+								"type": "column"
+							},
+							"response": {
+								"column": "response",
+								"fields": {
+									"fields": {
+										"category": {
+											"column": "category",
+											"fields": {
+												"fields": {
+													"id": {
+														"column": "id",
+														"type": "column"
+													},
+													"name": {
+														"column": "name",
+														"type": "column"
+													}
+												},
+												"type": "object"
+											},
+											"type": "column"
+										},
+										"field": {
+											"column": "field",
+											"type": "column"
+										},
+										"id": {
+											"column": "id",
+											"type": "column"
+										},
+										"name": {
+											"column": "name",
+											"type": "column"
+										},
+										"photoUrls": {
+											"column": "photoUrls",
+											"type": "column"
+										},
+										"status": {
+											"column": "status",
+											"type": "column"
+										},
+										"tags": {
+											"column": "tags",
+											"fields": {
+												"fields": {
+													"fields": {
+														"id": {
+															"column": "id",
+															"type": "column"
+														},
+														"name": {
+															"column": "name",
+															"type": "column"
+														}
+													},
+													"type": "object"
+												},
+												"type": "array"
+											},
+											"type": "column"
+										}
+									},
+									"type": "object"
+								},
+								"type": "column"
+							}
+						},
+						"type": "object"
+					}
+				}
+			],
+			"collection_relationships": {}
+		}`)
 
-	// 	res, err := http.Post(fmt.Sprintf("%s/mutation", testServer.URL), "application/json", bytes.NewBuffer(reqBody))
-	// 	assert.NilError(t, err)
-	// 	assertHTTPResponse(t, res, http.StatusOK, schema.MutationResponse{
-	// 		OperationResults: []schema.MutationOperationResults{
-	// 			schema.NewProcedureResult(map[string]any{
-	// 				"headers": map[string]any{"Content-Type": string("application/xml")},
-	// 				"response": map[string]any{"headers": nil, "response": map[string]any{
-	// 					"id":   int64(10),
-	// 					"name": "doggie",
-	// 					"category": map[string]any{
-	// 						"id":   int64(1),
-	// 						"name": "Dogs",
-	// 					},
-	// 					"photoUrls": []any{"string"},
-	// 					"tags": []any{
-	// 						map[string]any{
-	// 							"id":   int64(0),
-	// 							"name": "string",
-	// 						},
-	// 					},
-	// 					"status": "available",
-	// 				}},
-	// 			}).Encode(),
-	// 		},
-	// 	})
-	// })
+		res, err := http.Post(fmt.Sprintf("%s/mutation", testServer.URL), "application/json", bytes.NewBuffer(reqBody))
+		assert.NilError(t, err)
+		assertHTTPResponse(t, res, http.StatusOK, schema.MutationResponse{
+			OperationResults: []schema.MutationOperationResults{
+				schema.NewProcedureResult(map[string]any{
+					"headers": map[string]any{"Content-Type": string("application/xml")},
+					"response": map[string]any{
+						"id":   float64(10),
+						"name": "doggie",
+						"category": map[string]any{
+							"id":   float64(1),
+							"name": "Dogs",
+						},
+						"field":     nil,
+						"photoUrls": []any{"string"},
+						"tags": []any{
+							map[string]any{
+								"id":   float64(0),
+								"name": "string",
+							},
+						},
+						"status": "available",
+					},
+				}).Encode(),
+			},
+		})
+	})
 }
 
 func TestHTTPConnector_distribution(t *testing.T) {
