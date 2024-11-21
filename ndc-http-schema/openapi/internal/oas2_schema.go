@@ -1,7 +1,6 @@
 package internal
 
 import (
-	"errors"
 	"fmt"
 	"slices"
 	"strconv"
@@ -36,12 +35,13 @@ func (oc *oas2SchemaBuilder) getSchemaTypeFromParameter(param *v2.Parameter, fie
 
 	switch param.Type {
 	case "object":
-		return nil, errors.New("unsupported object parameter")
+		return nil, fmt.Errorf("%s: unsupported object parameter", strings.Join(fieldPaths, "."))
 	case "array":
 		if param.Items == nil || param.Items.Type == "" {
 			if oc.builder.Strict {
-				return nil, errors.New("array item is empty")
+				return nil, fmt.Errorf("%s: array item is empty", strings.Join(fieldPaths, "."))
 			}
+
 			typeEncoder = schema.NewArrayType(oc.builder.buildScalarJSON())
 		} else {
 			itemName, isNull := getScalarFromType(oc.builder.schema, []string{param.Items.Type}, param.Format, param.Enum, oc.trimPathPrefix(oc.apiPath), fieldPaths)
@@ -50,7 +50,7 @@ func (oc *oas2SchemaBuilder) getSchemaTypeFromParameter(param *v2.Parameter, fie
 		}
 	default:
 		if !isPrimitiveScalar([]string{param.Type}) {
-			return nil, fmt.Errorf("unsupported schema type %s", param.Type)
+			return nil, fmt.Errorf("%s: unsupported schema type %s", strings.Join(fieldPaths, "."), param.Type)
 		}
 
 		scalarName, isNull := getScalarFromType(oc.builder.schema, []string{param.Type}, param.Format, param.Enum, oc.trimPathPrefix(oc.apiPath), fieldPaths)
@@ -178,7 +178,7 @@ func (oc *oas2SchemaBuilder) getSchemaType(typeSchema *base.Schema, fieldPaths [
 			case "array":
 				if typeSchema.Items == nil || typeSchema.Items.A == nil {
 					if oc.builder.ConvertOptions.Strict {
-						return nil, nil, errors.New("array item is empty")
+						return nil, nil, fmt.Errorf("%s: array item is empty", strings.Join(fieldPaths, "."))
 					}
 					result = schema.NewArrayType(oc.builder.buildScalarJSON())
 				} else {

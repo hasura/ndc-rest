@@ -297,9 +297,7 @@ func (oc *OAS3Builder) trimPathPrefix(input string) string {
 // build a named type for JSON scalar
 func (oc *OAS3Builder) buildScalarJSON() *schema.NamedType {
 	scalarName := string(rest.ScalarJSON)
-	if _, ok := oc.schema.ScalarTypes[scalarName]; !ok {
-		oc.schema.ScalarTypes[scalarName] = *defaultScalarTypes[rest.ScalarJSON]
-	}
+	oc.schema.AddScalar(scalarName, *defaultScalarTypes[rest.ScalarJSON])
 
 	return schema.NewNamedType(scalarName)
 }

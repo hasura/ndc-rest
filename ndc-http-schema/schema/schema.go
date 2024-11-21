@@ -91,6 +91,14 @@ func (rm NDCHttpSchema) GetProcedure(name string) *OperationInfo {
 	return &fn
 }
 
+// AddScalar adds a new scalar if not exist.
+func (rm *NDCHttpSchema) AddScalar(name string, scalar schema.ScalarType) {
+	_, ok := rm.ScalarTypes[name]
+	if !ok {
+		rm.ScalarTypes[name] = scalar
+	}
+}
+
 type Response struct {
 	ContentType string `json:"contentType" mapstructure:"contentType" yaml:"contentType"`
 }

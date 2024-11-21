@@ -1,7 +1,6 @@
 package internal
 
 import (
-	"errors"
 	"fmt"
 	"log/slog"
 	"slices"
@@ -35,6 +34,7 @@ func (oc *oas3SchemaBuilder) getSchemaTypeFromProxy(schemaProxy *base.SchemaProx
 	if schemaProxy == nil {
 		return nil, nil, errParameterSchemaEmpty(fieldPaths)
 	}
+
 	innerSchema := schemaProxy.Schema()
 	if innerSchema == nil {
 		return nil, nil, fmt.Errorf("cannot get schema of $.%s from proxy: %s", strings.Join(fieldPaths, "."), schemaProxy.GetReference())
@@ -99,6 +99,10 @@ func (oc *oas3SchemaBuilder) getSchemaTypeFromProxy(schemaProxy *base.SchemaProx
 func (oc *oas3SchemaBuilder) getSchemaType(typeSchema *base.Schema, fieldPaths []string) (schema.TypeEncoder, *rest.TypeSchema, error) {
 	if typeSchema == nil {
 		return nil, nil, errParameterSchemaEmpty(fieldPaths)
+	}
+
+	if oc.builder.ConvertOptions.NoDeprecation && typeSchema.Deprecated != nil && *typeSchema.Deprecated {
+		return nil, nil, nil
 	}
 
 	description := utils.StripHTMLTags(typeSchema.Description)
@@ -267,7 +271,11 @@ func (oc *oas3SchemaBuilder) getSchemaType(typeSchema *base.Schema, fieldPaths [
 		}
 	case "array":
 		if typeSchema.Items == nil || typeSchema.Items.A == nil {
-			return nil, nil, errors.New("array item is empty")
+			if oc.builder.Strict {
+				return nil, nil, fmt.Errorf("%s: array item is empty", strings.Join(fieldPaths, "."))
+			}
+
+			return oc.builder.buildScalarJSON(), typeResult, nil
 		}
 
 		itemName := getSchemaRefTypeNameV3(typeSchema.Items.A.GetReference())

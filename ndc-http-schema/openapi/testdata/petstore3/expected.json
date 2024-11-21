@@ -407,6 +407,54 @@
         "type": "array"
       }
     },
+    "getBuildProjectNameRepositoryNameBuildconfig": {
+      "request": {
+        "url": "/build/{project_name}/{repository_name}/_buildconfig",
+        "method": "get",
+        "response": {
+          "contentType": "text/plain"
+        }
+      },
+      "arguments": {
+        "project_name": {
+          "description": "Project name",
+          "type": {
+            "name": "String",
+            "type": "named"
+          },
+          "http": {
+            "name": "project_name",
+            "in": "path",
+            "schema": {
+              "type": [
+                "string"
+              ]
+            }
+          }
+        },
+        "repository_name": {
+          "description": "Repository name",
+          "type": {
+            "name": "String",
+            "type": "named"
+          },
+          "http": {
+            "name": "repository_name",
+            "in": "path",
+            "schema": {
+              "type": [
+                "string"
+              ]
+            }
+          }
+        }
+      },
+      "description": "Show the build configuration for the specified repository.",
+      "result_type": {
+        "name": "String",
+        "type": "named"
+      }
+    },
     "getInventory": {
       "request": {
         "url": "/store/inventory",
@@ -997,7 +1045,6 @@
               }
             },
             "xml": {
-              "name": "",
               "wrapped": true
             }
           }
@@ -1033,7 +1080,6 @@
               "array"
             ],
             "xml": {
-              "name": "",
               "wrapped": true
             }
           }

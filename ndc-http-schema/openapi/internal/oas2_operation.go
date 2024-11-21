@@ -41,20 +41,7 @@ func (oc *oas2OperationBuilder) BuildFunction(operation *v2.Operation, commonPar
 		slog.String("path", oc.pathKey),
 	)
 
-	responseContentType := oc.getResponseContentTypeV2(operation.Produces)
-	if responseContentType == "" {
-		oc.builder.Logger.Info("supported response content type",
-			slog.String("name", funcName),
-			slog.String("path", oc.pathKey),
-			slog.String("method", "get"),
-			slog.Any("produces", operation.Produces),
-			slog.Any("consumes", operation.Consumes),
-		)
-
-		return nil, "", nil
-	}
-
-	resultType, err := oc.convertResponse(operation.Responses, []string{funcName, "Result"})
+	resultType, response, err := oc.convertResponse(operation, []string{funcName, "Result"})
 	if err != nil {
 		return nil, "", fmt.Errorf("%s: %w", oc.pathKey, err)
 	}
@@ -72,10 +59,8 @@ func (oc *oas2OperationBuilder) BuildFunction(operation *v2.Operation, commonPar
 			URL:         oc.pathKey,
 			Method:      "get",
 			RequestBody: reqBody,
-			Response: rest.Response{
-				ContentType: responseContentType,
-			},
-			Security: convertSecurities(operation.Security),
+			Response:    *response,
+			Security:    convertSecurities(operation.Security),
 		},
 		Description: &description,
 		Arguments:   oc.Arguments,
@@ -99,20 +84,7 @@ func (oc *oas2OperationBuilder) BuildProcedure(operation *v2.Operation, commonPa
 		slog.String("method", oc.method),
 	)
 
-	responseContentType := oc.getResponseContentTypeV2(operation.Produces)
-	if responseContentType == "" {
-		oc.builder.Logger.Info("supported response content type",
-			slog.String("name", procName),
-			slog.String("path", oc.pathKey),
-			slog.String("method", oc.method),
-			slog.Any("produces", operation.Produces),
-			slog.Any("consumes", operation.Consumes),
-		)
-
-		return nil, "", nil
-	}
-
-	resultType, err := oc.convertResponse(operation.Responses, []string{procName, "Result"})
+	resultType, response, err := oc.convertResponse(operation, []string{procName, "Result"})
 	if err != nil {
 		return nil, "", fmt.Errorf("%s: %w", oc.pathKey, err)
 	}
@@ -133,9 +105,7 @@ func (oc *oas2OperationBuilder) BuildProcedure(operation *v2.Operation, commonPa
 			Method:      oc.method,
 			RequestBody: reqBody,
 			Security:    convertSecurities(operation.Security),
-			Response: rest.Response{
-				ContentType: responseContentType,
-			},
+			Response:    *response,
 		},
 		Description: &description,
 		Arguments:   oc.Arguments,
@@ -150,9 +120,9 @@ func (oc *oas2OperationBuilder) convertParameters(operation *v2.Operation, commo
 		return nil, nil
 	}
 
-	contentType := rest.ContentTypeJSON
-	if len(operation.Consumes) > 0 && !slices.Contains(operation.Consumes, rest.ContentTypeJSON) {
-		contentType = operation.Consumes[0]
+	contentType := oc.getContentTypeV2(operation.Consumes)
+	if contentType == "" {
+		contentType = rest.ContentTypeJSON
 	}
 
 	var requestBody *rest.RequestBody
@@ -297,59 +267,84 @@ func (oc *oas2OperationBuilder) convertParameters(operation *v2.Operation, commo
 	return requestBody, nil
 }
 
-func (oc *oas2OperationBuilder) convertResponse(responses *v2.Responses, fieldPaths []string) (schema.TypeEncoder, error) {
-	if responses == nil || responses.Codes == nil || responses.Codes.IsZero() {
-		return nil, nil
+func (oc *oas2OperationBuilder) convertResponse(operation *v2.Operation, fieldPaths []string) (schema.TypeEncoder, *rest.Response, error) {
+	if operation.Responses == nil || operation.Responses.Codes == nil || operation.Responses.Codes.IsZero() {
+		return nil, nil, nil
+	}
+
+	contentType := oc.getContentTypeV2(operation.Produces)
+	if contentType == "" {
+		oc.builder.Logger.Info("empty content type in response",
+			slog.String("path", oc.pathKey),
+			slog.String("method", oc.method),
+			slog.Any("produces", operation.Produces),
+			slog.Any("consumes", operation.Consumes),
+		)
+
+		return nil, nil, nil
 	}
 
 	var resp *v2.Response
-	if responses.Codes == nil || responses.Codes.IsZero() {
+	var statusCode int64
+	if operation.Responses.Codes == nil || operation.Responses.Codes.IsZero() {
 		// the response is always successful
-		resp = responses.Default
+		resp = operation.Responses.Default
 	} else {
-		for r := responses.Codes.First(); r != nil; r = r.Next() {
+		for r := operation.Responses.Codes.First(); r != nil; r = r.Next() {
 			if r.Key() == "" {
 				continue
 			}
+
 			code, err := strconv.ParseInt(r.Key(), 10, 32)
 			if err != nil {
 				continue
 			}
 
 			if isUnsupportedResponseCodes(code) {
-				return nil, nil
+				return nil, nil, nil
 			} else if code >= 200 && code < 300 {
 				resp = r.Value()
+				statusCode = code
 
 				break
 			}
 		}
 	}
 
+	response := &rest.Response{
+		ContentType: contentType,
+	}
+
 	// return nullable boolean type if the response content is null
-	if resp == nil || resp.Schema == nil {
+	if resp == nil || (resp.Schema == nil && statusCode == 204) {
 		scalarName := string(rest.ScalarBoolean)
 		if _, ok := oc.builder.schema.ScalarTypes[scalarName]; !ok {
 			oc.builder.schema.ScalarTypes[scalarName] = *defaultScalarTypes[rest.ScalarBoolean]
 		}
 
-		return schema.NewNullableNamedType(scalarName), nil
+		return schema.NewNullableNamedType(scalarName), response, nil
+	}
+
+	if resp.Schema == nil {
+		return getResultTypeFromContentType(oc.builder.schema, contentType), response, nil
 	}
 
 	schemaType, _, err := newOAS2SchemaBuilder(oc.builder, oc.pathKey, rest.InBody).
 		getSchemaTypeFromProxy(resp.Schema, false, fieldPaths)
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 
-	return schemaType, nil
+	return schemaType, response, nil
 }
 
-func (oc *oas2OperationBuilder) getResponseContentTypeV2(contentTypes []string) string {
-	contentType := rest.ContentTypeJSON
-	if len(contentTypes) == 0 || slices.Contains(contentTypes, contentType) {
-		return contentType
+func (oc *oas2OperationBuilder) getContentTypeV2(contentTypes []string) string {
+	for _, contentType := range preferredContentTypes {
+		if len(contentTypes) == 0 || slices.Contains(contentTypes, contentType) {
+			return contentType
+		}
 	}
+
 	if len(oc.builder.ConvertOptions.AllowedContentTypes) == 0 {
 		return contentTypes[0]
 	}

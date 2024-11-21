@@ -32,6 +32,7 @@ func ConvertToNDCSchema(config *ConvertConfig, logger *slog.Logger) (*schema.NDC
 		EnvPrefix:           config.EnvPrefix,
 		AllowedContentTypes: config.AllowedContentTypes,
 		Strict:              config.Strict,
+		NoDeprecation:       config.NoDeprecation,
 		Logger:              logger,
 	}
 	rawContent = utils.RemoveYAMLSpecialCharacters(rawContent)
@@ -81,6 +82,9 @@ func ResolveConvertConfigArguments(config *ConvertConfig, configDir string, args
 		}
 		if args.Strict {
 			config.Strict = args.Strict
+		}
+		if args.NoDeprecation {
+			config.NoDeprecation = args.NoDeprecation
 		}
 		if len(args.AllowedContentTypes) > 0 {
 			config.AllowedContentTypes = args.AllowedContentTypes

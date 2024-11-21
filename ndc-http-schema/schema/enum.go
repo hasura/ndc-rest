@@ -224,6 +224,7 @@ const (
 	ContentTypeMultipartFormData = "multipart/form-data"
 	ContentTypeTextPlain         = "text/plain"
 	ContentTypeTextHTML          = "text/html"
+	ContentTypeOctetStream       = "application/octet-stream"
 )
 
 // ParameterEncodingStyle represents the encoding style of the parameter.

@@ -19,6 +19,8 @@ var (
 	errParameterNameRequired = errors.New("parameter name is empty")
 )
 
+var preferredContentTypes = []string{rest.ContentTypeJSON, rest.ContentTypeXML}
+
 var defaultScalarTypes = map[rest.ScalarName]*schema.ScalarType{
 	rest.ScalarBoolean: {
 		AggregateFunctions:  schema.ScalarTypeAggregateFunctions{},
@@ -121,5 +123,6 @@ type ConvertOptions struct {
 	TrimPrefix          string
 	EnvPrefix           string
 	Strict              bool
+	NoDeprecation       bool
 	Logger              *slog.Logger
 }

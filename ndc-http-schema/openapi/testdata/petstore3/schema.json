@@ -173,6 +173,30 @@
       }
     },
     {
+      "arguments": {
+        "project_name": {
+          "description": "Project name",
+          "type": {
+            "name": "String",
+            "type": "named"
+          }
+        },
+        "repository_name": {
+          "description": "Repository name",
+          "type": {
+            "name": "String",
+            "type": "named"
+          }
+        }
+      },
+      "description": "Show the build configuration for the specified repository.",
+      "name": "getBuildProjectNameRepositoryNameBuildconfig",
+      "result_type": {
+        "name": "String",
+        "type": "named"
+      }
+    },
+    {
       "arguments": {},
       "description": "Returns pet inventories by status",
       "name": "getInventory",

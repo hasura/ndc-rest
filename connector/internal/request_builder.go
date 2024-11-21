@@ -84,8 +84,8 @@ func (c *RequestBuilder) buildRequestBody(request *RetryableRequest, rawRequest 
 		return nil
 	}
 
-	contentType := rawRequest.RequestBody.ContentType
-	request.ContentType = contentType
+	contentType := parseContentType(rawRequest.RequestBody.ContentType)
+	request.ContentType = rawRequest.RequestBody.ContentType
 	bodyInfo, infoOk := c.Operation.Arguments[rest.BodyKey]
 	bodyData, ok := c.Arguments[rest.BodyKey]
 
@@ -444,7 +444,7 @@ func (c *RequestBuilder) getRequestUploadBody(rawRequest *rest.Request, bodyInfo
 	if rawRequest.RequestBody == nil || bodyInfo == nil {
 		return nil
 	}
-	if rawRequest.RequestBody.ContentType == "application/octet-stream" {
+	if rawRequest.RequestBody.ContentType == rest.ContentTypeOctetStream {
 		return rawRequest.RequestBody
 	}
 

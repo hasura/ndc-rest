@@ -214,6 +214,8 @@ type ConvertConfig struct {
 	Pure bool `json:"pure,omitempty" yaml:"pure"`
 	// Require strict validation
 	Strict bool `json:"strict,omitempty" yaml:"strict"`
+	// Ignore deprecated fields.
+	NoDeprecation bool `json:"noDeprecation,omitempty" yaml:"noDeprecation"`
 	// Patch files to be applied into the input file before converting
 	PatchBefore []restUtils.PatchConfig `json:"patchBefore,omitempty" yaml:"patchBefore"`
 	// Patch files to be applied into the input file after converting
@@ -239,6 +241,7 @@ type ConvertCommandArguments struct {
 	Spec                string            `help:"The API specification of the file, is one of oas3 (openapi3), oas2 (openapi2)"`
 	Format              string            `default:"json"                                                                              help:"The output format, is one of json, yaml. If the output is set, automatically detect the format in the output file extension"`
 	Strict              bool              `default:"false"                                                                             help:"Require strict validation"`
+	NoDeprecation       bool              `default:"false"                                                                             help:"Ignore deprecated fields"`
 	Pure                bool              `default:"false"                                                                             help:"Return the pure NDC schema only"`
 	Prefix              string            `help:"Add a prefix to the function and procedure names"`
 	TrimPrefix          string            `help:"Trim the prefix in URL, e.g. /v1"`

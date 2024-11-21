@@ -433,3 +433,20 @@ func buildUniqueOperationName(httpSchema *rest.NDCHttpSchema, operationId, pathK
 
 	return opName
 }
+
+// guess the result type from content type
+func getResultTypeFromContentType(httpSchema *rest.NDCHttpSchema, contentType string) schema.TypeEncoder {
+	var scalarName rest.ScalarName
+	switch {
+	case strings.HasPrefix(contentType, "text/"):
+		scalarName = rest.ScalarString
+	case contentType == rest.ContentTypeOctetStream || strings.HasPrefix(contentType, "image/") || strings.HasPrefix(contentType, "video/"):
+		scalarName = rest.ScalarBinary
+	default:
+		scalarName = rest.ScalarJSON
+	}
+
+	httpSchema.AddScalar(string(scalarName), *defaultScalarTypes[scalarName])
+
+	return schema.NewNamedType(string(scalarName))
+}
