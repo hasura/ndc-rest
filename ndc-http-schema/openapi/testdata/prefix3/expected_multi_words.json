@@ -182,9 +182,6 @@
             ]
           }
         }
-      },
-      "xml": {
-        "name": "CreateNotificationSuccessResponse"
       }
     },
     "HasuraOneSignalDeliveryData": {
@@ -264,9 +261,6 @@
             ]
           }
         }
-      },
-      "xml": {
-        "name": "DeliveryData"
       }
     },
     "HasuraOneSignalFilter": {
@@ -325,9 +319,6 @@
             ]
           }
         }
-      },
-      "xml": {
-        "name": "Filter"
       }
     },
     "HasuraOneSignalNotificationInput": {
@@ -512,9 +503,6 @@
             ]
           }
         }
-      },
-      "xml": {
-        "name": "NotificationSlice"
       }
     },
     "HasuraOneSignalNotificationWithMeta": {
@@ -894,9 +882,6 @@
             ]
           }
         }
-      },
-      "xml": {
-        "name": "OutcomeData"
       }
     },
     "HasuraOneSignalPlatformDeliveryData": {
@@ -1014,9 +999,6 @@
             ]
           }
         }
-      },
-      "xml": {
-        "name": "PlatformDeliveryData"
       }
     },
     "HasuraOneSignalStringMap": {
@@ -1036,9 +1018,6 @@
             ]
           }
         }
-      },
-      "xml": {
-        "name": "StringMap"
       }
     }
   },

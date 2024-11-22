@@ -78,9 +78,6 @@
             ]
           }
         }
-      },
-      "xml": {
-        "name": "ChatCompletionFunctions"
       }
     },
     "ChatCompletionMessageToolCall": {
@@ -121,9 +118,6 @@
             ]
           }
         }
-      },
-      "xml": {
-        "name": "ChatCompletionMessageToolCall"
       }
     },
     "ChatCompletionMessageToolCallFunction": {
@@ -153,9 +147,6 @@
             ]
           }
         }
-      },
-      "xml": {
-        "name": "ChatCompletionMessageToolCall"
       }
     },
     "ChatCompletionResponseMessage": {
@@ -218,9 +209,6 @@
             ]
           }
         }
-      },
-      "xml": {
-        "name": "ChatCompletionResponseMessage"
       }
     },
     "ChatCompletionResponseMessageFunctionCall": {
@@ -250,9 +238,6 @@
             ]
           }
         }
-      },
-      "xml": {
-        "name": "ChatCompletionResponseMessage"
       }
     },
     "ChatCompletionStreamOptions": {
@@ -273,9 +258,6 @@
             ]
           }
         }
-      },
-      "xml": {
-        "name": "ChatCompletionStreamOptions"
       }
     },
     "ChatCompletionTokenLogprob": {
@@ -344,9 +326,6 @@
             }
           }
         }
-      },
-      "xml": {
-        "name": "ChatCompletionTokenLogprob"
       }
     },
     "ChatCompletionTokenLogprobTopLogprobs": {
@@ -395,9 +374,6 @@
             ]
           }
         }
-      },
-      "xml": {
-        "name": "ChatCompletionTokenLogprob"
       }
     },
     "ChatCompletionTool": {
@@ -425,9 +401,6 @@
             ]
           }
         }
-      },
-      "xml": {
-        "name": "ChatCompletionTool"
       }
     },
     "CreateChatCompletionRequest": {
@@ -788,9 +761,6 @@
             ]
           }
         }
-      },
-      "xml": {
-        "name": "CreateChatCompletionRequest"
       }
     },
     "CreateChatCompletionRequestResponseFormat": {
@@ -811,9 +781,6 @@
             ]
           }
         }
-      },
-      "xml": {
-        "name": "CreateChatCompletionRequest"
       }
     },
     "CreateChatCompletionResponse": {
@@ -917,9 +884,6 @@
             ]
           }
         }
-      },
-      "xml": {
-        "name": "CreateChatCompletionResponse"
       }
     },
     "CreateChatCompletionResponseChoices": {
@@ -972,9 +936,6 @@
             ]
           }
         }
-      },
-      "xml": {
-        "name": "CreateChatCompletionResponse"
       }
     },
     "CreateChatCompletionResponseChoicesLogprobs": {
@@ -995,9 +956,6 @@
             ]
           }
         }
-      },
-      "xml": {
-        "name": "CreateChatCompletionResponse"
       }
     },
     "CreateModelRequest": {
@@ -1017,9 +975,6 @@
             ]
           }
         }
-      },
-      "xml": {
-        "name": "CreateModelRequest"
       }
     },
     "FunctionObject": {
@@ -1066,9 +1021,6 @@
             ]
           }
         }
-      },
-      "xml": {
-        "name": "FunctionObject"
       }
     },
     "ProgressResponse": {
@@ -1133,9 +1085,6 @@
             ]
           }
         }
-      },
-      "xml": {
-        "name": "ProgressResponse"
       }
     }
   },

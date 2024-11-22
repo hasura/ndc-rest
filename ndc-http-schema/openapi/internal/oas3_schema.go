@@ -181,26 +181,17 @@ func (oc *oas3SchemaBuilder) getSchemaType(typeSchema *base.Schema, fieldPaths [
 			return oc.builder.buildScalarJSON(), typeResult, nil
 		}
 
-		xmlSchema := typeResult.XML
-		if xmlSchema == nil {
-			xmlSchema = &rest.XMLSchema{}
-		}
-
-		if xmlSchema.Name == "" {
-			xmlSchema.Name = fieldPaths[0]
-		}
-
 		object := rest.ObjectType{
 			Fields: make(map[string]rest.ObjectField),
-			XML:    xmlSchema,
+			XML:    typeResult.XML,
 		}
 		readObject := rest.ObjectType{
 			Fields: make(map[string]rest.ObjectField),
-			XML:    xmlSchema,
+			XML:    typeResult.XML,
 		}
 		writeObject := rest.ObjectType{
 			Fields: make(map[string]rest.ObjectField),
-			XML:    xmlSchema,
+			XML:    typeResult.XML,
 		}
 
 		if description != "" {

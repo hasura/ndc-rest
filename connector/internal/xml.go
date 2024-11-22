@@ -236,7 +236,7 @@ func (c *XMLDecoder) Decode(r io.Reader, resultType schema.Type) (any, error) {
 		}
 
 		if se, ok := token.(xml.StartElement); ok {
-			result, _, err := c.evalXMLField(se, rest.ObjectField{
+			result, _, err := c.evalXMLField(se, "", rest.ObjectField{
 				ObjectField: schema.ObjectField{
 					Type: resultType,
 				},
@@ -253,7 +253,7 @@ func (c *XMLDecoder) Decode(r io.Reader, resultType schema.Type) (any, error) {
 	return nil, nil
 }
 
-func (c *XMLDecoder) evalXMLField(token xml.StartElement, field rest.ObjectField, fieldPaths []string) (any, xml.Token, error) {
+func (c *XMLDecoder) evalXMLField(token xml.StartElement, fieldName string, field rest.ObjectField, fieldPaths []string) (any, xml.Token, error) {
 	rawType, err := field.Type.InterfaceT()
 	if err != nil {
 		return nil, nil, err
@@ -261,22 +261,22 @@ func (c *XMLDecoder) evalXMLField(token xml.StartElement, field rest.ObjectField
 
 	switch t := rawType.(type) {
 	case *schema.NullableType:
-		return c.evalXMLField(token, rest.ObjectField{
+		return c.evalXMLField(token, fieldName, rest.ObjectField{
 			ObjectField: schema.ObjectField{
 				Type: t.UnderlyingType,
 			},
 			HTTP: field.HTTP,
 		}, fieldPaths)
 	case *schema.ArrayType:
-		return c.evalXMLArrayField(token, field, t, fieldPaths)
+		return c.evalXMLArrayField(token, fieldName, field, t, fieldPaths)
 	case *schema.NamedType:
-		return c.evalXMLNamedField(token, t, fieldPaths)
+		return c.evalXMLNamedField(token, fieldName, t, fieldPaths)
 	default:
 		return nil, nil, err
 	}
 }
 
-func (c *XMLDecoder) evalXMLNamedField(token xml.StartElement, t *schema.NamedType, fieldPaths []string) (any, xml.Token, error) {
+func (c *XMLDecoder) evalXMLNamedField(token xml.StartElement, fieldName string, t *schema.NamedType, fieldPaths []string) (any, xml.Token, error) {
 	if scalarType, ok := c.schema.ScalarTypes[t.Name]; ok {
 		nextToken, err := c.decoder.Token()
 		if err != nil {
@@ -302,7 +302,8 @@ func (c *XMLDecoder) evalXMLNamedField(token xml.StartElement, t *schema.NamedTy
 		return nil, nil, fmt.Errorf("%s: invalid response type", strings.Join(fieldPaths, "."))
 	}
 
-	if objectType.XML == nil || objectType.XML.Name != token.Name.Local {
+	// the root field may have a different tag name, we can skip the validation
+	if len(fieldPaths) > 0 && (fieldName != "" && token.Name.Local != fieldName) && (objectType.XML == nil || objectType.XML.Name != token.Name.Local) {
 		return nil, nil, fmt.Errorf("%s:invalid token, expected: %s, got: %+v", strings.Join(fieldPaths, "."), token.Name.Local, objectType.XML)
 	}
 	nextToken, err := c.decoder.Token()
@@ -333,7 +334,7 @@ L:
 					continue
 				}
 
-				fieldResult, nt, err := c.evalXMLField(nt, objectField, append(fieldPaths, key))
+				fieldResult, nt, err := c.evalXMLField(nt, key, objectField, append(fieldPaths, key))
 				if err != nil {
 					return nil, nil, err
 				}
@@ -371,7 +372,7 @@ L:
 	return result, nextToken, nil
 }
 
-func (c *XMLDecoder) evalXMLArrayField(token xml.StartElement, field rest.ObjectField, t *schema.ArrayType, fieldPaths []string) (any, xml.Token, error) {
+func (c *XMLDecoder) evalXMLArrayField(token xml.StartElement, fieldName string, field rest.ObjectField, t *schema.ArrayType, fieldPaths []string) (any, xml.Token, error) {
 	var wrapped bool
 	var nextToken xml.Token = token
 	var itemTokenName string
@@ -448,7 +449,7 @@ LA:
 				break LA
 			}
 
-			item, tok, err := c.evalXMLField(nt, fieldItem, append(fieldPaths, strconv.FormatInt(i, 10)))
+			item, tok, err := c.evalXMLField(nt, fieldName, fieldItem, append(fieldPaths, strconv.FormatInt(i, 10)))
 			if err != nil {
 				return nil, nil, err
 			}

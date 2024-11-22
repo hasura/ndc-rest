@@ -3,6 +3,7 @@ package internal
 import (
 	"bytes"
 	"context"
+	"encoding/base64"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -363,15 +364,15 @@ func (client *HTTPClient) evalHTTPResponse(ctx context.Context, span trace.Span,
 	}
 
 	var result any
-	switch contentType {
-	case rest.ContentTypeTextPlain, rest.ContentTypeTextHTML:
+	switch {
+	case strings.HasPrefix(contentType, "text/"):
 		respBody, err := io.ReadAll(resp.Body)
 		if err != nil {
 			return nil, nil, schema.NewConnectorError(http.StatusInternalServerError, err.Error(), nil)
 		}
 
 		result = string(respBody)
-	case rest.ContentTypeXML:
+	case contentType == rest.ContentTypeXML:
 		field, err := client.extractResultType(resultType)
 		if err != nil {
 			return nil, nil, schema.NewConnectorError(http.StatusInternalServerError, "failed to extract forwarded headers response: "+err.Error(), nil)
@@ -381,7 +382,7 @@ func (client *HTTPClient) evalHTTPResponse(ctx context.Context, span trace.Span,
 		if err != nil {
 			return nil, nil, schema.NewConnectorError(http.StatusInternalServerError, err.Error(), nil)
 		}
-	case rest.ContentTypeJSON:
+	case contentType == rest.ContentTypeJSON:
 		if len(resultType) > 0 {
 			namedType, err := resultType.AsNamed()
 			if err == nil && namedType.Name == string(rest.ScalarString) {
@@ -408,7 +409,7 @@ func (client *HTTPClient) evalHTTPResponse(ctx context.Context, span trace.Span,
 		if err != nil {
 			return nil, nil, schema.NewConnectorError(http.StatusInternalServerError, err.Error(), nil)
 		}
-	case rest.ContentTypeNdJSON:
+	case contentType == rest.ContentTypeNdJSON:
 		var results []any
 		decoder := json.NewDecoder(resp.Body)
 		for decoder.More() {
@@ -421,6 +422,12 @@ func (client *HTTPClient) evalHTTPResponse(ctx context.Context, span trace.Span,
 		}
 
 		result = results
+	case strings.HasPrefix(contentType, "application/") || strings.HasPrefix(contentType, "image/") || strings.HasPrefix(contentType, "video/"):
+		rawBytes, err := io.ReadAll(resp.Body)
+		if err != nil {
+			return nil, nil, schema.NewConnectorError(http.StatusInternalServerError, err.Error(), nil)
+		}
+		result = base64.StdEncoding.EncodeToString(rawBytes)
 	default:
 		return nil, nil, schema.NewConnectorError(http.StatusInternalServerError, "failed to evaluate response", map[string]any{
 			"cause": "unsupported content type " + contentType,

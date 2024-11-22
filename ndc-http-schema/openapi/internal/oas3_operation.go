@@ -36,6 +36,10 @@ func newOAS3OperationBuilder(builder *OAS3Builder, pathKey string, method string
 
 // BuildFunction build a HTTP NDC function information from OpenAPI v3 operation
 func (oc *oas3OperationBuilder) BuildFunction(itemGet *v3.Operation) (*rest.OperationInfo, string, error) {
+	if oc.builder.ConvertOptions.NoDeprecation && itemGet.Deprecated != nil && *itemGet.Deprecated {
+		return nil, "", nil
+	}
+
 	start := time.Now()
 	funcName := buildUniqueOperationName(oc.builder.schema, itemGet.OperationId, oc.pathKey, oc.method, oc.builder.ConvertOptions)
 
@@ -80,9 +84,10 @@ func (oc *oas3OperationBuilder) BuildFunction(itemGet *v3.Operation) (*rest.Oper
 }
 
 func (oc *oas3OperationBuilder) BuildProcedure(operation *v3.Operation) (*rest.OperationInfo, string, error) {
-	if operation == nil {
+	if operation == nil || (oc.builder.ConvertOptions.NoDeprecation && operation.Deprecated != nil && *operation.Deprecated) {
 		return nil, "", nil
 	}
+
 	start := time.Now()
 	procName := buildUniqueOperationName(oc.builder.schema, operation.OperationId, oc.pathKey, oc.method, oc.builder.ConvertOptions)
 

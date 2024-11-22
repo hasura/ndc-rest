@@ -173,6 +173,15 @@
       }
     },
     {
+      "arguments": {},
+      "description": "List all known architectures.",
+      "name": "getArchitectures",
+      "result_type": {
+        "name": "GetArchitecturesResult",
+        "type": "named"
+      }
+    },
+    {
       "arguments": {
         "project_name": {
           "description": "Project name",
@@ -393,6 +402,107 @@
     "CreateFineTuningJobRequest": {
       "fields": {
         "model": {
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "String",
+              "type": "named"
+            }
+          }
+        }
+      }
+    },
+    "GetArchitecturesResult": {
+      "fields": {
+        "count": {
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "Int32",
+              "type": "named"
+            }
+          }
+        },
+        "entry": {
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "element_type": {
+                "name": "GetArchitecturesResultEntry",
+                "type": "named"
+              },
+              "type": "array"
+            }
+          }
+        },
+        "name": {
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "String",
+              "type": "named"
+            }
+          }
+        },
+        "rev": {
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "String",
+              "type": "named"
+            }
+          }
+        },
+        "srcmd5": {
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "String",
+              "type": "named"
+            }
+          }
+        },
+        "vrev": {
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "String",
+              "type": "named"
+            }
+          }
+        }
+      }
+    },
+    "GetArchitecturesResultEntry": {
+      "fields": {
+        "md5": {
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "String",
+              "type": "named"
+            }
+          }
+        },
+        "mtime": {
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "String",
+              "type": "named"
+            }
+          }
+        },
+        "name": {
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "String",
+              "type": "named"
+            }
+          }
+        },
+        "size": {
           "type": {
             "type": "nullable",
             "underlying_type": {

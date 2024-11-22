@@ -407,6 +407,21 @@
         "type": "array"
       }
     },
+    "getArchitectures": {
+      "request": {
+        "url": "/architectures",
+        "method": "get",
+        "response": {
+          "contentType": "application/xml; charset=utf-8"
+        }
+      },
+      "arguments": {},
+      "description": "List all known architectures.",
+      "result_type": {
+        "name": "GetArchitecturesResult",
+        "type": "named"
+      }
+    },
     "getBuildProjectNameRepositoryNameBuildconfig": {
       "request": {
         "url": "/build/{project_name}/{repository_name}/_buildconfig",
@@ -820,9 +835,174 @@
             ]
           }
         }
+      }
+    },
+    "GetArchitecturesResult": {
+      "fields": {
+        "count": {
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "Int32",
+              "type": "named"
+            }
+          },
+          "http": {
+            "type": [
+              "integer"
+            ],
+            "xml": {}
+          }
+        },
+        "entry": {
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "element_type": {
+                "name": "GetArchitecturesResultEntry",
+                "type": "named"
+              },
+              "type": "array"
+            }
+          },
+          "http": {
+            "type": [
+              "array"
+            ],
+            "items": {
+              "type": [
+                "object"
+              ]
+            }
+          }
+        },
+        "name": {
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "String",
+              "type": "named"
+            }
+          },
+          "http": {
+            "type": [
+              "string"
+            ],
+            "xml": {}
+          }
+        },
+        "rev": {
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "String",
+              "type": "named"
+            }
+          },
+          "http": {
+            "type": [
+              "string"
+            ],
+            "xml": {}
+          }
+        },
+        "srcmd5": {
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "String",
+              "type": "named"
+            }
+          },
+          "http": {
+            "type": [
+              "string"
+            ],
+            "xml": {}
+          }
+        },
+        "vrev": {
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "String",
+              "type": "named"
+            }
+          },
+          "http": {
+            "type": [
+              "string"
+            ],
+            "xml": {}
+          }
+        }
       },
       "xml": {
-        "name": "CreateFineTuningJobRequest"
+        "name": "directory"
+      }
+    },
+    "GetArchitecturesResultEntry": {
+      "fields": {
+        "md5": {
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "String",
+              "type": "named"
+            }
+          },
+          "http": {
+            "type": [
+              "string"
+            ],
+            "xml": {}
+          }
+        },
+        "mtime": {
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "String",
+              "type": "named"
+            }
+          },
+          "http": {
+            "type": [
+              "string"
+            ],
+            "xml": {}
+          }
+        },
+        "name": {
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "String",
+              "type": "named"
+            }
+          },
+          "http": {
+            "type": [
+              "string"
+            ],
+            "xml": {}
+          }
+        },
+        "size": {
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "String",
+              "type": "named"
+            }
+          },
+          "http": {
+            "type": [
+              "string"
+            ],
+            "xml": {}
+          }
+        }
       }
     },
     "GetInvoicesResult": {
@@ -865,9 +1045,6 @@
             "maxLength": 5000
           }
         }
-      },
-      "xml": {
-        "name": "GetInvoices"
       }
     },
     "Order": {
@@ -1717,9 +1894,6 @@
             ]
           }
         }
-      },
-      "xml": {
-        "name": "PostCheckoutSessions"
       }
     },
     "PostCheckoutSessionsBodyAfterExpiration": {
@@ -1739,9 +1913,6 @@
             ]
           }
         }
-      },
-      "xml": {
-        "name": "PostCheckoutSessions"
       }
     },
     "PostCheckoutSessionsBodyAfterExpirationRecovery": {
@@ -1771,9 +1942,6 @@
             ]
           }
         }
-      },
-      "xml": {
-        "name": "PostCheckoutSessions"
       }
     },
     "PostCheckoutSessionsBodyAutomaticTax": {
@@ -1804,9 +1972,6 @@
             ]
           }
         }
-      },
-      "xml": {
-        "name": "PostCheckoutSessions"
       }
     },
     "PostCheckoutSessionsBodyAutomaticTaxLiability": {
@@ -1836,9 +2001,6 @@
             ]
           }
         }
-      },
-      "xml": {
-        "name": "PostCheckoutSessions"
       }
     },
     "PostCheckoutSessionsBodyConsentCollection": {
@@ -1886,9 +2048,6 @@
             ]
           }
         }
-      },
-      "xml": {
-        "name": "PostCheckoutSessions"
       }
     },
     "PostCheckoutSessionsBodyConsentCollectionPaymentMethodReuseAgreement": {
@@ -1904,9 +2063,6 @@
             ]
           }
         }
-      },
-      "xml": {
-        "name": "PostCheckoutSessions"
       }
     },
     "PostCheckoutSessionsBodyCustomFields": {
@@ -2001,9 +2157,6 @@
             ]
           }
         }
-      },
-      "xml": {
-        "name": "PostCheckoutSessions"
       }
     },
     "PostCheckoutSessionsBodyCustomFieldsDropdown": {
@@ -2027,9 +2180,6 @@
             }
           }
         }
-      },
-      "xml": {
-        "name": "PostCheckoutSessions"
       }
     },
     "PostCheckoutSessionsBodyCustomFieldsDropdownOptions": {
@@ -2058,9 +2208,6 @@
             "maxLength": 100
           }
         }
-      },
-      "xml": {
-        "name": "PostCheckoutSessions"
       }
     },
     "PostCheckoutSessionsBodyCustomFieldsLabel": {
@@ -2088,9 +2235,6 @@
             ]
           }
         }
-      },
-      "xml": {
-        "name": "PostCheckoutSessions"
       }
     },
     "PostCheckoutSessionsBodyCustomFieldsNumeric": {
@@ -2123,9 +2267,6 @@
             ]
           }
         }
-      },
-      "xml": {
-        "name": "PostCheckoutSessions"
       }
     },
     "PostCheckoutSessionsBodyCustomFieldsText": {
@@ -2158,9 +2299,6 @@
             ]
           }
         }
-      },
-      "xml": {
-        "name": "PostCheckoutSessions"
       }
     },
     "PostCheckoutSessionsBodyCustomText": {
@@ -2222,9 +2360,6 @@
             ]
           }
         }
-      },
-      "xml": {
-        "name": "PostCheckoutSessions"
       }
     },
     "PostCheckoutSessionsBodyCustomTextAfterSubmit": {
@@ -2241,9 +2376,6 @@
             "maxLength": 1200
           }
         }
-      },
-      "xml": {
-        "name": "PostCheckoutSessions"
       }
     },
     "PostCheckoutSessionsBodyCustomTextShippingAddress": {
@@ -2260,9 +2392,6 @@
             "maxLength": 1200
           }
         }
-      },
-      "xml": {
-        "name": "PostCheckoutSessions"
       }
     },
     "PostCheckoutSessionsBodyCustomTextSubmit": {
@@ -2279,9 +2408,6 @@
             "maxLength": 1200
           }
         }
-      },
-      "xml": {
-        "name": "PostCheckoutSessions"
       }
     },
     "PostCheckoutSessionsBodyCustomTextTermsOfServiceAcceptance": {
@@ -2298,9 +2424,6 @@
             "maxLength": 1200
           }
         }
-      },
-      "xml": {
-        "name": "PostCheckoutSessions"
       }
     },
     "PostCheckoutSessionsBodyCustomerUpdate": {
@@ -2348,9 +2471,6 @@
             ]
           }
         }
-      },
-      "xml": {
-        "name": "PostCheckoutSessions"
       }
     },
     "PostCheckoutSessionsBodyDiscounts": {
@@ -2385,9 +2505,6 @@
             "maxLength": 5000
           }
         }
-      },
-      "xml": {
-        "name": "PostCheckoutSessions"
       }
     },
     "PostCheckoutSessionsBodyInvoiceCreation": {
@@ -2418,9 +2535,6 @@
             ]
           }
         }
-      },
-      "xml": {
-        "name": "PostCheckoutSessions"
       }
     },
     "PostCheckoutSessionsBodyInvoiceCreationInvoiceData": {
@@ -2542,9 +2656,6 @@
             ]
           }
         }
-      },
-      "xml": {
-        "name": "PostCheckoutSessions"
       }
     },
     "PostCheckoutSessionsBodyInvoiceCreationInvoiceDataCustomFields": {
@@ -2573,9 +2684,6 @@
             "maxLength": 140
           }
         }
-      },
-      "xml": {
-        "name": "PostCheckoutSessions"
       }
     },
     "PostCheckoutSessionsBodyInvoiceCreationInvoiceDataIssuer": {
@@ -2605,9 +2713,6 @@
             ]
           }
         }
-      },
-      "xml": {
-        "name": "PostCheckoutSessions"
       }
     },
     "PostCheckoutSessionsBodyInvoiceCreationInvoiceDataRenderingOptions": {
@@ -2626,9 +2731,6 @@
             ]
           }
         }
-      },
-      "xml": {
-        "name": "PostCheckoutSessions"
       }
     },
     "PostCheckoutSessionsBodyLineItems": {
@@ -2736,9 +2838,6 @@
             }
           }
         }
-      },
-      "xml": {
-        "name": "PostCheckoutSessions"
       }
     },
     "PostCheckoutSessionsBodyLineItemsAdjustableQuantity": {
@@ -2782,9 +2881,6 @@
             ]
           }
         }
-      },
-      "xml": {
-        "name": "PostCheckoutSessions"
       }
     },
     "PostCheckoutSessionsBodyLineItemsPriceData": {
@@ -2886,9 +2982,6 @@
             "format": "decimal"
           }
         }
-      },
-      "xml": {
-        "name": "PostCheckoutSessions"
       }
     },
     "PostCheckoutSessionsBodyLineItemsPriceDataProductData": {
@@ -2971,9 +3064,6 @@
             "maxLength": 5000
           }
         }
-      },
-      "xml": {
-        "name": "PostCheckoutSessions"
       }
     },
     "PostCheckoutSessionsBodyLineItemsPriceDataRecurring": {
@@ -3003,9 +3093,6 @@
             ]
           }
         }
-      },
-      "xml": {
-        "name": "PostCheckoutSessions"
       }
     },
     "PostCheckoutSessionsBodyPaymentIntentData": {
@@ -3182,9 +3269,6 @@
             ]
           }
         }
-      },
-      "xml": {
-        "name": "PostCheckoutSessions"
       }
     },
     "PostCheckoutSessionsBodyPaymentIntentDataShipping": {
@@ -3257,9 +3341,6 @@
             "maxLength": 5000
           }
         }
-      },
-      "xml": {
-        "name": "PostCheckoutSessions"
       }
     },
     "PostCheckoutSessionsBodyPaymentIntentDataShippingAddress": {
@@ -3351,9 +3432,6 @@
             "maxLength": 5000
           }
         }
-      },
-      "xml": {
-        "name": "PostCheckoutSessions"
       }
     },
     "PostCheckoutSessionsBodyPaymentIntentDataTransferData": {
@@ -3383,9 +3461,6 @@
             ]
           }
         }
-      },
-      "xml": {
-        "name": "PostCheckoutSessions"
       }
     },
     "PostCheckoutSessionsBodyPaymentMethodOptions": {
@@ -3811,9 +3886,6 @@
             ]
           }
         }
-      },
-      "xml": {
-        "name": "PostCheckoutSessions"
       }
     },
     "PostCheckoutSessionsBodyPaymentMethodOptionsAcssDebit": {
@@ -3888,9 +3960,6 @@
             ]
           }
         }
-      },
-      "xml": {
-        "name": "PostCheckoutSessions"
       }
     },
     "PostCheckoutSessionsBodyPaymentMethodOptionsAcssDebitMandateOptions": {
@@ -3974,9 +4043,6 @@
             ]
           }
         }
-      },
-      "xml": {
-        "name": "PostCheckoutSessions"
       }
     },
     "PostCheckoutSessionsBodyPaymentMethodOptionsAffirm": {
@@ -3995,9 +4061,6 @@
             ]
           }
         }
-      },
-      "xml": {
-        "name": "PostCheckoutSessions"
       }
     },
     "PostCheckoutSessionsBodyPaymentMethodOptionsAfterpayClearpay": {
@@ -4016,9 +4079,6 @@
             ]
           }
         }
-      },
-      "xml": {
-        "name": "PostCheckoutSessions"
       }
     },
     "PostCheckoutSessionsBodyPaymentMethodOptionsAlipay": {
@@ -4037,9 +4097,6 @@
             ]
           }
         }
-      },
-      "xml": {
-        "name": "PostCheckoutSessions"
       }
     },
     "PostCheckoutSessionsBodyPaymentMethodOptionsAuBecsDebit": {
@@ -4058,9 +4115,6 @@
             ]
           }
         }
-      },
-      "xml": {
-        "name": "PostCheckoutSessions"
       }
     },
     "PostCheckoutSessionsBodyPaymentMethodOptionsBacsDebit": {
@@ -4079,9 +4133,6 @@
             ]
           }
         }
-      },
-      "xml": {
-        "name": "PostCheckoutSessions"
       }
     },
     "PostCheckoutSessionsBodyPaymentMethodOptionsBancontact": {
@@ -4100,9 +4151,6 @@
             ]
           }
         }
-      },
-      "xml": {
-        "name": "PostCheckoutSessions"
       }
     },
     "PostCheckoutSessionsBodyPaymentMethodOptionsBoleto": {
@@ -4135,9 +4183,6 @@
             ]
           }
         }
-      },
-      "xml": {
-        "name": "PostCheckoutSessions"
       }
     },
     "PostCheckoutSessionsBodyPaymentMethodOptionsCard": {
@@ -4214,9 +4259,6 @@
             "maxLength": 17
           }
         }
-      },
-      "xml": {
-        "name": "PostCheckoutSessions"
       }
     },
     "PostCheckoutSessionsBodyPaymentMethodOptionsCardInstallments": {
@@ -4235,9 +4277,6 @@
             ]
           }
         }
-      },
-      "xml": {
-        "name": "PostCheckoutSessions"
       }
     },
     "PostCheckoutSessionsBodyPaymentMethodOptionsCashapp": {
@@ -4256,9 +4295,6 @@
             ]
           }
         }
-      },
-      "xml": {
-        "name": "PostCheckoutSessions"
       }
     },
     "PostCheckoutSessionsBodyPaymentMethodOptionsCustomerBalance": {
@@ -4305,9 +4341,6 @@
             ]
           }
         }
-      },
-      "xml": {
-        "name": "PostCheckoutSessions"
       }
     },
     "PostCheckoutSessionsBodyPaymentMethodOptionsCustomerBalanceBankTransfer": {
@@ -4359,9 +4392,6 @@
             ]
           }
         }
-      },
-      "xml": {
-        "name": "PostCheckoutSessions"
       }
     },
     "PostCheckoutSessionsBodyPaymentMethodOptionsCustomerBalanceBankTransferEuBankTransfer": {
@@ -4378,9 +4408,6 @@
             "maxLength": 5000
           }
         }
-      },
-      "xml": {
-        "name": "PostCheckoutSessions"
       }
     },
     "PostCheckoutSessionsBodyPaymentMethodOptionsEps": {
@@ -4399,9 +4426,6 @@
             ]
           }
         }
-      },
-      "xml": {
-        "name": "PostCheckoutSessions"
       }
     },
     "PostCheckoutSessionsBodyPaymentMethodOptionsFpx": {
@@ -4420,9 +4444,6 @@
             ]
           }
         }
-      },
-      "xml": {
-        "name": "PostCheckoutSessions"
       }
     },
     "PostCheckoutSessionsBodyPaymentMethodOptionsGiropay": {
@@ -4441,9 +4462,6 @@
             ]
           }
         }
-      },
-      "xml": {
-        "name": "PostCheckoutSessions"
       }
     },
     "PostCheckoutSessionsBodyPaymentMethodOptionsGrabpay": {
@@ -4462,9 +4480,6 @@
             ]
           }
         }
-      },
-      "xml": {
-        "name": "PostCheckoutSessions"
       }
     },
     "PostCheckoutSessionsBodyPaymentMethodOptionsIdeal": {
@@ -4483,9 +4498,6 @@
             ]
           }
         }
-      },
-      "xml": {
-        "name": "PostCheckoutSessions"
       }
     },
     "PostCheckoutSessionsBodyPaymentMethodOptionsKlarna": {
@@ -4504,9 +4516,6 @@
             ]
           }
         }
-      },
-      "xml": {
-        "name": "PostCheckoutSessions"
       }
     },
     "PostCheckoutSessionsBodyPaymentMethodOptionsKonbini": {
@@ -4539,9 +4548,6 @@
             ]
           }
         }
-      },
-      "xml": {
-        "name": "PostCheckoutSessions"
       }
     },
     "PostCheckoutSessionsBodyPaymentMethodOptionsLink": {
@@ -4560,9 +4566,6 @@
             ]
           }
         }
-      },
-      "xml": {
-        "name": "PostCheckoutSessions"
       }
     },
     "PostCheckoutSessionsBodyPaymentMethodOptionsOxxo": {
@@ -4595,9 +4598,6 @@
             ]
           }
         }
-      },
-      "xml": {
-        "name": "PostCheckoutSessions"
       }
     },
     "PostCheckoutSessionsBodyPaymentMethodOptionsP24": {
@@ -4630,9 +4630,6 @@
             ]
           }
         }
-      },
-      "xml": {
-        "name": "PostCheckoutSessions"
       }
     },
     "PostCheckoutSessionsBodyPaymentMethodOptionsPaynow": {
@@ -4651,9 +4648,6 @@
             ]
           }
         }
-      },
-      "xml": {
-        "name": "PostCheckoutSessions"
       }
     },
     "PostCheckoutSessionsBodyPaymentMethodOptionsPaypal": {
@@ -4730,9 +4724,6 @@
             ]
           }
         }
-      },
-      "xml": {
-        "name": "PostCheckoutSessions"
       }
     },
     "PostCheckoutSessionsBodyPaymentMethodOptionsPix": {
@@ -4751,9 +4742,6 @@
             ]
           }
         }
-      },
-      "xml": {
-        "name": "PostCheckoutSessions"
       }
     },
     "PostCheckoutSessionsBodyPaymentMethodOptionsRevolutPay": {
@@ -4772,9 +4760,6 @@
             ]
           }
         }
-      },
-      "xml": {
-        "name": "PostCheckoutSessions"
       }
     },
     "PostCheckoutSessionsBodyPaymentMethodOptionsSepaDebit": {
@@ -4793,9 +4778,6 @@
             ]
           }
         }
-      },
-      "xml": {
-        "name": "PostCheckoutSessions"
       }
     },
     "PostCheckoutSessionsBodyPaymentMethodOptionsSofort": {
@@ -4814,9 +4796,6 @@
             ]
           }
         }
-      },
-      "xml": {
-        "name": "PostCheckoutSessions"
       }
     },
     "PostCheckoutSessionsBodyPaymentMethodOptionsSwish": {
@@ -4836,9 +4815,6 @@
             "maxLength": 5000
           }
         }
-      },
-      "xml": {
-        "name": "PostCheckoutSessions"
       }
     },
     "PostCheckoutSessionsBodyPaymentMethodOptionsUsBankAccount": {
@@ -4885,9 +4861,6 @@
             ]
           }
         }
-      },
-      "xml": {
-        "name": "PostCheckoutSessions"
       }
     },
     "PostCheckoutSessionsBodyPaymentMethodOptionsUsBankAccountFinancialConnections": {
@@ -4937,9 +4910,6 @@
             }
           }
         }
-      },
-      "xml": {
-        "name": "PostCheckoutSessions"
       }
     },
     "PostCheckoutSessionsBodyPaymentMethodOptionsWechatPay": {
@@ -4984,9 +4954,6 @@
             ]
           }
         }
-      },
-      "xml": {
-        "name": "PostCheckoutSessions"
       }
     },
     "PostCheckoutSessionsBodyPhoneNumberCollection": {
@@ -5003,9 +4970,6 @@
             ]
           }
         }
-      },
-      "xml": {
-        "name": "PostCheckoutSessions"
       }
     },
     "PostCheckoutSessionsBodySetupIntentData": {
@@ -5054,9 +5018,6 @@
             ]
           }
         }
-      },
-      "xml": {
-        "name": "PostCheckoutSessions"
       }
     },
     "PostCheckoutSessionsBodyShippingAddressCollection": {
@@ -5081,9 +5042,6 @@
             }
           }
         }
-      },
-      "xml": {
-        "name": "PostCheckoutSessions"
       }
     },
     "PostCheckoutSessionsBodyShippingOptions": {
@@ -5117,9 +5075,6 @@
             ]
           }
         }
-      },
-      "xml": {
-        "name": "PostCheckoutSessions"
       }
     },
     "PostCheckoutSessionsBodyShippingOptionsShippingRateData": {
@@ -5220,9 +5175,6 @@
             ]
           }
         }
-      },
-      "xml": {
-        "name": "PostCheckoutSessions"
       }
     },
     "PostCheckoutSessionsBodyShippingOptionsShippingRateDataDeliveryEstimate": {
@@ -5255,9 +5207,6 @@
             ]
           }
         }
-      },
-      "xml": {
-        "name": "PostCheckoutSessions"
       }
     },
     "PostCheckoutSessionsBodyShippingOptionsShippingRateDataDeliveryEstimateMaximum": {
@@ -5284,9 +5233,6 @@
             ]
           }
         }
-      },
-      "xml": {
-        "name": "PostCheckoutSessions"
       }
     },
     "PostCheckoutSessionsBodyShippingOptionsShippingRateDataDeliveryEstimateMinimum": {
@@ -5313,9 +5259,6 @@
             ]
           }
         }
-      },
-      "xml": {
-        "name": "PostCheckoutSessions"
       }
     },
     "PostCheckoutSessionsBodyShippingOptionsShippingRateDataFixedAmount": {
@@ -5356,9 +5299,6 @@
             ]
           }
         }
-      },
-      "xml": {
-        "name": "PostCheckoutSessions"
       }
     },
     "PostCheckoutSessionsBodySubscriptionData": {
@@ -5544,9 +5484,6 @@
             ]
           }
         }
-      },
-      "xml": {
-        "name": "PostCheckoutSessions"
       }
     },
     "PostCheckoutSessionsBodySubscriptionDataInvoiceSettings": {
@@ -5565,9 +5502,6 @@
             ]
           }
         }
-      },
-      "xml": {
-        "name": "PostCheckoutSessions"
       }
     },
     "PostCheckoutSessionsBodySubscriptionDataInvoiceSettingsIssuer": {
@@ -5597,9 +5531,6 @@
             ]
           }
         }
-      },
-      "xml": {
-        "name": "PostCheckoutSessions"
       }
     },
     "PostCheckoutSessionsBodySubscriptionDataTransferData": {
@@ -5629,9 +5560,6 @@
             ]
           }
         }
-      },
-      "xml": {
-        "name": "PostCheckoutSessions"
       }
     },
     "PostCheckoutSessionsBodySubscriptionDataTrialSettings": {
@@ -5647,9 +5575,6 @@
             ]
           }
         }
-      },
-      "xml": {
-        "name": "PostCheckoutSessions"
       }
     },
     "PostCheckoutSessionsBodySubscriptionDataTrialSettingsEndBehavior": {
@@ -5665,9 +5590,6 @@
             ]
           }
         }
-      },
-      "xml": {
-        "name": "PostCheckoutSessions"
       }
     },
     "PostCheckoutSessionsBodyTaxIdCollection": {
@@ -5684,9 +5606,6 @@
             ]
           }
         }
-      },
-      "xml": {
-        "name": "PostCheckoutSessions"
       }
     },
     "PostFilesBody": {
@@ -5778,9 +5697,6 @@
             ]
           }
         }
-      },
-      "xml": {
-        "name": "PostFiles"
       }
     },
     "PostFilesBodyFileLinkData": {
@@ -5824,9 +5740,6 @@
             "type": []
           }
         }
-      },
-      "xml": {
-        "name": "PostFiles"
       }
     },
     "PostTestHelpersTreasuryInboundTransfersIdFailBody": {
@@ -5870,9 +5783,6 @@
             ]
           }
         }
-      },
-      "xml": {
-        "name": "PostTestHelpersTreasuryInboundTransfersIdFail"
       }
     },
     "PostTestHelpersTreasuryInboundTransfersIdFailBodyFailureDetails": {
@@ -5892,9 +5802,6 @@
             ]
           }
         }
-      },
-      "xml": {
-        "name": "PostTestHelpersTreasuryInboundTransfersIdFail"
       }
     },
     "SnakeObject": {
@@ -5930,9 +5837,6 @@
             }
           }
         }
-      },
-      "xml": {
-        "name": "snake_object"
       }
     },
     "SnakeObjectId": {
@@ -6317,9 +6221,6 @@
             "type": []
           }
         }
-      },
-      "xml": {
-        "name": "treasury.inbound_transfer"
       }
     },
     "TreasuryInboundTransfersResourceFailureDetails": {
@@ -6336,9 +6237,6 @@
             ]
           }
         }
-      },
-      "xml": {
-        "name": "treasury_inbound_transfers_resource_failure_details"
       }
     },
     "TreasuryInboundTransfersResourceInboundTransferResourceStatusTransitions": {
@@ -6391,9 +6289,6 @@
             "format": "unix-time"
           }
         }
-      },
-      "xml": {
-        "name": "treasury_inbound_transfers_resource_inbound_transfer_resource_status_transitions"
       }
     },
     "UploadPetMultipartBody": {
@@ -6481,9 +6376,6 @@
             "format": "binary"
           }
         }
-      },
-      "xml": {
-        "name": "uploadPetMultipart"
       }
     },
     "User": {

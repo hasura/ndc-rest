@@ -55,7 +55,7 @@ func WriteSchemaFile(outputPath string, content any) error {
 		return err
 	}
 
-	basePath := filepath.Base(outputPath)
+	basePath := filepath.Dir(outputPath)
 	if basePath != "." {
 		if err := os.MkdirAll(basePath, 0664); err != nil {
 			return err

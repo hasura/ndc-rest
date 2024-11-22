@@ -193,9 +193,6 @@
             ]
           }
         }
-      },
-      "xml": {
-        "name": "CancelNotificationSuccessResponse"
       }
     },
     "CreateNotificationSuccessResponse": {
@@ -254,9 +251,6 @@
             ]
           }
         }
-      },
-      "xml": {
-        "name": "CreateNotificationSuccessResponse"
       }
     },
     "DeliveryData": {
@@ -336,9 +330,6 @@
             ]
           }
         }
-      },
-      "xml": {
-        "name": "DeliveryData"
       }
     },
     "Filter": {
@@ -397,9 +388,6 @@
             ]
           }
         }
-      },
-      "xml": {
-        "name": "Filter"
       }
     },
     "GetNotificationHistoryBody": {
@@ -448,9 +436,6 @@
             ]
           }
         }
-      },
-      "xml": {
-        "name": "get_notification_history"
       }
     },
     "NotificationHistorySuccessResponse": {
@@ -483,9 +468,6 @@
             ]
           }
         }
-      },
-      "xml": {
-        "name": "NotificationHistorySuccessResponse"
       }
     },
     "NotificationInput": {
@@ -670,9 +652,6 @@
             ]
           }
         }
-      },
-      "xml": {
-        "name": "NotificationSlice"
       }
     },
     "NotificationWithMeta": {
@@ -1030,9 +1009,6 @@
             ]
           }
         }
-      },
-      "xml": {
-        "name": "OutcomeData"
       }
     },
     "PlatformDeliveryData": {
@@ -1150,9 +1126,6 @@
             ]
           }
         }
-      },
-      "xml": {
-        "name": "PlatformDeliveryData"
       }
     },
     "StringMap": {
@@ -1172,9 +1145,6 @@
             ]
           }
         }
-      },
-      "xml": {
-        "name": "StringMap"
       }
     }
   },

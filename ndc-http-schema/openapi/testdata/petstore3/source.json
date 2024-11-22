@@ -3313,6 +3313,91 @@
           }
         }
       }
+    },
+    "/architectures": {
+      "get": {
+        "summary": "List all known architectures.",
+        "description": "Get a list of all known architectures known to OBS in general.\nThis is not the list of architectures provided by this instance. Check the\nschedulers element from the `/configuration` route for this.\n",
+        "responses": {
+          "200": {
+            "description": "OK. The request has succeeded.",
+            "content": {
+              "application/xml; charset=utf-8": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "count": {
+                      "type": "integer",
+                      "xml": {
+                        "attribute": true
+                      }
+                    },
+                    "name": {
+                      "type": "string",
+                      "xml": {
+                        "attribute": true
+                      }
+                    },
+                    "rev": {
+                      "type": "string",
+                      "xml": {
+                        "attribute": true
+                      }
+                    },
+                    "vrev": {
+                      "type": "string",
+                      "xml": {
+                        "attribute": true
+                      }
+                    },
+                    "srcmd5": {
+                      "type": "string",
+                      "xml": {
+                        "attribute": true
+                      }
+                    },
+                    "entry": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "name": {
+                            "type": "string",
+                            "xml": {
+                              "attribute": true
+                            }
+                          },
+                          "md5": {
+                            "type": "string",
+                            "xml": {
+                              "attribute": true
+                            }
+                          },
+                          "size": {
+                            "type": "string",
+                            "xml": {
+                              "attribute": true
+                            }
+                          },
+                          "mtime": {
+                            "type": "string",
+                            "xml": {
+                              "attribute": true
+                            }
+                          }
+                        }
+                      }
+                    }
+                  },
+                  "xml": {
+                    "name": "directory"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
