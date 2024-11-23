@@ -783,6 +783,75 @@
         "name": "##default"
       }
     },
+    "Book": {
+      "fields": {
+        "attr": {
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "String",
+              "type": "named"
+            }
+          },
+          "http": {
+            "type": [
+              "string"
+            ],
+            "xml": {
+              "prefix": "smp",
+              "attribute": true
+            }
+          }
+        },
+        "author": {
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "String",
+              "type": "named"
+            }
+          },
+          "http": {
+            "type": [
+              "string"
+            ]
+          }
+        },
+        "id": {
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "Int32",
+              "type": "named"
+            }
+          },
+          "http": {
+            "type": [
+              "integer"
+            ]
+          }
+        },
+        "title": {
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "String",
+              "type": "named"
+            }
+          },
+          "http": {
+            "type": [
+              "string"
+            ]
+          }
+        }
+      },
+      "xml": {
+        "name": "book",
+        "prefix": "smp",
+        "namespace": "http://example.com/schema"
+      }
+    },
     "Category": {
       "fields": {
         "id": {
@@ -851,7 +920,9 @@
             "type": [
               "integer"
             ],
-            "xml": {}
+            "xml": {
+              "attribute": true
+            }
           }
         },
         "entry": {
@@ -888,7 +959,9 @@
             "type": [
               "string"
             ],
-            "xml": {}
+            "xml": {
+              "attribute": true
+            }
           }
         },
         "rev": {
@@ -903,7 +976,9 @@
             "type": [
               "string"
             ],
-            "xml": {}
+            "xml": {
+              "attribute": true
+            }
           }
         },
         "srcmd5": {
@@ -918,7 +993,9 @@
             "type": [
               "string"
             ],
-            "xml": {}
+            "xml": {
+              "attribute": true
+            }
           }
         },
         "vrev": {
@@ -933,7 +1010,9 @@
             "type": [
               "string"
             ],
-            "xml": {}
+            "xml": {
+              "attribute": true
+            }
           }
         }
       },
@@ -955,7 +1034,9 @@
             "type": [
               "string"
             ],
-            "xml": {}
+            "xml": {
+              "attribute": true
+            }
           }
         },
         "mtime": {
@@ -970,7 +1051,9 @@
             "type": [
               "string"
             ],
-            "xml": {}
+            "xml": {
+              "attribute": true
+            }
           }
         },
         "name": {
@@ -985,7 +1068,9 @@
             "type": [
               "string"
             ],
-            "xml": {}
+            "xml": {
+              "attribute": true
+            }
           }
         },
         "size": {
@@ -1000,7 +1085,24 @@
             "type": [
               "string"
             ],
-            "xml": {}
+            "xml": {
+              "attribute": true
+            }
+          }
+        },
+        "xmlValue": {
+          "description": "Value of the xml field",
+          "type": {
+            "name": "String",
+            "type": "named"
+          },
+          "http": {
+            "type": [
+              "string"
+            ],
+            "xml": {
+              "text": true
+            }
           }
         }
       }
@@ -5804,6 +5906,476 @@
         }
       }
     },
+    "PutCommentXmlBody": {
+      "fields": {
+        "comment": {
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "element_type": {
+                "name": "PutCommentXmlBodyComment",
+                "type": "named"
+              },
+              "type": "array"
+            }
+          },
+          "http": {
+            "type": [
+              "array"
+            ],
+            "items": {
+              "type": [
+                "object"
+              ]
+            }
+          }
+        },
+        "package": {
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "String",
+              "type": "named"
+            }
+          },
+          "http": {
+            "type": [
+              "string"
+            ],
+            "xml": {
+              "attribute": true
+            }
+          }
+        },
+        "project": {
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "String",
+              "type": "named"
+            }
+          },
+          "http": {
+            "type": [
+              "string"
+            ],
+            "xml": {
+              "attribute": true
+            }
+          }
+        },
+        "request": {
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "Int32",
+              "type": "named"
+            }
+          },
+          "http": {
+            "type": [
+              "integer"
+            ],
+            "xml": {
+              "attribute": true
+            }
+          }
+        },
+        "user": {
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "String",
+              "type": "named"
+            }
+          },
+          "http": {
+            "type": [
+              "string"
+            ],
+            "xml": {
+              "attribute": true
+            }
+          }
+        }
+      },
+      "xml": {
+        "name": "comments"
+      }
+    },
+    "PutCommentXmlBodyComment": {
+      "fields": {
+        "bsrequest": {
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "Int32",
+              "type": "named"
+            }
+          },
+          "http": {
+            "type": [
+              "integer"
+            ],
+            "xml": {
+              "attribute": true
+            }
+          }
+        },
+        "id": {
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "Int32",
+              "type": "named"
+            }
+          },
+          "http": {
+            "type": [
+              "integer"
+            ],
+            "xml": {
+              "attribute": true
+            }
+          }
+        },
+        "package": {
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "String",
+              "type": "named"
+            }
+          },
+          "http": {
+            "type": [
+              "string"
+            ],
+            "xml": {
+              "attribute": true
+            }
+          }
+        },
+        "parent": {
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "Int32",
+              "type": "named"
+            }
+          },
+          "http": {
+            "type": [
+              "integer"
+            ],
+            "xml": {
+              "attribute": true
+            }
+          }
+        },
+        "project": {
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "String",
+              "type": "named"
+            }
+          },
+          "http": {
+            "type": [
+              "string"
+            ],
+            "xml": {
+              "attribute": true
+            }
+          }
+        },
+        "when": {
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "String",
+              "type": "named"
+            }
+          },
+          "http": {
+            "type": [
+              "string"
+            ],
+            "xml": {
+              "attribute": true
+            }
+          }
+        },
+        "who": {
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "String",
+              "type": "named"
+            }
+          },
+          "http": {
+            "type": [
+              "string"
+            ],
+            "xml": {
+              "attribute": true
+            }
+          }
+        },
+        "xmlValue": {
+          "description": "Value of the xml field",
+          "type": {
+            "name": "String",
+            "type": "named"
+          },
+          "http": {
+            "type": [
+              "string"
+            ],
+            "xml": {
+              "text": true
+            }
+          }
+        }
+      }
+    },
+    "PutCommentXmlResult": {
+      "fields": {
+        "comment": {
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "element_type": {
+                "name": "PutCommentXmlResultComment",
+                "type": "named"
+              },
+              "type": "array"
+            }
+          },
+          "http": {
+            "type": [
+              "array"
+            ],
+            "items": {
+              "type": [
+                "object"
+              ]
+            }
+          }
+        },
+        "package": {
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "String",
+              "type": "named"
+            }
+          },
+          "http": {
+            "type": [
+              "string"
+            ],
+            "xml": {
+              "attribute": true
+            }
+          }
+        },
+        "project": {
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "String",
+              "type": "named"
+            }
+          },
+          "http": {
+            "type": [
+              "string"
+            ],
+            "xml": {
+              "attribute": true
+            }
+          }
+        },
+        "request": {
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "Int32",
+              "type": "named"
+            }
+          },
+          "http": {
+            "type": [
+              "integer"
+            ],
+            "xml": {
+              "attribute": true
+            }
+          }
+        },
+        "user": {
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "String",
+              "type": "named"
+            }
+          },
+          "http": {
+            "type": [
+              "string"
+            ],
+            "xml": {
+              "attribute": true
+            }
+          }
+        }
+      },
+      "xml": {
+        "name": "comments"
+      }
+    },
+    "PutCommentXmlResultComment": {
+      "fields": {
+        "bsrequest": {
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "Int32",
+              "type": "named"
+            }
+          },
+          "http": {
+            "type": [
+              "integer"
+            ],
+            "xml": {
+              "attribute": true
+            }
+          }
+        },
+        "id": {
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "Int32",
+              "type": "named"
+            }
+          },
+          "http": {
+            "type": [
+              "integer"
+            ],
+            "xml": {
+              "attribute": true
+            }
+          }
+        },
+        "package": {
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "String",
+              "type": "named"
+            }
+          },
+          "http": {
+            "type": [
+              "string"
+            ],
+            "xml": {
+              "attribute": true
+            }
+          }
+        },
+        "parent": {
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "Int32",
+              "type": "named"
+            }
+          },
+          "http": {
+            "type": [
+              "integer"
+            ],
+            "xml": {
+              "attribute": true
+            }
+          }
+        },
+        "project": {
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "String",
+              "type": "named"
+            }
+          },
+          "http": {
+            "type": [
+              "string"
+            ],
+            "xml": {
+              "attribute": true
+            }
+          }
+        },
+        "when": {
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "String",
+              "type": "named"
+            }
+          },
+          "http": {
+            "type": [
+              "string"
+            ],
+            "xml": {
+              "attribute": true
+            }
+          }
+        },
+        "who": {
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "String",
+              "type": "named"
+            }
+          },
+          "http": {
+            "type": [
+              "string"
+            ],
+            "xml": {
+              "attribute": true
+            }
+          }
+        },
+        "xmlValue": {
+          "description": "Value of the xml field",
+          "type": {
+            "name": "String",
+            "type": "named"
+          },
+          "http": {
+            "type": [
+              "string"
+            ],
+            "xml": {
+              "text": true
+            }
+          }
+        }
+      }
+    },
     "SnakeObject": {
       "fields": {
         "features": {
@@ -7066,6 +7638,70 @@
       "description": "Place an order for a pet",
       "result_type": {
         "name": "Order",
+        "type": "named"
+      }
+    },
+    "putBookXml": {
+      "request": {
+        "url": "/book/xml",
+        "method": "put",
+        "requestBody": {
+          "contentType": "application/xml; charset=utf-8"
+        },
+        "response": {
+          "contentType": "application/xml; charset=utf-8"
+        }
+      },
+      "arguments": {
+        "body": {
+          "description": "Request body of PUT /book/xml",
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "Book",
+              "type": "named"
+            }
+          },
+          "http": {
+            "in": "body"
+          }
+        }
+      },
+      "description": "PUT /book/xml",
+      "result_type": {
+        "name": "Book",
+        "type": "named"
+      }
+    },
+    "putCommentXml": {
+      "request": {
+        "url": "/comment/xml",
+        "method": "put",
+        "requestBody": {
+          "contentType": "application/xml; charset=utf-8"
+        },
+        "response": {
+          "contentType": "application/xml; charset=utf-8"
+        }
+      },
+      "arguments": {
+        "body": {
+          "description": "Request body of PUT /comment/xml",
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "PutCommentXmlBody",
+              "type": "named"
+            }
+          },
+          "http": {
+            "in": "body"
+          }
+        }
+      },
+      "description": "PUT /comment/xml",
+      "result_type": {
+        "name": "PutCommentXmlResult",
         "type": "named"
       }
     },

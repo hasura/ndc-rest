@@ -7,6 +7,7 @@ import (
 
 	rest "github.com/hasura/ndc-http/ndc-http-schema/schema"
 	"github.com/hasura/ndc-sdk-go/schema"
+	"github.com/hasura/ndc-sdk-go/utils"
 )
 
 var (
@@ -112,6 +113,21 @@ var defaultScalarTypes = map[rest.ScalarName]*schema.ScalarType{
 		AggregateFunctions:  schema.ScalarTypeAggregateFunctions{},
 		ComparisonOperators: map[string]schema.ComparisonOperatorDefinition{},
 		Representation:      schema.NewTypeRepresentationInt32().Encode(),
+	},
+}
+
+const xmlValueFieldName string = "xmlValue"
+
+var xmlValueField = rest.ObjectField{
+	ObjectField: schema.ObjectField{
+		Description: utils.ToPtr("Value of the xml field"),
+		Type:        schema.NewNamedType(string(rest.ScalarString)).Encode(),
+	},
+	HTTP: &rest.TypeSchema{
+		Type: []string{"string"},
+		XML: &rest.XMLSchema{
+			Text: true,
+		},
 	},
 }
 

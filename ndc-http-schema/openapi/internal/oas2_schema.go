@@ -172,6 +172,9 @@ func (oc *oas2SchemaBuilder) getSchemaType(typeSchema *base.Schema, fieldPaths [
 						object.Fields[propName] = objField
 					}
 
+					if isXMLLeafObject(object) {
+						object.Fields[xmlValueFieldName] = xmlValueField
+					}
 					oc.builder.schema.ObjectTypes[refName] = object
 				}
 				result = schema.NewNamedType(refName)

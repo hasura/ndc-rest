@@ -244,6 +244,10 @@ func (oc *oas3SchemaBuilder) getSchemaType(typeSchema *base.Schema, fieldPaths [
 		}
 
 		if len(readObject.Fields) == 0 && len(writeObject.Fields) == 0 {
+			if len(object.Fields) > 0 && isXMLLeafObject(object) {
+				object.Fields[xmlValueFieldName] = xmlValueField
+			}
+
 			oc.builder.schema.ObjectTypes[refName] = object
 			result = schema.NewNamedType(refName)
 		} else {
@@ -251,6 +255,15 @@ func (oc *oas3SchemaBuilder) getSchemaType(typeSchema *base.Schema, fieldPaths [
 				readObject.Fields[key] = field
 				writeObject.Fields[key] = field
 			}
+
+			if len(readObject.Fields) > 0 && isXMLLeafObject(readObject) {
+				readObject.Fields[xmlValueFieldName] = xmlValueField
+			}
+
+			if len(writeObject.Fields) > 0 && isXMLLeafObject(writeObject) {
+				writeObject.Fields[xmlValueFieldName] = xmlValueField
+			}
+
 			writeRefName := formatWriteObjectName(refName)
 			oc.builder.schema.ObjectTypes[refName] = readObject
 			oc.builder.schema.ObjectTypes[writeRefName] = writeObject

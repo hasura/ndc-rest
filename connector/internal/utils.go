@@ -8,6 +8,7 @@ import (
 	"strconv"
 	"strings"
 
+	rest "github.com/hasura/ndc-http/ndc-http-schema/schema"
 	"github.com/hasura/ndc-sdk-go/schema"
 	"go.opentelemetry.io/otel/attribute"
 	"go.opentelemetry.io/otel/trace"
@@ -84,7 +85,7 @@ func cloneURL(input *url.URL) *url.URL {
 	}
 }
 
-func marshalSimpleScalar(val reflect.Value, kind reflect.Kind) (string, error) {
+func stringifySimpleScalar(val reflect.Value, kind reflect.Kind) (string, error) {
 	switch kind {
 	case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64:
 		return strconv.FormatInt(val.Int(), 10), nil
@@ -101,4 +102,44 @@ func marshalSimpleScalar(val reflect.Value, kind reflect.Kind) (string, error) {
 	default:
 		return "", fmt.Errorf("invalid value: %v", val.Interface())
 	}
+}
+
+func findXMLLeafObjectField(objectType rest.ObjectType) (*rest.ObjectField, string, bool) {
+	var f *rest.ObjectField
+	var fieldName string
+	for key, field := range objectType.Fields {
+		if field.HTTP == nil || field.HTTP.XML == nil {
+			return nil, "", false
+		}
+		if field.HTTP.XML.Text {
+			f = &field
+			fieldName = key
+		} else if !field.HTTP.XML.Attribute {
+			return nil, "", false
+		}
+	}
+
+	return f, fieldName, true
+}
+
+func getTypeSchemaXMLName(typeSchema *rest.TypeSchema, defaultName string) string {
+	if typeSchema != nil {
+		return getXMLName(typeSchema.XML, defaultName)
+	}
+
+	return defaultName
+}
+
+func getXMLName(xmlSchema *rest.XMLSchema, defaultName string) string {
+	if xmlSchema != nil {
+		if xmlSchema.Name != "" {
+			return xmlSchema.GetFullName()
+		}
+
+		if xmlSchema.Prefix != "" {
+			return xmlSchema.Prefix + ":" + defaultName
+		}
+	}
+
+	return defaultName
 }

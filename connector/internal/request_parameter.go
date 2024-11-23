@@ -287,7 +287,7 @@ func encodeParameterReflectionValues(reflectValue reflect.Value, fieldPaths []st
 	}
 
 	kind := reflectValue.Kind()
-	if result, err := marshalSimpleScalar(reflectValue, kind); err == nil {
+	if result, err := stringifySimpleScalar(reflectValue, kind); err == nil {
 		return []ParameterItem{
 			NewParameterItem([]Key{}, []string{result}),
 		}, nil

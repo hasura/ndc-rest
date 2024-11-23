@@ -3212,103 +3212,7 @@
           "200": {
             "description": "OK",
             "content": {
-              "text/plain": {
-                "example": "%define _project home:Admin\n\n### from openSUSE.org:openSUSE:Leap:15.2\n%define _repository standard\n\nMacros:\n%vendor obs://build.some.where/home:Admin\n%_project home:Admin\n\n### from openSUSE.org:openSUSE:Leap:15.2\n\n%_repository standard\n:Macros\n\n\nRelease: <CI_CNT>.<B_CNT> spec:lp152.<CI_CNT>.<B_CNT>\n%define gcc_version 7\n\n# testing new cycle algorithm\nBuildFlags: genmetaalgo:1\n\n# abort the build if the log file didn't move in an hour (seen in libreoffice builds)\nBuildFlags: logidlelimit:3600\n\nPublishFlags: ympdist:openSUSE%20Leap%2015.2\n\n# Help with the switch to the gcc7 provided libs\nPrefer: -libstdc++6-gcc7 -libtsan0-gcc7 -libgomp1-gcc7 -libgcc_s1-gcc7 -libatomic1-gcc7 -libcilkrts5-gcc7 -libitm1-gcc7\nPrefer: -liblsan0-gcc7 -libmpx2-gcc7 -libubsan0-gcc7\n"
-              }
-            }
-          },
-          "401": {
-            "description": "Unauthorized.\n\nXML Schema used for body validation: [status.rng](../schema/status.rng)\n",
-            "content": {
-              "application/xml; charset=utf-8": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "code": {
-                      "type": "string",
-                      "xml": {
-                        "attribute": true
-                      }
-                    },
-                    "origin": {
-                      "type": "string",
-                      "xml": {
-                        "attribute": true
-                      }
-                    },
-                    "summary": {
-                      "type": "string"
-                    },
-                    "details": {
-                      "type": "string"
-                    },
-                    "data": {
-                      "type": "array",
-                      "items": {
-                        "type": "string"
-                      }
-                    }
-                  },
-                  "xml": {
-                    "name": "status"
-                  }
-                },
-                "examples": {
-                  "anonymous_user": {
-                    "value": {
-                      "code": "anonymous_user",
-                      "summary": "Anonymous user is not allowed here - please login"
-                    },
-                    "summary": "Anonymous User"
-                  },
-                  "authentication_required": {
-                    "value": {
-                      "code": "authentication_required",
-                      "summary": "Unknown user 'Admin' or invalid password"
-                    },
-                    "summary": "Authentication Required"
-                  }
-                }
-              }
-            }
-          },
-          "404": {
-            "description": "Unknown project.\n\nXML Schema used for body validation: [status.rng](../schema/status.rng)\n",
-            "content": {
-              "application/xml; charset=utf-8": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "code": {
-                      "type": "string",
-                      "xml": {
-                        "attribute": true
-                      }
-                    },
-                    "origin": {
-                      "type": "string",
-                      "xml": {
-                        "attribute": true
-                      }
-                    },
-                    "summary": {
-                      "type": "string"
-                    },
-                    "details": {
-                      "type": "string"
-                    },
-                    "data": {
-                      "type": "array",
-                      "items": {
-                        "type": "string"
-                      }
-                    }
-                  },
-                  "xml": {
-                    "name": "status"
-                  }
-                }
-              }
+              "text/plain": {}
             }
           }
         }
@@ -3392,6 +3296,216 @@
                   "xml": {
                     "name": "directory"
                   }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/comment/xml": {
+      "put": {
+        "security": [],
+        "parameters": [],
+        "requestBody": {
+          "content": {
+            "application/xml; charset=utf-8": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "comment": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "integer",
+                          "xml": {
+                            "attribute": true
+                          }
+                        },
+                        "who": {
+                          "type": "string",
+                          "xml": {
+                            "attribute": true
+                          }
+                        },
+                        "when": {
+                          "type": "string",
+                          "xml": {
+                            "attribute": true
+                          }
+                        },
+                        "parent": {
+                          "type": "integer",
+                          "xml": {
+                            "attribute": true
+                          }
+                        },
+                        "bsrequest": {
+                          "type": "integer",
+                          "xml": {
+                            "attribute": true
+                          }
+                        },
+                        "project": {
+                          "type": "string",
+                          "xml": {
+                            "attribute": true
+                          }
+                        },
+                        "package": {
+                          "type": "string",
+                          "xml": {
+                            "attribute": true
+                          }
+                        }
+                      }
+                    }
+                  },
+                  "request": {
+                    "type": "integer",
+                    "xml": {
+                      "attribute": true
+                    }
+                  },
+                  "package": {
+                    "type": "string",
+                    "xml": {
+                      "attribute": true
+                    }
+                  },
+                  "project": {
+                    "type": "string",
+                    "xml": {
+                      "attribute": true
+                    }
+                  },
+                  "user": {
+                    "type": "string",
+                    "xml": {
+                      "attribute": true
+                    }
+                  }
+                },
+                "xml": {
+                  "name": "comments"
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/xml; charset=utf-8": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "comment": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "integer",
+                            "xml": {
+                              "attribute": true
+                            }
+                          },
+                          "who": {
+                            "type": "string",
+                            "xml": {
+                              "attribute": true
+                            }
+                          },
+                          "when": {
+                            "type": "string",
+                            "xml": {
+                              "attribute": true
+                            }
+                          },
+                          "parent": {
+                            "type": "integer",
+                            "xml": {
+                              "attribute": true
+                            }
+                          },
+                          "bsrequest": {
+                            "type": "integer",
+                            "xml": {
+                              "attribute": true
+                            }
+                          },
+                          "project": {
+                            "type": "string",
+                            "xml": {
+                              "attribute": true
+                            }
+                          },
+                          "package": {
+                            "type": "string",
+                            "xml": {
+                              "attribute": true
+                            }
+                          }
+                        }
+                      }
+                    },
+                    "request": {
+                      "type": "integer",
+                      "xml": {
+                        "attribute": true
+                      }
+                    },
+                    "package": {
+                      "type": "string",
+                      "xml": {
+                        "attribute": true
+                      }
+                    },
+                    "project": {
+                      "type": "string",
+                      "xml": {
+                        "attribute": true
+                      }
+                    },
+                    "user": {
+                      "type": "string",
+                      "xml": {
+                        "attribute": true
+                      }
+                    }
+                  },
+                  "xml": {
+                    "name": "comments"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/book/xml": {
+      "put": {
+        "security": [],
+        "parameters": [],
+        "requestBody": {
+          "content": {
+            "application/xml; charset=utf-8": {
+              "schema": {
+                "$ref": "#/components/schemas/book"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/xml; charset=utf-8": {
+                "schema": {
+                  "$ref": "#/components/schemas/book"
                 }
               }
             }
@@ -3893,6 +4007,31 @@
               }
             ]
           }
+        }
+      },
+      "book": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer"
+          },
+          "title": {
+            "type": "string"
+          },
+          "author": {
+            "type": "string"
+          },
+          "attr": {
+            "type": "string",
+            "xml": {
+              "prefix": "smp",
+              "attribute": true
+            }
+          }
+        },
+        "xml": {
+          "prefix": "smp",
+          "namespace": "http://example.com/schema"
         }
       }
     },

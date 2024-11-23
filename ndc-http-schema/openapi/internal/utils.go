@@ -245,6 +245,7 @@ func createSchemaFromOpenAPISchema(input *base.Schema) *rest.TypeSchema {
 			Prefix:    input.XML.Prefix,
 			Namespace: input.XML.Namespace,
 			Wrapped:   input.XML.Wrapped,
+			Attribute: input.XML.Attribute,
 		}
 	}
 
@@ -449,4 +450,15 @@ func getResultTypeFromContentType(httpSchema *rest.NDCHttpSchema, contentType st
 	httpSchema.AddScalar(string(scalarName), *defaultScalarTypes[scalarName])
 
 	return schema.NewNamedType(string(scalarName))
+}
+
+// check if the XML object doesn't have any child element.
+func isXMLLeafObject(objectType rest.ObjectType) bool {
+	for _, field := range objectType.Fields {
+		if field.HTTP == nil || field.HTTP.XML == nil || !field.HTTP.XML.Attribute {
+			return false
+		}
+	}
+
+	return true
 }
