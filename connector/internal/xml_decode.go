@@ -153,12 +153,12 @@ func (c *XMLDecoder) evalNamedField(block *xmlBlock, t *schema.NamedType, fieldP
 
 	for _, attr := range block.Start.Attr {
 		for key, objectField := range objectType.Fields {
-			if objectField.HTTP == nil {
+			if objectField.HTTP == nil || objectField.HTTP.XML == nil || !objectField.HTTP.XML.Attribute {
 				continue
 			}
 
 			xmlKey := key
-			if objectField.HTTP.XML != nil && objectField.HTTP.XML.Name != "" {
+			if objectField.HTTP.XML.Name != "" {
 				xmlKey = objectField.HTTP.XML.Name
 			}
 			if attr.Name.Local != xmlKey {
@@ -169,6 +169,7 @@ func (c *XMLDecoder) evalNamedField(block *xmlBlock, t *schema.NamedType, fieldP
 			if err != nil {
 				return nil, err
 			}
+
 			result[key] = attrValue
 
 			break

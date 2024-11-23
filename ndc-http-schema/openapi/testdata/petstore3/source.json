@@ -3313,6 +3313,13 @@
               "schema": {
                 "type": "object",
                 "properties": {
+                  "comment_count": {
+                    "type": "integer",
+                    "xml": {
+                      "attribute": true,
+                      "name": "comment"
+                    }
+                  },
                   "comment": {
                     "type": "array",
                     "items": {
@@ -3402,6 +3409,13 @@
                 "schema": {
                   "type": "object",
                   "properties": {
+                    "comment_count": {
+                      "type": "integer",
+                      "xml": {
+                        "attribute": true,
+                        "name": "comment"
+                      }
+                    },
                     "comment": {
                       "type": "array",
                       "items": {

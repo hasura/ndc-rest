@@ -38,7 +38,8 @@ func TestCreateXMLForm(t *testing.T) {
 		{
 			Name: "putCommentXml",
 			Body: map[string]any{
-				"user": "Iggy",
+				"user":          "Iggy",
+				"comment_count": int64(6),
 				"comment": []any{
 					map[string]any{
 						"who":       "Iggy",
@@ -65,7 +66,7 @@ func TestCreateXMLForm(t *testing.T) {
 				},
 			},
 			Expected: `<?xml version="1.0" encoding="UTF-8"?>
-<comments user="Iggy"><comment bsrequest="115" id="1" when="2021-10-15 13:28:22 UTC" who="Iggy">This is a pretty cool request!</comment><comment id="2" project="home:Admin" when="2021-10-15 13:49:39 UTC" who="Iggy">This is a pretty cool project!</comment><comment id="3" package="0ad" project="home:Admin" when="2021-10-15 13:54:38 UTC" who="Iggy">This is a pretty cool package!</comment></comments>`,
+<comments comment="6" user="Iggy"><comment bsrequest="115" id="1" when="2021-10-15 13:28:22 UTC" who="Iggy">This is a pretty cool request!</comment><comment id="2" project="home:Admin" when="2021-10-15 13:49:39 UTC" who="Iggy">This is a pretty cool project!</comment><comment id="3" package="0ad" project="home:Admin" when="2021-10-15 13:54:38 UTC" who="Iggy">This is a pretty cool package!</comment></comments>`,
 		},
 		{
 			Name: "putBookXml",

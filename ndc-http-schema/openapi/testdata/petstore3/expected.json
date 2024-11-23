@@ -5930,6 +5930,24 @@
             }
           }
         },
+        "comment_count": {
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "Int32",
+              "type": "named"
+            }
+          },
+          "http": {
+            "type": [
+              "integer"
+            ],
+            "xml": {
+              "name": "comment",
+              "attribute": true
+            }
+          }
+        },
         "package": {
           "type": {
             "type": "nullable",
@@ -6162,6 +6180,24 @@
               "type": [
                 "object"
               ]
+            }
+          }
+        },
+        "comment_count": {
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "Int32",
+              "type": "named"
+            }
+          },
+          "http": {
+            "type": [
+              "integer"
+            ],
+            "xml": {
+              "name": "comment",
+              "attribute": true
             }
           }
         },

@@ -3657,6 +3657,15 @@
             }
           }
         },
+        "comment_count": {
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "Int32",
+              "type": "named"
+            }
+          }
+        },
         "package": {
           "type": {
             "type": "nullable",
@@ -3780,6 +3789,15 @@
                 "type": "named"
               },
               "type": "array"
+            }
+          }
+        },
+        "comment_count": {
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "Int32",
+              "type": "named"
             }
           }
         },

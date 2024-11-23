@@ -237,9 +237,8 @@ func (c *XMLEncoder) evalAttributes(objectType rest.ObjectType, keys []string, v
 			continue
 		}
 
-		xmlName := getTypeSchemaXMLName(objectField.HTTP, key)
 		attrs = append(attrs, xml.Attr{
-			Name:  xml.Name{Local: xmlName},
+			Name:  xml.Name{Local: getTypeSchemaXMLName(objectField.HTTP, key)},
 			Value: *str,
 		})
 	}
