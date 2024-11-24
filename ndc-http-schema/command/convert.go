@@ -17,23 +17,6 @@ import (
 // ConvertToNDCSchema converts to NDC HTTP schema from file
 func CommandConvertToNDCSchema(args *configuration.ConvertCommandArguments, logger *slog.Logger) error {
 	start := time.Now()
-	logger.Debug(
-		"converting the document to NDC HTTP schema",
-		slog.String("file", args.File),
-		slog.String("config", args.Config),
-		slog.String("output", args.Output),
-		slog.String("spec", args.Spec),
-		slog.String("format", args.Format),
-		slog.String("prefix", args.Prefix),
-		slog.String("trim_prefix", args.TrimPrefix),
-		slog.String("env_prefix", args.EnvPrefix),
-		slog.Any("patch_before", args.PatchBefore),
-		slog.Any("patch_after", args.PatchAfter),
-		slog.Any("allowed_content_types", args.AllowedContentTypes),
-		slog.Bool("strict", args.Strict),
-		slog.Bool("pure", args.Pure),
-	)
-
 	if args.File == "" && args.Config == "" {
 		err := errors.New("--config or --file argument is required")
 		logger.Error(err.Error())
@@ -65,6 +48,24 @@ func CommandConvertToNDCSchema(args *configuration.ConvertCommandArguments, logg
 	}
 
 	configuration.ResolveConvertConfigArguments(&config, configDir, args)
+	logger.Debug(
+		"converting the document to NDC HTTP schema",
+		slog.String("file", config.File),
+		slog.String("config", config.File),
+		slog.String("output", config.Output),
+		slog.String("spec", string(config.Spec)),
+		slog.String("format", args.Format),
+		slog.String("prefix", config.Prefix),
+		slog.String("trim_prefix", config.TrimPrefix),
+		slog.String("env_prefix", config.EnvPrefix),
+		slog.Any("patch_before", config.PatchBefore),
+		slog.Any("patch_after", config.PatchAfter),
+		slog.Any("allowed_content_types", config.AllowedContentTypes),
+		slog.Bool("strict", config.Strict),
+		slog.Bool("pure", config.Pure),
+		slog.Bool("no_deprecation", config.NoDeprecation),
+	)
+
 	result, err := configuration.ConvertToNDCSchema(&config, logger)
 
 	if err != nil {

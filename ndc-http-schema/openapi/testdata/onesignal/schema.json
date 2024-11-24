@@ -488,18 +488,6 @@
             }
           }
         },
-        "include_player_ids": {
-          "type": {
-            "type": "nullable",
-            "underlying_type": {
-              "element_type": {
-                "name": "String",
-                "type": "named"
-              },
-              "type": "array"
-            }
-          }
-        },
         "included_segments": {
           "type": {
             "type": "nullable",

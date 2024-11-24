@@ -7,6 +7,7 @@ import (
 
 	rest "github.com/hasura/ndc-http/ndc-http-schema/schema"
 	"github.com/hasura/ndc-sdk-go/schema"
+	"github.com/hasura/ndc-sdk-go/utils"
 )
 
 var (
@@ -18,6 +19,8 @@ var (
 var (
 	errParameterNameRequired = errors.New("parameter name is empty")
 )
+
+var preferredContentTypes = []string{rest.ContentTypeJSON, rest.ContentTypeXML}
 
 var defaultScalarTypes = map[rest.ScalarName]*schema.ScalarType{
 	rest.ScalarBoolean: {
@@ -113,6 +116,21 @@ var defaultScalarTypes = map[rest.ScalarName]*schema.ScalarType{
 	},
 }
 
+const xmlValueFieldName string = "xmlValue"
+
+var xmlValueField = rest.ObjectField{
+	ObjectField: schema.ObjectField{
+		Description: utils.ToPtr("Value of the xml field"),
+		Type:        schema.NewNamedType(string(rest.ScalarString)).Encode(),
+	},
+	HTTP: &rest.TypeSchema{
+		Type: []string{"string"},
+		XML: &rest.XMLSchema{
+			Text: true,
+		},
+	},
+}
+
 // ConvertOptions represent the common convert options for both OpenAPI v2 and v3
 type ConvertOptions struct {
 	MethodAlias         map[string]string
@@ -121,5 +139,6 @@ type ConvertOptions struct {
 	TrimPrefix          string
 	EnvPrefix           string
 	Strict              bool
+	NoDeprecation       bool
 	Logger              *slog.Logger
 }

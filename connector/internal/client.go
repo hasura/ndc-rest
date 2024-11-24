@@ -3,6 +3,7 @@ package internal
 import (
 	"bytes"
 	"context"
+	"encoding/base64"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -17,6 +18,7 @@ import (
 	"sync"
 	"time"
 
+	"github.com/hasura/ndc-http/ndc-http-schema/configuration"
 	rest "github.com/hasura/ndc-http/ndc-http-schema/schema"
 	"github.com/hasura/ndc-sdk-go/connector"
 	"github.com/hasura/ndc-sdk-go/schema"
@@ -36,16 +38,21 @@ type Doer interface {
 
 // HTTPClient represents a http client wrapper with advanced methods
 type HTTPClient struct {
-	client     Doer
-	tracer     *connector.Tracer
-	propagator propagation.TextMapPropagator
+	client         Doer
+	schema         *rest.NDCHttpSchema
+	forwardHeaders configuration.ForwardHeadersSettings
+	tracer         *connector.Tracer
+	propagator     propagation.TextMapPropagator
 }
 
 // NewHTTPClient creates a http client wrapper
-func NewHTTPClient(client Doer) *HTTPClient {
+func NewHTTPClient(client Doer, httpSchema *rest.NDCHttpSchema, forwardHeaders configuration.ForwardHeadersSettings, tracer *connector.Tracer) *HTTPClient {
 	return &HTTPClient{
-		client:     client,
-		propagator: otel.GetTextMapPropagator(),
+		client:         client,
+		tracer:         tracer,
+		schema:         httpSchema,
+		forwardHeaders: forwardHeaders,
+		propagator:     otel.GetTextMapPropagator(),
 	}
 }
 
@@ -224,9 +231,21 @@ func (client *HTTPClient) sendSingle(ctx context.Context, request *RetryableRequ
 	contentType := parseContentType(resp.Header.Get(contentTypeHeader))
 	if resp.StatusCode >= 400 {
 		details := make(map[string]any)
-		if contentType == rest.ContentTypeJSON && json.Valid(errorBytes) {
-			details["error"] = json.RawMessage(errorBytes)
-		} else {
+		switch contentType {
+		case rest.ContentTypeJSON:
+			if json.Valid(errorBytes) {
+				details["error"] = json.RawMessage(errorBytes)
+			} else {
+				details["error"] = string(errorBytes)
+			}
+		case rest.ContentTypeXML:
+			errData, err := decodeArbitraryXML(bytes.NewReader(errorBytes))
+			if err != nil {
+				details["error"] = string(errorBytes)
+			} else {
+				details["error"] = errData
+			}
+		default:
 			details["error"] = string(errorBytes)
 		}
 
@@ -235,7 +254,7 @@ func (client *HTTPClient) sendSingle(ctx context.Context, request *RetryableRequ
 		return nil, nil, schema.NewConnectorError(resp.StatusCode, resp.Status, details)
 	}
 
-	result, headers, evalErr := evalHTTPResponse(ctx, span, resp, contentType, selection, resultType, logger)
+	result, headers, evalErr := client.evalHTTPResponse(ctx, span, resp, contentType, selection, resultType, logger)
 	if evalErr != nil {
 		span.SetStatus(codes.Error, "failed to decode the http response")
 		span.RecordError(evalErr)
@@ -317,7 +336,7 @@ func (client *HTTPClient) doRequest(ctx context.Context, request *RetryableReque
 	return resp, body, cancel, nil
 }
 
-func evalHTTPResponse(ctx context.Context, span trace.Span, resp *http.Response, contentType string, selection schema.NestedField, resultType schema.Type, logger *slog.Logger) (any, http.Header, *schema.ConnectorError) {
+func (client *HTTPClient) evalHTTPResponse(ctx context.Context, span trace.Span, resp *http.Response, contentType string, selection schema.NestedField, resultType schema.Type, logger *slog.Logger) (any, http.Header, *schema.ConnectorError) {
 	if logger.Enabled(ctx, slog.LevelDebug) {
 		logAttrs := []any{
 			slog.Int("http_status", resp.StatusCode),
@@ -356,25 +375,26 @@ func evalHTTPResponse(ctx context.Context, span trace.Span, resp *http.Response,
 		return nil, resp.Header, nil
 	}
 
-	switch contentType {
-	case "":
-		respBody, err := io.ReadAll(resp.Body)
-		if err != nil {
-			return nil, nil, schema.NewConnectorError(http.StatusInternalServerError, err.Error(), nil)
-		}
-		if len(respBody) == 0 {
-			return nil, resp.Header, nil
-		}
-
-		return string(respBody), resp.Header, nil
-	case "text/plain", "text/html":
+	var result any
+	switch {
+	case strings.HasPrefix(contentType, "text/"):
 		respBody, err := io.ReadAll(resp.Body)
 		if err != nil {
 			return nil, nil, schema.NewConnectorError(http.StatusInternalServerError, err.Error(), nil)
 		}
 
-		return string(respBody), resp.Header, nil
-	case rest.ContentTypeJSON:
+		result = string(respBody)
+	case contentType == rest.ContentTypeXML:
+		field, err := client.extractResultType(resultType)
+		if err != nil {
+			return nil, nil, schema.NewConnectorError(http.StatusInternalServerError, "failed to extract forwarded headers response: "+err.Error(), nil)
+		}
+
+		result, err = NewXMLDecoder(client.schema).Decode(resp.Body, field)
+		if err != nil {
+			return nil, nil, schema.NewConnectorError(http.StatusInternalServerError, err.Error(), nil)
+		}
+	case contentType == rest.ContentTypeJSON:
 		if len(resultType) > 0 {
 			namedType, err := resultType.AsNamed()
 			if err == nil && namedType.Name == string(rest.ScalarString) {
@@ -391,26 +411,17 @@ func evalHTTPResponse(ctx context.Context, span trace.Span, resp *http.Response,
 					return string(respBytes), resp.Header, nil
 				}
 
-				return strResult, resp.Header, nil
+				result = strResult
+
+				break
 			}
 		}
 
-		var result any
 		err := json.NewDecoder(resp.Body).Decode(&result)
 		if err != nil {
 			return nil, nil, schema.NewConnectorError(http.StatusInternalServerError, err.Error(), nil)
 		}
-		if selection == nil || selection.IsNil() {
-			return result, resp.Header, nil
-		}
-
-		result, err = utils.EvalNestedColumnFields(selection, result)
-		if err != nil {
-			return nil, nil, schema.InternalServerError(err.Error(), nil)
-		}
-
-		return result, resp.Header, nil
-	case rest.ContentTypeNdJSON:
+	case contentType == rest.ContentTypeNdJSON:
 		var results []any
 		decoder := json.NewDecoder(resp.Body)
 		for decoder.More() {
@@ -421,20 +432,89 @@ func evalHTTPResponse(ctx context.Context, span trace.Span, resp *http.Response,
 			}
 			results = append(results, r)
 		}
-		if selection == nil || selection.IsNil() {
-			return results, resp.Header, nil
-		}
 
-		result, err := utils.EvalNestedColumnFields(selection, any(results))
+		result = results
+	case strings.HasPrefix(contentType, "application/") || strings.HasPrefix(contentType, "image/") || strings.HasPrefix(contentType, "video/"):
+		rawBytes, err := io.ReadAll(resp.Body)
 		if err != nil {
-			return nil, nil, schema.InternalServerError(err.Error(), nil)
+			return nil, nil, schema.NewConnectorError(http.StatusInternalServerError, err.Error(), nil)
 		}
-
-		return result, resp.Header, nil
+		result = base64.StdEncoding.EncodeToString(rawBytes)
 	default:
 		return nil, nil, schema.NewConnectorError(http.StatusInternalServerError, "failed to evaluate response", map[string]any{
 			"cause": "unsupported content type " + contentType,
 		})
+	}
+
+	result = client.createHeaderForwardingResponse(result, resp.Header)
+	if len(selection) == 0 {
+		return result, resp.Header, nil
+	}
+
+	result, err := utils.EvalNestedColumnFields(selection, result)
+	if err != nil {
+		return nil, nil, schema.InternalServerError(err.Error(), nil)
+	}
+
+	return result, resp.Header, nil
+}
+
+func (client *HTTPClient) extractResultType(resultType schema.Type) (schema.Type, error) {
+	if !client.forwardHeaders.Enabled || client.forwardHeaders.ResponseHeaders == nil || client.forwardHeaders.ResponseHeaders.ResultField == "" {
+		return resultType, nil
+	}
+
+	return client.extractForwardedHeadersResultType(resultType)
+}
+
+func (client *HTTPClient) extractForwardedHeadersResultType(resultType schema.Type) (schema.Type, error) {
+	rawType, err := resultType.InterfaceT()
+	switch t := rawType.(type) {
+	case *schema.NullableType:
+		return client.extractForwardedHeadersResultType(t.UnderlyingType)
+	case *schema.ArrayType:
+		return nil, errors.New("expected object type, got array")
+	case *schema.NamedType:
+		objectType, ok := client.schema.ObjectTypes[t.Name]
+		if !ok {
+			return nil, fmt.Errorf("%s: expected object type", t.Name)
+		}
+
+		if len(objectType.Fields) == 0 {
+			return nil, fmt.Errorf("%s: empty object field", t.Name)
+		}
+
+		resultField, ok := objectType.Fields[client.forwardHeaders.ResponseHeaders.ResultField]
+		if !ok {
+			return nil, fmt.Errorf("%s: result field %s does not exist", t.Name, client.forwardHeaders.ResponseHeaders.ResultField)
+		}
+
+		return resultField.Type, nil
+	case *schema.PredicateType:
+		return nil, errors.New("expected object type, got predicate type")
+	default:
+		return nil, err
+	}
+}
+
+func (client *HTTPClient) createHeaderForwardingResponse(result any, rawHeaders http.Header) any {
+	if !client.forwardHeaders.Enabled || client.forwardHeaders.ResponseHeaders == nil {
+		return result
+	}
+
+	headers := make(map[string]string)
+	for key, values := range rawHeaders {
+		if len(client.forwardHeaders.ResponseHeaders.ForwardHeaders) > 0 && !slices.Contains(client.forwardHeaders.ResponseHeaders.ForwardHeaders, key) {
+			continue
+		}
+		if len(values) > 0 && values[0] != "" {
+			headers[key] = values[0]
+		}
+	}
+
+	return map[string]any{
+		client.forwardHeaders.ResponseHeaders.HeadersField: headers,
+		client.forwardHeaders.ResponseHeaders.ResultField:  result,
 	}
 }
 

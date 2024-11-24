@@ -10,19 +10,29 @@
           "securitySchemes": {
             "api_key": {
               "type": "apiKey",
+              "in": "header",
+              "name": "api_key",
               "value": {
                 "env": "PET_STORE_API_KEY"
+              }
+            },
+            "basic": {
+              "type": "basic",
+              "header": "Authorization",
+              "username": {
+                "value": "user"
               },
-              "in": "header",
-              "name": "api_key"
+              "password": {
+                "value": "password"
+              }
             },
             "bearer": {
               "type": "http",
+              "header": "",
+              "scheme": "bearer",
               "value": {
                 "env": "PET_STORE_BEARER_TOKEN"
-              },
-              "header": "",
-              "scheme": "bearer"
+              }
             },
             "petstore_auth": {
               "type": "oauth2",
@@ -47,19 +57,29 @@
       "securitySchemes": {
         "api_key": {
           "type": "apiKey",
+          "in": "header",
+          "name": "api_key",
           "value": {
             "env": "PET_STORE_API_KEY"
+          }
+        },
+        "basic": {
+          "type": "basic",
+          "header": "Authorization",
+          "username": {
+            "value": "user"
           },
-          "in": "header",
-          "name": "api_key"
+          "password": {
+            "value": "password"
+          }
         },
         "bearer": {
           "type": "http",
+          "header": "",
+          "scheme": "bearer",
           "value": {
             "env": "PET_STORE_BEARER_TOKEN"
-          },
-          "header": "",
-          "scheme": "bearer"
+          }
         },
         "petstore_auth": {
           "type": "oauth2",
@@ -86,7 +106,6 @@
         "request": {
           "url": "/pet",
           "method": "get",
-          "type": "http",
           "response": {
             "contentType": ""
           }
@@ -105,7 +124,6 @@
         "request": {
           "url": "/pet/findByStatus",
           "method": "get",
-          "type": "http",
           "security": [
             {
               "bearer": []
@@ -146,7 +164,6 @@
         "request": {
           "url": "/pet/retry",
           "method": "get",
-          "type": "http",
           "response": {
             "contentType": ""
           }
@@ -162,6 +179,38 @@
       }
     },
     "object_types": {
+      "Category": {
+        "fields": {
+          "id": {
+            "type": {
+              "type": "nullable",
+              "underlying_type": {
+                "name": "Int64",
+                "type": "named"
+              }
+            },
+            "http": {
+              "type": ["integer"],
+              "format": "int64"
+            }
+          },
+          "name": {
+            "type": {
+              "type": "nullable",
+              "underlying_type": {
+                "name": "String",
+                "type": "named"
+              }
+            },
+            "http": {
+              "type": ["string"]
+            }
+          }
+        },
+        "xml": {
+          "name": "category"
+        }
+      },
       "CreateModelRequest": {
         "fields": {
           "model": {
@@ -195,6 +244,115 @@
           }
         }
       },
+      "PetXml": {
+        "fields": {
+          "category": {
+            "type": {
+              "type": "nullable",
+              "underlying_type": {
+                "name": "Category",
+                "type": "named"
+              }
+            },
+            "http": {
+              "type": ["object"],
+              "xml": {
+                "name": "category"
+              }
+            }
+          },
+          "field": {
+            "description": "This empty field is returned instead of the list of scopes if the user making the call doesn't have the authorization required.",
+            "type": {
+              "type": "nullable",
+              "underlying_type": {
+                "name": "JSON",
+                "type": "named"
+              }
+            },
+            "http": {
+              "type": null
+            }
+          },
+          "id": {
+            "type": {
+              "type": "nullable",
+              "underlying_type": {
+                "name": "Int64",
+                "type": "named"
+              }
+            },
+            "http": {
+              "type": ["integer"],
+              "format": "int64"
+            }
+          },
+          "name": {
+            "type": {
+              "name": "String",
+              "type": "named"
+            },
+            "http": {
+              "type": ["string"]
+            }
+          },
+          "photoUrls": {
+            "type": {
+              "element_type": {
+                "name": "String",
+                "type": "named"
+              },
+              "type": "array"
+            },
+            "http": {
+              "type": ["array"],
+              "items": {
+                "type": ["string"],
+                "xml": {
+                  "name": "photoUrl"
+                }
+              },
+              "xml": {
+                "wrapped": true
+              }
+            }
+          },
+          "status": {
+            "description": "pet status in the store",
+            "type": {
+              "type": "nullable",
+              "underlying_type": {
+                "name": "String",
+                "type": "named"
+              }
+            },
+            "http": {
+              "type": ["string"]
+            }
+          },
+          "tags": {
+            "type": {
+              "type": "nullable",
+              "underlying_type": {
+                "element_type": {
+                  "name": "Tag",
+                  "type": "named"
+                },
+                "type": "array"
+              }
+            },
+            "http": {
+              "type": ["array"],
+              "xml": {
+                "wrapped": true
+              }
+            }
+          }
+        },
+        "xml": {
+          "name": "pet"
+        }
+      },
       "ProgressResponse": {
         "fields": {
           "completed": {
@@ -218,6 +376,38 @@
             }
           }
         }
+      },
+      "Tag": {
+        "fields": {
+          "id": {
+            "type": {
+              "type": "nullable",
+              "underlying_type": {
+                "name": "Int64",
+                "type": "named"
+              }
+            },
+            "http": {
+              "type": ["integer"],
+              "format": "int64"
+            }
+          },
+          "name": {
+            "type": {
+              "type": "nullable",
+              "underlying_type": {
+                "name": "String",
+                "type": "named"
+              }
+            },
+            "http": {
+              "type": ["string"]
+            }
+          }
+        },
+        "xml": {
+          "name": "tag"
+        }
       }
     },
     "procedures": {
@@ -225,7 +415,6 @@
         "request": {
           "url": "/pet",
           "method": "post",
-          "type": "http",
           "headers": {
             "Content-Type": {
               "value": "application/json"
@@ -265,7 +454,11 @@
         "request": {
           "url": "/model",
           "method": "post",
-          "type": "http",
+          "security": [
+            {
+              "basic": []
+            }
+          ],
           "requestBody": {
             "contentType": "application/json"
           },
@@ -289,6 +482,35 @@
           },
           "type": "array"
         }
+      },
+      "putPetXml": {
+        "request": {
+          "url": "/pet/xml",
+          "method": "put",
+          "requestBody": {
+            "contentType": "application/xml"
+          },
+          "response": {
+            "contentType": "application/xml"
+          }
+        },
+        "arguments": {
+          "body": {
+            "description": "Request body of PUT /pet/xml",
+            "type": {
+              "name": "PetXml",
+              "type": "named"
+            },
+            "http": {
+              "in": "body"
+            }
+          }
+        },
+        "description": "Update an existing pet",
+        "result_type": {
+          "name": "PetXml",
+          "type": "named"
+        }
       }
     },
     "scalar_types": {
@@ -304,6 +526,27 @@
         "comparison_operators": {},
         "representation": {
           "type": "int32"
+        }
+      },
+      "Int32": {
+        "aggregate_functions": {},
+        "comparison_operators": {},
+        "representation": {
+          "type": "int32"
+        }
+      },
+      "Int64": {
+        "aggregate_functions": {},
+        "comparison_operators": {},
+        "representation": {
+          "type": "int64"
+        }
+      },
+      "JSON": {
+        "aggregate_functions": {},
+        "comparison_operators": {},
+        "representation": {
+          "type": "json"
         }
       },
       "String": {

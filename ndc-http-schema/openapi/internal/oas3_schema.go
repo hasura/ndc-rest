@@ -1,7 +1,6 @@
 package internal
 
 import (
-	"errors"
 	"fmt"
 	"log/slog"
 	"slices"
@@ -35,6 +34,7 @@ func (oc *oas3SchemaBuilder) getSchemaTypeFromProxy(schemaProxy *base.SchemaProx
 	if schemaProxy == nil {
 		return nil, nil, errParameterSchemaEmpty(fieldPaths)
 	}
+
 	innerSchema := schemaProxy.Schema()
 	if innerSchema == nil {
 		return nil, nil, fmt.Errorf("cannot get schema of $.%s from proxy: %s", strings.Join(fieldPaths, "."), schemaProxy.GetReference())
@@ -99,6 +99,10 @@ func (oc *oas3SchemaBuilder) getSchemaTypeFromProxy(schemaProxy *base.SchemaProx
 func (oc *oas3SchemaBuilder) getSchemaType(typeSchema *base.Schema, fieldPaths []string) (schema.TypeEncoder, *rest.TypeSchema, error) {
 	if typeSchema == nil {
 		return nil, nil, errParameterSchemaEmpty(fieldPaths)
+	}
+
+	if oc.builder.ConvertOptions.NoDeprecation && typeSchema.Deprecated != nil && *typeSchema.Deprecated {
+		return nil, nil, nil
 	}
 
 	description := utils.StripHTMLTags(typeSchema.Description)
@@ -179,12 +183,15 @@ func (oc *oas3SchemaBuilder) getSchemaType(typeSchema *base.Schema, fieldPaths [
 
 		object := rest.ObjectType{
 			Fields: make(map[string]rest.ObjectField),
+			XML:    typeResult.XML,
 		}
 		readObject := rest.ObjectType{
 			Fields: make(map[string]rest.ObjectField),
+			XML:    typeResult.XML,
 		}
 		writeObject := rest.ObjectType{
 			Fields: make(map[string]rest.ObjectField),
+			XML:    typeResult.XML,
 		}
 
 		if description != "" {
@@ -237,6 +244,10 @@ func (oc *oas3SchemaBuilder) getSchemaType(typeSchema *base.Schema, fieldPaths [
 		}
 
 		if len(readObject.Fields) == 0 && len(writeObject.Fields) == 0 {
+			if len(object.Fields) > 0 && isXMLLeafObject(object) {
+				object.Fields[xmlValueFieldName] = xmlValueField
+			}
+
 			oc.builder.schema.ObjectTypes[refName] = object
 			result = schema.NewNamedType(refName)
 		} else {
@@ -244,6 +255,15 @@ func (oc *oas3SchemaBuilder) getSchemaType(typeSchema *base.Schema, fieldPaths [
 				readObject.Fields[key] = field
 				writeObject.Fields[key] = field
 			}
+
+			if len(readObject.Fields) > 0 && isXMLLeafObject(readObject) {
+				readObject.Fields[xmlValueFieldName] = xmlValueField
+			}
+
+			if len(writeObject.Fields) > 0 && isXMLLeafObject(writeObject) {
+				writeObject.Fields[xmlValueFieldName] = xmlValueField
+			}
+
 			writeRefName := formatWriteObjectName(refName)
 			oc.builder.schema.ObjectTypes[refName] = readObject
 			oc.builder.schema.ObjectTypes[writeRefName] = writeObject
@@ -255,7 +275,11 @@ func (oc *oas3SchemaBuilder) getSchemaType(typeSchema *base.Schema, fieldPaths [
 		}
 	case "array":
 		if typeSchema.Items == nil || typeSchema.Items.A == nil {
-			return nil, nil, errors.New("array item is empty")
+			if oc.builder.Strict {
+				return nil, nil, fmt.Errorf("%s: array item is empty", strings.Join(fieldPaths, "."))
+			}
+
+			return oc.builder.buildScalarJSON(), typeResult, nil
 		}
 
 		itemName := getSchemaRefTypeNameV3(typeSchema.Items.A.GetReference())

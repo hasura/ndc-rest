@@ -2,6 +2,7 @@ package schema
 
 import (
 	"encoding/json"
+	"encoding/xml"
 	"errors"
 	"fmt"
 
@@ -91,6 +92,14 @@ func (rm NDCHttpSchema) GetProcedure(name string) *OperationInfo {
 	return &fn
 }
 
+// AddScalar adds a new scalar if not exist.
+func (rm *NDCHttpSchema) AddScalar(name string, scalar schema.ScalarType) {
+	_, ok := rm.ScalarTypes[name]
+	if !ok {
+		rm.ScalarTypes[name] = scalar
+	}
+}
+
 type Response struct {
 	ContentType string `json:"contentType" mapstructure:"contentType" yaml:"contentType"`
 }
@@ -148,6 +157,7 @@ type TypeSchema struct {
 	MaxLength   *int64      `json:"maxLength,omitempty" mapstructure:"maxLength" yaml:"maxLength,omitempty"`
 	MinLength   *int64      `json:"minLength,omitempty" mapstructure:"minLength" yaml:"minLength,omitempty"`
 	Items       *TypeSchema `json:"items,omitempty"     mapstructure:"items"     yaml:"items,omitempty"`
+	XML         *XMLSchema  `json:"xml,omitempty"       mapstructure:"xml"       yaml:"xml,omitempty"`
 	Description string      `json:"-"                   yaml:"-"`
 	ReadOnly    bool        `json:"-"                   yaml:"-"`
 	WriteOnly   bool        `json:"-"                   yaml:"-"`
@@ -309,6 +319,8 @@ type ObjectType struct {
 	Description *string `json:"description,omitempty" mapstructure:"description,omitempty" yaml:"description,omitempty"`
 	// Fields defined on this object type
 	Fields map[string]ObjectField `json:"fields" mapstructure:"fields" yaml:"fields"`
+	// XML schema
+	XML *XMLSchema `json:"xml,omitempty" mapstructure:"xml" yaml:"xml,omitempty"`
 }
 
 // Schema returns schema the object field
@@ -419,6 +431,48 @@ func (j *ArgumentInfo) UnmarshalJSON(b []byte) error {
 	}
 
 	return nil
+}
+
+// XMLSchema represents a XML schema that adds additional metadata to describe the XML representation of this property.
+type XMLSchema struct {
+	// Replaces the name of the element/attribute used for the described schema property.
+	// When defined within items, it will affect the name of the individual XML elements within the list.
+	// When defined alongside type being array (outside the items), it will affect the wrapping element and only if wrapped is true.
+	// If wrapped is false, it will be ignored.
+	Name string `json:"name,omitempty" mapstructure:"name" yaml:"name,omitempty"`
+	// The prefix to be used for the name.
+	Prefix string `json:"prefix,omitempty" mapstructure:"prefix" yaml:"prefix,omitempty"`
+	// The URI of the namespace definition. This MUST be in the form of an absolute URI.
+	Namespace string `json:"namespace,omitempty" mapstructure:"namespace" yaml:"namespace,omitempty"`
+	// Used only for an array definition. Signifies whether the array is wrapped (for example, <books><book/><book/></books>) or unwrapped (<book/><book/>).
+	Wrapped bool `json:"wrapped,omitempty" mapstructure:"wrapped" yaml:"wrapped,omitempty"`
+	// Declares whether the property definition translates to an attribute instead of an element.
+	Attribute bool `json:"attribute,omitempty" mapstructure:"attribute" yaml:"attribute,omitempty"`
+	// Represents a text value of the xml element.
+	Text bool `json:"text,omitempty" mapstructure:"text" yaml:"text,omitempty"`
+}
+
+// GetFullName gets the full name with prefix.
+func (xs XMLSchema) GetFullName() string {
+	if xs.Prefix == "" {
+		return xs.Name
+	}
+
+	return xs.Prefix + ":" + xs.Name
+}
+
+// GetNamespaceAttribute gets the namespace attribute
+func (xs XMLSchema) GetNamespaceAttribute() xml.Attr {
+	// xmlns:smp="http://example.com/schema"
+	name := "xmlns"
+	if xs.Prefix != "" {
+		name += ":" + xs.Prefix
+	}
+
+	return xml.Attr{
+		Name:  xml.Name{Local: name},
+		Value: xs.Namespace,
+	}
 }
 
 func toAnySlice[T any](values []T) []any {

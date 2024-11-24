@@ -148,6 +148,7 @@ func (nsc *NDCBuilder) validateType(schemaType schema.Type) (schema.TypeEncoder,
 
 		newObjectType := rest.ObjectType{
 			Description: objectType.Description,
+			XML:         objectType.XML,
 			Fields:      make(map[string]rest.ObjectField),
 		}
 

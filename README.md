@@ -30,13 +30,18 @@ The connector can automatically transform OpenAPI 2.0 and 3.0 definitions to NDC
 
 **Supported content types**
 
-- `application/json`
-- `application/x-www-form-urlencoded`
-- `application/octet-stream`
-- `multipart/form-data`
-- `application/x-ndjson`
-- `text/*`
-- Upload file content types, e.g.`image/*` from `base64` arguments.
+| Content Type                      | Supported |
+| --------------------------------- | --------- |
+| application/json                  | ✅        |
+| application/xml                   | ✅        |
+| application/x-www-form-urlencoded | ✅        |
+| multipart/form-data               | ✅        |
+| application/octet-stream          | ✅ (\*)   |
+| text/\*                           | ✅        |
+| application/x-ndjson              | ✅        |
+| image/\*                          | ✅ (\*)   |
+
+\*: Upload file content types are converted to `base64` encoding.
 
 ## Quick start
 
@@ -83,9 +88,9 @@ HTTP connector supports both OpenAPI 2 and 3 specifications.
 - `oas3`: OpenAPI 3.0/3.1.
 - `oas2`: OpenAPI 2.0.
 
-#### HTTP schema
+#### HTTP Connector schema
 
-Enum: `http`
+Enum: `ndc`
 
 HTTP schema is the native configuration schema which other specs will be converted to behind the scene. The schema extends the NDC Specification with HTTP configuration and can be converted from other specs by the [NDC HTTP schema CLI](./ndc-http-schema).
 

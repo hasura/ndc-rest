@@ -33,14 +33,16 @@ func TestOpenAPIv3ToRESTSchema(t *testing.T) {
 				EnvPrefix:  "PET_STORE",
 			},
 		},
-		// go run ./ndc-http-schema convert -f ./ndc-http-schema/openapi/testdata/onesignal/source.json -o ./ndc-http-schema/openapi/testdata/onesignal/expected.json --spec openapi3
-		// go run ./ndc-http-schema convert -f ./ndc-http-schema/openapi/testdata/onesignal/source.json -o ./ndc-http-schema/openapi/testdata/onesignal/schema.json --pure --spec openapi3
+		// go run ./ndc-http-schema convert -f ./ndc-http-schema/openapi/testdata/onesignal/source.json -o ./ndc-http-schema/openapi/testdata/onesignal/expected.json --spec openapi3 --no-deprecation
+		// go run ./ndc-http-schema convert -f ./ndc-http-schema/openapi/testdata/onesignal/source.json -o ./ndc-http-schema/openapi/testdata/onesignal/schema.json --pure --spec openapi3 --no-deprecation
 		{
 			Name:     "onesignal",
 			Source:   "testdata/onesignal/source.json",
 			Expected: "testdata/onesignal/expected.json",
 			Schema:   "testdata/onesignal/schema.json",
-			Options:  ConvertOptions{},
+			Options: ConvertOptions{
+				NoDeprecation: true,
+			},
 		},
 		// go run ./ndc-http-schema convert -f ./ndc-http-schema/openapi/testdata/openai/source.json -o ./ndc-http-schema/openapi/testdata/openai/expected.json --spec openapi3
 		// go run ./ndc-http-schema convert -f ./ndc-http-schema/openapi/testdata/openai/source.json -o ./ndc-http-schema/openapi/testdata/openai/schema.json --pure --spec openapi3

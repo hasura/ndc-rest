@@ -3,6 +3,7 @@ package internal
 import (
 	"fmt"
 	"log/slog"
+	"slices"
 	"strconv"
 	"strings"
 	"time"
@@ -11,6 +12,7 @@ import (
 	"github.com/hasura/ndc-http/ndc-http-schema/utils"
 	"github.com/hasura/ndc-sdk-go/schema"
 	v3 "github.com/pb33f/libopenapi/datamodel/high/v3"
+	"github.com/pb33f/libopenapi/orderedmap"
 )
 
 type oas3OperationBuilder struct {
@@ -34,11 +36,12 @@ func newOAS3OperationBuilder(builder *OAS3Builder, pathKey string, method string
 
 // BuildFunction build a HTTP NDC function information from OpenAPI v3 operation
 func (oc *oas3OperationBuilder) BuildFunction(itemGet *v3.Operation) (*rest.OperationInfo, string, error) {
-	start := time.Now()
-	funcName := formatOperationName(itemGet.OperationId)
-	if funcName == "" {
-		funcName = buildPathMethodName(oc.pathKey, "get", oc.builder.ConvertOptions)
+	if oc.builder.ConvertOptions.NoDeprecation && itemGet.Deprecated != nil && *itemGet.Deprecated {
+		return nil, "", nil
 	}
+
+	start := time.Now()
+	funcName := buildUniqueOperationName(oc.builder.schema, itemGet.OperationId, oc.pathKey, oc.method, oc.builder.ConvertOptions)
 
 	defer func() {
 		oc.builder.Logger.Info("function",
@@ -53,6 +56,7 @@ func (oc *oas3OperationBuilder) BuildFunction(itemGet *v3.Operation) (*rest.Oper
 	if err != nil {
 		return nil, "", fmt.Errorf("%s: %w", oc.pathKey, err)
 	}
+
 	if resultType == nil {
 		return nil, "", nil
 	}
@@ -80,14 +84,12 @@ func (oc *oas3OperationBuilder) BuildFunction(itemGet *v3.Operation) (*rest.Oper
 }
 
 func (oc *oas3OperationBuilder) BuildProcedure(operation *v3.Operation) (*rest.OperationInfo, string, error) {
-	if operation == nil {
+	if operation == nil || (oc.builder.ConvertOptions.NoDeprecation && operation.Deprecated != nil && *operation.Deprecated) {
 		return nil, "", nil
 	}
+
 	start := time.Now()
-	procName := formatOperationName(operation.OperationId)
-	if procName == "" {
-		procName = buildPathMethodName(oc.pathKey, oc.method, oc.builder.ConvertOptions)
-	}
+	procName := buildUniqueOperationName(oc.builder.schema, operation.OperationId, oc.pathKey, oc.method, oc.builder.ConvertOptions)
 
 	defer func() {
 		oc.builder.Logger.Info("procedure",
@@ -158,7 +160,7 @@ func (oc *oas3OperationBuilder) convertParameters(params []*v3.Parameter, apiPat
 	}
 
 	for _, param := range append(params, oc.commonParams...) {
-		if param == nil {
+		if param == nil || (param.Deprecated && oc.builder.ConvertOptions.NoDeprecation) {
 			continue
 		}
 		paramName := param.Name
@@ -214,18 +216,33 @@ func (oc *oas3OperationBuilder) convertParameters(params []*v3.Parameter, apiPat
 	return nil
 }
 
+func (oc *oas3OperationBuilder) getContentType(contents *orderedmap.Map[string, *v3.MediaType]) (string, *v3.MediaType) {
+	var contentType string
+	var media *v3.MediaType
+	for _, ct := range preferredContentTypes {
+		for iter := contents.First(); iter != nil; iter = iter.Next() {
+			key := iter.Key()
+			value := iter.Value()
+			if strings.HasPrefix(key, ct) && value != nil {
+				return key, value
+			}
+
+			if media == nil && value != nil && (len(oc.builder.AllowedContentTypes) == 0 || slices.Contains(oc.builder.AllowedContentTypes, key)) {
+				contentType = key
+				media = value
+			}
+		}
+	}
+
+	return contentType, media
+}
+
 func (oc *oas3OperationBuilder) convertRequestBody(reqBody *v3.RequestBody, apiPath string, fieldPaths []string) (*rest.RequestBody, schema.TypeEncoder, error) {
 	if reqBody == nil || reqBody.Content == nil {
 		return nil, nil, nil
 	}
 
-	contentType := rest.ContentTypeJSON
-	content, ok := reqBody.Content.Get(contentType)
-	if !ok {
-		contentPair := reqBody.Content.First()
-		contentType = contentPair.Key()
-		content = contentPair.Value()
-	}
+	contentType, content := oc.getContentType(reqBody.Content)
 
 	bodyRequired := false
 	if reqBody.Required != nil && *reqBody.Required {
@@ -335,6 +352,7 @@ func (oc *oas3OperationBuilder) convertResponse(responses *v3.Responses, apiPath
 	}
 
 	var resp *v3.Response
+	var statusCode int64
 	if responses.Codes != nil && !responses.Codes.IsZero() {
 		for r := responses.Codes.First(); r != nil; r = r.Next() {
 			if r.Key() == "" {
@@ -349,6 +367,7 @@ func (oc *oas3OperationBuilder) convertResponse(responses *v3.Responses, apiPath
 				return nil, nil, nil
 			} else if code >= 200 && code < 300 {
 				resp = r.Value()
+				statusCode = code
 
 				break
 			}
@@ -358,37 +377,32 @@ func (oc *oas3OperationBuilder) convertResponse(responses *v3.Responses, apiPath
 	// return nullable boolean type if the response content is null
 	if resp == nil || resp.Content == nil {
 		scalarName := string(rest.ScalarBoolean)
-		if _, ok := oc.builder.schema.ScalarTypes[scalarName]; !ok {
-			oc.builder.schema.ScalarTypes[scalarName] = *defaultScalarTypes[rest.ScalarBoolean]
-		}
+		oc.builder.schema.AddScalar(scalarName, *defaultScalarTypes[rest.ScalarBoolean])
 
 		return schema.NewNullableNamedType(scalarName), &rest.Response{
 			ContentType: rest.ContentTypeJSON,
 		}, nil
 	}
 
-	contentType := rest.ContentTypeJSON
-	bodyContent, present := resp.Content.Get(contentType)
-	if !present {
-		if len(oc.builder.AllowedContentTypes) == 0 {
-			firstContent := resp.Content.First()
-			bodyContent = firstContent.Value()
-			contentType = firstContent.Key()
-			present = true
-		} else {
-			for _, ct := range oc.builder.AllowedContentTypes {
-				bodyContent, present = resp.Content.Get(ct)
-				if present {
-					contentType = ct
+	contentType, bodyContent := oc.getContentType(resp.Content)
+	if bodyContent == nil {
+		if statusCode == 204 {
+			scalarName := string(rest.ScalarBoolean)
+			oc.builder.schema.AddScalar(scalarName, *defaultScalarTypes[rest.ScalarBoolean])
 
-					break
-				}
-			}
+			return schema.NewNullableNamedType(scalarName), &rest.Response{
+				ContentType: rest.ContentTypeJSON,
+			}, nil
 		}
+
+		return nil, nil, nil
 	}
 
-	if !present {
-		return nil, nil, nil
+	schemaResponse := &rest.Response{
+		ContentType: contentType,
+	}
+	if bodyContent.Schema == nil {
+		return getResultTypeFromContentType(oc.builder.schema, contentType), schemaResponse, nil
 	}
 
 	schemaType, _, err := newOAS3SchemaBuilder(oc.builder, apiPath, rest.InBody, false).
@@ -397,9 +411,6 @@ func (oc *oas3OperationBuilder) convertResponse(responses *v3.Responses, apiPath
 		return nil, nil, err
 	}
 
-	schemaResponse := &rest.Response{
-		ContentType: contentType,
-	}
 	switch contentType {
 	case rest.ContentTypeNdJSON:
 		// Newline Delimited JSON (ndjson) format represents a stream of structured objects

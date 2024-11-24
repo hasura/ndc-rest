@@ -287,25 +287,13 @@ func encodeParameterReflectionValues(reflectValue reflect.Value, fieldPaths []st
 	}
 
 	kind := reflectValue.Kind()
+	if result, err := stringifySimpleScalar(reflectValue, kind); err == nil {
+		return []ParameterItem{
+			NewParameterItem([]Key{}, []string{result}),
+		}, nil
+	}
+
 	switch kind {
-	case reflect.Bool:
-		return []ParameterItem{
-			NewParameterItem([]Key{}, []string{strconv.FormatBool(reflectValue.Bool())}),
-		}, nil
-	case reflect.String:
-		return []ParameterItem{NewParameterItem([]Key{}, []string{reflectValue.String()})}, nil
-	case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64:
-		return []ParameterItem{
-			NewParameterItem([]Key{}, []string{strconv.FormatInt(reflectValue.Int(), 10)}),
-		}, nil
-	case reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64:
-		return []ParameterItem{
-			NewParameterItem([]Key{}, []string{strconv.FormatUint(reflectValue.Uint(), 10)}),
-		}, nil
-	case reflect.Float32, reflect.Float64:
-		return []ParameterItem{
-			NewParameterItem([]Key{}, []string{fmt.Sprintf("%f", reflectValue.Float())}),
-		}, nil
 	case reflect.Slice, reflect.Array:
 		return encodeParameterReflectionSlice(reflectValue, fieldPaths)
 	case reflect.Map, reflect.Interface:

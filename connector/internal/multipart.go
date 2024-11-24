@@ -49,7 +49,7 @@ func (w *MultipartWriter) WriteDataURI(name string, value any, headers http.Head
 			escapeQuotes(name), escapeQuotes(name)))
 
 	if dataURI.MediaType == "" {
-		h.Set("Content-Type", "application/octet-stream")
+		h.Set("Content-Type", schema.ContentTypeOctetStream)
 	} else {
 		h.Set("Content-Type", dataURI.MediaType)
 	}

@@ -71,7 +71,9 @@
             "name": "aggregated_by",
             "in": "query",
             "schema": {
-              "type": ["string"]
+              "type": [
+                "string"
+              ]
             }
           }
         },
@@ -88,7 +90,9 @@
             "name": "browsers",
             "in": "query",
             "schema": {
-              "type": ["string"]
+              "type": [
+                "string"
+              ]
             }
           }
         },
@@ -105,7 +109,9 @@
             "name": "end_date",
             "in": "query",
             "schema": {
-              "type": ["string"]
+              "type": [
+                "string"
+              ]
             }
           }
         },
@@ -122,7 +128,9 @@
             "name": "limit",
             "in": "query",
             "schema": {
-              "type": ["integer"]
+              "type": [
+                "integer"
+              ]
             }
           }
         },
@@ -139,7 +147,9 @@
             "name": "offset",
             "in": "query",
             "schema": {
-              "type": ["integer"]
+              "type": [
+                "integer"
+              ]
             }
           }
         },
@@ -155,7 +165,9 @@
             "name": "on-behalf-of",
             "in": "header",
             "schema": {
-              "type": ["string"]
+              "type": [
+                "string"
+              ]
             }
           }
         },
@@ -169,7 +181,9 @@
             "name": "start_date",
             "in": "query",
             "schema": {
-              "type": ["string"]
+              "type": [
+                "string"
+              ]
             }
           }
         }
@@ -207,7 +221,9 @@
             "name": "list_id",
             "in": "path",
             "schema": {
-              "type": ["integer"]
+              "type": [
+                "integer"
+              ]
             }
           }
         },
@@ -223,7 +239,9 @@
             "name": "on-behalf-of",
             "in": "header",
             "schema": {
-              "type": ["string"]
+              "type": [
+                "string"
+              ]
             }
           }
         }
@@ -260,7 +278,9 @@
             "name": "on-behalf-of",
             "in": "header",
             "schema": {
-              "type": ["string"]
+              "type": [
+                "string"
+              ]
             }
           }
         }
@@ -298,7 +318,9 @@
             "name": "username",
             "in": "query",
             "schema": {
-              "type": ["string"]
+              "type": [
+                "string"
+              ]
             }
           }
         }
@@ -315,7 +337,10 @@
         "method": "get",
         "security": [
           {
-            "petstore_auth": ["write:pets", "read:pets"]
+            "petstore_auth": [
+              "write:pets",
+              "read:pets"
+            ]
           }
         ],
         "response": {
@@ -336,7 +361,9 @@
             "name": "status",
             "in": "query",
             "schema": {
-              "type": ["array"]
+              "type": [
+                "array"
+              ]
             }
           }
         }
@@ -356,7 +383,10 @@
         "method": "get",
         "security": [
           {
-            "petstore_auth": ["write:pets", "read:pets"]
+            "petstore_auth": [
+              "write:pets",
+              "read:pets"
+            ]
           }
         ],
         "response": {
@@ -377,7 +407,9 @@
             "name": "tags",
             "in": "query",
             "schema": {
-              "type": ["array"]
+              "type": [
+                "array"
+              ]
             }
           }
         }
@@ -430,7 +462,9 @@
             "name": "orderId",
             "in": "path",
             "schema": {
-              "type": ["integer"],
+              "type": [
+                "integer"
+              ],
               "maximum": 10,
               "minimum": 1
             }
@@ -467,7 +501,9 @@
             "name": "petId",
             "in": "path",
             "schema": {
-              "type": ["integer"]
+              "type": [
+                "integer"
+              ]
             }
           }
         }
@@ -512,7 +548,9 @@
             "name": "username",
             "in": "path",
             "schema": {
-              "type": ["string"]
+              "type": [
+                "string"
+              ]
             }
           }
         }
@@ -545,7 +583,9 @@
             "name": "client_name",
             "in": "query",
             "schema": {
-              "type": ["string"]
+              "type": [
+                "string"
+              ]
             }
           }
         },
@@ -562,7 +602,9 @@
             "name": "limit",
             "in": "query",
             "schema": {
-              "type": ["integer"]
+              "type": [
+                "integer"
+              ]
             }
           }
         },
@@ -579,7 +621,9 @@
             "name": "offset",
             "in": "query",
             "schema": {
-              "type": ["integer"]
+              "type": [
+                "integer"
+              ]
             }
           }
         },
@@ -596,7 +640,9 @@
             "name": "owner",
             "in": "query",
             "schema": {
-              "type": ["string"]
+              "type": [
+                "string"
+              ]
             }
           }
         },
@@ -646,7 +692,9 @@
             "name": "password",
             "in": "query",
             "schema": {
-              "type": ["string"]
+              "type": [
+                "string"
+              ]
             }
           }
         },
@@ -660,7 +708,9 @@
             "name": "username",
             "in": "query",
             "schema": {
-              "type": ["string"]
+              "type": [
+                "string"
+              ]
             }
           }
         }
@@ -686,7 +736,9 @@
             }
           },
           "http": {
-            "type": ["integer"]
+            "type": [
+              "integer"
+            ]
           }
         },
         "unique_clicks": {
@@ -699,9 +751,14 @@
             }
           },
           "http": {
-            "type": ["integer"]
+            "type": [
+              "integer"
+            ]
           }
         }
+      },
+      "xml": {
+        "name": "advanced_stats_clicks"
       }
     },
     "AdvancedStatsClicksOpens": {
@@ -717,7 +774,9 @@
             }
           },
           "http": {
-            "type": ["integer"]
+            "type": [
+              "integer"
+            ]
           }
         },
         "opens": {
@@ -730,7 +789,9 @@
             }
           },
           "http": {
-            "type": ["integer"]
+            "type": [
+              "integer"
+            ]
           }
         },
         "unique_clicks": {
@@ -743,7 +804,9 @@
             }
           },
           "http": {
-            "type": ["integer"]
+            "type": [
+              "integer"
+            ]
           }
         },
         "unique_opens": {
@@ -756,7 +819,9 @@
             }
           },
           "http": {
-            "type": ["integer"]
+            "type": [
+              "integer"
+            ]
           }
         }
       }
@@ -772,7 +837,9 @@
             }
           },
           "http": {
-            "type": ["integer"],
+            "type": [
+              "integer"
+            ],
             "format": "int32"
           }
         },
@@ -785,7 +852,9 @@
             }
           },
           "http": {
-            "type": ["string"]
+            "type": [
+              "string"
+            ]
           }
         },
         "type": {
@@ -797,9 +866,14 @@
             }
           },
           "http": {
-            "type": ["string"]
+            "type": [
+              "string"
+            ]
           }
         }
+      },
+      "xml": {
+        "name": "ApiResponse"
       }
     },
     "Category": {
@@ -813,7 +887,9 @@
             }
           },
           "http": {
-            "type": ["integer"],
+            "type": [
+              "integer"
+            ],
             "format": "int64"
           }
         },
@@ -826,9 +902,14 @@
             }
           },
           "http": {
-            "type": ["string"]
+            "type": [
+              "string"
+            ]
           }
         }
+      },
+      "xml": {
+        "name": "Category"
       }
     },
     "ContactdbCustomFieldWithIdValue": {
@@ -843,7 +924,9 @@
             }
           },
           "http": {
-            "type": ["number"]
+            "type": [
+              "number"
+            ]
           }
         },
         "name": {
@@ -856,7 +939,9 @@
             }
           },
           "http": {
-            "type": ["string"]
+            "type": [
+              "string"
+            ]
           }
         },
         "type": {
@@ -869,7 +954,9 @@
             }
           },
           "http": {
-            "type": ["string"]
+            "type": [
+              "string"
+            ]
           }
         },
         "value": {
@@ -882,7 +969,9 @@
             }
           },
           "http": {
-            "type": ["string"]
+            "type": [
+              "string"
+            ]
           }
         }
       }
@@ -901,12 +990,19 @@
             }
           },
           "http": {
-            "type": ["array"],
+            "type": [
+              "array"
+            ],
             "items": {
-              "type": ["object"]
+              "type": [
+                "object"
+              ]
             }
           }
         }
+      },
+      "xml": {
+        "name": "contactdb_recipient"
       }
     },
     "ContactdbRecipientRecipients": {
@@ -924,7 +1020,9 @@
             }
           },
           "http": {
-            "type": ["array"]
+            "type": [
+              "array"
+            ]
           }
         },
         "first_name": {
@@ -937,9 +1035,14 @@
             }
           },
           "http": {
-            "type": ["string"]
+            "type": [
+              "string"
+            ]
           }
         }
+      },
+      "xml": {
+        "name": "contactdb_recipient"
       }
     },
     "DomainAuthenticationDomainSpf": {
@@ -951,7 +1054,9 @@
             "type": "named"
           },
           "http": {
-            "type": ["boolean"]
+            "type": [
+              "boolean"
+            ]
           }
         },
         "custom_spf": {
@@ -961,7 +1066,9 @@
             "type": "named"
           },
           "http": {
-            "type": ["boolean"]
+            "type": [
+              "boolean"
+            ]
           }
         },
         "default": {
@@ -971,7 +1078,9 @@
             "type": "named"
           },
           "http": {
-            "type": ["boolean"]
+            "type": [
+              "boolean"
+            ]
           }
         },
         "dns": {
@@ -981,7 +1090,9 @@
             "type": "named"
           },
           "http": {
-            "type": ["object"]
+            "type": [
+              "object"
+            ]
           }
         },
         "domain": {
@@ -991,7 +1102,9 @@
             "type": "named"
           },
           "http": {
-            "type": ["string"]
+            "type": [
+              "string"
+            ]
           }
         },
         "id": {
@@ -1001,7 +1114,9 @@
             "type": "named"
           },
           "http": {
-            "type": ["integer"]
+            "type": [
+              "integer"
+            ]
           }
         },
         "ips": {
@@ -1014,7 +1129,9 @@
             "type": "array"
           },
           "http": {
-            "type": ["array"],
+            "type": [
+              "array"
+            ],
             "items": {
               "type": null
             }
@@ -1027,7 +1144,9 @@
             "type": "named"
           },
           "http": {
-            "type": ["boolean"]
+            "type": [
+              "boolean"
+            ]
           }
         },
         "subdomain": {
@@ -1040,7 +1159,9 @@
             }
           },
           "http": {
-            "type": ["string"]
+            "type": [
+              "string"
+            ]
           }
         },
         "user_id": {
@@ -1050,7 +1171,9 @@
             "type": "named"
           },
           "http": {
-            "type": ["integer"]
+            "type": [
+              "integer"
+            ]
           }
         },
         "username": {
@@ -1060,7 +1183,9 @@
             "type": "named"
           },
           "http": {
-            "type": ["string"]
+            "type": [
+              "string"
+            ]
           }
         },
         "valid": {
@@ -1070,9 +1195,14 @@
             "type": "named"
           },
           "http": {
-            "type": ["boolean"]
+            "type": [
+              "boolean"
+            ]
           }
         }
+      },
+      "xml": {
+        "name": "domain_authentication:domain_spf"
       }
     },
     "DomainAuthenticationDomainSpfDns": {
@@ -1085,7 +1215,9 @@
             "type": "named"
           },
           "http": {
-            "type": ["object"]
+            "type": [
+              "object"
+            ]
           }
         },
         "domain_spf": {
@@ -1095,7 +1227,9 @@
             "type": "named"
           },
           "http": {
-            "type": ["object"]
+            "type": [
+              "object"
+            ]
           }
         },
         "mail_server": {
@@ -1105,7 +1239,9 @@
             "type": "named"
           },
           "http": {
-            "type": ["object"]
+            "type": [
+              "object"
+            ]
           }
         },
         "subdomain_spf": {
@@ -1115,9 +1251,14 @@
             "type": "named"
           },
           "http": {
-            "type": ["object"]
+            "type": [
+              "object"
+            ]
           }
         }
+      },
+      "xml": {
+        "name": "domain_authentication:domain_spf"
       }
     },
     "DomainAuthenticationDomainSpfDnsDkim": {
@@ -1130,7 +1271,9 @@
             "type": "named"
           },
           "http": {
-            "type": ["string"]
+            "type": [
+              "string"
+            ]
           }
         },
         "host": {
@@ -1140,7 +1283,9 @@
             "type": "named"
           },
           "http": {
-            "type": ["string"]
+            "type": [
+              "string"
+            ]
           }
         },
         "type": {
@@ -1150,7 +1295,9 @@
             "type": "named"
           },
           "http": {
-            "type": ["string"]
+            "type": [
+              "string"
+            ]
           }
         },
         "valid": {
@@ -1160,9 +1307,14 @@
             "type": "named"
           },
           "http": {
-            "type": ["boolean"]
+            "type": [
+              "boolean"
+            ]
           }
         }
+      },
+      "xml": {
+        "name": "domain_authentication:domain_spf"
       }
     },
     "DomainAuthenticationDomainSpfDnsDomainSpf": {
@@ -1175,7 +1327,9 @@
             "type": "named"
           },
           "http": {
-            "type": ["string"]
+            "type": [
+              "string"
+            ]
           }
         },
         "host": {
@@ -1185,7 +1339,9 @@
             "type": "named"
           },
           "http": {
-            "type": ["string"]
+            "type": [
+              "string"
+            ]
           }
         },
         "type": {
@@ -1195,7 +1351,9 @@
             "type": "named"
           },
           "http": {
-            "type": ["string"]
+            "type": [
+              "string"
+            ]
           }
         },
         "valid": {
@@ -1205,9 +1363,14 @@
             "type": "named"
           },
           "http": {
-            "type": ["boolean"]
+            "type": [
+              "boolean"
+            ]
           }
         }
+      },
+      "xml": {
+        "name": "domain_authentication:domain_spf"
       }
     },
     "DomainAuthenticationDomainSpfDnsMailServer": {
@@ -1220,7 +1383,9 @@
             "type": "named"
           },
           "http": {
-            "type": ["string"]
+            "type": [
+              "string"
+            ]
           }
         },
         "host": {
@@ -1230,7 +1395,9 @@
             "type": "named"
           },
           "http": {
-            "type": ["string"]
+            "type": [
+              "string"
+            ]
           }
         },
         "type": {
@@ -1240,7 +1407,9 @@
             "type": "named"
           },
           "http": {
-            "type": ["string"]
+            "type": [
+              "string"
+            ]
           }
         },
         "valid": {
@@ -1250,9 +1419,14 @@
             "type": "named"
           },
           "http": {
-            "type": ["boolean"]
+            "type": [
+              "boolean"
+            ]
           }
         }
+      },
+      "xml": {
+        "name": "domain_authentication:domain_spf"
       }
     },
     "DomainAuthenticationDomainSpfDnsSubdomainSpf": {
@@ -1265,7 +1439,9 @@
             "type": "named"
           },
           "http": {
-            "type": ["string"]
+            "type": [
+              "string"
+            ]
           }
         },
         "host": {
@@ -1275,7 +1451,9 @@
             "type": "named"
           },
           "http": {
-            "type": ["string"]
+            "type": [
+              "string"
+            ]
           }
         },
         "type": {
@@ -1285,7 +1463,9 @@
             "type": "named"
           },
           "http": {
-            "type": ["string"]
+            "type": [
+              "string"
+            ]
           }
         },
         "valid": {
@@ -1295,9 +1475,14 @@
             "type": "named"
           },
           "http": {
-            "type": ["boolean"]
+            "type": [
+              "boolean"
+            ]
           }
         }
+      },
+      "xml": {
+        "name": "domain_authentication:domain_spf"
       }
     },
     "GETBrowsersStatsResult": {
@@ -1312,7 +1497,9 @@
             }
           },
           "http": {
-            "type": ["string"]
+            "type": [
+              "string"
+            ]
           }
         },
         "stats": {
@@ -1328,12 +1515,19 @@
             }
           },
           "http": {
-            "type": ["array"],
+            "type": [
+              "array"
+            ],
             "items": {
-              "type": ["object"]
+              "type": [
+                "object"
+              ]
             }
           }
         }
+      },
+      "xml": {
+        "name": "GET_browsers_stats"
       }
     },
     "GETBrowsersStatsResultStats": {
@@ -1348,7 +1542,9 @@
             }
           },
           "http": {
-            "type": ["object"]
+            "type": [
+              "object"
+            ]
           }
         },
         "name": {
@@ -1361,7 +1557,9 @@
             }
           },
           "http": {
-            "type": ["string"]
+            "type": [
+              "string"
+            ]
           }
         },
         "type": {
@@ -1374,9 +1572,14 @@
             }
           },
           "http": {
-            "type": ["string"]
+            "type": [
+              "string"
+            ]
           }
         }
+      },
+      "xml": {
+        "name": "GET_browsers_stats"
       }
     },
     "GETContactdbListsListIdRecipientsResult": {
@@ -1393,9 +1596,14 @@
             }
           },
           "http": {
-            "type": ["array"]
+            "type": [
+              "array"
+            ]
           }
         }
+      },
+      "xml": {
+        "name": "GET_contactdb_lists_list_id_recipients"
       }
     },
     "GETGeoStatsResult": {
@@ -1410,7 +1618,9 @@
             }
           },
           "http": {
-            "type": ["string"]
+            "type": [
+              "string"
+            ]
           }
         },
         "stats": {
@@ -1426,12 +1636,19 @@
             }
           },
           "http": {
-            "type": ["array"],
+            "type": [
+              "array"
+            ],
             "items": {
-              "type": ["object"]
+              "type": [
+                "object"
+              ]
             }
           }
         }
+      },
+      "xml": {
+        "name": "GET_geo_stats"
       }
     },
     "GETGeoStatsResultStats": {
@@ -1446,7 +1663,9 @@
             }
           },
           "http": {
-            "type": ["object"]
+            "type": [
+              "object"
+            ]
           }
         },
         "name": {
@@ -1459,7 +1678,9 @@
             }
           },
           "http": {
-            "type": ["string"]
+            "type": [
+              "string"
+            ]
           }
         },
         "type": {
@@ -1472,9 +1693,14 @@
             }
           },
           "http": {
-            "type": ["string"]
+            "type": [
+              "string"
+            ]
           }
         }
+      },
+      "xml": {
+        "name": "GET_geo_stats"
       }
     },
     "OAuth2Client": {
@@ -1489,7 +1715,9 @@
             }
           },
           "http": {
-            "type": ["string"]
+            "type": [
+              "string"
+            ]
           }
         },
         "client_name": {
@@ -1502,7 +1730,9 @@
             }
           },
           "http": {
-            "type": ["string"]
+            "type": [
+              "string"
+            ]
           }
         },
         "client_secret": {
@@ -1515,7 +1745,9 @@
             }
           },
           "http": {
-            "type": ["string"]
+            "type": [
+              "string"
+            ]
           }
         },
         "client_secret_expires_at": {
@@ -1528,7 +1760,9 @@
             }
           },
           "http": {
-            "type": ["integer"],
+            "type": [
+              "integer"
+            ],
             "format": "int64"
           }
         },
@@ -1542,9 +1776,14 @@
             }
           },
           "http": {
-            "type": ["string"]
+            "type": [
+              "string"
+            ]
           }
         }
+      },
+      "xml": {
+        "name": "oAuth2Client"
       }
     },
     "Order": {
@@ -1558,7 +1797,9 @@
             }
           },
           "http": {
-            "type": ["boolean"]
+            "type": [
+              "boolean"
+            ]
           }
         },
         "id": {
@@ -1570,7 +1811,9 @@
             }
           },
           "http": {
-            "type": ["integer"],
+            "type": [
+              "integer"
+            ],
             "format": "int64"
           }
         },
@@ -1583,7 +1826,9 @@
             }
           },
           "http": {
-            "type": ["integer"],
+            "type": [
+              "integer"
+            ],
             "format": "int64"
           }
         },
@@ -1596,7 +1841,9 @@
             }
           },
           "http": {
-            "type": ["integer"],
+            "type": [
+              "integer"
+            ],
             "format": "int32"
           }
         },
@@ -1609,7 +1856,9 @@
             }
           },
           "http": {
-            "type": ["string"],
+            "type": [
+              "string"
+            ],
             "format": "date-time"
           }
         },
@@ -1623,9 +1872,14 @@
             }
           },
           "http": {
-            "type": ["string"]
+            "type": [
+              "string"
+            ]
           }
         }
+      },
+      "xml": {
+        "name": "Order"
       }
     },
     "Pet": {
@@ -1639,7 +1893,12 @@
             }
           },
           "http": {
-            "type": ["object"]
+            "type": [
+              "object"
+            ],
+            "xml": {
+              "name": "Category"
+            }
           }
         },
         "field": {
@@ -1664,7 +1923,9 @@
             }
           },
           "http": {
-            "type": ["integer"],
+            "type": [
+              "integer"
+            ],
             "format": "int64"
           }
         },
@@ -1674,7 +1935,9 @@
             "type": "named"
           },
           "http": {
-            "type": ["string"]
+            "type": [
+              "string"
+            ]
           }
         },
         "photoUrls": {
@@ -1686,9 +1949,20 @@
             "type": "array"
           },
           "http": {
-            "type": ["array"],
+            "type": [
+              "array"
+            ],
             "items": {
-              "type": ["string"]
+              "type": [
+                "string"
+              ],
+              "xml": {
+                "name": "photoUrl"
+              }
+            },
+            "xml": {
+              "name": "",
+              "wrapped": true
             }
           }
         },
@@ -1702,7 +1976,9 @@
             }
           },
           "http": {
-            "type": ["string"]
+            "type": [
+              "string"
+            ]
           }
         },
         "tags": {
@@ -1717,9 +1993,18 @@
             }
           },
           "http": {
-            "type": ["array"]
+            "type": [
+              "array"
+            ],
+            "xml": {
+              "name": "",
+              "wrapped": true
+            }
           }
         }
+      },
+      "xml": {
+        "name": "Pet"
       }
     },
     "SnakeObject": {
@@ -1745,7 +2030,9 @@
             }
           },
           "http": {
-            "type": ["integer"],
+            "type": [
+              "integer"
+            ],
             "format": "int64"
           }
         },
@@ -1758,9 +2045,14 @@
             }
           },
           "http": {
-            "type": ["string"]
+            "type": [
+              "string"
+            ]
           }
         }
+      },
+      "xml": {
+        "name": "User"
       }
     },
     "Tag": {
@@ -1774,7 +2066,9 @@
             }
           },
           "http": {
-            "type": ["integer"],
+            "type": [
+              "integer"
+            ],
             "format": "int64"
           }
         },
@@ -1787,9 +2081,14 @@
             }
           },
           "http": {
-            "type": ["string"]
+            "type": [
+              "string"
+            ]
           }
         }
+      },
+      "xml": {
+        "name": "Tag"
       }
     },
     "UpdatePetWithFormBody": {
@@ -1804,7 +2103,9 @@
             }
           },
           "http": {
-            "type": ["string"]
+            "type": [
+              "string"
+            ]
           }
         },
         "status": {
@@ -1817,7 +2118,9 @@
             }
           },
           "http": {
-            "type": ["string"]
+            "type": [
+              "string"
+            ]
           }
         }
       }
@@ -1834,7 +2137,9 @@
             }
           },
           "http": {
-            "type": ["string"]
+            "type": [
+              "string"
+            ]
           }
         },
         "file": {
@@ -1847,7 +2152,9 @@
             }
           },
           "http": {
-            "type": ["file"]
+            "type": [
+              "file"
+            ]
           }
         }
       }
@@ -1863,7 +2170,9 @@
             }
           },
           "http": {
-            "type": ["string"]
+            "type": [
+              "string"
+            ]
           }
         },
         "firstName": {
@@ -1875,7 +2184,9 @@
             }
           },
           "http": {
-            "type": ["string"]
+            "type": [
+              "string"
+            ]
           }
         },
         "id": {
@@ -1887,7 +2198,9 @@
             }
           },
           "http": {
-            "type": ["integer"],
+            "type": [
+              "integer"
+            ],
             "format": "int64"
           }
         },
@@ -1900,7 +2213,9 @@
             }
           },
           "http": {
-            "type": ["string"]
+            "type": [
+              "string"
+            ]
           }
         },
         "password": {
@@ -1912,7 +2227,9 @@
             }
           },
           "http": {
-            "type": ["string"]
+            "type": [
+              "string"
+            ]
           }
         },
         "phone": {
@@ -1924,7 +2241,9 @@
             }
           },
           "http": {
-            "type": ["string"]
+            "type": [
+              "string"
+            ]
           }
         },
         "userStatus": {
@@ -1937,7 +2256,9 @@
             }
           },
           "http": {
-            "type": ["integer"],
+            "type": [
+              "integer"
+            ],
             "format": "int32"
           }
         },
@@ -1950,9 +2271,14 @@
             }
           },
           "http": {
-            "type": ["string"]
+            "type": [
+              "string"
+            ]
           }
         }
+      },
+      "xml": {
+        "name": "User"
       }
     }
   },
@@ -1963,7 +2289,10 @@
         "method": "post",
         "security": [
           {
-            "petstore_auth": ["write:pets", "read:pets"]
+            "petstore_auth": [
+              "write:pets",
+              "read:pets"
+            ]
           }
         ],
         "requestBody": {
@@ -1983,7 +2312,12 @@
           "http": {
             "in": "body",
             "schema": {
-              "type": ["object"]
+              "type": [
+                "object"
+              ],
+              "xml": {
+                "name": "Pet"
+              }
             }
           }
         }
@@ -2031,7 +2365,9 @@
             "name": "orderId",
             "in": "path",
             "schema": {
-              "type": ["integer"],
+              "type": [
+                "integer"
+              ],
               "minimum": 1
             }
           }
@@ -2052,7 +2388,10 @@
         "method": "delete",
         "security": [
           {
-            "petstore_auth": ["write:pets", "read:pets"]
+            "petstore_auth": [
+              "write:pets",
+              "read:pets"
+            ]
           }
         ],
         "response": {
@@ -2072,7 +2411,9 @@
             "name": "api_key",
             "in": "header",
             "schema": {
-              "type": ["string"]
+              "type": [
+                "string"
+              ]
             }
           }
         },
@@ -2086,7 +2427,9 @@
             "name": "petId",
             "in": "path",
             "schema": {
-              "type": ["integer"]
+              "type": [
+                "integer"
+              ]
             }
           }
         }
@@ -2119,7 +2462,9 @@
             "name": "username",
             "in": "path",
             "schema": {
-              "type": ["string"]
+              "type": [
+                "string"
+              ]
             }
           }
         }
@@ -2153,7 +2498,9 @@
           "http": {
             "in": "body",
             "schema": {
-              "type": ["object"]
+              "type": [
+                "object"
+              ]
             }
           }
         }
@@ -2185,7 +2532,12 @@
           "http": {
             "in": "body",
             "schema": {
-              "type": ["object"]
+              "type": [
+                "object"
+              ],
+              "xml": {
+                "name": "Order"
+              }
             }
           }
         }
@@ -2196,13 +2548,64 @@
         "type": "named"
       }
     },
+    "putPetXml": {
+      "request": {
+        "url": "/pet/xml",
+        "method": "put",
+        "security": [
+          {
+            "petstore_auth": [
+              "write:pets",
+              "read:pets"
+            ]
+          }
+        ],
+        "requestBody": {
+          "contentType": "application/xml"
+        },
+        "response": {
+          "contentType": "application/xml"
+        }
+      },
+      "arguments": {
+        "body": {
+          "description": "Pet object that needs to be added to the store",
+          "type": {
+            "name": "Pet",
+            "type": "named"
+          },
+          "http": {
+            "in": "body",
+            "schema": {
+              "type": [
+                "object"
+              ],
+              "xml": {
+                "name": "Pet"
+              }
+            }
+          }
+        }
+      },
+      "description": "PUT /pet/xml",
+      "result_type": {
+        "type": "nullable",
+        "underlying_type": {
+          "name": "Boolean",
+          "type": "named"
+        }
+      }
+    },
     "updatePet": {
       "request": {
         "url": "/pet",
         "method": "put",
         "security": [
           {
-            "petstore_auth": ["write:pets", "read:pets"]
+            "petstore_auth": [
+              "write:pets",
+              "read:pets"
+            ]
           }
         ],
         "requestBody": {
@@ -2222,7 +2625,12 @@
           "http": {
             "in": "body",
             "schema": {
-              "type": ["object"]
+              "type": [
+                "object"
+              ],
+              "xml": {
+                "name": "Pet"
+              }
             }
           }
         }
@@ -2242,7 +2650,10 @@
         "method": "post",
         "security": [
           {
-            "petstore_auth": ["write:pets", "read:pets"]
+            "petstore_auth": [
+              "write:pets",
+              "read:pets"
+            ]
           }
         ],
         "requestBody": {
@@ -2262,7 +2673,9 @@
           "http": {
             "in": "formData",
             "schema": {
-              "type": ["object"]
+              "type": [
+                "object"
+              ]
             }
           }
         },
@@ -2276,7 +2689,9 @@
             "name": "petId",
             "in": "path",
             "schema": {
-              "type": ["integer"]
+              "type": [
+                "integer"
+              ]
             }
           }
         }
@@ -2311,7 +2726,12 @@
           "http": {
             "in": "body",
             "schema": {
-              "type": ["object"]
+              "type": [
+                "object"
+              ],
+              "xml": {
+                "name": "User"
+              }
             }
           }
         },
@@ -2325,7 +2745,9 @@
             "name": "username",
             "in": "path",
             "schema": {
-              "type": ["string"]
+              "type": [
+                "string"
+              ]
             }
           }
         }
@@ -2345,7 +2767,10 @@
         "method": "post",
         "security": [
           {
-            "petstore_auth": ["write:pets", "read:pets"]
+            "petstore_auth": [
+              "write:pets",
+              "read:pets"
+            ]
           }
         ],
         "requestBody": {
@@ -2365,7 +2790,9 @@
           "http": {
             "in": "formData",
             "schema": {
-              "type": ["object"]
+              "type": [
+                "object"
+              ]
             }
           }
         },
@@ -2379,7 +2806,9 @@
             "name": "petId",
             "in": "path",
             "schema": {
-              "type": ["integer"]
+              "type": [
+                "integer"
+              ]
             }
           }
         }
@@ -2410,7 +2839,11 @@
       "aggregate_functions": {},
       "comparison_operators": {},
       "representation": {
-        "one_of": ["day", "week", "month"],
+        "one_of": [
+          "day",
+          "week",
+          "month"
+        ],
         "type": "enum"
       }
     },
@@ -2418,7 +2851,11 @@
       "aggregate_functions": {},
       "comparison_operators": {},
       "representation": {
-        "one_of": ["date", "text", "number"],
+        "one_of": [
+          "date",
+          "text",
+          "number"
+        ],
         "type": "enum"
       }
     },
@@ -2461,7 +2898,11 @@
       "aggregate_functions": {},
       "comparison_operators": {},
       "representation": {
-        "one_of": ["placed", "approved", "delivered"],
+        "one_of": [
+          "placed",
+          "approved",
+          "delivered"
+        ],
         "type": "enum"
       }
     },
@@ -2469,7 +2910,11 @@
       "aggregate_functions": {},
       "comparison_operators": {},
       "representation": {
-        "one_of": ["available", "pending", "sold"],
+        "one_of": [
+          "available",
+          "pending",
+          "sold"
+        ],
         "type": "enum"
       }
     },

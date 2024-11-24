@@ -11,19 +11,29 @@
           "securitySchemes": {
             "api_key": {
               "type": "apiKey",
+              "in": "header",
+              "name": "api_key",
               "value": {
                 "value": "dog-secret"
+              }
+            },
+            "basic": {
+              "type": "basic",
+              "header": "Authorization",
+              "username": {
+                "value": "user"
               },
-              "in": "header",
-              "name": "api_key"
+              "password": {
+                "value": "password"
+              }
             },
             "bearer": {
               "type": "http",
+              "header": "",
+              "scheme": "bearer",
               "value": {
                 "env": "PET_STORE_BEARER_TOKEN"
-              },
-              "header": "",
-              "scheme": "bearer"
+              }
             }
           },
           "security": [
@@ -40,19 +50,29 @@
           "securitySchemes": {
             "api_key": {
               "type": "apiKey",
+              "in": "header",
+              "name": "api_key",
               "value": {
                 "value": "cat-secret"
+              }
+            },
+            "basic": {
+              "type": "basic",
+              "header": "Authorization",
+              "username": {
+                "value": "user"
               },
-              "in": "header",
-              "name": "api_key"
+              "password": {
+                "value": "password"
+              }
             },
             "bearer": {
               "type": "http",
+              "header": "",
+              "scheme": "bearer",
               "value": {
                 "env": "PET_STORE_BEARER_TOKEN"
-              },
-              "header": "",
-              "scheme": "bearer"
+              }
             }
           },
           "security": [
@@ -65,19 +85,29 @@
       "securitySchemes": {
         "api_key": {
           "type": "apiKey",
+          "in": "header",
+          "name": "api_key",
           "value": {
             "env": "PET_STORE_API_KEY"
+          }
+        },
+        "basic": {
+          "type": "basic",
+          "header": "Authorization",
+          "username": {
+            "value": "user"
           },
-          "in": "header",
-          "name": "api_key"
+          "password": {
+            "value": "password"
+          }
         },
         "bearer": {
           "type": "http",
+          "header": "",
+          "scheme": "bearer",
           "value": {
             "env": "PET_STORE_BEARER_TOKEN"
-          },
-          "header": "",
-          "scheme": "bearer"
+          }
         }
       },
       "security": [
@@ -92,7 +122,6 @@
         "request": {
           "url": "/pet",
           "method": "get",
-          "type": "http",
           "response": {
             "contentType": ""
           }
@@ -129,7 +158,6 @@
         "request": {
           "url": "/pet/findByStatus",
           "method": "get",
-          "type": "http",
           "security": [
             {
               "bearer": []
@@ -187,7 +215,6 @@
         "request": {
           "url": "/pet/findByStatus",
           "method": "get",
-          "type": "http",
           "security": [
             {
               "bearer": []
@@ -245,7 +272,6 @@
         "request": {
           "url": "/pet",
           "method": "get",
-          "type": "http",
           "response": {
             "contentType": ""
           }
@@ -282,7 +308,6 @@
         "request": {
           "url": "/pet/retry",
           "method": "get",
-          "type": "http",
           "response": {
             "contentType": ""
           }
@@ -318,7 +343,6 @@
         "request": {
           "url": "/pet/retry",
           "method": "get",
-          "type": "http",
           "response": {
             "contentType": ""
           }
@@ -432,6 +456,38 @@
               "type": "named"
             }
           }
+        }
+      },
+      "Category": {
+        "fields": {
+          "id": {
+            "type": {
+              "type": "nullable",
+              "underlying_type": {
+                "name": "Int64",
+                "type": "named"
+              }
+            },
+            "http": {
+              "type": ["integer"],
+              "format": "int64"
+            }
+          },
+          "name": {
+            "type": {
+              "type": "nullable",
+              "underlying_type": {
+                "name": "String",
+                "type": "named"
+              }
+            },
+            "http": {
+              "type": ["string"]
+            }
+          }
+        },
+        "xml": {
+          "name": "category"
         }
       },
       "CreateModelDistributedHeadersResponse": {
@@ -744,6 +800,52 @@
           }
         }
       },
+      "HttpDistributedOptions": {
+        "description": "Distributed execution options for HTTP requests to multiple servers",
+        "fields": {
+          "parallel": {
+            "description": "Execute requests to remote servers in parallel",
+            "type": {
+              "type": "nullable",
+              "underlying_type": {
+                "name": "Boolean",
+                "type": "named"
+              }
+            }
+          },
+          "servers": {
+            "description": "Specify remote servers to receive the request",
+            "type": {
+              "type": "nullable",
+              "underlying_type": {
+                "element_type": {
+                  "name": "HttpServerId",
+                  "type": "named"
+                },
+                "type": "array"
+              }
+            }
+          }
+        }
+      },
+      "HttpSingleOptions": {
+        "description": "Execution options for HTTP requests to a single server",
+        "fields": {
+          "servers": {
+            "description": "Specify remote servers to receive the request. If there are many server IDs the server is selected randomly",
+            "type": {
+              "type": "nullable",
+              "underlying_type": {
+                "element_type": {
+                  "name": "HttpServerId",
+                  "type": "named"
+                },
+                "type": "array"
+              }
+            }
+          }
+        }
+      },
       "Pet": {
         "fields": {
           "id": {
@@ -851,6 +953,115 @@
           }
         }
       },
+      "PetXml": {
+        "fields": {
+          "category": {
+            "type": {
+              "type": "nullable",
+              "underlying_type": {
+                "name": "Category",
+                "type": "named"
+              }
+            },
+            "http": {
+              "type": ["object"],
+              "xml": {
+                "name": "category"
+              }
+            }
+          },
+          "field": {
+            "description": "This empty field is returned instead of the list of scopes if the user making the call doesn't have the authorization required.",
+            "type": {
+              "type": "nullable",
+              "underlying_type": {
+                "name": "JSON",
+                "type": "named"
+              }
+            },
+            "http": {
+              "type": null
+            }
+          },
+          "id": {
+            "type": {
+              "type": "nullable",
+              "underlying_type": {
+                "name": "Int64",
+                "type": "named"
+              }
+            },
+            "http": {
+              "type": ["integer"],
+              "format": "int64"
+            }
+          },
+          "name": {
+            "type": {
+              "name": "String",
+              "type": "named"
+            },
+            "http": {
+              "type": ["string"]
+            }
+          },
+          "photoUrls": {
+            "type": {
+              "element_type": {
+                "name": "String",
+                "type": "named"
+              },
+              "type": "array"
+            },
+            "http": {
+              "type": ["array"],
+              "items": {
+                "type": ["string"],
+                "xml": {
+                  "name": "photoUrl"
+                }
+              },
+              "xml": {
+                "wrapped": true
+              }
+            }
+          },
+          "status": {
+            "description": "pet status in the store",
+            "type": {
+              "type": "nullable",
+              "underlying_type": {
+                "name": "String",
+                "type": "named"
+              }
+            },
+            "http": {
+              "type": ["string"]
+            }
+          },
+          "tags": {
+            "type": {
+              "type": "nullable",
+              "underlying_type": {
+                "element_type": {
+                  "name": "Tag",
+                  "type": "named"
+                },
+                "type": "array"
+              }
+            },
+            "http": {
+              "type": ["array"],
+              "xml": {
+                "wrapped": true
+              }
+            }
+          }
+        },
+        "xml": {
+          "name": "pet"
+        }
+      },
       "ProgressResponse": {
         "fields": {
           "completed": {
@@ -875,50 +1086,118 @@
           }
         }
       },
-      "HttpDistributedOptions": {
-        "description": "Distributed execution options for HTTP requests to multiple servers",
+      "PutPetXmlDistributedHeadersResponse": {
         "fields": {
-          "parallel": {
-            "description": "Execute requests to remote servers in parallel",
+          "headers": {
             "type": {
               "type": "nullable",
               "underlying_type": {
-                "name": "Boolean",
+                "name": "JSON",
                 "type": "named"
               }
             }
           },
-          "servers": {
-            "description": "Specify remote servers to receive the request",
+          "response": {
             "type": {
-              "type": "nullable",
-              "underlying_type": {
-                "element_type": {
-                  "name": "HttpServerId",
-                  "type": "named"
-                },
-                "type": "array"
-              }
+              "name": "PutPetXmlDistributedResult",
+              "type": "named"
             }
           }
         }
       },
-      "HttpSingleOptions": {
-        "description": "Execution options for HTTP requests to a single server",
+      "PutPetXmlDistributedResult": {
+        "description": "Distributed responses of putPetXmlDistributed",
         "fields": {
-          "servers": {
-            "description": "Specify remote servers to receive the request. If there are many server IDs the server is selected randomly",
+          "errors": {
+            "description": "Error responses of putPetXmlDistributed",
+            "type": {
+              "element_type": {
+                "name": "DistributedError",
+                "type": "named"
+              },
+              "type": "array"
+            }
+          },
+          "results": {
+            "description": "Results of putPetXmlDistributed",
+            "type": {
+              "element_type": {
+                "name": "PutPetXmlDistributedResultData",
+                "type": "named"
+              },
+              "type": "array"
+            }
+          }
+        }
+      },
+      "PutPetXmlDistributedResultData": {
+        "description": "Distributed response data of putPetXmlDistributed",
+        "fields": {
+          "data": {
+            "description": "A result of putPetXmlDistributed",
+            "type": {
+              "name": "PetXml",
+              "type": "named"
+            }
+          },
+          "server": {
+            "description": "Identity of the remote server",
+            "type": {
+              "name": "HttpServerId",
+              "type": "named"
+            }
+          }
+        }
+      },
+      "PutPetXmlHeadersResponse": {
+        "fields": {
+          "headers": {
             "type": {
               "type": "nullable",
               "underlying_type": {
-                "element_type": {
-                  "name": "HttpServerId",
-                  "type": "named"
-                },
-                "type": "array"
+                "name": "JSON",
+                "type": "named"
               }
             }
+          },
+          "response": {
+            "type": {
+              "name": "PetXml",
+              "type": "named"
+            }
           }
+        }
+      },
+      "Tag": {
+        "fields": {
+          "id": {
+            "type": {
+              "type": "nullable",
+              "underlying_type": {
+                "name": "Int64",
+                "type": "named"
+              }
+            },
+            "http": {
+              "type": ["integer"],
+              "format": "int64"
+            }
+          },
+          "name": {
+            "type": {
+              "type": "nullable",
+              "underlying_type": {
+                "name": "String",
+                "type": "named"
+              }
+            },
+            "http": {
+              "type": ["string"]
+            }
+          }
+        },
+        "xml": {
+          "name": "tag"
         }
       }
     },
@@ -927,7 +1206,6 @@
         "request": {
           "url": "/pet",
           "method": "post",
-          "type": "http",
           "headers": {
             "Content-Type": {
               "value": "application/json"
@@ -987,7 +1265,6 @@
         "request": {
           "url": "/pet",
           "method": "post",
-          "type": "http",
           "headers": {
             "Content-Type": {
               "value": "application/json"
@@ -1047,7 +1324,11 @@
         "request": {
           "url": "/model",
           "method": "post",
-          "type": "http",
+          "security": [
+            {
+              "basic": []
+            }
+          ],
           "requestBody": {
             "contentType": "application/json"
           },
@@ -1093,7 +1374,11 @@
         "request": {
           "url": "/model",
           "method": "post",
-          "type": "http",
+          "security": [
+            {
+              "basic": []
+            }
+          ],
           "requestBody": {
             "contentType": "application/json"
           },
@@ -1134,6 +1419,104 @@
           "name": "CreateModelDistributedHeadersResponse",
           "type": "named"
         }
+      },
+      "putPetXml": {
+        "request": {
+          "url": "/pet/xml",
+          "method": "put",
+          "requestBody": {
+            "contentType": "application/xml"
+          },
+          "response": {
+            "contentType": "application/xml"
+          }
+        },
+        "arguments": {
+          "body": {
+            "description": "Request body of PUT /pet/xml",
+            "type": {
+              "name": "PetXml",
+              "type": "named"
+            },
+            "http": {
+              "in": "body"
+            }
+          },
+          "headers": {
+            "description": "Headers forwarded from the Hasura engine",
+            "type": {
+              "type": "nullable",
+              "underlying_type": {
+                "name": "JSON",
+                "type": "named"
+              }
+            }
+          },
+          "httpOptions": {
+            "description": "Execution options for HTTP requests to a single server",
+            "type": {
+              "type": "nullable",
+              "underlying_type": {
+                "name": "HttpSingleOptions",
+                "type": "named"
+              }
+            }
+          }
+        },
+        "description": "Update an existing pet",
+        "result_type": {
+          "name": "PutPetXmlHeadersResponse",
+          "type": "named"
+        }
+      },
+      "putPetXmlDistributed": {
+        "request": {
+          "url": "/pet/xml",
+          "method": "put",
+          "requestBody": {
+            "contentType": "application/xml"
+          },
+          "response": {
+            "contentType": "application/xml"
+          }
+        },
+        "arguments": {
+          "body": {
+            "description": "Request body of PUT /pet/xml",
+            "type": {
+              "name": "PetXml",
+              "type": "named"
+            },
+            "http": {
+              "in": "body"
+            }
+          },
+          "headers": {
+            "description": "Headers forwarded from the Hasura engine",
+            "type": {
+              "type": "nullable",
+              "underlying_type": {
+                "name": "JSON",
+                "type": "named"
+              }
+            }
+          },
+          "httpOptions": {
+            "description": "Distributed execution options for HTTP requests to multiple servers",
+            "type": {
+              "type": "nullable",
+              "underlying_type": {
+                "name": "HttpDistributedOptions",
+                "type": "named"
+              }
+            }
+          }
+        },
+        "description": "Update an existing pet",
+        "result_type": {
+          "name": "PutPetXmlDistributedHeadersResponse",
+          "type": "named"
+        }
       }
     },
     "scalar_types": {
@@ -1144,6 +1527,14 @@
           "type": "boolean"
         }
       },
+      "HttpServerId": {
+        "aggregate_functions": {},
+        "comparison_operators": {},
+        "representation": {
+          "one_of": ["dog", "cat"],
+          "type": "enum"
+        }
+      },
       "Int": {
         "aggregate_functions": {},
         "comparison_operators": {},
@@ -1151,19 +1542,25 @@
           "type": "int32"
         }
       },
+      "Int32": {
+        "aggregate_functions": {},
+        "comparison_operators": {},
+        "representation": {
+          "type": "int32"
+        }
+      },
+      "Int64": {
+        "aggregate_functions": {},
+        "comparison_operators": {},
+        "representation": {
+          "type": "int64"
+        }
+      },
       "JSON": {
         "aggregate_functions": {},
         "comparison_operators": {},
         "representation": {
           "type": "json"
-        }
-      },
-      "HttpServerId": {
-        "aggregate_functions": {},
-        "comparison_operators": {},
-        "representation": {
-          "one_of": ["dog", "cat"],
-          "type": "enum"
         }
       },
       "String": {

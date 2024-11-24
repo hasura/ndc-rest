@@ -798,28 +798,6 @@
             ]
           }
         },
-        "include_player_ids": {
-          "type": {
-            "type": "nullable",
-            "underlying_type": {
-              "element_type": {
-                "name": "String",
-                "type": "named"
-              },
-              "type": "array"
-            }
-          },
-          "http": {
-            "type": [
-              "array"
-            ],
-            "items": {
-              "type": [
-                "string"
-              ]
-            }
-          }
-        },
         "included_segments": {
           "type": {
             "type": "nullable",

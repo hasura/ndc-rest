@@ -40,7 +40,7 @@ func (c *HTTPConnector) QueryExplain(ctx context.Context, configuration *configu
 		requestVars = []schema.QueryRequestVariablesElem{make(schema.QueryRequestVariablesElem)}
 	}
 
-	httpRequest, _, httpOptions, err := c.explainQuery(request, requestVars[0])
+	httpRequest, _, _, httpOptions, err := c.explainQuery(request, requestVars[0])
 	if err != nil {
 		return nil, err
 	}
@@ -48,16 +48,16 @@ func (c *HTTPConnector) QueryExplain(ctx context.Context, configuration *configu
 	return serializeExplainResponse(httpRequest, httpOptions)
 }
 
-func (c *HTTPConnector) explainQuery(request *schema.QueryRequest, variables map[string]any) (*internal.RetryableRequest, *rest.OperationInfo, *internal.HTTPOptions, error) {
+func (c *HTTPConnector) explainQuery(request *schema.QueryRequest, variables map[string]any) (*internal.RetryableRequest, *rest.OperationInfo, *configuration.NDCHttpRuntimeSchema, *internal.HTTPOptions, error) {
 	function, metadata, err := c.metadata.GetFunction(request.Collection)
 	if err != nil {
-		return nil, nil, nil, err
+		return nil, nil, nil, nil, err
 	}
 
 	// 1. resolve arguments, evaluate URL and query parameters
 	rawArgs, err := utils.ResolveArgumentVariables(request.Arguments, variables)
 	if err != nil {
-		return nil, nil, nil, schema.UnprocessableContentError("failed to resolve argument variables", map[string]any{
+		return nil, nil, nil, nil, schema.UnprocessableContentError("failed to resolve argument variables", map[string]any{
 			"cause": err.Error(),
 		})
 	}
@@ -65,25 +65,25 @@ func (c *HTTPConnector) explainQuery(request *schema.QueryRequest, variables map
 	// 2. build the request
 	req, err := internal.NewRequestBuilder(c.schema, function, rawArgs, metadata.Runtime).Build()
 	if err != nil {
-		return nil, nil, nil, err
+		return nil, nil, nil, nil, err
 	}
 
 	if err := c.evalForwardedHeaders(req, rawArgs); err != nil {
-		return nil, nil, nil, schema.UnprocessableContentError("invalid forwarded headers", map[string]any{
+		return nil, nil, nil, nil, schema.UnprocessableContentError("invalid forwarded headers", map[string]any{
 			"cause": err.Error(),
 		})
 	}
 
 	httpOptions, err := c.parseHTTPOptionsFromArguments(function.Arguments, rawArgs)
 	if err != nil {
-		return nil, nil, nil, schema.UnprocessableContentError("invalid http options", map[string]any{
+		return nil, nil, nil, nil, schema.UnprocessableContentError("invalid http options", map[string]any{
 			"cause": err.Error(),
 		})
 	}
 
 	httpOptions.Settings = metadata.Settings
 
-	return req, function, httpOptions, err
+	return req, function, &metadata, httpOptions, err
 }
 
 func (c *HTTPConnector) execQuerySync(ctx context.Context, state *State, request *schema.QueryRequest, valueField schema.NestedField, requestVars []schema.QueryRequestVariablesElem) ([]schema.RowSet, error) {
@@ -145,7 +145,7 @@ func (c *HTTPConnector) execQuery(ctx context.Context, state *State, request *sc
 	ctx, span := state.Tracer.Start(ctx, fmt.Sprintf("Execute Query %d", index))
 	defer span.End()
 
-	httpRequest, function, httpOptions, err := c.explainQuery(request, variables)
+	httpRequest, function, metadata, httpOptions, err := c.explainQuery(request, variables)
 	if err != nil {
 		span.SetStatus(codes.Error, "failed to explain query")
 		span.RecordError(err)
@@ -154,7 +154,8 @@ func (c *HTTPConnector) execQuery(ctx context.Context, state *State, request *sc
 	}
 
 	httpOptions.Concurrency = c.config.Concurrency.HTTP
-	result, headers, err := c.client.Send(ctx, httpRequest, queryFields, function.ResultType, httpOptions)
+	client := internal.NewHTTPClient(c.client, metadata.NDCHttpSchema, c.config.ForwardHeaders, state.Tracer)
+	result, _, err := client.Send(ctx, httpRequest, queryFields, function.ResultType, httpOptions)
 	if err != nil {
 		span.SetStatus(codes.Error, "failed to execute the http request")
 		span.RecordError(err)
@@ -162,7 +163,7 @@ func (c *HTTPConnector) execQuery(ctx context.Context, state *State, request *sc
 		return nil, err
 	}
 
-	return c.createHeaderForwardingResponse(result, headers), nil
+	return result, nil
 }
 
 func serializeExplainResponse(httpRequest *internal.RetryableRequest, httpOptions *internal.HTTPOptions) (*schema.ExplainResponse, error) {

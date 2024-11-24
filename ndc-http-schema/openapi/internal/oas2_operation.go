@@ -15,65 +15,52 @@ import (
 
 type oas2OperationBuilder struct {
 	builder   *OAS2Builder
+	pathKey   string
+	method    string
 	Arguments map[string]rest.ArgumentInfo
 }
 
-func newOAS2OperationBuilder(builder *OAS2Builder) *oas2OperationBuilder {
+func newOAS2OperationBuilder(builder *OAS2Builder, pathKey string, method string) *oas2OperationBuilder {
 	return &oas2OperationBuilder{
 		builder:   builder,
+		pathKey:   pathKey,
+		method:    method,
 		Arguments: make(map[string]rest.ArgumentInfo),
 	}
 }
 
 // BuildFunction build a HTTP NDC function information from OpenAPI v2 operation
-func (oc *oas2OperationBuilder) BuildFunction(pathKey string, operation *v2.Operation, commonParams []*v2.Parameter) (*rest.OperationInfo, string, error) {
+func (oc *oas2OperationBuilder) BuildFunction(operation *v2.Operation, commonParams []*v2.Parameter) (*rest.OperationInfo, string, error) {
 	if operation == nil {
 		return nil, "", nil
 	}
-	funcName := formatOperationName(operation.OperationId)
-	if funcName == "" {
-		funcName = buildPathMethodName(pathKey, "get", oc.builder.ConvertOptions)
-	}
+
+	funcName := buildUniqueOperationName(oc.builder.schema, operation.OperationId, oc.pathKey, oc.method, oc.builder.ConvertOptions)
 	oc.builder.Logger.Info("function",
 		slog.String("name", funcName),
-		slog.String("path", pathKey),
+		slog.String("path", oc.pathKey),
 	)
 
-	responseContentType := oc.getResponseContentTypeV2(operation.Produces)
-	if responseContentType == "" {
-		oc.builder.Logger.Info("supported response content type",
-			slog.String("name", funcName),
-			slog.String("path", pathKey),
-			slog.String("method", "get"),
-			slog.Any("produces", operation.Produces),
-			slog.Any("consumes", operation.Consumes),
-		)
-
-		return nil, "", nil
-	}
-
-	resultType, err := oc.convertResponse(operation.Responses, pathKey, []string{funcName, "Result"})
+	resultType, response, err := oc.convertResponse(operation, []string{funcName, "Result"})
 	if err != nil {
-		return nil, "", fmt.Errorf("%s: %w", pathKey, err)
+		return nil, "", fmt.Errorf("%s: %w", oc.pathKey, err)
 	}
 	if resultType == nil {
 		return nil, "", nil
 	}
-	reqBody, err := oc.convertParameters(operation, pathKey, commonParams, []string{funcName})
+	reqBody, err := oc.convertParameters(operation, commonParams, []string{funcName})
 	if err != nil {
 		return nil, "", fmt.Errorf("%s: %w", funcName, err)
 	}
 
-	description := oc.getOperationDescription(pathKey, "get", operation)
+	description := oc.getOperationDescription(operation)
 	function := rest.OperationInfo{
 		Request: &rest.Request{
-			URL:         pathKey,
+			URL:         oc.pathKey,
 			Method:      "get",
 			RequestBody: reqBody,
-			Response: rest.Response{
-				ContentType: responseContentType,
-			},
-			Security: convertSecurities(operation.Security),
+			Response:    *response,
+			Security:    convertSecurities(operation.Security),
 		},
 		Description: &description,
 		Arguments:   oc.Arguments,
@@ -84,59 +71,41 @@ func (oc *oas2OperationBuilder) BuildFunction(pathKey string, operation *v2.Oper
 }
 
 // BuildProcedure build a HTTP NDC function information from OpenAPI v2 operation
-func (oc *oas2OperationBuilder) BuildProcedure(pathKey string, method string, operation *v2.Operation, commonParams []*v2.Parameter) (*rest.OperationInfo, string, error) {
+func (oc *oas2OperationBuilder) BuildProcedure(operation *v2.Operation, commonParams []*v2.Parameter) (*rest.OperationInfo, string, error) {
 	if operation == nil {
 		return nil, "", nil
 	}
 
-	procName := formatOperationName(operation.OperationId)
-	if procName == "" {
-		procName = buildPathMethodName(pathKey, method, oc.builder.ConvertOptions)
-	}
+	procName := buildUniqueOperationName(oc.builder.schema, operation.OperationId, oc.pathKey, oc.method, oc.builder.ConvertOptions)
 
 	oc.builder.Logger.Info("procedure",
 		slog.String("name", procName),
-		slog.String("path", pathKey),
-		slog.String("method", method),
+		slog.String("path", oc.pathKey),
+		slog.String("method", oc.method),
 	)
 
-	responseContentType := oc.getResponseContentTypeV2(operation.Produces)
-	if responseContentType == "" {
-		oc.builder.Logger.Info("supported response content type",
-			slog.String("name", procName),
-			slog.String("path", pathKey),
-			slog.String("method", method),
-			slog.Any("produces", operation.Produces),
-			slog.Any("consumes", operation.Consumes),
-		)
-
-		return nil, "", nil
-	}
-
-	resultType, err := oc.convertResponse(operation.Responses, pathKey, []string{procName, "Result"})
+	resultType, response, err := oc.convertResponse(operation, []string{procName, "Result"})
 	if err != nil {
-		return nil, "", fmt.Errorf("%s: %w", pathKey, err)
+		return nil, "", fmt.Errorf("%s: %w", oc.pathKey, err)
 	}
 
 	if resultType == nil {
 		return nil, "", nil
 	}
 
-	reqBody, err := oc.convertParameters(operation, pathKey, commonParams, []string{procName})
+	reqBody, err := oc.convertParameters(operation, commonParams, []string{procName})
 	if err != nil {
-		return nil, "", fmt.Errorf("%s: %w", pathKey, err)
+		return nil, "", fmt.Errorf("%s: %w", oc.pathKey, err)
 	}
 
-	description := oc.getOperationDescription(pathKey, method, operation)
+	description := oc.getOperationDescription(operation)
 	procedure := rest.OperationInfo{
 		Request: &rest.Request{
-			URL:         pathKey,
-			Method:      method,
+			URL:         oc.pathKey,
+			Method:      oc.method,
 			RequestBody: reqBody,
 			Security:    convertSecurities(operation.Security),
-			Response: rest.Response{
-				ContentType: responseContentType,
-			},
+			Response:    *response,
 		},
 		Description: &description,
 		Arguments:   oc.Arguments,
@@ -146,14 +115,14 @@ func (oc *oas2OperationBuilder) BuildProcedure(pathKey string, method string, op
 	return &procedure, procName, nil
 }
 
-func (oc *oas2OperationBuilder) convertParameters(operation *v2.Operation, apiPath string, commonParams []*v2.Parameter, fieldPaths []string) (*rest.RequestBody, error) {
+func (oc *oas2OperationBuilder) convertParameters(operation *v2.Operation, commonParams []*v2.Parameter, fieldPaths []string) (*rest.RequestBody, error) {
 	if operation == nil || (len(operation.Parameters) == 0 && len(commonParams) == 0) {
 		return nil, nil
 	}
 
-	contentType := rest.ContentTypeJSON
-	if len(operation.Consumes) > 0 && !slices.Contains(operation.Consumes, rest.ContentTypeJSON) {
-		contentType = operation.Consumes[0]
+	contentType := oc.getContentTypeV2(operation.Consumes)
+	if contentType == "" {
+		contentType = rest.ContentTypeJSON
 	}
 
 	var requestBody *rest.RequestBody
@@ -183,7 +152,7 @@ func (oc *oas2OperationBuilder) convertParameters(operation *v2.Operation, apiPa
 
 		switch {
 		case param.Type != "":
-			typeEncoder, err = newOAS2SchemaBuilder(oc.builder, apiPath, rest.ParameterLocation(param.In)).getSchemaTypeFromParameter(param, fieldPaths)
+			typeEncoder, err = newOAS2SchemaBuilder(oc.builder, oc.pathKey, rest.ParameterLocation(param.In)).getSchemaTypeFromParameter(param, fieldPaths)
 			if err != nil {
 				return nil, err
 			}
@@ -208,7 +177,7 @@ func (oc *oas2OperationBuilder) convertParameters(operation *v2.Operation, apiPa
 				typeSchema.MinLength = &minLength
 			}
 		case param.Schema != nil:
-			typeEncoder, typeSchema, err = newOAS2SchemaBuilder(oc.builder, apiPath, rest.ParameterLocation(param.In)).
+			typeEncoder, typeSchema, err = newOAS2SchemaBuilder(oc.builder, oc.pathKey, rest.ParameterLocation(param.In)).
 				getSchemaTypeFromProxy(param.Schema, !paramRequired, fieldPaths)
 			if err != nil {
 				return nil, err
@@ -279,7 +248,7 @@ func (oc *oas2OperationBuilder) convertParameters(operation *v2.Operation, apiPa
 		bodyName := utils.StringSliceToPascalCase(fieldPaths) + "Body"
 		oc.builder.schema.ObjectTypes[bodyName] = formDataObject
 
-		desc := "Form data of " + apiPath
+		desc := "Form data of " + oc.pathKey
 		oc.Arguments["body"] = rest.ArgumentInfo{
 			ArgumentInfo: schema.ArgumentInfo{
 				Type:        schema.NewNamedType(bodyName).Encode(),
@@ -298,59 +267,84 @@ func (oc *oas2OperationBuilder) convertParameters(operation *v2.Operation, apiPa
 	return requestBody, nil
 }
 
-func (oc *oas2OperationBuilder) convertResponse(responses *v2.Responses, apiPath string, fieldPaths []string) (schema.TypeEncoder, error) {
-	if responses == nil || responses.Codes == nil || responses.Codes.IsZero() {
-		return nil, nil
+func (oc *oas2OperationBuilder) convertResponse(operation *v2.Operation, fieldPaths []string) (schema.TypeEncoder, *rest.Response, error) {
+	if operation.Responses == nil || operation.Responses.Codes == nil || operation.Responses.Codes.IsZero() {
+		return nil, nil, nil
+	}
+
+	contentType := oc.getContentTypeV2(operation.Produces)
+	if contentType == "" {
+		oc.builder.Logger.Info("empty content type in response",
+			slog.String("path", oc.pathKey),
+			slog.String("method", oc.method),
+			slog.Any("produces", operation.Produces),
+			slog.Any("consumes", operation.Consumes),
+		)
+
+		return nil, nil, nil
 	}
 
 	var resp *v2.Response
-	if responses.Codes == nil || responses.Codes.IsZero() {
+	var statusCode int64
+	if operation.Responses.Codes == nil || operation.Responses.Codes.IsZero() {
 		// the response is always successful
-		resp = responses.Default
+		resp = operation.Responses.Default
 	} else {
-		for r := responses.Codes.First(); r != nil; r = r.Next() {
+		for r := operation.Responses.Codes.First(); r != nil; r = r.Next() {
 			if r.Key() == "" {
 				continue
 			}
+
 			code, err := strconv.ParseInt(r.Key(), 10, 32)
 			if err != nil {
 				continue
 			}
 
 			if isUnsupportedResponseCodes(code) {
-				return nil, nil
+				return nil, nil, nil
 			} else if code >= 200 && code < 300 {
 				resp = r.Value()
+				statusCode = code
 
 				break
 			}
 		}
 	}
 
+	response := &rest.Response{
+		ContentType: contentType,
+	}
+
 	// return nullable boolean type if the response content is null
-	if resp == nil || resp.Schema == nil {
+	if resp == nil || (resp.Schema == nil && statusCode == 204) {
 		scalarName := string(rest.ScalarBoolean)
 		if _, ok := oc.builder.schema.ScalarTypes[scalarName]; !ok {
 			oc.builder.schema.ScalarTypes[scalarName] = *defaultScalarTypes[rest.ScalarBoolean]
 		}
 
-		return schema.NewNullableNamedType(scalarName), nil
+		return schema.NewNullableNamedType(scalarName), response, nil
 	}
 
-	schemaType, _, err := newOAS2SchemaBuilder(oc.builder, apiPath, rest.InBody).
+	if resp.Schema == nil {
+		return getResultTypeFromContentType(oc.builder.schema, contentType), response, nil
+	}
+
+	schemaType, _, err := newOAS2SchemaBuilder(oc.builder, oc.pathKey, rest.InBody).
 		getSchemaTypeFromProxy(resp.Schema, false, fieldPaths)
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 
-	return schemaType, nil
+	return schemaType, response, nil
 }
 
-func (oc *oas2OperationBuilder) getResponseContentTypeV2(contentTypes []string) string {
-	contentType := rest.ContentTypeJSON
-	if len(contentTypes) == 0 || slices.Contains(contentTypes, contentType) {
-		return contentType
+func (oc *oas2OperationBuilder) getContentTypeV2(contentTypes []string) string {
+	for _, contentType := range preferredContentTypes {
+		if len(contentTypes) == 0 || slices.Contains(contentTypes, contentType) {
+			return contentType
+		}
 	}
+
 	if len(oc.builder.ConvertOptions.AllowedContentTypes) == 0 {
 		return contentTypes[0]
 	}
@@ -364,7 +358,7 @@ func (oc *oas2OperationBuilder) getResponseContentTypeV2(contentTypes []string) 
 	return ""
 }
 
-func (oc *oas2OperationBuilder) getOperationDescription(pathKey string, method string, operation *v2.Operation) string {
+func (oc *oas2OperationBuilder) getOperationDescription(operation *v2.Operation) string {
 	if operation.Summary != "" {
 		return utils.StripHTMLTags(operation.Summary)
 	}
@@ -372,5 +366,5 @@ func (oc *oas2OperationBuilder) getOperationDescription(pathKey string, method s
 		return utils.StripHTMLTags(operation.Description)
 	}
 
-	return strings.ToUpper(method) + " " + pathKey
+	return strings.ToUpper(oc.method) + " " + oc.pathKey
 }

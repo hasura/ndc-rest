@@ -679,6 +679,9 @@
             "format": "int64"
           }
         }
+      },
+      "xml": {
+        "name": "Album"
       }
     },
     "Comment": {
@@ -756,6 +759,9 @@
             "format": "int64"
           }
         }
+      },
+      "xml": {
+        "name": "Comment"
       }
     },
     "Photo": {
@@ -834,6 +840,9 @@
             "format": "uri"
           }
         }
+      },
+      "xml": {
+        "name": "Photo"
       }
     },
     "Post": {
@@ -896,6 +905,9 @@
             "format": "int64"
           }
         }
+      },
+      "xml": {
+        "name": "Post"
       }
     },
     "Todo": {
@@ -958,6 +970,9 @@
             "format": "int64"
           }
         }
+      },
+      "xml": {
+        "name": "Todo"
       }
     },
     "User": {
@@ -1076,6 +1091,9 @@
             ]
           }
         }
+      },
+      "xml": {
+        "name": "User"
       }
     },
     "UserAddress": {
@@ -1150,6 +1168,9 @@
             ]
           }
         }
+      },
+      "xml": {
+        "name": "User"
       }
     },
     "UserAddressGeo": {
@@ -1182,6 +1203,9 @@
             ]
           }
         }
+      },
+      "xml": {
+        "name": "User"
       }
     },
     "UserCompany": {
@@ -1228,6 +1252,9 @@
             ]
           }
         }
+      },
+      "xml": {
+        "name": "User"
       }
     }
   },
