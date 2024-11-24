@@ -567,6 +567,92 @@
         "type": "named"
       }
     },
+    "getSearchXml": {
+      "request": {
+        "url": "/search/xml",
+        "method": "get",
+        "response": {
+          "contentType": "application/xml; charset=utf-8"
+        }
+      },
+      "arguments": {
+        "in": {
+          "description": "Where to search and apply a XPath expression: either the list of projects or the list of packages.  Example of a result when `projects` is selected: ```                                      x86_64                        x86_64                Standard OBS instance at build.opensuse.org     This instance delivers the default build targets for OBS.     https://api.opensuse.org/public     ```  Example of a result when `packages` is selected: ```                   ```",
+          "type": {
+            "name": "SearchIn",
+            "type": "named"
+          },
+          "http": {
+            "name": "in",
+            "in": "query",
+            "schema": {
+              "type": [
+                "string"
+              ]
+            }
+          }
+        },
+        "match": {
+          "description": "XPath expression used to filter the results.",
+          "type": {
+            "name": "String",
+            "type": "named"
+          },
+          "http": {
+            "name": "match",
+            "in": "query",
+            "schema": {
+              "type": [
+                "string"
+              ]
+            }
+          }
+        },
+        "return": {
+          "description": "XPath expression that defines which values will be returned.  Instead of returning a collection of projects or packages, the result will be a collection of:   - contents of elements, when that XPath expression match elements, or,   - values of atttributes, when that XPath expression match atttributes.  Example of result, for a query string like `?in=projects\u0026match=repository/arch='x86_64'\u0026return=repository/name`: ```    openSUSE_Tumbleweed   15.3  ```",
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "String",
+              "type": "named"
+            }
+          },
+          "http": {
+            "name": "return",
+            "in": "query",
+            "schema": {
+              "type": [
+                "string"
+              ]
+            }
+          }
+        },
+        "values": {
+          "description": "When set to `1`, return a list of values, instead of returning a list of projects or packages.  The result will be a collection of:   - contents of elements, when the expression defined in the `match` query parameter match elements.     For example: `match=repository/arch`.   - values of atttributes, when the expression defined in the `match` query parameter match atttributes.     For example: `match=repository/name`.  Example of result, for a query string like `?in=projects\u0026match=repository/path/project\u0026values=1`: ```    openSUSE.org:openSUSE:Factory   openSUSE.org:openSUSE:Leap:15.3  ```",
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "String",
+              "type": "named"
+            }
+          },
+          "http": {
+            "name": "values",
+            "in": "query",
+            "schema": {
+              "type": [
+                "string"
+              ]
+            }
+          }
+        }
+      },
+      "description": "Search in projects or in packages.",
+      "result_type": {
+        "name": "JSON",
+        "type": "named"
+      }
+    },
     "getSnake": {
       "request": {
         "url": "/snake",
@@ -8943,6 +9029,17 @@
       "representation": {
         "one_of": [
           "fixed_amount"
+        ],
+        "type": "enum"
+      }
+    },
+    "SearchIn": {
+      "aggregate_functions": {},
+      "comparison_operators": {},
+      "representation": {
+        "one_of": [
+          "projects",
+          "packages"
         ],
         "type": "enum"
       }

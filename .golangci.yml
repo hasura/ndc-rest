@@ -42,6 +42,10 @@ linters-settings:
     # Default: 5
     min-complexity: 10
 
+  gocritic:
+    disabled-checks:
+      - appendAssign
+
 issues:
   exclude-files:
     - ".*_test\\.go$"

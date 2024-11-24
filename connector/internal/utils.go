@@ -143,3 +143,21 @@ func getXMLName(xmlSchema *rest.XMLSchema, defaultName string) string {
 
 	return defaultName
 }
+
+func getArrayOrNamedType(schemaType schema.Type) (*schema.ArrayType, *schema.NamedType, error) {
+	rawType, err := schemaType.InterfaceT()
+	if err != nil {
+		return nil, nil, err
+	}
+
+	switch t := rawType.(type) {
+	case *schema.NullableType:
+		return getArrayOrNamedType(t.UnderlyingType)
+	case *schema.ArrayType:
+		return t, nil, nil
+	case *schema.NamedType:
+		return nil, t, nil
+	default:
+		return nil, nil, nil
+	}
+}

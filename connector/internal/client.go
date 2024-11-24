@@ -231,9 +231,21 @@ func (client *HTTPClient) sendSingle(ctx context.Context, request *RetryableRequ
 	contentType := parseContentType(resp.Header.Get(contentTypeHeader))
 	if resp.StatusCode >= 400 {
 		details := make(map[string]any)
-		if contentType == rest.ContentTypeJSON && json.Valid(errorBytes) {
-			details["error"] = json.RawMessage(errorBytes)
-		} else {
+		switch contentType {
+		case rest.ContentTypeJSON:
+			if json.Valid(errorBytes) {
+				details["error"] = json.RawMessage(errorBytes)
+			} else {
+				details["error"] = string(errorBytes)
+			}
+		case rest.ContentTypeXML:
+			errData, err := decodeArbitraryXML(bytes.NewReader(errorBytes))
+			if err != nil {
+				details["error"] = string(errorBytes)
+			} else {
+				details["error"] = errData
+			}
+		default:
 			details["error"] = string(errorBytes)
 		}
 

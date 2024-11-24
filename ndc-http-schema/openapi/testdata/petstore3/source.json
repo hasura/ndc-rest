@@ -3526,6 +3526,157 @@
           }
         }
       }
+    },
+    "/search/xml": {
+      "get": {
+        "summary": "Search in projects or in packages.",
+        "description": "Get a list of projects or a list of packages that match a XPath expression, passed in the query parameter `match`.",
+        "security": [],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "in",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "enum": ["projects", "packages"],
+              "example": "projects"
+            },
+            "description": "Where to search and apply a XPath expression: either the list of projects or the list of packages.\n\nExample of a result when `projects` is selected:\n```\n<collection>\n  <project name=\"home:Admin\">\n    <title></title>\n    <description></description>\n    <person userid=\"Admin\" role=\"maintainer\"/>\n    <repository name=\"openSUSE_Tumbleweed\">\n      <path project=\"openSUSE.org:openSUSE:Factory\" repository=\"snapshot\"/>\n      <arch>x86_64</arch>\n    </repository>\n    <repository name=\"15.3\">\n      <path project=\"openSUSE.org:openSUSE:Leap:15.3\" repository=\"standard\"/>\n      <arch>x86_64</arch>\n    </repository>\n  </project>\n  <project name=\"openSUSE.org\">\n    <title>Standard OBS instance at build.opensuse.org</title>\n    <description>This instance delivers the default build targets for OBS.</description>\n    <remoteurl>https://api.opensuse.org/public</remoteurl>\n  </project>\n</collection>\n```\n\nExample of a result when `packages` is selected:\n```\n<collection>\n  <package name=\"ctris\" project=\"home:Admin\">\n    <title></title>\n    <description></description>\n  </package>\n</collection>\n```\n"
+          },
+          {
+            "in": "query",
+            "name": "match",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "XPath expression used to filter the results."
+          },
+          {
+            "in": "query",
+            "name": "return",
+            "schema": {
+              "type": "string",
+              "example": "repository/name"
+            },
+            "description": "XPath expression that defines which values will be returned.\n\nInstead of returning a collection of projects or packages, the result will be a collection of:\n  - contents of elements, when that XPath expression match elements, or,\n  - values of atttributes, when that XPath expression match atttributes.\n\nExample of result, for a query string like `?in=projects&match=repository/arch='x86_64'&return=repository/name`:\n```\n<collection>\n  <value>openSUSE_Tumbleweed</value>\n  <value>15.3</value>\n</collection>\n```\n"
+          },
+          {
+            "in": "query",
+            "name": "values",
+            "schema": {
+              "type": "string",
+              "example": 1
+            },
+            "description": "When set to `1`, return a list of values, instead of returning a list of projects or packages.\n\nThe result will be a collection of:\n  - contents of elements, when the expression defined in the `match` query parameter match elements.\n    For example: `match=repository/arch`.\n  - values of atttributes, when the expression defined in the `match` query parameter match atttributes.\n    For example: `match=repository/name`.\n\nExample of result, for a query string like `?in=projects&match=repository/path/project&values=1`:\n```\n<collection>\n  <value>openSUSE.org:openSUSE:Factory</value>\n  <value>openSUSE.org:openSUSE:Leap:15.3</value>\n</collection>\n```\n"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK. The request has succeeded.",
+            "content": {
+              "application/xml; charset=utf-8": {
+                "schema": {
+                  "oneOf": [
+                    {
+                      "type": "object",
+                      "properties": {
+                        "matches": {
+                          "type": "integer",
+                          "xml": {
+                            "attribute": true
+                          }
+                        },
+                        "project": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "name": {
+                                "type": "string",
+                                "xml": {
+                                  "attribute": true
+                                }
+                              },
+                              "title": {
+                                "type": "string"
+                              },
+                              "description": {
+                                "type": "string"
+                              },
+                              "person": {
+                                "type": "object",
+                                "properties": {
+                                  "userid": {
+                                    "type": "string",
+                                    "xml": {
+                                      "attribute": true
+                                    }
+                                  },
+                                  "role": {
+                                    "type": "string",
+                                    "xml": {
+                                      "attribute": true
+                                    }
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        }
+                      },
+                      "xml": {
+                        "name": "collection"
+                      }
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "matches": {
+                          "type": "integer",
+                          "xml": {
+                            "attribute": true
+                          }
+                        },
+                        "package": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "name": {
+                                "type": "string",
+                                "xml": {
+                                  "attribute": true
+                                }
+                              },
+                              "project": {
+                                "type": "string",
+                                "xml": {
+                                  "attribute": true
+                                }
+                              },
+                              "title": {
+                                "type": "string"
+                              },
+                              "description": {
+                                "type": "string"
+                              }
+                            }
+                          }
+                        }
+                      },
+                      "xml": {
+                        "name": "collection"
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {

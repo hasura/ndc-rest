@@ -79,6 +79,22 @@ func TestCreateXMLForm(t *testing.T) {
 			Expected: `<?xml version="1.0" encoding="UTF-8"?>
 <smp:book smp:attr="foo" xmlns:smp="http://example.com/schema"><author>Author</author><id>0</id><title>string</title></smp:book>`,
 		},
+		{
+			Name: "putCommentXml",
+			Body: map[string]any{
+				"project": "home:Admin",
+				"package": "0ad",
+				"comment": []any{
+					map[string]any{
+						"who":      "Iggy",
+						"when":     "2021-10-15 13:28:22 UTC",
+						"id":       int64(1),
+						"xmlValue": "This is a pretty cool comment!",
+					},
+				},
+			},
+			Expected: "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<comments package=\"0ad\" project=\"home:Admin\"><comment id=\"1\" when=\"2021-10-15 13:28:22 UTC\" who=\"Iggy\">This is a pretty cool comment!</comment></comments>",
+		},
 	}
 
 	ndcSchema := createMockSchema(t)
