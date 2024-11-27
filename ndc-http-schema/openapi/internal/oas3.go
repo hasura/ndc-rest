@@ -164,16 +164,23 @@ func (oc *OAS3Builder) convertSecuritySchemes(scheme orderedmap.Pair[string, *v3
 
 		flows := make(map[rest.OAuthFlowType]rest.OAuthFlow)
 		if security.Flows.Implicit != nil {
-			flows[rest.ImplicitFlow] = *convertV3OAuthFLow(security.Flows.Implicit)
+			flows[rest.ImplicitFlow] = oc.convertV3OAuthFLow(key, security.Flows.Implicit)
 		}
 		if security.Flows.AuthorizationCode != nil {
-			flows[rest.AuthorizationCodeFlow] = *convertV3OAuthFLow(security.Flows.AuthorizationCode)
+			flows[rest.AuthorizationCodeFlow] = oc.convertV3OAuthFLow(key, security.Flows.AuthorizationCode)
 		}
 		if security.Flows.ClientCredentials != nil {
-			flows[rest.ClientCredentialsFlow] = *convertV3OAuthFLow(security.Flows.ClientCredentials)
+			clientID := sdkUtils.NewEnvStringVariable(utils.StringSliceToConstantCase([]string{oc.EnvPrefix, key, "CLIENT_ID"}))
+			clientSecret := sdkUtils.NewEnvStringVariable(utils.StringSliceToConstantCase([]string{oc.EnvPrefix, key, "CLIENT_SECRET"}))
+			flow := oc.convertV3OAuthFLow(key, security.Flows.ClientCredentials)
+			flow.ClientID = &clientID
+			flow.ClientSecret = &clientSecret
+
+			flows[rest.ClientCredentialsFlow] = flow
 		}
+
 		if security.Flows.Password != nil {
-			flows[rest.PasswordFlow] = *convertV3OAuthFLow(security.Flows.Password)
+			flows[rest.PasswordFlow] = oc.convertV3OAuthFLow(key, security.Flows.Password)
 		}
 
 		result.SecuritySchemer = rest.NewOAuth2Config(flows)
@@ -399,11 +406,20 @@ func (oc *OAS3Builder) populateWriteSchemaType(schemaType schema.Type) (schema.T
 	}
 }
 
-func convertV3OAuthFLow(input *v3.OAuthFlow) *rest.OAuthFlow {
-	result := &rest.OAuthFlow{
+func (oc *OAS3Builder) convertV3OAuthFLow(key string, input *v3.OAuthFlow) rest.OAuthFlow {
+	result := rest.OAuthFlow{
 		AuthorizationURL: input.AuthorizationUrl,
-		TokenURL:         input.TokenUrl,
-		RefreshURL:       input.RefreshUrl,
+	}
+
+	tokenURL := sdkUtils.NewEnvStringVariable(utils.StringSliceToConstantCase([]string{oc.EnvPrefix, key, "TOKEN_URL"}))
+	if input.TokenUrl != "" {
+		tokenURL.Value = &input.TokenUrl
+	}
+	result.TokenURL = &tokenURL
+
+	if input.RefreshUrl != "" {
+		refreshURL := sdkUtils.NewEnvString(utils.StringSliceToConstantCase([]string{oc.EnvPrefix, key, "REFRESH_URL"}), input.TokenUrl)
+		result.RefreshURL = &refreshURL
 	}
 
 	if input.Scopes != nil {

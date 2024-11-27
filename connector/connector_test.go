@@ -100,7 +100,7 @@ func TestHTTPConnector_emptyServer(t *testing.T) {
 func TestHTTPConnector_authentication(t *testing.T) {
 	apiKey := "random_api_key"
 	bearerToken := "random_bearer_token"
-	slog.SetLogLoggerLevel(slog.LevelDebug)
+	slog.SetLogLoggerLevel(slog.LevelInfo)
 	server := createMockServer(t, apiKey, bearerToken)
 	defer server.Close()
 
@@ -134,7 +134,7 @@ func TestHTTPConnector_authentication(t *testing.T) {
 		assertHTTPResponse(t, res, http.StatusOK, schema.ExplainResponse{
 			Details: schema.ExplainResponseDetails{
 				"url":     server.URL + "/pet",
-				"headers": `{"Api_key":["ran*******(14)"]}`,
+				"headers": `{"Api_key":["ran*******(14)"],"Content-Type":["application/json"]}`,
 			},
 		})
 	})
@@ -244,7 +244,7 @@ func TestHTTPConnector_authentication(t *testing.T) {
 		assertHTTPResponse(t, res, http.StatusOK, schema.ExplainResponse{
 			Details: schema.ExplainResponseDetails{
 				"url":     server.URL + "/pet/findByStatus?status=available",
-				"headers": `{"Authorization":["Bearer ran*******(19)"],"X-Custom-Header":["This is a test"]}`,
+				"headers": `{"Authorization":["Bearer ran*******(19)"],"Content-Type":["application/json"],"X-Custom-Header":["This is a test"]}`,
 			},
 		})
 	})

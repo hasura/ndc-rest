@@ -9,6 +9,7 @@ import (
 	"strings"
 
 	rest "github.com/hasura/ndc-http/ndc-http-schema/schema"
+	"github.com/hasura/ndc-http/ndc-http-schema/utils"
 	"github.com/hasura/ndc-sdk-go/schema"
 	"go.opentelemetry.io/otel/attribute"
 	"go.opentelemetry.io/otel/trace"
@@ -37,20 +38,7 @@ func eitherMaskSecret(input string, shouldMask bool) string {
 		return input
 	}
 
-	return MaskString(input)
-}
-
-// MaskString masks the string value for security
-func MaskString(input string) string {
-	inputLength := len(input)
-	switch {
-	case inputLength < 6:
-		return strings.Repeat("*", inputLength)
-	case inputLength < 12:
-		return input[0:1] + strings.Repeat("*", inputLength-1)
-	default:
-		return input[0:3] + strings.Repeat("*", 7) + fmt.Sprintf("(%d)", inputLength)
-	}
+	return utils.MaskString(input)
 }
 
 func setHeaderAttributes(span trace.Span, prefix string, httpHeaders http.Header) {
@@ -62,7 +50,7 @@ func setHeaderAttributes(span trace.Span, prefix string, httpHeaders http.Header
 		if sensitiveHeaderRegex.MatchString(strings.ToLower(key)) {
 			values = make([]string, len(headers))
 			for i, header := range headers {
-				values[i] = MaskString(header)
+				values[i] = utils.MaskString(header)
 			}
 		}
 		span.SetAttributes(attribute.StringSlice(prefix+strings.ToLower(key), values))

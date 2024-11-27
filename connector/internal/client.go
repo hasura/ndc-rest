@@ -18,8 +18,10 @@ import (
 	"sync"
 	"time"
 
+	"github.com/hasura/ndc-http/connector/internal/settings"
 	"github.com/hasura/ndc-http/ndc-http-schema/configuration"
 	rest "github.com/hasura/ndc-http/ndc-http-schema/schema"
+	restUtils "github.com/hasura/ndc-http/ndc-http-schema/utils"
 	"github.com/hasura/ndc-sdk-go/connector"
 	"github.com/hasura/ndc-sdk-go/schema"
 	"github.com/hasura/ndc-sdk-go/utils"
@@ -31,26 +33,21 @@ import (
 	"golang.org/x/sync/errgroup"
 )
 
-// Doer abstracts a HTTP client with Do method
-type Doer interface {
-	Do(req *http.Request) (*http.Response, error)
-}
-
 // HTTPClient represents a http client wrapper with advanced methods
 type HTTPClient struct {
-	client         Doer
-	schema         *rest.NDCHttpSchema
+	settings       *settings.SettingManager
+	metadata       *configuration.NDCHttpRuntimeSchema
 	forwardHeaders configuration.ForwardHeadersSettings
 	tracer         *connector.Tracer
 	propagator     propagation.TextMapPropagator
 }
 
 // NewHTTPClient creates a http client wrapper
-func NewHTTPClient(client Doer, httpSchema *rest.NDCHttpSchema, forwardHeaders configuration.ForwardHeadersSettings, tracer *connector.Tracer) *HTTPClient {
+func NewHTTPClient(settings *settings.SettingManager, metadata *configuration.NDCHttpRuntimeSchema, forwardHeaders configuration.ForwardHeadersSettings, tracer *connector.Tracer) *HTTPClient {
 	return &HTTPClient{
-		client:         client,
+		settings:       settings,
 		tracer:         tracer,
-		schema:         httpSchema,
+		metadata:       metadata,
 		forwardHeaders: forwardHeaders,
 		propagator:     otel.GetTextMapPropagator(),
 	}
@@ -201,7 +198,7 @@ func (client *HTTPClient) sendSingle(ctx context.Context, request *RetryableRequ
 	times := int(request.Runtime.Retry.Times)
 	delayMs := int(math.Max(float64(request.Runtime.Retry.Delay), 100))
 	for i := 0; i <= times; i++ {
-		resp, errorBytes, cancel, err = client.doRequest(ctx, request, port, i) //nolint:all
+		resp, errorBytes, cancel, err = client.doRequest(ctx, request, serverID, port, i) //nolint:all
 		if err != nil {
 			span.SetStatus(codes.Error, "failed to execute the request")
 			span.RecordError(err)
@@ -265,7 +262,7 @@ func (client *HTTPClient) sendSingle(ctx context.Context, request *RetryableRequ
 	return result, headers, nil
 }
 
-func (client *HTTPClient) doRequest(ctx context.Context, request *RetryableRequest, port int, retryCount int) (*http.Response, []byte, context.CancelFunc, error) {
+func (client *HTTPClient) doRequest(ctx context.Context, request *RetryableRequest, serverID string, port int, retryCount int) (*http.Response, []byte, context.CancelFunc, error) {
 	method := strings.ToUpper(request.RawRequest.Method)
 	ctx, span := client.tracer.Start(ctx, fmt.Sprintf("%s %s", method, request.RawRequest.URL), trace.WithSpanKind(trace.SpanKindClient))
 	defer span.End()
@@ -273,9 +270,9 @@ func (client *HTTPClient) doRequest(ctx context.Context, request *RetryableReque
 	urlAttr := cloneURL(&request.URL)
 	password, hasPassword := urlAttr.User.Password()
 	if urlAttr.User.String() != "" || hasPassword {
-		maskedUser := MaskString(urlAttr.User.Username())
+		maskedUser := restUtils.MaskString(urlAttr.User.Username())
 		if hasPassword {
-			urlAttr.User = url.UserPassword(maskedUser, MaskString(password))
+			urlAttr.User = url.UserPassword(maskedUser, restUtils.MaskString(password))
 		} else {
 			urlAttr.User = url.User(maskedUser)
 		}
@@ -308,7 +305,15 @@ func (client *HTTPClient) doRequest(ctx context.Context, request *RetryableReque
 		return nil, nil, nil, err
 	}
 
-	resp, err := client.client.Do(req)
+	httpClient, err := client.settings.InjectCredential(req, client.metadata.Name, request.RawRequest.Security)
+	if err != nil {
+		span.SetStatus(codes.Error, "error happened when creating request")
+		span.RecordError(err)
+
+		return nil, nil, nil, err
+	}
+
+	resp, err := httpClient.Do(req)
 	if err != nil {
 		span.SetStatus(codes.Error, "error happened when executing the request")
 		span.RecordError(err)
@@ -390,7 +395,7 @@ func (client *HTTPClient) evalHTTPResponse(ctx context.Context, span trace.Span,
 			return nil, nil, schema.NewConnectorError(http.StatusInternalServerError, "failed to extract forwarded headers response: "+err.Error(), nil)
 		}
 
-		result, err = NewXMLDecoder(client.schema).Decode(resp.Body, field)
+		result, err = NewXMLDecoder(client.metadata.NDCHttpSchema).Decode(resp.Body, field)
 		if err != nil {
 			return nil, nil, schema.NewConnectorError(http.StatusInternalServerError, err.Error(), nil)
 		}
@@ -475,7 +480,7 @@ func (client *HTTPClient) extractForwardedHeadersResultType(resultType schema.Ty
 	case *schema.ArrayType:
 		return nil, errors.New("expected object type, got array")
 	case *schema.NamedType:
-		objectType, ok := client.schema.ObjectTypes[t.Name]
+		objectType, ok := client.metadata.NDCHttpSchema.ObjectTypes[t.Name]
 		if !ok {
 			return nil, fmt.Errorf("%s: expected object type", t.Name)
 		}

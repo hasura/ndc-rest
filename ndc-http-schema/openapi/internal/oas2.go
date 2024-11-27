@@ -122,8 +122,13 @@ func (oc *OAS2Builder) convertSecuritySchemes(scheme orderedmap.Pair[string, *v2
 		}
 		flow := rest.OAuthFlow{
 			AuthorizationURL: security.AuthorizationUrl,
-			TokenURL:         security.TokenUrl,
 		}
+
+		tokenURL := sdkUtils.NewEnvStringVariable(utils.StringSliceToConstantCase([]string{oc.EnvPrefix, key, "TOKEN_URL"}))
+		if security.TokenUrl != "" {
+			tokenURL.Value = &security.TokenUrl
+		}
+		flow.TokenURL = &tokenURL
 
 		if security.Scopes != nil {
 			scopes := make(map[string]string)

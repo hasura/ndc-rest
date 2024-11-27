@@ -3,7 +3,6 @@ package internal
 import (
 	"bytes"
 	"context"
-	"encoding/base64"
 	"fmt"
 	"io"
 	"math/rand/v2"
@@ -98,7 +97,7 @@ func BuildDistributedRequestsWithOptions(request *RetryableRequest, httpOptions 
 		request.URL.Host = baseURL.Host
 		request.URL.Path = baseURL.Path + request.URL.Path
 		request.ServerID = serverID
-		if err := request.applySettings(httpOptions.Settings, httpOptions.Explain); err != nil {
+		if err := request.applySettings(httpOptions.Settings); err != nil {
 			return nil, err
 		}
 
@@ -137,7 +136,7 @@ func BuildDistributedRequestsWithOptions(request *RetryableRequest, httpOptions 
 			Headers:     request.Headers.Clone(),
 			Body:        request.Body,
 		}
-		if err := req.applySettings(httpOptions.Settings, httpOptions.Explain); err != nil {
+		if err := req.applySettings(httpOptions.Settings); err != nil {
 			return nil, err
 		}
 		if len(buf) > 0 {
@@ -165,123 +164,13 @@ func (req *RetryableRequest) getServerConfig(settings *rest.NDCHttpSettings) *re
 	return nil
 }
 
-func (req *RetryableRequest) applySecurity(serverConfig *rest.ServerConfig, isExplain bool) error {
-	if serverConfig == nil {
-		return nil
-	}
-
-	securitySchemes := serverConfig.SecuritySchemes
-	securities := req.RawRequest.Security
-	if req.RawRequest.Security.IsEmpty() && serverConfig.Security != nil {
-		securities = serverConfig.Security
-	}
-
-	if securities.IsOptional() || len(securitySchemes) == 0 {
-		return nil
-	}
-
-	for _, security := range securities {
-		sc, ok := securitySchemes[security.Name()]
-		if !ok {
-			continue
-		}
-
-		hasAuth, err := req.applySecurityScheme(sc, isExplain)
-		if hasAuth || err != nil {
-			return err
-		}
-	}
-
-	return nil
-}
-
-func (req *RetryableRequest) applySecurityScheme(securityScheme rest.SecurityScheme, isExplain bool) (bool, error) {
-	if securityScheme.SecuritySchemer == nil {
-		return false, nil
-	}
-
-	if req.Headers == nil {
-		req.Headers = http.Header{}
-	}
-
-	switch config := securityScheme.SecuritySchemer.(type) {
-	case *rest.BasicAuthConfig:
-		username := config.GetUsername()
-		password := config.GetPassword()
-		if config.Header != "" {
-			b64Value := base64.StdEncoding.EncodeToString([]byte(username + ":" + password))
-			req.Headers.Set(rest.AuthorizationHeader, "Basic "+b64Value)
-		} else {
-			req.URL.User = url.UserPassword(username, password)
-		}
-
-		return true, nil
-	case *rest.HTTPAuthConfig:
-		headerName := config.Header
-		if headerName == "" {
-			headerName = rest.AuthorizationHeader
-		}
-		scheme := config.Scheme
-		if scheme == "bearer" {
-			scheme = "Bearer"
-		}
-		v := config.GetValue()
-		if v != "" {
-			req.Headers.Set(headerName, fmt.Sprintf("%s %s", scheme, eitherMaskSecret(v, isExplain)))
-
-			return true, nil
-		}
-	case *rest.APIKeyAuthConfig:
-		switch config.In {
-		case rest.APIKeyInHeader:
-			value := config.GetValue()
-			if value != "" {
-				req.Headers.Set(config.Name, eitherMaskSecret(value, isExplain))
-
-				return true, nil
-			}
-		case rest.APIKeyInQuery:
-			value := config.GetValue()
-			if value != "" {
-				endpoint := req.URL
-				q := endpoint.Query()
-				q.Add(config.Name, eitherMaskSecret(value, isExplain))
-				endpoint.RawQuery = q.Encode()
-				req.URL = endpoint
-
-				return true, nil
-			}
-		case rest.APIKeyInCookie:
-			// Cookie header should be forwarded from Hasura engine
-			return true, nil
-		default:
-			return false, fmt.Errorf("unsupported location for apiKey scheme: %s", config.In)
-		}
-	// TODO: support OAuth and OIDC
-	// Authentication headers can be forwarded from Hasura engine
-	case *rest.OAuth2Config, *rest.OpenIDConnectConfig:
-	case *rest.CookieAuthConfig:
-		return true, nil
-	case *rest.MutualTLSAuthConfig:
-		// the server may require not only mutualTLS authentication
-		return false, nil
-	default:
-		return false, fmt.Errorf("unsupported security scheme: %s", securityScheme.GetType())
-	}
-
-	return false, nil
-}
-
-func (req *RetryableRequest) applySettings(settings *rest.NDCHttpSettings, isExplain bool) error {
+func (req *RetryableRequest) applySettings(settings *rest.NDCHttpSettings) error {
 	if settings == nil {
 		return nil
 	}
 	serverConfig := req.getServerConfig(settings)
 	if serverConfig == nil {
 		return nil
-	}
-	if err := req.applySecurity(serverConfig, isExplain); err != nil {
-		return err
 	}
 
 	req.applyDefaultHeaders(serverConfig.GetHeaders())

@@ -164,7 +164,7 @@ func parseHttpURL(input string) (*url.URL, error) {
 	return url.Parse(input)
 }
 
-func parseRelativeOrHttpURL(input string) (*url.URL, error) {
+func ParseRelativeOrHttpURL(input string) (*url.URL, error) {
 	if strings.HasPrefix(input, "/") {
 		return &url.URL{Path: input}, nil
 	}

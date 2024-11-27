@@ -8,10 +8,10 @@ require (
 	github.com/alecthomas/kong v1.4.0
 	github.com/evanphx/json-patch v0.5.2
 	github.com/google/go-cmp v0.6.0
-	github.com/hasura/ndc-sdk-go v1.6.2-0.20241109102535-399b739f7af5
+	github.com/hasura/ndc-sdk-go v1.6.3-0.20241127025002-02d7a257e75f
 	github.com/invopop/jsonschema v0.12.0
 	github.com/lmittmann/tint v1.0.5
-	github.com/pb33f/libopenapi v0.18.6
+	github.com/pb33f/libopenapi v0.18.7
 	github.com/wk8/go-ordered-map/v2 v2.1.9-0.20240815153524-6ea36470d1bd
 	gopkg.in/yaml.v3 v3.0.1
 	gotest.tools/v3 v3.5.1
@@ -32,5 +32,5 @@ require (
 	go.opentelemetry.io/otel v1.32.0 // indirect
 	golang.org/x/net v0.30.0 // indirect
 	golang.org/x/sys v0.26.0 // indirect
-	google.golang.org/protobuf v1.35.1 // indirect
+	google.golang.org/protobuf v1.35.2 // indirect
 )
