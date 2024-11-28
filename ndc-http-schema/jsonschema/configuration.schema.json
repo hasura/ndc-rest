@@ -64,6 +64,10 @@
           "type": "boolean",
           "description": "Require strict validation"
         },
+        "noDeprecation": {
+          "type": "boolean",
+          "description": "Ignore deprecated fields."
+        },
         "patchBefore": {
           "items": {
             "$ref": "#/$defs/PatchConfig"

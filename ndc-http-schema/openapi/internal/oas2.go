@@ -53,7 +53,7 @@ func (oc *OAS2Builder) BuildDocumentModel(docModel *libopenapi.DocumentModel[v2.
 			}
 		}
 		envName := utils.StringSliceToConstantCase([]string{oc.EnvPrefix, "SERVER_URL"})
-		serverURL := fmt.Sprintf("%s://%s%s", scheme, docModel.Model.Host, docModel.Model.BasePath)
+		serverURL := strings.TrimRight(fmt.Sprintf("%s://%s%s", scheme, docModel.Model.Host, docModel.Model.BasePath), "/")
 		oc.schema.Settings.Servers = append(oc.schema.Settings.Servers, rest.ServerConfig{
 			URL: sdkUtils.NewEnvString(envName, serverURL),
 		})

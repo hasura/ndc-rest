@@ -285,6 +285,10 @@
           },
           "type": "object",
           "description": "Fields defined on this object type"
+        },
+        "xml": {
+          "$ref": "#/$defs/XMLSchema",
+          "description": "XML schema"
         }
       },
       "additionalProperties": false,
@@ -808,6 +812,9 @@
         },
         "items": {
           "$ref": "#/$defs/TypeSchema"
+        },
+        "xml": {
+          "$ref": "#/$defs/XMLSchema"
         }
       },
       "additionalProperties": false,
@@ -816,6 +823,37 @@
         "type"
       ],
       "description": "TypeSchema represents a serializable object of OpenAPI schema that is used for validation"
+    },
+    "XMLSchema": {
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "Replaces the name of the element/attribute used for the described schema property.\nWhen defined within items, it will affect the name of the individual XML elements within the list.\nWhen defined alongside type being array (outside the items), it will affect the wrapping element and only if wrapped is true.\nIf wrapped is false, it will be ignored."
+        },
+        "prefix": {
+          "type": "string",
+          "description": "The prefix to be used for the name."
+        },
+        "namespace": {
+          "type": "string",
+          "description": "The URI of the namespace definition. This MUST be in the form of an absolute URI."
+        },
+        "wrapped": {
+          "type": "boolean",
+          "description": "Used only for an array definition. Signifies whether the array is wrapped (for example, \u003cbooks\u003e\u003cbook/\u003e\u003cbook/\u003e\u003c/books\u003e) or unwrapped (\u003cbook/\u003e\u003cbook/\u003e)."
+        },
+        "attribute": {
+          "type": "boolean",
+          "description": "Declares whether the property definition translates to an attribute instead of an element."
+        },
+        "text": {
+          "type": "boolean",
+          "description": "Represents a text value of the xml element."
+        }
+      },
+      "additionalProperties": false,
+      "type": "object",
+      "description": "XMLSchema represents a XML schema that adds additional metadata to describe the XML representation of this property."
     }
   }
 }

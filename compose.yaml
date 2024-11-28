@@ -13,3 +13,41 @@ services:
     environment:
       OTEL_EXPORTER_OTLP_ENDPOINT: http://local.hasura.dev:4317
       HASURA_LOG_LEVEL: debug
+
+  hydra:
+    image: oryd/hydra:v2.2.0
+    ports:
+      - "4444:4444" # Public port
+      - "4445:4445" # Admin port
+      - "5555:5555" # Port for hydra token user
+    command: serve -c /etc/config/hydra/hydra.yml all --dev
+    volumes:
+      - type: volume
+        source: hydra-sqlite
+        target: /var/lib/sqlite
+        read_only: false
+      - type: bind
+        source: ./testdata/hydra.yml
+        target: /etc/config/hydra/hydra.yml
+    environment:
+      - DSN=sqlite:///var/lib/sqlite/db.sqlite?_fk=true
+    restart: unless-stopped
+    depends_on:
+      hydra-migrate:
+        required: true
+        condition: service_completed_successfully
+
+  hydra-migrate:
+    image: oryd/hydra:v2.2.0
+    environment:
+      - DSN=sqlite:///var/lib/sqlite/db.sqlite?_fk=true
+    command: migrate -c /etc/config/hydra/hydra.yml sql -e --yes
+    volumes:
+      - type: volume
+        source: hydra-sqlite
+        target: /var/lib/sqlite
+        read_only: false
+      - type: bind
+        source: ./testdata/hydra.yml
+        target: /etc/config/hydra/hydra.yml
+    restart: on-failure

@@ -114,7 +114,7 @@ func (oc *OAS3Builder) convertServers(servers []*v3.Server) []rest.ServerConfig 
 
 			conf := rest.ServerConfig{
 				ID:  serverID,
-				URL: sdkUtils.NewEnvString(envName, serverURL),
+				URL: sdkUtils.NewEnvString(envName, strings.TrimRight(serverURL, "/")),
 			}
 			results = append(results, conf)
 		}

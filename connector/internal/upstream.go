@@ -9,6 +9,7 @@ import (
 	"math/rand/v2"
 	"net/http"
 	"net/url"
+	"path"
 	"slices"
 	"strconv"
 	"strings"
@@ -279,7 +280,7 @@ func (sm *UpstreamManager) BuildDistributedRequestsWithOptions(request *Retryabl
 
 		request.URL.Scheme = baseURL.Scheme
 		request.URL.Host = baseURL.Host
-		request.URL.Path = baseURL.Path + request.URL.Path
+		request.URL.Path = path.Join(baseURL.Path, request.URL.Path)
 		request.ServerID = serverID
 
 		return []RetryableRequest{*request}, nil

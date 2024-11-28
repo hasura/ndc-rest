@@ -57,12 +57,12 @@ func WriteSchemaFile(outputPath string, content any) error {
 
 	basePath := filepath.Dir(outputPath)
 	if basePath != "." {
-		if err := os.MkdirAll(basePath, 0664); err != nil {
-			return err
+		if err := os.MkdirAll(basePath, 0o775); err != nil {
+			return fmt.Errorf("failed to create directory %s: %w", basePath, err)
 		}
 	}
 
-	return os.WriteFile(outputPath, rawBytes, 0664)
+	return os.WriteFile(outputPath, rawBytes, 0o664)
 }
 
 // ReadFileFromPath read file content from either file path or URL
