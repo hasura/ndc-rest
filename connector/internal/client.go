@@ -18,6 +18,7 @@ import (
 	"sync"
 	"time"
 
+	"github.com/hasura/ndc-http/connector/internal/contenttype"
 	"github.com/hasura/ndc-http/ndc-http-schema/configuration"
 	rest "github.com/hasura/ndc-http/ndc-http-schema/schema"
 	restUtils "github.com/hasura/ndc-http/ndc-http-schema/utils"
@@ -233,7 +234,7 @@ func (client *HTTPClient) sendSingle(ctx context.Context, request *RetryableRequ
 				details["error"] = string(errorBytes)
 			}
 		case rest.ContentTypeXML:
-			errData, err := decodeArbitraryXML(bytes.NewReader(errorBytes))
+			errData, err := contenttype.DecodeArbitraryXML(bytes.NewReader(errorBytes))
 			if err != nil {
 				details["error"] = string(errorBytes)
 			} else {
@@ -375,7 +376,7 @@ func (client *HTTPClient) evalHTTPResponse(ctx context.Context, span trace.Span,
 			return nil, nil, schema.NewConnectorError(http.StatusInternalServerError, "failed to extract forwarded headers response: "+err.Error(), nil)
 		}
 
-		result, err = NewXMLDecoder(client.metadata.NDCHttpSchema).Decode(resp.Body, field)
+		result, err = contenttype.NewXMLDecoder(client.metadata.NDCHttpSchema).Decode(resp.Body, field)
 		if err != nil {
 			return nil, nil, schema.NewConnectorError(http.StatusInternalServerError, err.Error(), nil)
 		}
