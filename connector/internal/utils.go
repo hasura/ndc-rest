@@ -32,15 +32,6 @@ func UnwrapNullableType(input schema.Type) (schema.TypeEncoder, bool, error) {
 	}
 }
 
-// either masks the string value for security
-func eitherMaskSecret(input string, shouldMask bool) string {
-	if !shouldMask {
-		return input
-	}
-
-	return utils.MaskString(input)
-}
-
 func setHeaderAttributes(span trace.Span, prefix string, httpHeaders http.Header) {
 	for key, headers := range httpHeaders {
 		if len(headers) == 0 {

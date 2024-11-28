@@ -100,7 +100,7 @@ func TestHTTPConnector_emptyServer(t *testing.T) {
 func TestHTTPConnector_authentication(t *testing.T) {
 	apiKey := "random_api_key"
 	bearerToken := "random_bearer_token"
-	slog.SetLogLoggerLevel(slog.LevelInfo)
+	slog.SetLogLoggerLevel(slog.LevelDebug)
 	server := createMockServer(t, apiKey, bearerToken)
 	defer server.Close()
 
@@ -530,7 +530,6 @@ func TestHTTPConnector_distribution(t *testing.T) {
 		assertHTTPResponse(t, res, http.StatusOK, schema.QueryResponse{
 			{
 				Rows: []map[string]any{
-
 					{"__value": map[string]any{
 						"errors": []any{},
 						"results": []any{
@@ -694,6 +693,7 @@ func TestHTTPConnector_multiSchemas(t *testing.T) {
 	testServer := connServer.BuildTestServer()
 	defer testServer.Close()
 
+	slog.SetLogLoggerLevel(slog.LevelDebug)
 	reqBody := []byte(`{
 			"collection": "findCats",
 			"query": {
@@ -914,9 +914,10 @@ func (mds *mockMultiSchemaServer) createServer() *httptest.Server {
 		return func(w http.ResponseWriter, r *http.Request) {
 			switch r.Method {
 			case http.MethodGet:
-				log.Println("headers", r.Header)
 				if r.Header.Get("pet") != name {
+					slog.Error(fmt.Sprintf("expected r.Header.Get(\"pet\") == %s, got %s", name, r.Header.Get("pet")))
 					w.WriteHeader(http.StatusBadRequest)
+
 					return
 				}
 				writeResponse(w, []byte(fmt.Sprintf(`{"name": "%s"}`, name)))
@@ -999,5 +1000,6 @@ func assertHTTPResponse[B any](t *testing.T, res *http.Response, statusCode int,
 		t.Errorf("failed to decode json body, got error: %s; body: %s", err, string(bodyBytes))
 	}
 
+	log.Println(string(bodyBytes))
 	assert.DeepEqual(t, expectedBody, body)
 }

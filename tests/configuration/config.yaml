@@ -2,14 +2,15 @@
 output: schema.output.json
 strict: true
 forwardHeaders:
-  enabled: false
+  enabled: true
   argumentField: headers
-  responseHeaders:
-    headersField: "headers"
-    resultField: "response"
-    forwardHeaders:
-      - Content-Type
-      - X-Custom-Header
+  responseHeaders: null
+  # responseHeaders:
+  #   headersField: "headers"
+  #   resultField: "response"
+  #   forwardHeaders:
+  #     - Content-Type
+  #     - X-Custom-Header
 concurrency:
   query: 1
   mutation: 1

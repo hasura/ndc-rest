@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"regexp"
 
-	rest "github.com/hasura/ndc-http/ndc-http-schema/schema"
 	"github.com/hasura/ndc-sdk-go/schema"
 	"github.com/hasura/ndc-sdk-go/utils"
 )
@@ -31,10 +30,9 @@ type HTTPOptions struct {
 	Servers  []string `json:"serverIds" yaml:"serverIds"`
 	Parallel bool     `json:"parallel"  yaml:"parallel"`
 
-	Explain     bool                  `json:"-" yaml:"-"`
-	Distributed bool                  `json:"-" yaml:"-"`
-	Concurrency uint                  `json:"-" yaml:"-"`
-	Settings    *rest.NDCHttpSettings `json:"-" yaml:"-"`
+	Explain     bool `json:"-" yaml:"-"`
+	Distributed bool `json:"-" yaml:"-"`
+	Concurrency uint `json:"-" yaml:"-"`
 }
 
 // FromValue parses http execution options from any value

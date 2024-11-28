@@ -17,8 +17,6 @@ type NDCHttpSettings struct {
 	SecuritySchemes map[string]SecurityScheme  `json:"securitySchemes,omitempty" mapstructure:"securitySchemes" yaml:"securitySchemes,omitempty"`
 	Security        AuthSecurities             `json:"security,omitempty"        mapstructure:"security"        yaml:"security,omitempty"`
 	Version         string                     `json:"version,omitempty"         mapstructure:"version"         yaml:"version,omitempty"`
-
-	headers map[string]string
 }
 
 // UnmarshalJSON implements json.Unmarshaler.
@@ -52,22 +50,7 @@ func (rs *NDCHttpSettings) Validate() error {
 		}
 	}
 
-	headers, err := getHeadersFromEnv(rs.Headers)
-	if err != nil {
-		return err
-	}
-	rs.headers = headers
-
 	return nil
-}
-
-// Validate if the current instance is valid
-func (rs NDCHttpSettings) GetHeaders() map[string]string {
-	if rs.headers != nil {
-		return rs.headers
-	}
-
-	return getHeadersFromEnvUnsafe(rs.Headers)
 }
 
 // ServerConfig contains server configurations
@@ -78,10 +61,6 @@ type ServerConfig struct {
 	SecuritySchemes map[string]SecurityScheme  `json:"securitySchemes,omitempty" mapstructure:"securitySchemes" yaml:"securitySchemes,omitempty"`
 	Security        AuthSecurities             `json:"security,omitempty"        mapstructure:"security"        yaml:"security,omitempty"`
 	TLS             *TLSConfig                 `json:"tls,omitempty"             mapstructure:"tls"             yaml:"tls,omitempty"`
-
-	// cached values that are loaded from environment variables
-	url     *url.URL
-	headers map[string]string
 }
 
 // UnmarshalJSON implements json.Unmarshaler.
@@ -112,47 +91,26 @@ func (ss *ServerConfig) Validate() error {
 		return errors.New("url is required for server")
 	}
 
-	urlValue, err := parseHttpURL(rawURL)
+	_, err = parseHttpURL(rawURL)
 	if err != nil {
 		return fmt.Errorf("server url: %w", err)
 	}
-
-	ss.url = urlValue
-
-	headers, err := getHeadersFromEnv(ss.Headers)
-	if err != nil {
-		return err
-	}
-	ss.headers = headers
 
 	return nil
 }
 
 // Validate if the current instance is valid
-func (ss ServerConfig) GetURL() (url.URL, error) {
-	if ss.url != nil {
-		return *ss.url, nil
-	}
-
+func (ss ServerConfig) GetURL() (*url.URL, error) {
 	rawURL, err := ss.URL.Get()
 	if err != nil {
-		return url.URL{}, err
+		return nil, err
 	}
 	urlValue, err := parseHttpURL(rawURL)
 	if err != nil {
-		return url.URL{}, fmt.Errorf("server url: %w", err)
+		return nil, fmt.Errorf("server url: %w", err)
 	}
 
-	return *urlValue, nil
-}
-
-// Validate if the current instance is valid
-func (ss ServerConfig) GetHeaders() map[string]string {
-	if ss.headers != nil {
-		return ss.headers
-	}
-
-	return getHeadersFromEnvUnsafe(ss.Headers)
+	return urlValue, nil
 }
 
 // parseHttpURL parses and validate if the URL has HTTP scheme
@@ -206,31 +164,4 @@ type TLSConfig struct {
 // Validate if the current instance is valid
 func (ss TLSConfig) Validate() error {
 	return nil
-}
-
-func getHeadersFromEnv(headers map[string]utils.EnvString) (map[string]string, error) {
-	results := make(map[string]string)
-	for key, header := range headers {
-		value, err := header.Get()
-		if err != nil {
-			return nil, fmt.Errorf("headers[%s]: %w", key, err)
-		}
-		if value != "" {
-			results[key] = value
-		}
-	}
-
-	return results, nil
-}
-
-func getHeadersFromEnvUnsafe(headers map[string]utils.EnvString) map[string]string {
-	results := make(map[string]string)
-	for key, header := range headers {
-		value, _ := header.Get()
-		if value != "" {
-			results[key] = value
-		}
-	}
-
-	return results
 }

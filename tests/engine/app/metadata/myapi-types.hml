@@ -112,3 +112,61 @@ definition:
   graphql:
     comparisonExpressionTypeName: URI_comparison_exp
 
+---
+kind: DataConnectorScalarRepresentation
+version: v1
+definition:
+  dataConnectorName: myapi
+  dataConnectorScalarType: String
+  representation: String
+  graphql:
+    comparisonExpressionTypeName: String_comparison_exp
+
+---
+kind: DataConnectorScalarRepresentation
+version: v1
+definition:
+  dataConnectorName: myapi
+  dataConnectorScalarType: Boolean
+  representation: Boolean
+  graphql:
+    comparisonExpressionTypeName: Boolean_comparison_exp
+
+---
+kind: ScalarType
+version: v1
+definition:
+  name: JSON
+  graphql:
+    typeName: JSON
+
+---
+kind: BooleanExpressionType
+version: v1
+definition:
+  name: JSON_bool_exp
+  operand:
+    scalar:
+      type: JSON
+      comparisonOperators: []
+      dataConnectorOperatorMapping:
+        - dataConnectorName: myapi
+          dataConnectorScalarType: JSON
+          operatorMapping: {}
+  logicalOperators:
+    enable: true
+  isNull:
+    enable: true
+  graphql:
+    typeName: JSON_bool_exp
+
+---
+kind: DataConnectorScalarRepresentation
+version: v1
+definition:
+  dataConnectorName: myapi
+  dataConnectorScalarType: JSON
+  representation: JSON
+  graphql:
+    comparisonExpressionTypeName: JSON_comparison_exp
+

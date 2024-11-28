@@ -7,7 +7,6 @@ import (
 	"net/http"
 
 	"github.com/hasura/ndc-http/connector/internal"
-	"github.com/hasura/ndc-http/connector/internal/settings"
 	"github.com/hasura/ndc-http/ndc-http-schema/configuration"
 	rest "github.com/hasura/ndc-http/ndc-http-schema/schema"
 	"github.com/hasura/ndc-sdk-go/connector"
@@ -22,7 +21,7 @@ type HTTPConnector struct {
 	rawSchema    *schema.RawSchemaResponse
 	schema       *rest.NDCHttpSchema
 	httpClient   *http.Client
-	settings     *settings.SettingManager
+	upstreams    *internal.UpstreamManager
 }
 
 // NewHTTPConnector creates a HTTP connector instance
@@ -80,7 +79,7 @@ func (c *HTTPConnector) ParseConfiguration(ctx context.Context, configurationDir
 	}
 
 	c.config = config
-	c.settings = settings.NewSettingManager(c.httpClient)
+	c.upstreams = internal.NewUpstreamManager(c.httpClient)
 	if err := c.ApplyNDCHttpSchemas(ctx, config, schemas, logger); err != nil {
 		return nil, fmt.Errorf("failed to validate NDC HTTP schema: %w", err)
 	}

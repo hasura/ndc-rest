@@ -18,7 +18,6 @@ import (
 	"sync"
 	"time"
 
-	"github.com/hasura/ndc-http/connector/internal/settings"
 	"github.com/hasura/ndc-http/ndc-http-schema/configuration"
 	rest "github.com/hasura/ndc-http/ndc-http-schema/schema"
 	restUtils "github.com/hasura/ndc-http/ndc-http-schema/utils"
@@ -35,7 +34,7 @@ import (
 
 // HTTPClient represents a http client wrapper with advanced methods
 type HTTPClient struct {
-	settings       *settings.SettingManager
+	manager        *UpstreamManager
 	metadata       *configuration.NDCHttpRuntimeSchema
 	forwardHeaders configuration.ForwardHeadersSettings
 	tracer         *connector.Tracer
@@ -43,9 +42,9 @@ type HTTPClient struct {
 }
 
 // NewHTTPClient creates a http client wrapper
-func NewHTTPClient(settings *settings.SettingManager, metadata *configuration.NDCHttpRuntimeSchema, forwardHeaders configuration.ForwardHeadersSettings, tracer *connector.Tracer) *HTTPClient {
+func NewHTTPClient(upstreams *UpstreamManager, metadata *configuration.NDCHttpRuntimeSchema, forwardHeaders configuration.ForwardHeadersSettings, tracer *connector.Tracer) *HTTPClient {
 	return &HTTPClient{
-		settings:       settings,
+		manager:        upstreams,
 		tracer:         tracer,
 		metadata:       metadata,
 		forwardHeaders: forwardHeaders,
@@ -60,13 +59,13 @@ func (client *HTTPClient) SetTracer(tracer *connector.Tracer) {
 
 // Send creates and executes the request and evaluate response selection
 func (client *HTTPClient) Send(ctx context.Context, request *RetryableRequest, selection schema.NestedField, resultType schema.Type, httpOptions *HTTPOptions) (any, http.Header, error) {
-	requests, err := BuildDistributedRequestsWithOptions(request, httpOptions)
+	requests, err := client.manager.BuildDistributedRequestsWithOptions(request, httpOptions)
 	if err != nil {
 		return nil, nil, err
 	}
 
 	if !httpOptions.Distributed {
-		result, headers, err := client.sendSingle(ctx, &requests[0], selection, resultType, requests[0].ServerID, "single")
+		result, headers, err := client.sendSingle(ctx, &requests[0], selection, resultType, "single")
 		if err != nil {
 			return nil, nil, err
 		}
@@ -91,7 +90,7 @@ func (client *HTTPClient) sendSequence(ctx context.Context, requests []Retryable
 	var firstHeaders http.Header
 
 	for _, req := range requests {
-		result, headers, err := client.sendSingle(ctx, &req, selection, resultType, req.ServerID, "sequence")
+		result, headers, err := client.sendSingle(ctx, &req, selection, resultType, "sequence")
 		if err != nil {
 			results.Errors = append(results.Errors, DistributedError{
 				Server:         req.ServerID,
@@ -124,7 +123,7 @@ func (client *HTTPClient) sendParallel(ctx context.Context, requests []Retryable
 
 	sendFunc := func(req RetryableRequest) {
 		eg.Go(func() error {
-			result, headers, err := client.sendSingle(ctx, &req, selection, resultType, req.ServerID, "parallel")
+			result, headers, err := client.sendSingle(ctx, &req, selection, resultType, "parallel")
 			lock.Lock()
 			defer lock.Unlock()
 			if err != nil {
@@ -156,8 +155,8 @@ func (client *HTTPClient) sendParallel(ctx context.Context, requests []Retryable
 }
 
 // execute a request to the remote server with retries
-func (client *HTTPClient) sendSingle(ctx context.Context, request *RetryableRequest, selection schema.NestedField, resultType schema.Type, serverID string, mode string) (any, http.Header, *schema.ConnectorError) {
-	ctx, span := client.tracer.Start(ctx, "Send Request to Server "+serverID)
+func (client *HTTPClient) sendSingle(ctx context.Context, request *RetryableRequest, selection schema.NestedField, resultType schema.Type, mode string) (any, http.Header, *schema.ConnectorError) {
+	ctx, span := client.tracer.Start(ctx, "Send Request to Server "+request.ServerID)
 	defer span.End()
 
 	span.SetAttributes(attribute.String("execution.mode", mode))
@@ -172,8 +171,6 @@ func (client *HTTPClient) sendSingle(ctx context.Context, request *RetryableRequ
 	} else if strings.HasPrefix(request.URL.Scheme, "https") {
 		port = 443
 	}
-
-	client.propagator.Inject(ctx, propagation.HeaderCarrier(request.Headers))
 
 	logger := connector.GetLogger(ctx)
 	if logger.Enabled(ctx, slog.LevelDebug) {
@@ -198,7 +195,7 @@ func (client *HTTPClient) sendSingle(ctx context.Context, request *RetryableRequ
 	times := int(request.Runtime.Retry.Times)
 	delayMs := int(math.Max(float64(request.Runtime.Retry.Delay), 100))
 	for i := 0; i <= times; i++ {
-		resp, errorBytes, cancel, err = client.doRequest(ctx, request, serverID, port, i) //nolint:all
+		resp, errorBytes, cancel, err = client.doRequest(ctx, request, port, i) //nolint:all
 		if err != nil {
 			span.SetStatus(codes.Error, "failed to execute the request")
 			span.RecordError(err)
@@ -262,7 +259,7 @@ func (client *HTTPClient) sendSingle(ctx context.Context, request *RetryableRequ
 	return result, headers, nil
 }
 
-func (client *HTTPClient) doRequest(ctx context.Context, request *RetryableRequest, serverID string, port int, retryCount int) (*http.Response, []byte, context.CancelFunc, error) {
+func (client *HTTPClient) doRequest(ctx context.Context, request *RetryableRequest, port int, retryCount int) (*http.Response, []byte, context.CancelFunc, error) {
 	method := strings.ToUpper(request.RawRequest.Method)
 	ctx, span := client.tracer.Start(ctx, fmt.Sprintf("%s %s", method, request.RawRequest.URL), trace.WithSpanKind(trace.SpanKindClient))
 	defer span.End()
@@ -297,27 +294,10 @@ func (client *HTTPClient) doRequest(ctx context.Context, request *RetryableReque
 
 	client.propagator.Inject(ctx, propagation.HeaderCarrier(request.Headers))
 
-	req, cancel, err := request.CreateRequest(ctx)
-	if err != nil {
-		span.SetStatus(codes.Error, "error happened when creating request")
-		span.RecordError(err)
-
-		return nil, nil, nil, err
-	}
-
-	httpClient, err := client.settings.InjectCredential(req, client.metadata.Name, request.RawRequest.Security)
-	if err != nil {
-		span.SetStatus(codes.Error, "error happened when creating request")
-		span.RecordError(err)
-
-		return nil, nil, nil, err
-	}
-
-	resp, err := httpClient.Do(req)
+	resp, cancel, err := client.manager.ExecuteRequest(ctx, request, client.metadata.Name)
 	if err != nil {
 		span.SetStatus(codes.Error, "error happened when executing the request")
 		span.RecordError(err)
-		cancel()
 
 		return nil, nil, nil, err
 	}

@@ -29,7 +29,7 @@ func (c *HTTPConnector) ApplyNDCHttpSchemas(ctx context.Context, config *configu
 	}
 
 	for _, meta := range metadata {
-		if err := c.settings.Register(ctx, meta.Name, meta.Settings); err != nil {
+		if err := c.upstreams.Register(ctx, meta.Name, meta.Settings); err != nil {
 			return err
 		}
 	}
