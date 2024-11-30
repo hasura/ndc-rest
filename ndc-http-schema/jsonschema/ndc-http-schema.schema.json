@@ -732,9 +732,6 @@
               "enum": [
                 "mutualTLS"
               ]
-            },
-            "tls": {
-              "$ref": "#/$defs/TLSConfig"
             }
           },
           "type": "object",
@@ -786,7 +783,7 @@
         },
         "certPem": {
           "$ref": "#/$defs/EnvString",
-          "description": "Alternative to cert_file. Provide the certificate contents as a string instead of a filepath."
+          "description": "Alternative to cert_file. Provide the certificate contents as a base64-encoded string instead of a filepath."
         },
         "keyFile": {
           "$ref": "#/$defs/EnvString",
@@ -794,7 +791,7 @@
         },
         "keyPem": {
           "$ref": "#/$defs/EnvString",
-          "description": "Alternative to key_file. Provide the key contents as a string instead of a filepath."
+          "description": "Alternative to key_file. Provide the key contents as a base64-encoded string instead of a filepath."
         },
         "caFile": {
           "$ref": "#/$defs/EnvString",
@@ -802,7 +799,7 @@
         },
         "caPem": {
           "$ref": "#/$defs/EnvString",
-          "description": "Alternative to ca_file. Provide the CA cert contents as a string instead of a filepath."
+          "description": "Alternative to ca_file. Provide the CA cert contents as a base64-encoded string instead of a filepath."
         },
         "insecureSkipVerify": {
           "$ref": "#/$defs/EnvBool",

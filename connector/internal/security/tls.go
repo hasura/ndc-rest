@@ -3,6 +3,7 @@ package security
 import (
 	"crypto/tls"
 	"crypto/x509"
+	"encoding/base64"
 	"errors"
 	"fmt"
 	"net/http"
@@ -117,7 +118,12 @@ func loadCACertPool(tlsConfig *schema.TLSConfig) (*x509.CertPool, error) {
 		}
 
 		if caPem != "" {
-			return loadCertPem([]byte(caPem), includeSystemCACertsPool)
+			caData, err := base64.StdEncoding.DecodeString(caPem)
+			if err != nil {
+				return nil, fmt.Errorf("failed to decode CA PEM from base64: %w", err)
+			}
+
+			return loadCertPem(caData, includeSystemCACertsPool)
 		}
 	}
 
@@ -175,7 +181,10 @@ func loadCertificate(tlsConfig *schema.TLSConfig) (*tls.Certificate, error) {
 	}
 
 	if certPem != "" {
-		certData = []byte(certPem)
+		certData, err = base64.StdEncoding.DecodeString(certPem)
+		if err != nil {
+			return nil, fmt.Errorf("failed to decode certificate PEM from base64: %w", err)
+		}
 	} else if tlsConfig.CertFile != nil {
 		certFile, err := tlsConfig.CertFile.GetOrDefault("")
 		if err != nil {
@@ -198,7 +207,10 @@ func loadCertificate(tlsConfig *schema.TLSConfig) (*tls.Certificate, error) {
 	}
 
 	if keyPem != "" {
-		keyData = []byte(keyPem)
+		keyData, err = base64.StdEncoding.DecodeString(keyPem)
+		if err != nil {
+			return nil, fmt.Errorf("failed to decode key PEM from base64: %w", err)
+		}
 	} else if tlsConfig.KeyFile != nil {
 		keyFile, err := tlsConfig.KeyFile.GetOrDefault("")
 		if err != nil {

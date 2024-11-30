@@ -19,16 +19,16 @@ const defaultMaxTLSVersion = 0
 type TLSConfig struct {
 	// Path to the TLS cert to use for TLS required connections.
 	CertFile *utils.EnvString `json:"certFile,omitempty" mapstructure:"certFile" yaml:"certFile,omitempty"`
-	// Alternative to cert_file. Provide the certificate contents as a string instead of a filepath.
+	// Alternative to cert_file. Provide the certificate contents as a base64-encoded string instead of a filepath.
 	CertPem *utils.EnvString `json:"certPem,omitempty" mapstructure:"certPem" yaml:"certPem,omitempty"`
 	// Path to the TLS key to use for TLS required connections.
 	KeyFile *utils.EnvString `json:"keyFile,omitempty" mapstructure:"keyFile" yaml:"keyFile,omitempty"`
-	// Alternative to key_file. Provide the key contents as a string instead of a filepath.
+	// Alternative to key_file. Provide the key contents as a base64-encoded string instead of a filepath.
 	KeyPem *utils.EnvString `json:"keyPem,omitempty" mapstructure:"keyPem" yaml:"keyPem,omitempty"`
 	// Path to the CA cert. For a client this verifies the server certificate. For a server this verifies client certificates.
 	// If empty uses system root CA.
 	CAFile *utils.EnvString `json:"caFile,omitempty" mapstructure:"caFile" yaml:"caFile,omitempty"`
-	// Alternative to ca_file. Provide the CA cert contents as a string instead of a filepath.
+	// Alternative to ca_file. Provide the CA cert contents as a base64-encoded string instead of a filepath.
 	CAPem *utils.EnvString `json:"caPem,omitempty" mapstructure:"caPem" yaml:"caPem,omitempty"`
 	// Additionally you can configure TLS to be enabled but skip verifying the server's certificate chain.
 	InsecureSkipVerify *utils.EnvBool `json:"insecureSkipVerify,omitempty" mapstructure:"insecureSkipVerify" yaml:"insecureSkipVerify,omitempty"`

@@ -8,10 +8,16 @@ settings:
       tls:
         caFile:
           env: PET_STORE_S1_CA_FILE
+        caPem:
+          env: PET_STORE_S1_CA_PEM
         certFile:
           env: PET_STORE_S1_CERT_FILE
+        certPem:
+          env: PET_STORE_S1_CERT_PEM
         keyFile:
           env: PET_STORE_S1_KEY_FILE
+        keyPem:
+          env: PET_STORE_S1_KEY_PEM
   securitySchemes:
     mtls:
       type: mutualTLS

@@ -30,6 +30,40 @@ func TestNDCHttpSettings(t *testing.T) {
 					{
 						"url": {
 							"value": "https://petstore3.swagger.io/api/v3.1"
+						},
+						"tls": {
+							"certFile": {
+								"env": "PET_STORE_CERT_FILE"
+							},
+							"certPem": {
+								"env": "PET_STORE_CERT_PEM"
+							},
+							"keyFile": {
+								"env": "PET_STORE_KEY_FILE"
+							},
+							"keyPem": {
+								"env": "PET_STORE_KEY_PEM"
+							},
+							"caFile": {
+								"env": "PET_STORE_CA_FILE"
+							},
+							"caPem": {
+								"env": "PET_STORE_CA_PEM"
+							},
+							"insecureSkipVerify": {
+								"env": "PET_STORE_INSECURE_SKIP_VERIFY",
+								"value": true
+							},
+							"includeSystemCACertsPool": {
+								"env": "PET_STORE_INCLUDE_SYSTEM_CA_CERT_POOL",
+								"value": true
+							},
+							"serverName": {
+								"env": "PET_STORE_SERVER_NAME"
+							},
+							"minVersion": "1.0",
+							"maxVersion": "1.3",
+							"cipherSuites": ["TLS_AES_128_GCM_SHA256"]
 						}
 					}
 				],
@@ -95,7 +129,41 @@ func TestNDCHttpSettings(t *testing.T) {
 						"petstore_auth": ["write:pets", "read:pets"]
 					}
 				],
-				"version": "1.0.19"
+				"version": "1.0.19",
+				"tls": {
+					"certFile": {
+						"env": "PET_STORE_CERT_FILE"
+					},
+					"certPem": {
+						"env": "PET_STORE_CERT_PEM"
+					},
+					"keyFile": {
+						"env": "PET_STORE_KEY_FILE"
+					},
+					"keyPem": {
+						"env": "PET_STORE_KEY_PEM"
+					},
+					"caFile": {
+						"env": "PET_STORE_CA_FILE"
+					},
+					"caPem": {
+						"env": "PET_STORE_CA_PEM"
+					},
+					"insecureSkipVerify": {
+						"env": "PET_STORE_INSECURE_SKIP_VERIFY",
+						"value": true
+					},
+					"includeSystemCACertsPool": {
+						"env": "PET_STORE_INCLUDE_SYSTEM_CA_CERT_POOL",
+						"value": true
+					},
+					"serverName": {
+						"env": "PET_STORE_SERVER_NAME"
+					},
+					"minVersion": "1.0",
+					"maxVersion": "1.3",
+					"cipherSuites": ["TLS_AES_128_GCM_SHA256"]
+				}
 			}`,
 			expected: NDCHttpSettings{
 				Servers: []ServerConfig{
@@ -104,6 +172,40 @@ func TestNDCHttpSettings(t *testing.T) {
 					},
 					{
 						URL: utils.NewEnvStringValue("https://petstore3.swagger.io/api/v3.1"),
+						TLS: &TLSConfig{
+							CertFile: &utils.EnvString{
+								Variable: utils.ToPtr("PET_STORE_CERT_FILE"),
+							},
+							CertPem: &utils.EnvString{
+								Variable: utils.ToPtr("PET_STORE_CERT_PEM"),
+							},
+							KeyFile: &utils.EnvString{
+								Variable: utils.ToPtr("PET_STORE_KEY_FILE"),
+							},
+							KeyPem: &utils.EnvString{
+								Variable: utils.ToPtr("PET_STORE_KEY_PEM"),
+							},
+							CAFile: &utils.EnvString{
+								Variable: utils.ToPtr("PET_STORE_CA_FILE"),
+							},
+							CAPem: &utils.EnvString{
+								Variable: utils.ToPtr("PET_STORE_CA_PEM"),
+							},
+							InsecureSkipVerify: &utils.EnvBool{
+								Variable: utils.ToPtr("PET_STORE_INSECURE_SKIP_VERIFY"),
+								Value:    utils.ToPtr(true),
+							},
+							IncludeSystemCACertsPool: &utils.EnvBool{
+								Variable: utils.ToPtr("PET_STORE_INCLUDE_SYSTEM_CA_CERT_POOL"),
+								Value:    utils.ToPtr(true),
+							},
+							ServerName: &utils.EnvString{
+								Variable: utils.ToPtr("PET_STORE_SERVER_NAME"),
+							},
+							MinVersion:   "1.0",
+							MaxVersion:   "1.3",
+							CipherSuites: []string{"TLS_AES_128_GCM_SHA256"},
+						},
 					},
 				},
 				SecuritySchemes: map[string]SecurityScheme{
@@ -161,6 +263,40 @@ func TestNDCHttpSettings(t *testing.T) {
 					NewAuthSecurity("petstore_auth", []string{"write:pets", "read:pets"}),
 				},
 				Version: "1.0.19",
+				TLS: &TLSConfig{
+					CertFile: &utils.EnvString{
+						Variable: utils.ToPtr("PET_STORE_CERT_FILE"),
+					},
+					CertPem: &utils.EnvString{
+						Variable: utils.ToPtr("PET_STORE_CERT_PEM"),
+					},
+					KeyFile: &utils.EnvString{
+						Variable: utils.ToPtr("PET_STORE_KEY_FILE"),
+					},
+					KeyPem: &utils.EnvString{
+						Variable: utils.ToPtr("PET_STORE_KEY_PEM"),
+					},
+					CAFile: &utils.EnvString{
+						Variable: utils.ToPtr("PET_STORE_CA_FILE"),
+					},
+					CAPem: &utils.EnvString{
+						Variable: utils.ToPtr("PET_STORE_CA_PEM"),
+					},
+					InsecureSkipVerify: &utils.EnvBool{
+						Variable: utils.ToPtr("PET_STORE_INSECURE_SKIP_VERIFY"),
+						Value:    utils.ToPtr(true),
+					},
+					IncludeSystemCACertsPool: &utils.EnvBool{
+						Variable: utils.ToPtr("PET_STORE_INCLUDE_SYSTEM_CA_CERT_POOL"),
+						Value:    utils.ToPtr(true),
+					},
+					ServerName: &utils.EnvString{
+						Variable: utils.ToPtr("PET_STORE_SERVER_NAME"),
+					},
+					MinVersion:   "1.0",
+					MaxVersion:   "1.3",
+					CipherSuites: []string{"TLS_AES_128_GCM_SHA256"},
+				},
 			},
 		},
 	}
@@ -172,19 +308,21 @@ func TestNDCHttpSettings(t *testing.T) {
 				t.Errorf("failed to decode: %s", err)
 				t.FailNow()
 			}
-			for i, s := range tc.expected.Servers {
-				assert.DeepEqual(t, s.URL.Variable, result.Servers[i].URL.Variable)
-				assert.DeepEqual(t, s.URL.Value, result.Servers[i].URL.Value)
-			}
+			assert.NilError(t, result.Validate())
+			assert.DeepEqual(t, tc.expected.Servers, result.Servers)
 			assert.DeepEqual(t, tc.expected.Headers, result.Headers)
 			assert.DeepEqual(t, tc.expected.Security, result.Security)
+
 			for key, expectedSS := range tc.expected.SecuritySchemes {
 				ss := result.SecuritySchemes[key]
 				ss.JSONSchema()
 				assert.Equal(t, expectedSS.GetType(), ss.GetType())
 				assert.DeepEqual(t, expectedSS.SecuritySchemer, ss.SecuritySchemer, cmp.Exporter(func(t reflect.Type) bool { return true }))
 			}
+
 			assert.DeepEqual(t, tc.expected.Version, result.Version)
+			assert.DeepEqual(t, *tc.expected.TLS, *result.TLS)
+			assert.NilError(t, result.TLS.Validate())
 
 			_, err := json.Marshal(tc.expected)
 			if err != nil {
