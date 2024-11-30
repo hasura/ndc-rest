@@ -1,7 +1,6 @@
 package schema
 
 import (
-	"encoding/json"
 	"errors"
 	"fmt"
 	"net/url"
@@ -17,23 +16,7 @@ type NDCHttpSettings struct {
 	SecuritySchemes map[string]SecurityScheme  `json:"securitySchemes,omitempty" mapstructure:"securitySchemes" yaml:"securitySchemes,omitempty"`
 	Security        AuthSecurities             `json:"security,omitempty"        mapstructure:"security"        yaml:"security,omitempty"`
 	Version         string                     `json:"version,omitempty"         mapstructure:"version"         yaml:"version,omitempty"`
-}
-
-// UnmarshalJSON implements json.Unmarshaler.
-func (j *NDCHttpSettings) UnmarshalJSON(b []byte) error {
-	type Plain NDCHttpSettings
-
-	var raw Plain
-	if err := json.Unmarshal(b, &raw); err != nil {
-		return err
-	}
-
-	result := NDCHttpSettings(raw)
-	_ = result.Validate()
-
-	*j = result
-
-	return nil
+	TLS             *TLSConfig                 `json:"tls,omitempty"             mapstructure:"tls"             yaml:"tls,omitempty"`
 }
 
 // Validate if the current instance is valid
@@ -50,6 +33,12 @@ func (rs *NDCHttpSettings) Validate() error {
 		}
 	}
 
+	if rs.TLS != nil {
+		if err := rs.TLS.Validate(); err != nil {
+			return err
+		}
+	}
+
 	return nil
 }
 
@@ -61,23 +50,6 @@ type ServerConfig struct {
 	SecuritySchemes map[string]SecurityScheme  `json:"securitySchemes,omitempty" mapstructure:"securitySchemes" yaml:"securitySchemes,omitempty"`
 	Security        AuthSecurities             `json:"security,omitempty"        mapstructure:"security"        yaml:"security,omitempty"`
 	TLS             *TLSConfig                 `json:"tls,omitempty"             mapstructure:"tls"             yaml:"tls,omitempty"`
-}
-
-// UnmarshalJSON implements json.Unmarshaler.
-func (j *ServerConfig) UnmarshalJSON(b []byte) error {
-	type Plain ServerConfig
-
-	var raw Plain
-	if err := json.Unmarshal(b, &raw); err != nil {
-		return err
-	}
-
-	result := ServerConfig(raw)
-	_ = result.Validate()
-
-	*j = result
-
-	return nil
 }
 
 // Validate if the current instance is valid
@@ -94,6 +66,12 @@ func (ss *ServerConfig) Validate() error {
 	_, err = parseHttpURL(rawURL)
 	if err != nil {
 		return fmt.Errorf("server url: %w", err)
+	}
+
+	if ss.TLS != nil {
+		if err := ss.TLS.Validate(); err != nil {
+			return fmt.Errorf("tls: %w", err)
+		}
 	}
 
 	return nil
@@ -128,40 +106,4 @@ func ParseRelativeOrHttpURL(input string) (*url.URL, error) {
 	}
 
 	return parseHttpURL(input)
-}
-
-// TLSConfig represents the transport layer security (LTS) configuration for the mutualTLS authentication
-type TLSConfig struct {
-	// Path to the TLS cert to use for TLS required connections.
-	CertFile *utils.EnvString `json:"certFile,omitempty" mapstructure:"certFile" yaml:"certFile,omitempty"`
-	// Alternative to cert_file. Provide the certificate contents as a string instead of a filepath.
-	CertPem *utils.EnvString `json:"certPem,omitempty" mapstructure:"certPem" yaml:"certPem,omitempty"`
-	// Path to the TLS key to use for TLS required connections.
-	KeyFile *utils.EnvString `json:"keyFile,omitempty" mapstructure:"keyFile" yaml:"keyFile,omitempty"`
-	// Alternative to key_file. Provide the key contents as a string instead of a filepath.
-	KeyPem *utils.EnvString `json:"keyPem,omitempty" mapstructure:"keyPem" yaml:"keyPem,omitempty"`
-	// Path to the CA cert. For a client this verifies the server certificate. For a server this verifies client certificates.
-	// If empty uses system root CA.
-	CAFile *utils.EnvString `json:"caFile,omitempty" mapstructure:"caFile" yaml:"caFile,omitempty"`
-	// Alternative to ca_file. Provide the CA cert contents as a string instead of a filepath.
-	CAPem *utils.EnvString `json:"caPem,omitempty" mapstructure:"caPem" yaml:"caPem,omitempty"`
-	// Additionally you can configure TLS to be enabled but skip verifying the server's certificate chain.
-	InsecureSkipVerify *utils.EnvBool `json:"insecureSkipVerify,omitempty" mapstructure:"insecureSkipVerify" yaml:"insecureSkipVerify,omitempty"`
-	// Whether to load the system certificate authorities pool alongside the certificate authority.
-	IncludeSystemCACertsPool *utils.EnvBool `json:"includeSystemCACertsPool,omitempty" mapstructure:"includeSystemCACertsPool" yaml:"includeSystemCACertsPool,omitempty"`
-	// Minimum acceptable TLS version.
-	MinVersion *utils.EnvString `json:"minVersion,omitempty" mapstructure:"minVersion" yaml:"minVersion,omitempty"`
-	// Maximum acceptable TLS version.
-	MaxVersion *utils.EnvString `json:"maxVersion,omitempty" mapstructure:"maxVersion" yaml:"maxVersion,omitempty"`
-	// Explicit cipher suites can be set. If left blank, a safe default list is used.
-	// See https://go.dev/src/crypto/tls/cipher_suites.go for a list of supported cipher suites.
-	CipherSuites []string `json:"cipherSuites,omitempty" mapstructure:"cipherSuites" yaml:"cipherSuites,omitempty"`
-	// Specifies the duration after which the certificate will be reloaded. If not set, it will never be reloaded.
-	// The interval unit is minute
-	ReloadInterval *utils.EnvInt `json:"reloadInterval,omitempty" mapstructure:"reloadInterval" yaml:"reloadInterval,omitempty"`
-}
-
-// Validate if the current instance is valid
-func (ss TLSConfig) Validate() error {
-	return nil
 }

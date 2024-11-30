@@ -188,6 +188,9 @@ func (oc *OAS3Builder) convertSecuritySchemes(scheme orderedmap.Pair[string, *v3
 		result.SecuritySchemer = rest.NewOpenIDConnectConfig(security.OpenIdConnectUrl)
 	case rest.MutualTLSScheme:
 		result.SecuritySchemer = rest.NewMutualTLSAuthConfig()
+		if oc.schema.Settings.TLS == nil {
+			oc.schema.Settings.TLS = createTLSConfig([]string{oc.EnvPrefix, key})
+		}
 	default:
 		return fmt.Errorf("invalid security scheme: %s", security.Type)
 	}

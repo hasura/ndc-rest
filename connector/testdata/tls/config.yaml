@@ -1,0 +1,21 @@
+# yaml-language-server: $schema=../../../ndc-http-schema/jsonschema/configuration.schema.json
+strict: true
+forwardHeaders:
+  enabled: false
+  argumentField: headers
+  responseHeaders: null
+concurrency:
+  query: 1
+  mutation: 1
+  http: 0
+files:
+  - file: schema.yaml
+    spec: ndc
+    timeout:
+      value: 10
+    retry:
+      times:
+        value: 1
+      delay:
+        value: 500
+      httpStatus: [429, 500, 501, 502]

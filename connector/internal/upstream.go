@@ -14,7 +14,7 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/hasura/ndc-http/connector/internal/auth"
+	"github.com/hasura/ndc-http/connector/internal/security"
 	"github.com/hasura/ndc-http/ndc-http-schema/configuration"
 	rest "github.com/hasura/ndc-http/ndc-http-schema/schema"
 	"github.com/hasura/ndc-sdk-go/connector"
@@ -26,21 +26,22 @@ import (
 type Server struct {
 	URL         *url.URL
 	Headers     map[string]string
-	Credentials map[string]auth.Credential
+	Credentials map[string]security.Credential
 	Security    rest.AuthSecurities
+	HTTPClient  *http.Client
 }
 
 type UpstreamSetting struct {
+	httpClient  *http.Client
 	servers     map[string]Server
 	headers     map[string]string
 	security    rest.AuthSecurities
-	credentials map[string]auth.Credential
+	credentials map[string]security.Credential
 }
 
 type UpstreamManager struct {
 	config        *configuration.Configuration
 	defaultClient *http.Client
-	httpClients   map[string]*http.Client
 	upstreams     map[string]UpstreamSetting
 }
 
@@ -48,7 +49,6 @@ func NewUpstreamManager(httpClient *http.Client, config *configuration.Configura
 	return &UpstreamManager{
 		config:        config,
 		defaultClient: httpClient,
-		httpClients:   make(map[string]*http.Client),
 		upstreams:     make(map[string]UpstreamSetting),
 	}
 }
@@ -56,13 +56,24 @@ func NewUpstreamManager(httpClient *http.Client, config *configuration.Configura
 func (sm *UpstreamManager) Register(ctx context.Context, namespace string, rawSettings *rest.NDCHttpSettings) error {
 	logger := connector.GetLogger(ctx)
 	httpClient := sm.defaultClient
-	sm.httpClients[namespace] = httpClient
+
+	if rawSettings.TLS != nil {
+		tlsClient, err := security.NewHTTPClientTLS(httpClient, rawSettings.TLS)
+		if err != nil {
+			return fmt.Errorf("%s: %w", namespace, err)
+		}
+
+		if tlsClient != nil {
+			httpClient = tlsClient
+		}
+	}
 
 	settings := UpstreamSetting{
 		servers:     make(map[string]Server),
 		security:    rawSettings.Security,
 		headers:     sm.getHeadersFromEnv(logger, namespace, rawSettings.Headers),
 		credentials: sm.registerSecurityCredentials(ctx, httpClient, rawSettings.SecuritySchemes, logger.With(slog.String("namespace", namespace))),
+		httpClient:  httpClient,
 	}
 
 	for i, server := range rawSettings.Servers {
@@ -80,11 +91,24 @@ func (sm *UpstreamManager) Register(ctx context.Context, namespace string, rawSe
 			continue
 		}
 
+		serverClient := httpClient
+		if server.TLS != nil {
+			tlsClient, err := security.NewHTTPClientTLS(sm.defaultClient, server.TLS)
+			if err != nil {
+				return fmt.Errorf("%s.server[%s]: %w", namespace, serverID, err)
+			}
+
+			if tlsClient != nil {
+				serverClient = tlsClient
+			}
+		}
+
 		newServer := Server{
 			URL:         serverURL,
 			Headers:     sm.getHeadersFromEnv(logger, namespace, server.Headers),
 			Security:    server.Security,
-			Credentials: sm.registerSecurityCredentials(ctx, httpClient, server.SecuritySchemes, logger.With(slog.String("namespace", namespace), slog.String("server_id", serverID))),
+			Credentials: sm.registerSecurityCredentials(ctx, serverClient, server.SecuritySchemes, logger.With(slog.String("namespace", namespace), slog.String("server_id", serverID))),
+			HTTPClient:  serverClient,
 		}
 
 		settings.servers[serverID] = newServer
@@ -119,14 +143,13 @@ func (sm *UpstreamManager) ExecuteRequest(ctx context.Context, request *Retryabl
 }
 
 func (sm *UpstreamManager) evalRequestSettings(ctx context.Context, request *RetryableRequest, req *http.Request, namespace string) (*http.Client, error) {
-	httpClient, ok := sm.httpClients[namespace]
-	if !ok {
-		httpClient = sm.defaultClient
-	}
-
+	httpClient := sm.defaultClient
 	settings, ok := sm.upstreams[namespace]
 	if !ok {
-		return httpClient, nil
+		return sm.defaultClient, nil
+	}
+	if settings.httpClient != nil {
+		httpClient = settings.httpClient
 	}
 
 	for key, header := range settings.headers {
@@ -144,6 +167,10 @@ func (sm *UpstreamManager) evalRequestSettings(ctx context.Context, request *Ret
 	var err error
 	server, ok := settings.servers[request.ServerID]
 	if ok {
+		if server.HTTPClient != nil {
+			httpClient = server.HTTPClient
+		}
+
 		for key, header := range server.Headers {
 			if header != "" {
 				req.Header.Set(key, header)
@@ -179,7 +206,7 @@ func (sm *UpstreamManager) evalRequestSettings(ctx context.Context, request *Ret
 	return httpClient, nil
 }
 
-func (sm *UpstreamManager) evalSecuritySchemes(req *http.Request, securities rest.AuthSecurities, credentials map[string]auth.Credential) (*http.Client, error) {
+func (sm *UpstreamManager) evalSecuritySchemes(req *http.Request, securities rest.AuthSecurities, credentials map[string]security.Credential) (*http.Client, error) {
 	for _, security := range securities {
 		sc, ok := credentials[security.Name()]
 		if !ok {
@@ -341,11 +368,11 @@ func (sm *UpstreamManager) getBaseURLFromServers(servers map[string]Server, name
 	}
 }
 
-func (sm *UpstreamManager) registerSecurityCredentials(ctx context.Context, httpClient *http.Client, securitySchemes map[string]rest.SecurityScheme, logger *slog.Logger) map[string]auth.Credential {
-	credentials := make(map[string]auth.Credential)
+func (sm *UpstreamManager) registerSecurityCredentials(ctx context.Context, httpClient *http.Client, securitySchemes map[string]rest.SecurityScheme, logger *slog.Logger) map[string]security.Credential {
+	credentials := make(map[string]security.Credential)
 
 	for key, ss := range securitySchemes {
-		cred, headerForwardRequired, err := auth.NewCredential(ctx, httpClient, ss)
+		cred, headerForwardRequired, err := security.NewCredential(ctx, httpClient, ss)
 		if err != nil {
 			// Relax the error to allow schema introspection without environment variables setting.
 			// Moreover, because there are many security schemes the user may use one of them.

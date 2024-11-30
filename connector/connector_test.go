@@ -3,6 +3,8 @@ package connector
 import (
 	"bytes"
 	"context"
+	"crypto/tls"
+	"crypto/x509"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -12,6 +14,7 @@ import (
 	"net/http/httptest"
 	"os"
 	"path"
+	"path/filepath"
 	"strings"
 	"sync/atomic"
 	"testing"
@@ -1152,7 +1155,7 @@ func assertHTTPResponse[B any](t *testing.T, res *http.Response, statusCode int,
 	assert.DeepEqual(t, expectedBody, body)
 }
 
-func TestOAuth(t *testing.T) {
+func TestConnectorOAuth(t *testing.T) {
 	apiKey := "random_api_key"
 	bearerToken := "random_bearer_token"
 	oauth2ClientID := "test-client"
@@ -1221,5 +1224,138 @@ func TestOAuth(t *testing.T) {
 				},
 			},
 		},
+	})
+}
+
+func createMockTLSServer(t *testing.T, dir string) *httptest.Server {
+	t.Helper()
+	mux := http.NewServeMux()
+
+	writeResponse := func(w http.ResponseWriter, body string) {
+		w.Header().Add("Content-Type", "application/json")
+		w.WriteHeader(http.StatusOK)
+		_, _ = w.Write([]byte(body))
+	}
+	mux.HandleFunc("/pet", func(w http.ResponseWriter, r *http.Request) {
+		switch r.Method {
+		case http.MethodGet, http.MethodPost:
+			writeResponse(w, "{}")
+		default:
+			w.WriteHeader(http.StatusMethodNotAllowed)
+			return
+		}
+	})
+
+	// load CA certificate file and add it to list of client CAs
+	caCertFile, err := os.ReadFile(filepath.Join(dir, "ca.crt"))
+	if err != nil {
+		log.Fatalf("error reading CA certificate: %v", err)
+	}
+	caCertPool := x509.NewCertPool()
+	caCertPool.AppendCertsFromPEM(caCertFile)
+
+	// Create the TLS Config with the CA pool and enable Client certificate validation
+	cert, err := tls.LoadX509KeyPair(filepath.Join(dir, "server.crt"), filepath.Join(dir, "server.key"))
+	assert.NilError(t, err)
+
+	tlsConfig := &tls.Config{
+		ClientCAs:    caCertPool,
+		Certificates: []tls.Certificate{cert},
+		ClientAuth:   tls.RequireAndVerifyClientCert,
+	}
+
+	server := httptest.NewUnstartedServer(mux)
+	server.TLS = tlsConfig
+	server.StartTLS()
+
+	return server
+}
+
+func TestConnectorTLS(t *testing.T) {
+	server := createMockTLSServer(t, "testdata/tls/certs")
+	defer server.Close()
+
+	server1 := createMockTLSServer(t, "testdata/tls/certs_s1")
+	defer server1.Close()
+
+	t.Setenv("PET_STORE_URL", server.URL)
+	t.Setenv("PET_STORE_CA_FILE", filepath.Join("testdata/tls/certs", "ca.crt"))
+	t.Setenv("PET_STORE_CERT_FILE", filepath.Join("testdata/tls/certs", "client.crt"))
+	t.Setenv("PET_STORE_KEY_FILE", filepath.Join("testdata/tls/certs", "client.key"))
+
+	t.Setenv("PET_STORE_S1_URL", server1.URL)
+	t.Setenv("PET_STORE_S1_CA_FILE", filepath.Join("testdata/tls/certs_s1", "ca.crt"))
+	t.Setenv("PET_STORE_S1_CERT_FILE", filepath.Join("testdata/tls/certs_s1", "client.crt"))
+	t.Setenv("PET_STORE_S1_KEY_FILE", filepath.Join("testdata/tls/certs_s1", "client.key"))
+
+	connServer, err := connector.NewServer(NewHTTPConnector(), &connector.ServerOptions{
+		Configuration: "testdata/tls",
+	}, connector.WithoutRecovery())
+	assert.NilError(t, err)
+	testServer := connServer.BuildTestServer()
+	defer testServer.Close()
+
+	t.Run("default_cert", func(t *testing.T) {
+
+		findPetsBody := []byte(`{
+		"collection": "findPets",
+		"query": {
+			"fields": {
+				"__value": {
+					"type": "column",
+					"column": "__value"
+				}
+			}
+		},
+		"arguments": {},
+		"collection_relationships": {}
+	}`)
+
+		res, err := http.Post(fmt.Sprintf("%s/query", testServer.URL), "application/json", bytes.NewBuffer(findPetsBody))
+		assert.NilError(t, err)
+		assertHTTPResponse(t, res, http.StatusOK, schema.QueryResponse{
+			{
+				Rows: []map[string]any{
+					{
+						"__value": map[string]any{},
+					},
+				},
+			},
+		})
+	})
+
+	t.Run("server1_cert", func(t *testing.T) {
+		findPetsBody := []byte(`{
+			"collection": "findPets",
+			"query": {
+				"fields": {
+					"__value": {
+						"type": "column",
+						"column": "__value"
+					}
+				}
+			},
+			"arguments": {
+				"httpOptions": {
+					"type": "literal",
+					"value": {
+						"servers": ["1"]
+					}
+				}
+			},
+			"collection_relationships": {}
+		}`)
+
+		res, err := http.Post(fmt.Sprintf("%s/query", testServer.URL), "application/json", bytes.NewBuffer(findPetsBody))
+		assert.NilError(t, err)
+		assertHTTPResponse(t, res, http.StatusOK, schema.QueryResponse{
+			{
+				Rows: []map[string]any{
+					{
+						"__value": map[string]any{},
+					},
+				},
+			},
+		})
 	})
 }

@@ -114,32 +114,6 @@
       "additionalProperties": false,
       "type": "object"
     },
-    "EnvInt": {
-      "anyOf": [
-        {
-          "required": [
-            "value"
-          ],
-          "title": "value"
-        },
-        {
-          "required": [
-            "env"
-          ],
-          "title": "env"
-        }
-      ],
-      "properties": {
-        "value": {
-          "type": "integer"
-        },
-        "env": {
-          "type": "string"
-        }
-      },
-      "additionalProperties": false,
-      "type": "object"
-    },
     "EnvString": {
       "anyOf": [
         {
@@ -235,6 +209,9 @@
         },
         "version": {
           "type": "string"
+        },
+        "tls": {
+          "$ref": "#/$defs/TLSConfig"
         }
       },
       "additionalProperties": false,
@@ -755,6 +732,9 @@
               "enum": [
                 "mutualTLS"
               ]
+            },
+            "tls": {
+              "$ref": "#/$defs/TLSConfig"
             }
           },
           "type": "object",
@@ -833,11 +813,11 @@
           "description": "Whether to load the system certificate authorities pool alongside the certificate authority."
         },
         "minVersion": {
-          "$ref": "#/$defs/EnvString",
+          "type": "string",
           "description": "Minimum acceptable TLS version."
         },
         "maxVersion": {
-          "$ref": "#/$defs/EnvString",
+          "type": "string",
           "description": "Maximum acceptable TLS version."
         },
         "cipherSuites": {
@@ -847,9 +827,9 @@
           "type": "array",
           "description": "Explicit cipher suites can be set. If left blank, a safe default list is used.\nSee https://go.dev/src/crypto/tls/cipher_suites.go for a list of supported cipher suites."
         },
-        "reloadInterval": {
-          "$ref": "#/$defs/EnvInt",
-          "description": "Specifies the duration after which the certificate will be reloaded. If not set, it will never be reloaded.\nThe interval unit is minute"
+        "serverName": {
+          "$ref": "#/$defs/EnvString",
+          "description": "ServerName requested by client for virtual hosting.\nThis sets the ServerName in the TLSConfig. Please refer to\nhttps://godoc.org/crypto/tls#Config for more information. (optional)"
         }
       },
       "additionalProperties": false,
