@@ -2,15 +2,86 @@
 
 The current version supports API key and Auth token authentication schemes. The configuration is inspired from `securitySchemes` [with env variables](https://github.com/hasura/ndc-http/ndc-http-schema#authentication). The connector supports the following authentication strategies:
 
-- API Key
-- Bearer Auth
-- Cookie
-- OAuth 2.0
-- Mutual TLS
+- API Key.
+- Basic Auth.
+- Bearer Auth.
+- Cookie.
+- OAuth 2.0.
+- Mutual TLS.
 
 The configuration automatically generates environment variables for those security schemes.
 
+## API Key
+
+There is a `value` field with the environment variable to be replaced in runtime. The name of the variable is generated from the security scheme key. For example:
+
+```yaml
+securitySchemes:
+  api_key:
+    type: apiKey
+    value:
+      env: API_KEY # the constant case of api_key
+    in: header
+    name: api_key
+```
+
+```
+api_key: {{API_KEY}}
+```
+
+## Basic Auth
+
+Set `username` and `password` environment variables:
+
+```yaml
+securitySchemes:
+  basic:
+    type: basic
+    header: Authorization
+    username:
+      value: PET_STORE_USERNAME
+    password:
+      value: PET_STORE_PASSWORD
+```
+
+## Bearer Auth
+
+Set the `value` environment variable, header name and scheme. For example, the below configuration will inject the bearer token into incoming requests:
+
+```yaml
+securitySchemes:
+  bearer:
+    type: http
+    header: Authorization
+    value:
+      env: PET_STORE_BEARER_TOKEN
+    scheme: bearer
+```
+
+```
+Authorization: Bearer {{PET_STORE_BEARER_TOKEN}}
+```
+
 ## OAuth 2.0
+
+The client credentials grant is built-in supported. You can set the tokenUrl, scopes, the client ID and client secret variables. The connector automatically refreshes access tokens and inject them into incoming requests.
+
+```yaml
+securitySchemes:
+  petstore_auth:
+    type: oauth2
+    flows:
+      clientCredentials:
+        tokenUrl:
+          value: http://localhost:4444/oauth2/token
+        clientId:
+          env: OAUTH2_CLIENT_ID
+        clientSecret:
+          env: OAUTH2_CLIENT_SECRET
+        scopes:
+          read:pets: read your pets
+          write:pets: modify pets in your account
+```
 
 For other OAuth 2.0 flows, you need to enable [headers forwarding](#headers-forwarding) from the Hasura engine to the connector.
 

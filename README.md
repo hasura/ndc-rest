@@ -48,6 +48,7 @@ The connector can automatically transform OpenAPI 2.0 and 3.0 definitions to NDC
 | Security scheme | Supported | Comment                                                                                                                                   |
 | --------------- | --------- | ----------------------------------------------------------------------------------------------------------------------------------------- |
 | API Key         | ✅        |                                                                                                                                           |
+| Basic Auth      | ✅        |                                                                                                                                           |
 | Bearer Auth     | ✅        |                                                                                                                                           |
 | Cookies         | ✅        | Require forwarding the `Cookie` header from the Hasura engine.                                                                            |
 | OAuth 2.0       | ✅        | Built-in support for the `client_credentials` grant. Other grant types require forwarding access tokens from headers by the Hasura engine |
