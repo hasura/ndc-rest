@@ -221,6 +221,14 @@ func buildSchemaFile(config *Configuration, configDir string, configItem *Config
 }
 
 func buildHTTPArguments(config *Configuration, restSchema *rest.NDCHttpSchema, conf *ConfigItem) {
+	for _, fn := range restSchema.Functions {
+		applyForwardingHeadersArgument(config, &fn)
+	}
+
+	for _, proc := range restSchema.Procedures {
+		applyForwardingHeadersArgument(config, &proc)
+	}
+
 	if restSchema.Settings == nil || len(restSchema.Settings.Servers) < 2 {
 		return
 	}
@@ -243,11 +251,11 @@ func buildHTTPArguments(config *Configuration, restSchema *rest.NDCHttpSchema, c
 	restSchema.ObjectTypes[rest.HTTPSingleOptionsObjectName] = singleObjectType
 
 	for _, fn := range restSchema.Functions {
-		applyOperationInfo(config, &fn)
+		fn.Arguments[rest.HTTPOptionsArgumentName] = httpSingleOptionsArgument
 	}
 
 	for _, proc := range restSchema.Procedures {
-		applyOperationInfo(config, &proc)
+		proc.Arguments[rest.HTTPOptionsArgumentName] = httpSingleOptionsArgument
 	}
 
 	if !conf.IsDistributed() {
@@ -334,8 +342,7 @@ func buildHeadersForwardingResponse(config *Configuration, restSchema *rest.NDCH
 	}
 }
 
-func applyOperationInfo(config *Configuration, info *rest.OperationInfo) {
-	info.Arguments[rest.HTTPOptionsArgumentName] = httpSingleOptionsArgument
+func applyForwardingHeadersArgument(config *Configuration, info *rest.OperationInfo) {
 	if config.ForwardHeaders.Enabled && config.ForwardHeaders.ArgumentField != nil {
 		info.Arguments[*config.ForwardHeaders.ArgumentField] = headersArguments
 	}

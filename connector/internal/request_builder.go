@@ -11,6 +11,7 @@ import (
 	"slices"
 	"strings"
 
+	"github.com/hasura/ndc-http/connector/internal/contenttype"
 	rest "github.com/hasura/ndc-http/ndc-http-schema/schema"
 	"github.com/hasura/ndc-sdk-go/schema"
 	"github.com/hasura/ndc-sdk-go/utils"
@@ -98,7 +99,7 @@ func (c *RequestBuilder) buildRequestBody(request *RetryableRequest, rawRequest 
 			if err != nil {
 				return err
 			}
-			dataURI, err := DecodeDataURI(b64)
+			dataURI, err := contenttype.DecodeDataURI(b64)
 			if err != nil {
 				return err
 			}
@@ -144,7 +145,7 @@ func (c *RequestBuilder) buildRequestBody(request *RetryableRequest, rawRequest 
 
 			return nil
 		case contentType == rest.ContentTypeXML:
-			bodyBytes, err := NewXMLEncoder(c.Schema).Encode(&bodyInfo, bodyData)
+			bodyBytes, err := contenttype.NewXMLEncoder(c.Schema).Encode(&bodyInfo, bodyData)
 			if err != nil {
 				return err
 			}
@@ -200,7 +201,7 @@ func (c *RequestBuilder) createMultipartForm(bodyData any) (*bytes.Reader, strin
 	}
 
 	buffer := new(bytes.Buffer)
-	writer := NewMultipartWriter(buffer)
+	writer := contenttype.NewMultipartWriter(buffer)
 
 	if err := c.evalMultipartForm(writer, &bodyInfo, reflect.ValueOf(bodyData)); err != nil {
 		return nil, "", err
@@ -215,7 +216,7 @@ func (c *RequestBuilder) createMultipartForm(bodyData any) (*bytes.Reader, strin
 	return reader, writer.FormDataContentType(), nil
 }
 
-func (c *RequestBuilder) evalMultipartForm(w *MultipartWriter, bodyInfo *rest.ArgumentInfo, bodyData reflect.Value) error {
+func (c *RequestBuilder) evalMultipartForm(w *contenttype.MultipartWriter, bodyInfo *rest.ArgumentInfo, bodyData reflect.Value) error {
 	bodyData, ok := utils.UnwrapPointerFromReflectValue(bodyData)
 	if !ok {
 		return nil
@@ -291,7 +292,7 @@ func (c *RequestBuilder) evalMultipartForm(w *MultipartWriter, bodyInfo *rest.Ar
 	return fmt.Errorf("invalid multipart form body, expected object, got %v", bodyInfo.Type)
 }
 
-func (c *RequestBuilder) evalMultipartFieldValueRecursive(w *MultipartWriter, name string, value reflect.Value, fieldInfo *rest.ObjectField, enc *rest.EncodingObject) error {
+func (c *RequestBuilder) evalMultipartFieldValueRecursive(w *contenttype.MultipartWriter, name string, value reflect.Value, fieldInfo *rest.ObjectField, enc *rest.EncodingObject) error {
 	underlyingValue, notNull := utils.UnwrapPointerFromReflectValue(value)
 	argTypeT, err := fieldInfo.Type.InterfaceT()
 	switch argType := argTypeT.(type) {

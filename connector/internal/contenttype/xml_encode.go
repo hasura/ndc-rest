@@ -1,4 +1,4 @@
-package internal
+package contenttype
 
 import (
 	"bytes"
@@ -280,7 +280,7 @@ func (c *XMLEncoder) encodeXMLText(schemaType schema.Type, value reflect.Value, 
 		}
 
 		if _, ok := c.schema.ScalarTypes[t.Name]; ok {
-			str, err := stringifySimpleScalar(value, value.Kind())
+			str, err := StringifySimpleScalar(value, value.Kind())
 			if err != nil {
 				return nil, err
 			}
@@ -302,7 +302,7 @@ func (c *XMLEncoder) encodeXMLText(schemaType schema.Type, value reflect.Value, 
 }
 
 func (c *XMLEncoder) encodeSimpleScalar(enc *xml.Encoder, name string, value reflect.Value, attributes []xml.Attr) error {
-	str, err := stringifySimpleScalar(value, value.Kind())
+	str, err := StringifySimpleScalar(value, value.Kind())
 	if err != nil {
 		return err
 	}

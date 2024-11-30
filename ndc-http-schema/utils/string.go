@@ -1,6 +1,7 @@
 package utils
 
 import (
+	"fmt"
 	"regexp"
 	"strings"
 	"unicode"
@@ -250,4 +251,17 @@ func getu4(s []byte) rune {
 	}
 
 	return r
+}
+
+// MaskString masks the string value for security
+func MaskString(input string) string {
+	inputLength := len(input)
+	switch {
+	case inputLength < 6:
+		return strings.Repeat("*", inputLength)
+	case inputLength < 12:
+		return input[0:1] + strings.Repeat("*", inputLength-1)
+	default:
+		return input[0:3] + strings.Repeat("*", 7) + fmt.Sprintf("(%d)", inputLength)
+	}
 }

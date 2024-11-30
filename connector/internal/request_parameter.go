@@ -12,6 +12,7 @@ import (
 	"time"
 
 	"github.com/google/uuid"
+	"github.com/hasura/ndc-http/connector/internal/contenttype"
 	rest "github.com/hasura/ndc-http/ndc-http-schema/schema"
 	"github.com/hasura/ndc-sdk-go/schema"
 	"github.com/hasura/ndc-sdk-go/utils"
@@ -287,7 +288,7 @@ func encodeParameterReflectionValues(reflectValue reflect.Value, fieldPaths []st
 	}
 
 	kind := reflectValue.Kind()
-	if result, err := stringifySimpleScalar(reflectValue, kind); err == nil {
+	if result, err := contenttype.StringifySimpleScalar(reflectValue, kind); err == nil {
 		return []ParameterItem{
 			NewParameterItem([]Key{}, []string{result}),
 		}, nil

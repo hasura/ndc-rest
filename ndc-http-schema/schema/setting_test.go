@@ -74,6 +74,13 @@ func TestNDCHttpSettings(t *testing.T) {
 						"flows": {
 							"implicit": {
 								"authorizationUrl": "https://petstore3.swagger.io/oauth/authorize",
+								"tokenUrl": {
+									"value": "https://petstore3.swagger.io/oauth/token"
+								},
+								"refreshUrl": {
+									"value": "https://petstore3.swagger.io/oauth/token",
+									"env": "PET_STORE_AUTH_REFRESH_URL"
+								},
 								"scopes": {
 									"read:pets": "read your pets",
 									"write:pets": "modify pets in your account"
@@ -106,7 +113,6 @@ func TestNDCHttpSettings(t *testing.T) {
 							In:    APIKeyInHeader,
 							Name:  "api_key",
 							Value: utils.NewEnvStringVariable("PET_STORE_API_KEY"),
-							value: utils.ToPtr("api_key"),
 						},
 					},
 					"basic": {
@@ -114,8 +120,6 @@ func TestNDCHttpSettings(t *testing.T) {
 							Type:     BasicAuthScheme,
 							Username: utils.NewEnvStringValue("user"),
 							Password: utils.NewEnvStringValue("password"),
-							username: utils.ToPtr("user"),
-							password: utils.ToPtr("password"),
 						},
 					},
 					"http": {
@@ -124,7 +128,6 @@ func TestNDCHttpSettings(t *testing.T) {
 							Header: "Authorization",
 							Scheme: "bearer",
 							Value:  utils.NewEnvStringVariable("PET_STORE_API_KEY"),
-							value:  utils.ToPtr("api_key"),
 						},
 					},
 					"cookie": {
@@ -142,6 +145,8 @@ func TestNDCHttpSettings(t *testing.T) {
 							Flows: map[OAuthFlowType]OAuthFlow{
 								ImplicitFlow: {
 									AuthorizationURL: "https://petstore3.swagger.io/oauth/authorize",
+									TokenURL:         utils.ToPtr(utils.NewEnvStringValue("https://petstore3.swagger.io/oauth/token")),
+									RefreshURL:       utils.ToPtr(utils.NewEnvString("PET_STORE_AUTH_REFRESH_URL", "https://petstore3.swagger.io/oauth/token")),
 									Scopes: map[string]string{
 										"read:pets":  "read your pets",
 										"write:pets": "modify pets in your account",

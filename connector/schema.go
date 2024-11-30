@@ -19,12 +19,18 @@ func (c *HTTPConnector) GetSchema(ctx context.Context, configuration *configurat
 }
 
 // ApplyNDCHttpSchemas applies slice of raw NDC HTTP schemas to the connector
-func (c *HTTPConnector) ApplyNDCHttpSchemas(config *configuration.Configuration, schemas []configuration.NDCHttpRuntimeSchema, logger *slog.Logger) error {
+func (c *HTTPConnector) ApplyNDCHttpSchemas(ctx context.Context, config *configuration.Configuration, schemas []configuration.NDCHttpRuntimeSchema, logger *slog.Logger) error {
 	ndcSchema, metadata, errs := configuration.MergeNDCHttpSchemas(config, schemas)
 	if len(errs) > 0 {
 		printSchemaValidationError(logger, errs)
 		if ndcSchema == nil || config.Strict {
 			return errBuildSchemaFailed
+		}
+	}
+
+	for _, meta := range metadata {
+		if err := c.upstreams.Register(ctx, meta.Name, meta.Settings); err != nil {
+			return err
 		}
 	}
 

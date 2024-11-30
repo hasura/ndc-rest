@@ -39,6 +39,9 @@
         "flows": {
           "implicit": {
             "authorizationUrl": "https://petstore3.swagger.io/oauth/authorize",
+            "tokenUrl": {
+              "env": "PET_STORE_PETSTORE_AUTH_TOKEN_URL"
+            },
             "scopes": {
               "read:pets": "read your pets",
               "write:pets": "modify pets in your account"

@@ -58,7 +58,11 @@ func jsonSchemaNDCHttpSchema() error {
 		return err
 	}
 
+	flowSchema := r.Reflect(&schema.OAuthFlow{})
 	reflectSchema := r.Reflect(&schema.NDCHttpSchema{})
+	for k, def := range flowSchema.Definitions {
+		reflectSchema.Definitions[k] = def
+	}
 	schemaBytes, err := json.MarshalIndent(reflectSchema, "", "  ")
 	if err != nil {
 		return err

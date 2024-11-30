@@ -40,12 +40,12 @@ func (c *HTTPConnector) QueryExplain(ctx context.Context, configuration *configu
 		requestVars = []schema.QueryRequestVariablesElem{make(schema.QueryRequestVariablesElem)}
 	}
 
-	httpRequest, _, _, httpOptions, err := c.explainQuery(request, requestVars[0])
+	httpRequest, _, metadata, httpOptions, err := c.explainQuery(request, requestVars[0])
 	if err != nil {
 		return nil, err
 	}
 
-	return serializeExplainResponse(httpRequest, httpOptions)
+	return c.serializeExplainResponse(ctx, httpRequest, metadata, httpOptions)
 }
 
 func (c *HTTPConnector) explainQuery(request *schema.QueryRequest, variables map[string]any) (*internal.RetryableRequest, *rest.OperationInfo, *configuration.NDCHttpRuntimeSchema, *internal.HTTPOptions, error) {
@@ -67,6 +67,7 @@ func (c *HTTPConnector) explainQuery(request *schema.QueryRequest, variables map
 	if err != nil {
 		return nil, nil, nil, nil, err
 	}
+	req.Namespace = metadata.Name
 
 	if err := c.evalForwardedHeaders(req, rawArgs); err != nil {
 		return nil, nil, nil, nil, schema.UnprocessableContentError("invalid forwarded headers", map[string]any{
@@ -80,8 +81,6 @@ func (c *HTTPConnector) explainQuery(request *schema.QueryRequest, variables map
 			"cause": err.Error(),
 		})
 	}
-
-	httpOptions.Settings = metadata.Settings
 
 	return req, function, &metadata, httpOptions, err
 }
@@ -154,7 +153,7 @@ func (c *HTTPConnector) execQuery(ctx context.Context, state *State, request *sc
 	}
 
 	httpOptions.Concurrency = c.config.Concurrency.HTTP
-	client := internal.NewHTTPClient(c.client, metadata.NDCHttpSchema, c.config.ForwardHeaders, state.Tracer)
+	client := internal.NewHTTPClient(c.upstreams, metadata, c.config.ForwardHeaders, state.Tracer)
 	result, _, err := client.Send(ctx, httpRequest, queryFields, function.ResultType, httpOptions)
 	if err != nil {
 		span.SetStatus(codes.Error, "failed to execute the http request")
@@ -166,7 +165,7 @@ func (c *HTTPConnector) execQuery(ctx context.Context, state *State, request *sc
 	return result, nil
 }
 
-func serializeExplainResponse(httpRequest *internal.RetryableRequest, httpOptions *internal.HTTPOptions) (*schema.ExplainResponse, error) {
+func (c *HTTPConnector) serializeExplainResponse(ctx context.Context, httpRequest *internal.RetryableRequest, metadata *configuration.NDCHttpRuntimeSchema, httpOptions *internal.HTTPOptions) (*schema.ExplainResponse, error) {
 	explainResp := &schema.ExplainResponse{
 		Details: schema.ExplainResponseDetails{},
 	}
@@ -183,11 +182,10 @@ func serializeExplainResponse(httpRequest *internal.RetryableRequest, httpOption
 
 	httpOptions.Distributed = false
 	httpOptions.Explain = true
-	requests, err := internal.BuildDistributedRequestsWithOptions(httpRequest, httpOptions)
+	requests, err := c.upstreams.BuildDistributedRequestsWithOptions(httpRequest, httpOptions)
 	if err != nil {
 		return nil, err
 	}
-	explainResp.Details["url"] = requests[0].URL.String()
 
 	if httpRequest.Body != nil {
 		bodyBytes, err := io.ReadAll(httpRequest.Body)
@@ -199,7 +197,17 @@ func serializeExplainResponse(httpRequest *internal.RetryableRequest, httpOption
 		httpRequest.Body = nil
 		explainResp.Details["body"] = string(bodyBytes)
 	}
-	rawHeaders, err := json.Marshal(requests[0].Headers)
+
+	req, cancel, err := requests[0].CreateRequest(ctx)
+	if err != nil {
+		return nil, err
+	}
+	defer cancel()
+
+	c.upstreams.InjectMockRequestSettings(req, metadata.Name, requests[0].RawRequest.Security)
+
+	explainResp.Details["url"] = req.URL.String()
+	rawHeaders, err := json.Marshal(req.Header)
 	if err != nil {
 		return nil, schema.InternalServerError("failed to encode headers", map[string]any{
 			"cause": err.Error(),

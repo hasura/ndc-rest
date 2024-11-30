@@ -75,6 +75,16 @@ definition:
     comparisonExpressionTypeName: Int64_comparison_exp
 
 ---
+kind: DataConnectorScalarRepresentation
+version: v1
+definition:
+  dataConnectorName: myapi
+  dataConnectorScalarType: String
+  representation: String
+  graphql:
+    comparisonExpressionTypeName: String_comparison_exp
+
+---
 kind: ScalarType
 version: v1
 definition:
@@ -111,4 +121,14 @@ definition:
   representation: URI
   graphql:
     comparisonExpressionTypeName: URI_comparison_exp
+
+---
+kind: DataConnectorScalarRepresentation
+version: v1
+definition:
+  dataConnectorName: myapi
+  dataConnectorScalarType: Boolean
+  representation: Boolean
+  graphql:
+    comparisonExpressionTypeName: Boolean_comparison_exp
 

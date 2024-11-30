@@ -53,7 +53,7 @@ func (oc *OAS2Builder) BuildDocumentModel(docModel *libopenapi.DocumentModel[v2.
 			}
 		}
 		envName := utils.StringSliceToConstantCase([]string{oc.EnvPrefix, "SERVER_URL"})
-		serverURL := fmt.Sprintf("%s://%s%s", scheme, docModel.Model.Host, docModel.Model.BasePath)
+		serverURL := strings.TrimRight(fmt.Sprintf("%s://%s%s", scheme, docModel.Model.Host, docModel.Model.BasePath), "/")
 		oc.schema.Settings.Servers = append(oc.schema.Settings.Servers, rest.ServerConfig{
 			URL: sdkUtils.NewEnvString(envName, serverURL),
 		})
@@ -122,8 +122,13 @@ func (oc *OAS2Builder) convertSecuritySchemes(scheme orderedmap.Pair[string, *v2
 		}
 		flow := rest.OAuthFlow{
 			AuthorizationURL: security.AuthorizationUrl,
-			TokenURL:         security.TokenUrl,
 		}
+
+		tokenURL := sdkUtils.NewEnvStringVariable(utils.StringSliceToConstantCase([]string{oc.EnvPrefix, key, "TOKEN_URL"}))
+		if security.TokenUrl != "" {
+			tokenURL.Value = &security.TokenUrl
+		}
+		flow.TokenURL = &tokenURL
 
 		if security.Scopes != nil {
 			scopes := make(map[string]string)
@@ -131,6 +136,13 @@ func (oc *OAS2Builder) convertSecuritySchemes(scheme orderedmap.Pair[string, *v2
 				scopes[scope.Key()] = scope.Value()
 			}
 			flow.Scopes = scopes
+		}
+
+		if flowType == rest.ClientCredentialsFlow {
+			clientID := sdkUtils.NewEnvStringVariable(utils.StringSliceToConstantCase([]string{oc.EnvPrefix, key, "CLIENT_ID"}))
+			clientSecret := sdkUtils.NewEnvStringVariable(utils.StringSliceToConstantCase([]string{oc.EnvPrefix, key, "CLIENT_SECRET"}))
+			flow.ClientID = &clientID
+			flow.ClientSecret = &clientSecret
 		}
 
 		result.SecuritySchemer = rest.NewOAuth2Config(map[rest.OAuthFlowType]rest.OAuthFlow{

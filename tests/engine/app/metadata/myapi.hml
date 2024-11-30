@@ -30,6 +30,11 @@ definition:
             type: int64
           aggregate_functions: {}
           comparison_operators: {}
+        JSON:
+          representation:
+            type: json
+          aggregate_functions: {}
+          comparison_operators: {}
         String:
           representation:
             type: string
@@ -298,6 +303,13 @@ definition:
         - name: getAlbums
           description: Get all available albums
           arguments:
+            headers:
+              description: Headers forwarded from the Hasura engine
+              type:
+                type: nullable
+                underlying_type:
+                  type: named
+                  name: JSON
             id:
               description: Filter by album ID
               type:
@@ -320,6 +332,13 @@ definition:
         - name: getAlbumsId
           description: Get specific album
           arguments:
+            headers:
+              description: Headers forwarded from the Hasura engine
+              type:
+                type: nullable
+                underlying_type:
+                  type: named
+                  name: JSON
             id:
               description: The ID of the album to retrieve
               type:
@@ -331,6 +350,13 @@ definition:
         - name: getAlbumsIdPhotos
           description: Get photos for a specific album
           arguments:
+            headers:
+              description: Headers forwarded from the Hasura engine
+              type:
+                type: nullable
+                underlying_type:
+                  type: named
+                  name: JSON
             id:
               description: post id
               type:
@@ -344,6 +370,13 @@ definition:
         - name: getComment
           description: Get specific comment
           arguments:
+            headers:
+              description: Headers forwarded from the Hasura engine
+              type:
+                type: nullable
+                underlying_type:
+                  type: named
+                  name: JSON
             id:
               description: The ID of the comment to retrieve
               type:
@@ -355,6 +388,13 @@ definition:
         - name: getComments
           description: Get all available comments
           arguments:
+            headers:
+              description: Headers forwarded from the Hasura engine
+              type:
+                type: nullable
+                underlying_type:
+                  type: named
+                  name: JSON
             id:
               description: Filter by comment ID
               type:
@@ -377,6 +417,13 @@ definition:
         - name: getPhoto
           description: Get specific photo
           arguments:
+            headers:
+              description: Headers forwarded from the Hasura engine
+              type:
+                type: nullable
+                underlying_type:
+                  type: named
+                  name: JSON
             id:
               description: The ID of the photo to retrieve
               type:
@@ -395,6 +442,13 @@ definition:
                 underlying_type:
                   type: named
                   name: Int32
+            headers:
+              description: Headers forwarded from the Hasura engine
+              type:
+                type: nullable
+                underlying_type:
+                  type: named
+                  name: JSON
             id:
               description: Filter by photo ID
               type:
@@ -410,6 +464,13 @@ definition:
         - name: getPostById
           description: Get specific post
           arguments:
+            headers:
+              description: Headers forwarded from the Hasura engine
+              type:
+                type: nullable
+                underlying_type:
+                  type: named
+                  name: JSON
             id:
               description: The ID of the post to retrieve
               type:
@@ -421,6 +482,13 @@ definition:
         - name: getPosts
           description: Get all available posts
           arguments:
+            headers:
+              description: Headers forwarded from the Hasura engine
+              type:
+                type: nullable
+                underlying_type:
+                  type: named
+                  name: JSON
             id:
               description: Filter by post ID
               type:
@@ -443,6 +511,13 @@ definition:
         - name: getPostsIdComments
           description: Get comments for a specific post
           arguments:
+            headers:
+              description: Headers forwarded from the Hasura engine
+              type:
+                type: nullable
+                underlying_type:
+                  type: named
+                  name: JSON
             id:
               description: post id
               type:
@@ -456,6 +531,13 @@ definition:
         - name: getTodo
           description: Get specific todo
           arguments:
+            headers:
+              description: Headers forwarded from the Hasura engine
+              type:
+                type: nullable
+                underlying_type:
+                  type: named
+                  name: JSON
             id:
               description: The ID of the todo to retrieve
               type:
@@ -467,6 +549,13 @@ definition:
         - name: getTodos
           description: Get all available todos
           arguments:
+            headers:
+              description: Headers forwarded from the Hasura engine
+              type:
+                type: nullable
+                underlying_type:
+                  type: named
+                  name: JSON
             id:
               description: Filter by todo ID
               type:
@@ -489,6 +578,13 @@ definition:
         - name: getUser
           description: Get specific user
           arguments:
+            headers:
+              description: Headers forwarded from the Hasura engine
+              type:
+                type: nullable
+                underlying_type:
+                  type: named
+                  name: JSON
             id:
               description: The ID of the user to retrieve
               type:
@@ -507,6 +603,13 @@ definition:
                 underlying_type:
                   type: named
                   name: Int32
+            headers:
+              description: Headers forwarded from the Hasura engine
+              type:
+                type: nullable
+                underlying_type:
+                  type: named
+                  name: JSON
             id:
               description: Filter by user ID
               type:
@@ -528,12 +631,26 @@ definition:
               type:
                 type: named
                 name: Post
+            headers:
+              description: Headers forwarded from the Hasura engine
+              type:
+                type: nullable
+                underlying_type:
+                  type: named
+                  name: JSON
           result_type:
             type: named
             name: Post
         - name: deletePostById
           description: Delete specific post
           arguments:
+            headers:
+              description: Headers forwarded from the Hasura engine
+              type:
+                type: nullable
+                underlying_type:
+                  type: named
+                  name: JSON
             id:
               description: The ID of the post to retrieve
               type:
@@ -552,6 +669,13 @@ definition:
               type:
                 type: named
                 name: Post
+            headers:
+              description: Headers forwarded from the Hasura engine
+              type:
+                type: nullable
+                underlying_type:
+                  type: named
+                  name: JSON
             id:
               description: The ID of the post to retrieve
               type:
@@ -568,6 +692,13 @@ definition:
               type:
                 type: named
                 name: Post
+            headers:
+              description: Headers forwarded from the Hasura engine
+              type:
+                type: nullable
+                underlying_type:
+                  type: named
+                  name: JSON
             id:
               description: The ID of the post to retrieve
               type:
@@ -586,3 +717,17 @@ definition:
           exists: {}
         mutation:
           explain: {}
+  argumentPresets:
+    - argument: headers
+      value:
+        httpHeaders:
+          forward:
+            - X-Test-Header
+            - X-Custom-Header
+          additional: {}
+  responseHeaders:
+    headersField: headers
+    resultField: response
+    forwardHeaders:
+      - X-Test-Header
+      - X-Custom-Header

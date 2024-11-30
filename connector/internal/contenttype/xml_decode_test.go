@@ -1,9 +1,12 @@
-package internal
+package contenttype
 
 import (
+	"encoding/json"
+	"os"
 	"strings"
 	"testing"
 
+	rest "github.com/hasura/ndc-http/ndc-http-schema/schema"
 	"github.com/hasura/ndc-sdk-go/schema"
 	"gotest.tools/v3/assert"
 )
@@ -67,4 +70,13 @@ func TestDecodeXML(t *testing.T) {
 			assert.DeepEqual(t, tc.Expected, result)
 		})
 	}
+}
+
+func createMockSchema(t *testing.T) *rest.NDCHttpSchema {
+	var ndcSchema rest.NDCHttpSchema
+	rawSchemaBytes, err := os.ReadFile("../../../ndc-http-schema/openapi/testdata/petstore3/expected.json")
+	assert.NilError(t, err)
+	assert.NilError(t, json.Unmarshal(rawSchemaBytes, &ndcSchema))
+
+	return &ndcSchema
 }

@@ -1,4 +1,4 @@
-package internal
+package contenttype
 
 import (
 	"encoding/json"
@@ -434,7 +434,8 @@ L:
 	return nil
 }
 
-func decodeArbitraryXML(r io.Reader) (any, error) {
+// DecodeArbitraryXML decodes an arbitrary XML from a reader stream.
+func DecodeArbitraryXML(r io.Reader) (any, error) {
 	decoder := xml.NewDecoder(r)
 
 	for {
@@ -459,4 +460,62 @@ func decodeArbitraryXML(r io.Reader) (any, error) {
 	}
 
 	return nil, nil
+}
+
+func findXMLLeafObjectField(objectType rest.ObjectType) (*rest.ObjectField, string, bool) {
+	var f *rest.ObjectField
+	var fieldName string
+	for key, field := range objectType.Fields {
+		if field.HTTP == nil || field.HTTP.XML == nil {
+			return nil, "", false
+		}
+		if field.HTTP.XML.Text {
+			f = &field
+			fieldName = key
+		} else if !field.HTTP.XML.Attribute {
+			return nil, "", false
+		}
+	}
+
+	return f, fieldName, true
+}
+
+func getTypeSchemaXMLName(typeSchema *rest.TypeSchema, defaultName string) string {
+	if typeSchema != nil {
+		return getXMLName(typeSchema.XML, defaultName)
+	}
+
+	return defaultName
+}
+
+func getXMLName(xmlSchema *rest.XMLSchema, defaultName string) string {
+	if xmlSchema != nil {
+		if xmlSchema.Name != "" {
+			return xmlSchema.GetFullName()
+		}
+
+		if xmlSchema.Prefix != "" {
+			return xmlSchema.Prefix + ":" + defaultName
+		}
+	}
+
+	return defaultName
+}
+
+func getArrayOrNamedType(schemaType schema.Type) (*schema.ArrayType, *schema.NamedType, error) {
+	rawType, err := schemaType.InterfaceT()
+	if err != nil {
+		return nil, nil, err
+	}
+
+	switch t := rawType.(type) {
+	case *schema.NullableType:
+		return getArrayOrNamedType(t.UnderlyingType)
+	case *schema.ArrayType:
+		return t, nil, nil
+	case *schema.NamedType:
+		return nil, t, nil
+	default:
+		return nil, nil, nil
+	}
 }

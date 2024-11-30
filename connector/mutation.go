@@ -32,12 +32,12 @@ func (c *HTTPConnector) MutationExplain(ctx context.Context, configuration *conf
 	operation := request.Operations[0]
 	switch operation.Type {
 	case schema.MutationOperationProcedure:
-		httpRequest, _, _, httpOptions, err := c.explainProcedure(&operation)
+		httpRequest, _, metadata, httpOptions, err := c.explainProcedure(&operation)
 		if err != nil {
 			return nil, err
 		}
 
-		return serializeExplainResponse(httpRequest, httpOptions)
+		return c.serializeExplainResponse(ctx, httpRequest, metadata, httpOptions)
 	default:
 		return nil, schema.BadRequestError(fmt.Sprintf("invalid operation type: %s", operation.Type), nil)
 	}
@@ -63,6 +63,7 @@ func (c *HTTPConnector) explainProcedure(operation *schema.MutationOperation) (*
 	if err != nil {
 		return nil, nil, nil, nil, err
 	}
+	httpRequest.Namespace = metadata.Name
 
 	if err := c.evalForwardedHeaders(httpRequest, rawArgs); err != nil {
 		return nil, nil, nil, nil, schema.UnprocessableContentError("invalid forwarded headers", map[string]any{
@@ -76,8 +77,6 @@ func (c *HTTPConnector) explainProcedure(operation *schema.MutationOperation) (*
 			"cause": err.Error(),
 		})
 	}
-
-	httpOptions.Settings = metadata.Settings
 
 	return httpRequest, procedure, &metadata, httpOptions, nil
 }
@@ -139,7 +138,7 @@ func (c *HTTPConnector) execMutationOperation(parentCtx context.Context, state *
 	}
 
 	httpOptions.Concurrency = c.config.Concurrency.HTTP
-	client := internal.NewHTTPClient(c.client, metadata.NDCHttpSchema, c.config.ForwardHeaders, state.Tracer)
+	client := internal.NewHTTPClient(c.upstreams, metadata, c.config.ForwardHeaders, state.Tracer)
 	result, _, err := client.Send(ctx, httpRequest, operation.Fields, procedure.ResultType, httpOptions)
 	if err != nil {
 		span.SetStatus(codes.Error, "failed to execute mutation")

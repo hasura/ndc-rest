@@ -33,6 +33,9 @@
         "flows": {
           "implicit": {
             "authorizationUrl": "https://petstore.swagger.io/oauth/authorize",
+            "tokenUrl": {
+              "env": "PETSTORE_AUTH_TOKEN_URL"
+            },
             "scopes": {
               "read:pets": "read your pets",
               "write:pets": "modify pets in your account"
@@ -1961,7 +1964,6 @@
               }
             },
             "xml": {
-              "name": "",
               "wrapped": true
             }
           }
@@ -1997,7 +1999,6 @@
               "array"
             ],
             "xml": {
-              "name": "",
               "wrapped": true
             }
           }

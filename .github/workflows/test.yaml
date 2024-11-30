@@ -18,7 +18,10 @@ jobs:
           go-version: ${{ env.GO_VERSION }}
       - name: Run Go unit tests
         run: |
+          docker compose up -d hydra hydra-migrate
+          sleep 5
           go test -v -coverpkg=./... -race -timeout 3m -coverprofile=coverage.out.tmp ./...
+          docker compose down -v
           cat coverage.out.tmp | grep -v "main.go" > coverage.out
       - name: Run integration tests
         run: |

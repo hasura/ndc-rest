@@ -182,16 +182,6 @@ func (j SecurityScheme) JSONSchema() *jsonschema.Schema {
 		},
 	})
 
-	oauth2Schema := orderedmap.New[string, *jsonschema.Schema]()
-	oauth2Schema.Set("type", &jsonschema.Schema{
-		Type: "string",
-		Enum: []any{OAuth2Scheme},
-	})
-	oauth2Schema.Set("flows", &jsonschema.Schema{
-		Type:                 "object",
-		AdditionalProperties: &jsonschema.Schema{},
-	})
-
 	oidcSchema := orderedmap.New[string, *jsonschema.Schema]()
 	oidcSchema.Set("type", &jsonschema.Schema{
 		Type: "string",
@@ -230,11 +220,7 @@ func (j SecurityScheme) JSONSchema() *jsonschema.Schema {
 				Properties: httpAuthSchema,
 				Required:   []string{"type", "value", "header", "scheme"},
 			},
-			{
-				Type:       "object",
-				Properties: oauth2Schema,
-				Required:   []string{"type", "flows"},
-			},
+			OAuth2Config{}.JSONSchema(),
 			{
 				Type:       "object",
 				Properties: oidcSchema,
@@ -336,9 +322,6 @@ type APIKeyAuthConfig struct {
 	In    APIKeyLocation     `json:"in"    mapstructure:"in"    yaml:"in"`
 	Name  string             `json:"name"  mapstructure:"name"  yaml:"name"`
 	Value utils.EnvString    `json:"value" mapstructure:"value" yaml:"value"`
-
-	// cached values
-	value *string
 }
 
 var _ SecuritySchemer = &APIKeyAuthConfig{}
@@ -378,31 +361,12 @@ func (ss *APIKeyAuthConfig) Validate() error {
 		return err
 	}
 
-	value, err := ss.Value.Get()
-	if err != nil {
-		return fmt.Errorf("APIKeyAuthConfig.Value: %w", err)
-	}
-	if value != "" {
-		ss.value = &value
-	}
-
 	return nil
 }
 
 // GetValue get the authentication credential value
 func (ss APIKeyAuthConfig) GetType() SecuritySchemeType {
 	return ss.Type
-}
-
-// GetValue get the authentication credential value
-func (ss APIKeyAuthConfig) GetValue() string {
-	if ss.value != nil {
-		return *ss.value
-	}
-
-	value, _ := ss.Value.Get()
-
-	return value
 }
 
 // HTTPAuthConfig contains configurations for http authentication
@@ -414,9 +378,6 @@ type HTTPAuthConfig struct {
 	Header string             `json:"header" mapstructure:"header" yaml:"header"`
 	Scheme string             `json:"scheme" mapstructure:"scheme" yaml:"scheme"`
 	Value  utils.EnvString    `json:"value"  mapstructure:"value"  yaml:"value"`
-
-	// cached values
-	value *string
 }
 
 var _ SecuritySchemer = &HTTPAuthConfig{}
@@ -437,31 +398,12 @@ func (ss *HTTPAuthConfig) Validate() error {
 		return errors.New("schema is required for http security")
 	}
 
-	value, err := ss.Value.Get()
-	if err != nil {
-		return fmt.Errorf("APIKeyAuthConfig.Value: %w", err)
-	}
-	if value != "" {
-		ss.value = &value
-	}
-
 	return nil
 }
 
 // GetValue get the authentication credential value
 func (ss HTTPAuthConfig) GetType() SecuritySchemeType {
 	return ss.Type
-}
-
-// GetValue get the authentication credential value
-func (ss HTTPAuthConfig) GetValue() string {
-	if ss.value != nil {
-		return *ss.value
-	}
-
-	value, _ := ss.Value.Get()
-
-	return value
 }
 
 // BasicAuthConfig contains configurations for the [basic] authentication.
@@ -472,10 +414,6 @@ type BasicAuthConfig struct {
 	Header   string             `json:"header"   mapstructure:"header"   yaml:"header"`
 	Username utils.EnvString    `json:"username" mapstructure:"username" yaml:"username"`
 	Password utils.EnvString    `json:"password" mapstructure:"password" yaml:"password"`
-
-	// cached values
-	username *string
-	password *string
 }
 
 // NewBasicAuthConfig creates a new BasicAuthConfig instance.
@@ -489,48 +427,12 @@ func NewBasicAuthConfig(username, password utils.EnvString) *BasicAuthConfig {
 
 // Validate if the current instance is valid
 func (ss *BasicAuthConfig) Validate() error {
-	user, err := ss.Username.Get()
-	if err != nil {
-		return fmt.Errorf("BasicAuthConfig.User: %w", err)
-	}
-
-	// user and password can be empty.
-	ss.username = &user
-
-	password, err := ss.Password.Get()
-	if err != nil {
-		return fmt.Errorf("BasicAuthConfig.Password: %w", err)
-	}
-	ss.password = &password
-
 	return nil
 }
 
 // GetValue get the authentication credential value
 func (ss BasicAuthConfig) GetType() SecuritySchemeType {
 	return ss.Type
-}
-
-// GetUsername get the username value
-func (ss BasicAuthConfig) GetUsername() string {
-	if ss.username != nil {
-		return *ss.username
-	}
-
-	value, _ := ss.Username.Get()
-
-	return value
-}
-
-// GetPassword get the password value
-func (ss BasicAuthConfig) GetPassword() string {
-	if ss.password != nil {
-		return *ss.password
-	}
-
-	value, _ := ss.Password.Get()
-
-	return value
 }
 
 // OAuthFlowType represents the OAuth flow type enum
@@ -581,33 +483,39 @@ func ParseOAuthFlowType(value string) (OAuthFlowType, error) {
 //
 // [OAuth 2.0]: https://swagger.io/docs/specification/authentication/oauth2
 type OAuthFlow struct {
-	AuthorizationURL string            `json:"authorizationUrl,omitempty" mapstructure:"authorizationUrl" yaml:"authorizationUrl,omitempty"`
-	TokenURL         string            `json:"tokenUrl,omitempty"         mapstructure:"tokenUrl"         yaml:"tokenUrl,omitempty"`
-	RefreshURL       string            `json:"refreshUrl,omitempty"       mapstructure:"refreshUrl"       yaml:"refreshUrl,omitempty"`
-	Scopes           map[string]string `json:"scopes,omitempty"           mapstructure:"scopes"           yaml:"scopes,omitempty"`
+	AuthorizationURL string                     `json:"authorizationUrl,omitempty" mapstructure:"authorizationUrl" yaml:"authorizationUrl,omitempty"`
+	TokenURL         *utils.EnvString           `json:"tokenUrl,omitempty"         mapstructure:"tokenUrl"         yaml:"tokenUrl,omitempty"`
+	RefreshURL       *utils.EnvString           `json:"refreshUrl,omitempty"       mapstructure:"refreshUrl"       yaml:"refreshUrl,omitempty"`
+	Scopes           map[string]string          `json:"scopes,omitempty"           mapstructure:"scopes"           yaml:"scopes,omitempty"`
+	ClientID         *utils.EnvString           `json:"clientId,omitempty"         mapstructure:"clientId"         yaml:"clientId,omitempty"`
+	ClientSecret     *utils.EnvString           `json:"clientSecret,omitempty"     mapstructure:"clientSecret"     yaml:"clientSecret,omitempty"`
+	EndpointParams   map[string]utils.EnvString `json:"endpointParams,omitempty"   mapstructure:"endpointParams"   yaml:"endpointParams,omitempty"`
 }
 
 // Validate if the current instance is valid
 func (ss OAuthFlow) Validate(flowType OAuthFlowType) error {
-	if ss.AuthorizationURL == "" {
-		if slices.Contains([]OAuthFlowType{ImplicitFlow, AuthorizationCodeFlow}, flowType) {
-			return fmt.Errorf("authorizationUrl is required for oauth2 %s security", flowType)
-		}
-	} else if _, err := parseRelativeOrHttpURL(ss.AuthorizationURL); err != nil {
-		return fmt.Errorf("authorizationUrl: %w", err)
-	}
-
-	if ss.TokenURL == "" {
+	if ss.TokenURL == nil {
 		if slices.Contains([]OAuthFlowType{PasswordFlow, ClientCredentialsFlow, AuthorizationCodeFlow}, flowType) {
 			return fmt.Errorf("tokenUrl is required for oauth2 %s security", flowType)
 		}
-	} else if _, err := parseRelativeOrHttpURL(ss.TokenURL); err != nil {
-		return fmt.Errorf("tokenUrl: %w", err)
+	} else if ss.TokenURL.Value == nil && ss.TokenURL.Variable == nil {
+		return errors.New("tokenUrl: value and env are empty")
 	}
-	if ss.RefreshURL != "" {
-		if _, err := parseRelativeOrHttpURL(ss.RefreshURL); err != nil {
-			return fmt.Errorf("refreshUrl: %w", err)
-		}
+
+	if flowType != ClientCredentialsFlow {
+		return nil
+	}
+
+	if ss.ClientID == nil {
+		return errors.New("clientId is required for the OAuth2 client_credentials flow")
+	} else if ss.ClientID.Value == nil && ss.ClientID.Variable == nil {
+		return errors.New("clientId: value and env are empty")
+	}
+
+	if ss.ClientSecret == nil {
+		return errors.New("clientSecret is required for the OAuth2 client_credentials flow")
+	} else if ss.ClientSecret.Value == nil && ss.ClientSecret.Variable == nil {
+		return errors.New("clientSecret: value and env are empty")
 	}
 
 	return nil
@@ -651,6 +559,61 @@ func (ss OAuth2Config) Validate() error {
 	return nil
 }
 
+// JSONSchema is used to generate a custom jsonschema
+func (j OAuth2Config) JSONSchema() *jsonschema.Schema {
+	oauth2Schema := orderedmap.New[string, *jsonschema.Schema]()
+	oauth2Schema.Set("type", &jsonschema.Schema{
+		Type: "string",
+		Enum: []any{OAuth2Scheme},
+	})
+
+	oauthFlowRef := &jsonschema.Schema{
+		Ref: "#/$defs/OAuthFlow",
+	}
+	implicitFlow := orderedmap.New[string, *jsonschema.Schema]()
+	implicitFlow.Set(string(ImplicitFlow), oauthFlowRef)
+
+	passwordFlow := orderedmap.New[string, *jsonschema.Schema]()
+	passwordFlow.Set(string(PasswordFlow), oauthFlowRef)
+
+	ccFlow := orderedmap.New[string, *jsonschema.Schema]()
+	ccFlow.Set(string(ClientCredentialsFlow), oauthFlowRef)
+
+	acFlow := orderedmap.New[string, *jsonschema.Schema]()
+	acFlow.Set(string(AuthorizationCodeFlow), oauthFlowRef)
+
+	oauth2Schema.Set("flows", &jsonschema.Schema{
+		OneOf: []*jsonschema.Schema{
+			{
+				Type:       "object",
+				Required:   []string{string(PasswordFlow)},
+				Properties: passwordFlow,
+			},
+			{
+				Type:       "object",
+				Required:   []string{string(ImplicitFlow)},
+				Properties: implicitFlow,
+			},
+			{
+				Type:       "object",
+				Required:   []string{string(ClientCredentialsFlow)},
+				Properties: ccFlow,
+			},
+			{
+				Type:       "object",
+				Required:   []string{string(AuthorizationCodeFlow)},
+				Properties: acFlow,
+			},
+		},
+	})
+
+	return &jsonschema.Schema{
+		Type:       "object",
+		Properties: oauth2Schema,
+		Required:   []string{"type", "flows"},
+	}
+}
+
 // OpenIDConnectConfig contains configurations for [OpenID Connect] API specification
 //
 // [OpenID Connect]: https://swagger.io/docs/specification/authentication/openid-connect-discovery
@@ -680,7 +643,7 @@ func (ss OpenIDConnectConfig) Validate() error {
 		return errors.New("openIdConnectUrl is required for oidc security")
 	}
 
-	if _, err := parseRelativeOrHttpURL(ss.OpenIDConnectURL); err != nil {
+	if _, err := ParseRelativeOrHttpURL(ss.OpenIDConnectURL); err != nil {
 		return fmt.Errorf("openIdConnectUrl: %w", err)
 	}
 
