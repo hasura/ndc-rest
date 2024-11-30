@@ -244,6 +244,40 @@
       ],
       "description": "NDCHttpSettings represent global settings of the HTTP API, including base URL, headers, etc..."
     },
+    "OAuthFlow": {
+      "properties": {
+        "authorizationUrl": {
+          "type": "string"
+        },
+        "tokenUrl": {
+          "$ref": "#/$defs/EnvString"
+        },
+        "refreshUrl": {
+          "$ref": "#/$defs/EnvString"
+        },
+        "scopes": {
+          "additionalProperties": {
+            "type": "string"
+          },
+          "type": "object"
+        },
+        "clientId": {
+          "$ref": "#/$defs/EnvString"
+        },
+        "clientSecret": {
+          "$ref": "#/$defs/EnvString"
+        },
+        "endpointParams": {
+          "additionalProperties": {
+            "$ref": "#/$defs/EnvString"
+          },
+          "type": "object"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object",
+      "description": "OAuthFlow contains flow configurations for OAuth 2.0 API specification\n\n[OAuth 2.0]: https://swagger.io/docs/specification/authentication/oauth2"
+    },
     "ObjectField": {
       "properties": {
         "arguments": {
@@ -628,8 +662,52 @@
               ]
             },
             "flows": {
-              "additionalProperties": true,
-              "type": "object"
+              "oneOf": [
+                {
+                  "properties": {
+                    "password": {
+                      "$ref": "#/$defs/OAuthFlow"
+                    }
+                  },
+                  "type": "object",
+                  "required": [
+                    "password"
+                  ]
+                },
+                {
+                  "properties": {
+                    "implicit": {
+                      "$ref": "#/$defs/OAuthFlow"
+                    }
+                  },
+                  "type": "object",
+                  "required": [
+                    "implicit"
+                  ]
+                },
+                {
+                  "properties": {
+                    "clientCredentials": {
+                      "$ref": "#/$defs/OAuthFlow"
+                    }
+                  },
+                  "type": "object",
+                  "required": [
+                    "clientCredentials"
+                  ]
+                },
+                {
+                  "properties": {
+                    "authorizationCode": {
+                      "$ref": "#/$defs/OAuthFlow"
+                    }
+                  },
+                  "type": "object",
+                  "required": [
+                    "authorizationCode"
+                  ]
+                }
+              ]
             }
           },
           "type": "object",

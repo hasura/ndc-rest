@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"net/http"
+	"net/url"
 
 	"github.com/hasura/ndc-http/ndc-http-schema/schema"
 	"golang.org/x/oauth2"
@@ -25,6 +26,20 @@ func NewOAuth2Client(ctx context.Context, httpClient *http.Client, flowType sche
 		}, nil
 	}
 
+	tokenURL, err := config.TokenURL.Get()
+	if err != nil {
+		return nil, fmt.Errorf("tokenUrl: %w", err)
+	}
+
+	if _, err := schema.ParseRelativeOrHttpURL(tokenURL); err != nil {
+		return nil, fmt.Errorf("tokenUrl: %w", err)
+	}
+
+	scopes := make([]string, 0, len(config.Scopes))
+	for scope := range config.Scopes {
+		scopes = append(scopes, scope)
+	}
+
 	clientID, err := config.ClientID.Get()
 	if err != nil {
 		return nil, fmt.Errorf("clientId: %w", err)
@@ -35,38 +50,24 @@ func NewOAuth2Client(ctx context.Context, httpClient *http.Client, flowType sche
 		return nil, fmt.Errorf("clientSecret: %w", err)
 	}
 
-	tokenUrl, err := config.TokenURL.Get()
-	if err != nil {
-		return nil, fmt.Errorf("tokenUrl: %w", err)
-	}
-
-	if _, err := schema.ParseRelativeOrHttpURL(tokenUrl); err != nil {
-		return nil, fmt.Errorf("tokenUrl: %w", err)
-	}
-
-	// if ss.RefreshURL != nil {
-	// 	refreshUrl, err := ss.RefreshURL.Get()
-	// 	if err != nil {
-	// 		return fmt.Errorf("refreshUrl: %w", err)
-	// 	}
-	// 	if _, err := ParseRelativeOrHttpURL(refreshUrl); err != nil {
-	// 		return fmt.Errorf("refreshUrl: %w", err)
-	// 	}
-	// }
-
-	scopes := make([]string, 0, len(config.Scopes))
-	for scope := range config.Scopes {
-		scopes = append(scopes, scope)
-	}
-
-	conf := &clientcredentials.Config{
-		ClientID:     clientID,
-		ClientSecret: clientSecret,
-		Scopes:       scopes,
-		TokenURL:     tokenUrl,
+	var endpointParams url.Values
+	for key, envValue := range config.EndpointParams {
+		value, err := envValue.Get()
+		if err != nil {
+			return nil, fmt.Errorf("endpointParams[%s]: %w", key, err)
+		}
+		endpointParams.Set(key, value)
 	}
 
 	ctx = context.WithValue(ctx, oauth2.HTTPClient, httpClient)
+	conf := &clientcredentials.Config{
+		ClientID:       clientID,
+		ClientSecret:   clientSecret,
+		Scopes:         scopes,
+		TokenURL:       tokenURL,
+		EndpointParams: endpointParams,
+	}
+
 	client := conf.Client(ctx)
 
 	return &OAuth2Client{

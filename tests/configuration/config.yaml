@@ -18,7 +18,3 @@ concurrency:
 files:
   - file: https://raw.githubusercontent.com/hasura/ndc-http/refs/heads/main/connector/testdata/jsonplaceholder/swagger.json
     spec: oas2
-  - file: https://raw.githubusercontent.com/hasura/ndc-http-recipes/refs/heads/main/recipes/ory/hydra/schema/hydra-public.json
-    spec: ndc
-  - file: https://raw.githubusercontent.com/hasura/ndc-http-recipes/refs/heads/main/recipes/ory/hydra/schema/hydra-admin.json
-    spec: ndc

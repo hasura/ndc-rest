@@ -724,7 +724,6 @@ definition:
           forward:
             - X-Test-Header
             - X-Custom-Header
-            - sentry-trace
           additional: {}
   responseHeaders:
     headersField: headers

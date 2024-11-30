@@ -1,4 +1,4 @@
----
+# yaml-language-server: $schema=../../../ndc-http-schema/jsonschema/ndc-http-schema.schema.json
 settings:
   servers:
     - url:
@@ -12,6 +12,7 @@ settings:
       name: api_key
     bearer:
       type: http
+      header: Authorization
       value:
         env: PET_STORE_BEARER_TOKEN
       scheme: bearer
@@ -26,25 +27,34 @@ settings:
     petstore_auth:
       type: oauth2
       flows:
-        implicit:
-          authorizationUrl: https://petstore3.swagger.io/oauth/authorize
+        clientCredentials:
+          tokenUrl:
+            value: http://localhost:4444/oauth2/token
+          clientId:
+            env: OAUTH2_CLIENT_ID
+          clientSecret:
+            env: OAUTH2_CLIENT_SECRET
           scopes:
             read:pets: read your pets
             write:pets: modify pets in your account
+    cookie:
+      type: cookie
+    oidc:
+      type: openIdConnect
+      openIdConnectUrl: http://localhost:4444/oauth2/token
   security:
     - api_key: []
   version: 1.0.18
-collections: []
 functions:
   findPets:
     request:
       url: "/pet"
       method: get
-      parameters: []
       security: []
+      response:
+        contentType: application/json
     arguments: {}
     description: Finds Pets
-    name: findPets
     result_type:
       element_type:
         name: Pet
@@ -56,6 +66,8 @@ functions:
       method: get
       security:
         - bearer: []
+      response:
+        contentType: application/json
     arguments:
       status:
         description: Status values that need to be considered for filter
@@ -68,12 +80,7 @@ functions:
           in: query
           schema:
             type: [string]
-            enum:
-              - available
-              - pending
-              - sold
     description: Finds Pets by status
-    name: findPetsByStatus
     result_type:
       element_type:
         name: Pet
@@ -83,10 +90,59 @@ functions:
     request:
       url: "/pet/retry"
       method: get
-      parameters: []
       security: []
+      response:
+        contentType: application/json
     arguments: {}
-    name: petRetry
+    result_type:
+      element_type:
+        name: Pet
+        type: named
+      type: array
+  findPetsOAuth:
+    request:
+      url: "/pet/oauth"
+      method: get
+      security:
+        - petstore_auth: []
+      response:
+        contentType: application/json
+    arguments: {}
+    result_type:
+      element_type:
+        name: Pet
+        type: named
+      type: array
+  findPetsOAuthPassword:
+    request:
+      url: "/pet/oauth"
+      method: get
+      security:
+        - oauth_password: []
+      response:
+        contentType: application/json
+    arguments: {}
+    result_type:
+      element_type:
+        name: Pet
+        type: named
+      type: array
+  findPetsCookie:
+    request:
+      url: "/pet/cookie"
+      method: get
+      security:
+        - cookie: []
+      response:
+        contentType: application/json
+    arguments:
+      headers:
+        type:
+          type: nullable
+          underlying_type:
+            name: JSON
+            type: named
+        http: {}
     result_type:
       element_type:
         name: Pet
@@ -104,6 +160,8 @@ procedures:
         - api_key: []
       requestBody:
         contentType: application/json
+      response:
+        contentType: application/json
     arguments:
       body:
         description: Request body of /pet
@@ -113,7 +171,31 @@ procedures:
         http:
           in: body
     description: Add a new pet to the store
-    name: addPet
+    result_type:
+      name: Pet
+      type: named
+  addPetOidc:
+    request:
+      url: "/pet/oidc"
+      method: post
+      headers:
+        Content-Type:
+          value: application/json
+      security:
+        - oidc: []
+      requestBody:
+        contentType: application/json
+      response:
+        contentType: application/json
+    arguments:
+      body:
+        description: Request body of /pet
+        type:
+          name: Pet
+          type: named
+        http:
+          in: body
+    description: Add a new pet to the store
     result_type:
       name: Pet
       type: named
@@ -133,7 +215,6 @@ procedures:
         type:
           name: CreateModelRequest
           type: named
-    name: createModel
     result_type:
       element_type:
         name: ProgressResponse
@@ -196,7 +277,7 @@ object_types:
             name: JSON
             type: named
         http:
-          type:
+          type: []
       id:
         type:
           type: nullable

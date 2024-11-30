@@ -15,6 +15,7 @@ import (
 	"strings"
 
 	"github.com/hasura/ndc-http/connector/internal/auth"
+	"github.com/hasura/ndc-http/ndc-http-schema/configuration"
 	rest "github.com/hasura/ndc-http/ndc-http-schema/schema"
 	"github.com/hasura/ndc-sdk-go/connector"
 	"github.com/hasura/ndc-sdk-go/schema"
@@ -37,13 +38,15 @@ type UpstreamSetting struct {
 }
 
 type UpstreamManager struct {
+	config        *configuration.Configuration
 	defaultClient *http.Client
 	httpClients   map[string]*http.Client
 	upstreams     map[string]UpstreamSetting
 }
 
-func NewUpstreamManager(httpClient *http.Client) *UpstreamManager {
+func NewUpstreamManager(httpClient *http.Client, config *configuration.Configuration) *UpstreamManager {
 	return &UpstreamManager{
+		config:        config,
 		defaultClient: httpClient,
 		httpClients:   make(map[string]*http.Client),
 		upstreams:     make(map[string]UpstreamSetting),
@@ -59,22 +62,7 @@ func (sm *UpstreamManager) Register(ctx context.Context, namespace string, rawSe
 		servers:     make(map[string]Server),
 		security:    rawSettings.Security,
 		headers:     sm.getHeadersFromEnv(logger, namespace, rawSettings.Headers),
-		credentials: make(map[string]auth.Credential),
-	}
-
-	for key, ss := range rawSettings.SecuritySchemes {
-		cred, err := auth.NewCredential(ctx, httpClient, ss)
-		if err != nil {
-			// Relax the error to allow schema introspection without environment variables setting.
-			// Moreover, because there are many security schemes the user may use one of them.
-			logger.Error(
-				fmt.Sprintf("failed to register security scheme %s:%s, %s", namespace, key, err),
-				slog.String("namespace", namespace),
-				slog.String("scheme", key),
-			)
-		} else {
-			settings.credentials[key] = cred
-		}
+		credentials: sm.registerSecurityCredentials(ctx, httpClient, rawSettings.SecuritySchemes, logger.With(slog.String("namespace", namespace))),
 	}
 
 	for i, server := range rawSettings.Servers {
@@ -95,23 +83,8 @@ func (sm *UpstreamManager) Register(ctx context.Context, namespace string, rawSe
 		newServer := Server{
 			URL:         serverURL,
 			Headers:     sm.getHeadersFromEnv(logger, namespace, server.Headers),
-			Credentials: make(map[string]auth.Credential),
 			Security:    server.Security,
-		}
-
-		for key, ss := range server.SecuritySchemes {
-			cred, err := auth.NewCredential(ctx, httpClient, ss)
-			if err != nil {
-				// Relax the error to allow schema introspection without environment variables setting.
-				// Moreover, because there are many security schemes the user may use one of them.
-				logger.Error(
-					fmt.Sprintf("failed to register security scheme for server %s: %s", serverID, err),
-					slog.String("namespace", namespace),
-					slog.String("scheme", key),
-				)
-			} else {
-				newServer.Credentials[key] = cred
-			}
+			Credentials: sm.registerSecurityCredentials(ctx, httpClient, server.SecuritySchemes, logger.With(slog.String("namespace", namespace), slog.String("server_id", serverID))),
 		}
 
 		settings.servers[serverID] = newServer
@@ -366,4 +339,29 @@ func (sm *UpstreamManager) getBaseURLFromServers(servers map[string]Server, name
 
 		return host, selectedServerIDs[index], nil
 	}
+}
+
+func (sm *UpstreamManager) registerSecurityCredentials(ctx context.Context, httpClient *http.Client, securitySchemes map[string]rest.SecurityScheme, logger *slog.Logger) map[string]auth.Credential {
+	credentials := make(map[string]auth.Credential)
+
+	for key, ss := range securitySchemes {
+		cred, headerForwardRequired, err := auth.NewCredential(ctx, httpClient, ss)
+		if err != nil {
+			// Relax the error to allow schema introspection without environment variables setting.
+			// Moreover, because there are many security schemes the user may use one of them.
+			logger.Error(
+				fmt.Sprintf("failed to register security scheme %s, %s", key, err),
+				slog.String("scheme", key),
+			)
+
+			continue
+		}
+
+		credentials[key] = cred
+		if headerForwardRequired && (!sm.config.ForwardHeaders.Enabled || sm.config.ForwardHeaders.ArgumentField == nil || *sm.config.ForwardHeaders.ArgumentField == "") {
+			logger.Warn("%s: the security scheme needs header forwarding enabled with argumentField set", slog.String("scheme", key))
+		}
+	}
+
+	return credentials
 }

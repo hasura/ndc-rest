@@ -19,27 +19,42 @@ type Credential interface {
 }
 
 // NewCredential creates a generic credential from the security scheme.
-func NewCredential(ctx context.Context, httpClient *http.Client, security schema.SecurityScheme) (Credential, error) {
+func NewCredential(ctx context.Context, httpClient *http.Client, security schema.SecurityScheme) (Credential, bool, error) {
 	if security.SecuritySchemer == nil {
-		return nil, errors.New("empty security scheme")
+		return nil, false, errors.New("empty security scheme")
 	}
 
 	switch ss := security.SecuritySchemer.(type) {
 	case *schema.APIKeyAuthConfig:
-		return NewApiKeyCredential(httpClient, ss)
+		cred, err := NewApiKeyCredential(httpClient, ss)
+
+		return cred, err == nil, err
 	case *schema.BasicAuthConfig:
-		return NewBasicCredential(httpClient, ss)
+		cred, err := NewBasicCredential(httpClient, ss)
+
+		return cred, err == nil, err
 	case *schema.HTTPAuthConfig:
-		return NewHTTPCredential(httpClient, ss)
+		cred, err := NewHTTPCredential(httpClient, ss)
+
+		return cred, err == nil, err
 	case *schema.OAuth2Config:
+		var headerForwardingRequired bool
 		for flowType, flow := range ss.Flows {
-			return NewOAuth2Client(ctx, httpClient, flowType, &flow)
+			if flowType != schema.ClientCredentialsFlow {
+				headerForwardingRequired = true
+			}
+
+			cred, err := NewOAuth2Client(ctx, httpClient, flowType, &flow)
+
+			return cred, headerForwardingRequired || err != nil, err
 		}
 	case *schema.CookieAuthConfig:
-		return NewCookieCredential(httpClient)
+		cred, err := NewCookieCredential(httpClient)
+
+		return cred, true, err
 	}
 
-	return NewMockCredential(httpClient), nil
+	return NewMockCredential(httpClient), true, nil
 }
 
 // MockCredential implements a mock credential.

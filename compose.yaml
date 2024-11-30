@@ -12,6 +12,8 @@ services:
       - local.hasura.dev=host-gateway
     environment:
       OTEL_EXPORTER_OTLP_ENDPOINT: http://local.hasura.dev:4317
+      HYDRA_PUBLIC_SERVER_URL: http://hydra:4444
+      HYDRA_ADMIN_SERVER_URL: http://hydra:4445
       HASURA_LOG_LEVEL: debug
 
   hydra:
@@ -27,7 +29,7 @@ services:
         target: /var/lib/sqlite
         read_only: false
       - type: bind
-        source: ./testdata/hydra.yml
+        source: ./tests/hydra.yml
         target: /etc/config/hydra/hydra.yml
     environment:
       - DSN=sqlite:///var/lib/sqlite/db.sqlite?_fk=true
@@ -48,6 +50,9 @@ services:
         target: /var/lib/sqlite
         read_only: false
       - type: bind
-        source: ./testdata/hydra.yml
+        source: ./tests/hydra.yml
         target: /etc/config/hydra/hydra.yml
     restart: on-failure
+
+volumes:
+  hydra-sqlite:

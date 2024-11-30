@@ -12,11 +12,13 @@ import (
 	"net/http/httptest"
 	"os"
 	"path"
+	"strings"
 	"sync/atomic"
 	"testing"
 	"time"
 
 	"github.com/hasura/ndc-http/ndc-http-schema/configuration"
+	rest "github.com/hasura/ndc-http/ndc-http-schema/schema"
 	"github.com/hasura/ndc-sdk-go/connector"
 	"github.com/hasura/ndc-sdk-go/schema"
 	"gotest.tools/v3/assert"
@@ -266,6 +268,92 @@ func TestHTTPConnector_authentication(t *testing.T) {
 				},
 			})
 		}
+	})
+
+	t.Run("auth_cookie", func(t *testing.T) {
+
+		requestBody := []byte(`{
+		"collection": "findPetsCookie",
+		"query": {
+			"fields": {
+				"__value": {
+					"type": "column",
+					"column": "__value"
+				}
+			}
+		},
+		"arguments": {
+			"headers": { 
+				"type": "literal", 
+				"value": {
+					"Cookie": "auth=auth_token"
+				} 
+			}
+		},
+		"collection_relationships": {}
+	}`)
+
+		res, err := http.Post(fmt.Sprintf("%s/query", testServer.URL), "application/json", bytes.NewBuffer(requestBody))
+		assert.NilError(t, err)
+		assertHTTPResponse(t, res, http.StatusOK, schema.QueryResponse{
+			{
+				Rows: []map[string]any{
+					{
+						"__value": map[string]any{
+							"headers": map[string]any{
+								"Content-Type": string("application/json"),
+							},
+							"response": map[string]any{},
+						},
+					},
+				},
+			},
+		})
+	})
+
+	t.Run("auth_oidc", func(t *testing.T) {
+		addPetOidcBody := []byte(`{
+			"operations": [
+				{
+					"type": "procedure",
+					"name": "addPetOidc",
+					"arguments": {
+						"headers": {
+							"Authorization": "Bearer random_token"
+						},
+						"body": {
+							"name": "pet"
+						}
+					},
+					"fields": {
+						"type": "object",
+						"fields": {
+							"headers": {
+								"column": "headers",
+								"type": "column"
+							},
+							"response": {
+								"column": "response",
+								"type": "column"
+							}
+						}
+					}
+				}
+			],
+			"collection_relationships": {}
+		}`)
+		res, err := http.Post(fmt.Sprintf("%s/mutation", testServer.URL), "application/json", bytes.NewBuffer(addPetOidcBody))
+		assert.NilError(t, err)
+		assertHTTPResponse(t, res, http.StatusOK, schema.MutationResponse{
+			OperationResults: []schema.MutationOperationResults{
+				schema.NewProcedureResult(map[string]any{
+					"headers": map[string]any{
+						"Content-Type": string("application/json"),
+					},
+					"response": map[string]any{},
+				}).Encode(),
+			},
+		})
 	})
 
 	t.Run("retry", func(t *testing.T) {
@@ -840,6 +928,66 @@ func createMockServer(t *testing.T, apiKey string, bearerToken string) *httptest
 		}
 	})
 
+	mux.HandleFunc("/pet/oauth", func(w http.ResponseWriter, r *http.Request) {
+		switch r.Method {
+		case http.MethodGet:
+			authToken := strings.TrimPrefix(r.Header.Get("Authorization"), "Bearer ")
+			if authToken == "" {
+				t.Errorf("empty Authorization token")
+				t.FailNow()
+
+				return
+			}
+
+			tokenBody := "token=" + authToken
+			tokenResp, err := http.DefaultClient.Post("http://localhost:4445/admin/oauth2/introspect", rest.ContentTypeFormURLEncoded, bytes.NewBufferString(tokenBody))
+			assert.NilError(t, err)
+			assert.Equal(t, http.StatusOK, tokenResp.StatusCode)
+
+			var result struct {
+				Active   bool   `json:"active"`
+				CLientID string `json:"client_id"`
+			}
+
+			assert.NilError(t, json.NewDecoder(tokenResp.Body).Decode(&result))
+			assert.Equal(t, "test-client", result.CLientID)
+			assert.Equal(t, true, result.Active)
+
+			writeResponse(w, "{}")
+		default:
+			w.WriteHeader(http.StatusMethodNotAllowed)
+			return
+		}
+	})
+
+	mux.HandleFunc("/pet/cookie", func(w http.ResponseWriter, r *http.Request) {
+		switch r.Method {
+		case http.MethodGet:
+			authCookie, err := r.Cookie("auth")
+			assert.NilError(t, err)
+			assert.Equal(t, "auth_token", authCookie.Value)
+			writeResponse(w, "{}")
+		default:
+			w.WriteHeader(http.StatusMethodNotAllowed)
+			return
+		}
+	})
+
+	mux.HandleFunc("/pet/oidc", func(w http.ResponseWriter, r *http.Request) {
+		switch r.Method {
+		case http.MethodPost:
+			if r.Header.Get("Authorization") != "Bearer random_token" {
+				t.Errorf("invalid bearer token, expected: `Authorization: Bearer random_token`, got %s", r.Header.Get("Authorization"))
+				t.FailNow()
+				return
+			}
+			writeResponse(w, "{}")
+		default:
+			w.WriteHeader(http.StatusMethodNotAllowed)
+			return
+		}
+	})
+
 	return httptest.NewServer(mux)
 }
 
@@ -1002,4 +1150,76 @@ func assertHTTPResponse[B any](t *testing.T, res *http.Response, statusCode int,
 
 	log.Println(string(bodyBytes))
 	assert.DeepEqual(t, expectedBody, body)
+}
+
+func TestOAuth(t *testing.T) {
+	apiKey := "random_api_key"
+	bearerToken := "random_bearer_token"
+	oauth2ClientID := "test-client"
+	oauth2ClientSecret := "randomsecret"
+	createClientBody := []byte(fmt.Sprintf(`{
+		"client_id": "%s",
+		"client_name": "Test client",
+		"client_secret": "%s",
+		"audience": ["http://hasura.io"],
+		"grant_types": ["client_credentials"],
+		"response_types": ["code"],
+		"scope": "openid read:pets write:pets",
+		"token_endpoint_auth_method": "client_secret_post"
+	}`, oauth2ClientID, oauth2ClientSecret))
+
+	oauthResp, err := http.DefaultClient.Post("http://localhost:4445/admin/clients", "application/json", bytes.NewBuffer(createClientBody))
+	assert.NilError(t, err)
+	defer oauthResp.Body.Close()
+
+	if oauthResp.StatusCode != http.StatusCreated && oauthResp.StatusCode != http.StatusConflict {
+		body, _ := io.ReadAll(oauthResp.Body)
+		t.Fatal(string(body))
+	}
+
+	server := createMockServer(t, apiKey, bearerToken)
+	defer server.Close()
+
+	t.Setenv("PET_STORE_URL", server.URL)
+	t.Setenv("PET_STORE_API_KEY", apiKey)
+	t.Setenv("PET_STORE_BEARER_TOKEN", bearerToken)
+	t.Setenv("OAUTH2_CLIENT_ID", oauth2ClientID)
+	t.Setenv("OAUTH2_CLIENT_SECRET", oauth2ClientSecret)
+	connServer, err := connector.NewServer(NewHTTPConnector(), &connector.ServerOptions{
+		Configuration: "testdata/auth",
+	}, connector.WithoutRecovery())
+	assert.NilError(t, err)
+	testServer := connServer.BuildTestServer()
+	defer testServer.Close()
+
+	findPetsBody := []byte(`{
+		"collection": "findPetsOAuth",
+		"query": {
+			"fields": {
+				"__value": {
+					"type": "column",
+					"column": "__value"
+				}
+			}
+		},
+		"arguments": {},
+		"collection_relationships": {}
+	}`)
+
+	res, err := http.Post(fmt.Sprintf("%s/query", testServer.URL), "application/json", bytes.NewBuffer(findPetsBody))
+	assert.NilError(t, err)
+	assertHTTPResponse(t, res, http.StatusOK, schema.QueryResponse{
+		{
+			Rows: []map[string]any{
+				{
+					"__value": map[string]any{
+						"headers": map[string]any{
+							"Content-Type": string("application/json"),
+						},
+						"response": map[string]any{},
+					},
+				},
+			},
+		},
+	})
 }

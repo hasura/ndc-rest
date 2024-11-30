@@ -357,7 +357,7 @@ func (client *HTTPClient) evalHTTPResponse(ctx context.Context, span trace.Span,
 		return true, resp.Header, nil
 	}
 
-	if resp.Body == nil {
+	if resp.Body == nil || resp.ContentLength == 0 {
 		return nil, resp.Header, nil
 	}
 

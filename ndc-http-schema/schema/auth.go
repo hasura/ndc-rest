@@ -182,16 +182,6 @@ func (j SecurityScheme) JSONSchema() *jsonschema.Schema {
 		},
 	})
 
-	oauth2Schema := orderedmap.New[string, *jsonschema.Schema]()
-	oauth2Schema.Set("type", &jsonschema.Schema{
-		Type: "string",
-		Enum: []any{OAuth2Scheme},
-	})
-	oauth2Schema.Set("flows", &jsonschema.Schema{
-		Type:                 "object",
-		AdditionalProperties: &jsonschema.Schema{},
-	})
-
 	oidcSchema := orderedmap.New[string, *jsonschema.Schema]()
 	oidcSchema.Set("type", &jsonschema.Schema{
 		Type: "string",
@@ -230,11 +220,7 @@ func (j SecurityScheme) JSONSchema() *jsonschema.Schema {
 				Properties: httpAuthSchema,
 				Required:   []string{"type", "value", "header", "scheme"},
 			},
-			{
-				Type:       "object",
-				Properties: oauth2Schema,
-				Required:   []string{"type", "flows"},
-			},
+			OAuth2Config{}.JSONSchema(),
 			{
 				Type:       "object",
 				Properties: oidcSchema,
@@ -497,12 +483,13 @@ func ParseOAuthFlowType(value string) (OAuthFlowType, error) {
 //
 // [OAuth 2.0]: https://swagger.io/docs/specification/authentication/oauth2
 type OAuthFlow struct {
-	AuthorizationURL string            `json:"authorizationUrl,omitempty" mapstructure:"authorizationUrl" yaml:"authorizationUrl,omitempty"`
-	ClientID         *utils.EnvString  `json:"clientId,omitempty"         mapstructure:"clientId"         yaml:"clientId,omitempty"`
-	ClientSecret     *utils.EnvString  `json:"clientSecret,omitempty"     mapstructure:"clientSecret"     yaml:"clientSecret,omitempty"`
-	TokenURL         *utils.EnvString  `json:"tokenUrl,omitempty"         mapstructure:"tokenUrl"         yaml:"tokenUrl,omitempty"`
-	RefreshURL       *utils.EnvString  `json:"refreshUrl,omitempty"       mapstructure:"refreshUrl"       yaml:"refreshUrl,omitempty"`
-	Scopes           map[string]string `json:"scopes,omitempty"           mapstructure:"scopes"           yaml:"scopes,omitempty"`
+	AuthorizationURL string                     `json:"authorizationUrl,omitempty" mapstructure:"authorizationUrl" yaml:"authorizationUrl,omitempty"`
+	TokenURL         *utils.EnvString           `json:"tokenUrl,omitempty"         mapstructure:"tokenUrl"         yaml:"tokenUrl,omitempty"`
+	RefreshURL       *utils.EnvString           `json:"refreshUrl,omitempty"       mapstructure:"refreshUrl"       yaml:"refreshUrl,omitempty"`
+	Scopes           map[string]string          `json:"scopes,omitempty"           mapstructure:"scopes"           yaml:"scopes,omitempty"`
+	ClientID         *utils.EnvString           `json:"clientId,omitempty"         mapstructure:"clientId"         yaml:"clientId,omitempty"`
+	ClientSecret     *utils.EnvString           `json:"clientSecret,omitempty"     mapstructure:"clientSecret"     yaml:"clientSecret,omitempty"`
+	EndpointParams   map[string]utils.EnvString `json:"endpointParams,omitempty"   mapstructure:"endpointParams"   yaml:"endpointParams,omitempty"`
 }
 
 // Validate if the current instance is valid
@@ -570,6 +557,61 @@ func (ss OAuth2Config) Validate() error {
 	}
 
 	return nil
+}
+
+// JSONSchema is used to generate a custom jsonschema
+func (j OAuth2Config) JSONSchema() *jsonschema.Schema {
+	oauth2Schema := orderedmap.New[string, *jsonschema.Schema]()
+	oauth2Schema.Set("type", &jsonschema.Schema{
+		Type: "string",
+		Enum: []any{OAuth2Scheme},
+	})
+
+	oauthFlowRef := &jsonschema.Schema{
+		Ref: "#/$defs/OAuthFlow",
+	}
+	implicitFlow := orderedmap.New[string, *jsonschema.Schema]()
+	implicitFlow.Set(string(ImplicitFlow), oauthFlowRef)
+
+	passwordFlow := orderedmap.New[string, *jsonschema.Schema]()
+	passwordFlow.Set(string(PasswordFlow), oauthFlowRef)
+
+	ccFlow := orderedmap.New[string, *jsonschema.Schema]()
+	ccFlow.Set(string(ClientCredentialsFlow), oauthFlowRef)
+
+	acFlow := orderedmap.New[string, *jsonschema.Schema]()
+	acFlow.Set(string(AuthorizationCodeFlow), oauthFlowRef)
+
+	oauth2Schema.Set("flows", &jsonschema.Schema{
+		OneOf: []*jsonschema.Schema{
+			{
+				Type:       "object",
+				Required:   []string{string(PasswordFlow)},
+				Properties: passwordFlow,
+			},
+			{
+				Type:       "object",
+				Required:   []string{string(ImplicitFlow)},
+				Properties: implicitFlow,
+			},
+			{
+				Type:       "object",
+				Required:   []string{string(ClientCredentialsFlow)},
+				Properties: ccFlow,
+			},
+			{
+				Type:       "object",
+				Required:   []string{string(AuthorizationCodeFlow)},
+				Properties: acFlow,
+			},
+		},
+	})
+
+	return &jsonschema.Schema{
+		Type:       "object",
+		Properties: oauth2Schema,
+		Required:   []string{"type", "flows"},
+	}
 }
 
 // OpenIDConnectConfig contains configurations for [OpenID Connect] API specification

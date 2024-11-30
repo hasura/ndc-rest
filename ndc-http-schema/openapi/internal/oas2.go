@@ -138,6 +138,13 @@ func (oc *OAS2Builder) convertSecuritySchemes(scheme orderedmap.Pair[string, *v2
 			flow.Scopes = scopes
 		}
 
+		if flowType == rest.ClientCredentialsFlow {
+			clientID := sdkUtils.NewEnvStringVariable(utils.StringSliceToConstantCase([]string{oc.EnvPrefix, key, "CLIENT_ID"}))
+			clientSecret := sdkUtils.NewEnvStringVariable(utils.StringSliceToConstantCase([]string{oc.EnvPrefix, key, "CLIENT_SECRET"}))
+			flow.ClientID = &clientID
+			flow.ClientSecret = &clientSecret
+		}
+
 		result.SecuritySchemer = rest.NewOAuth2Config(map[rest.OAuthFlowType]rest.OAuthFlow{
 			flowType: flow,
 		})
