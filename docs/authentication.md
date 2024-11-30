@@ -46,7 +46,7 @@ securitySchemes:
 
 ## Bearer Auth
 
-Set the `value` environment variable, header name and scheme. For example, the below configuration will inject the bearer token into incoming requests:
+Configure the `value` environment variable, header name, and scheme. For example, the below configuration will inject the bearer token into incoming requests:
 
 ```yaml
 securitySchemes:
@@ -64,7 +64,7 @@ Authorization: Bearer {{PET_STORE_BEARER_TOKEN}}
 
 ## OAuth 2.0
 
-The client credentials grant is built-in supported. You can set the tokenUrl, scopes, the client ID and client secret variables. The connector automatically refreshes access tokens and inject them into incoming requests.
+The client credentials grant is built-in supported. You can set the tokenUrl, scopes, client ID, and client secret variables. The connector automatically refreshes access tokens and injects them into incoming requests.
 
 ```yaml
 securitySchemes:
@@ -170,9 +170,9 @@ settings:
       - TLS_AES_128_GCM_SHA256
 ```
 
-You can configure either file path `*_FILE` or inline PEM data `*_PEM` in bases64-encoded string.
+You can configure either file path `*_FILE` or inline bases64-encoded PEM data `*_PEM`.
 
-If the service has many servers, you can configure different TLS configuration for each server. However, you need to [manually patch the configuration](../README.md#json-patch):
+If the service has many servers, you can configure different TLS configurations for each server. However, you need to [manually patch the configuration](../README.md#json-patch):
 
 ```yaml
 settings:
