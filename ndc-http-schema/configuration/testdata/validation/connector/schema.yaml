@@ -1,4 +1,4 @@
-# yaml-language-server: $schema=../../../jsonschema/ndc-http-schema.schema.json
+# yaml-language-server: $schema=../../../../jsonschema/ndc-http-schema.schema.json
 settings:
   servers:
     - url:

@@ -11,7 +11,7 @@
   ``` {{ .ContextPath }}/connector.yaml
   envMapping:
     {{range $index, $variable := .Variables }}{{ index $variable 0 }}
-      fromEnv: ${{ index $variable 1 }}
+      fromEnv: {{ index $variable 1 }}
     {{end}}
   ```
 

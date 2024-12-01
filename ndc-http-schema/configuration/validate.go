@@ -7,6 +7,7 @@ import (
 	"log/slog"
 	"os"
 	"path/filepath"
+	"strings"
 	"text/template"
 
 	"github.com/hasura/ndc-http/ndc-http-schema/schema"
@@ -20,6 +21,7 @@ type ConfigValidator struct {
 	templates   *template.Template
 	logger      *slog.Logger
 	contextPath string
+	noColor     bool
 
 	requiredVariables         map[string]bool
 	requiredHeadersForwarding map[schema.SecuritySchemeType]bool
@@ -28,7 +30,7 @@ type ConfigValidator struct {
 }
 
 // ValidateConfiguration evaluates, validates the configuration and suggests required actions to make the connector working.
-func ValidateConfiguration(config *Configuration, schemas []NDCHttpRuntimeSchema, logger *slog.Logger) (*ConfigValidator, error) {
+func ValidateConfiguration(config *Configuration, contextPath string, schemas []NDCHttpRuntimeSchema, logger *slog.Logger, noColor bool) (*ConfigValidator, error) {
 	templates, err := getTemplates()
 	if err != nil {
 		return nil, err
@@ -38,9 +40,10 @@ func ValidateConfiguration(config *Configuration, schemas []NDCHttpRuntimeSchema
 		config:                    config,
 		logger:                    logger,
 		templates:                 templates,
+		noColor:                   noColor,
 		requiredVariables:         make(map[string]bool),
 		requiredHeadersForwarding: map[schema.SecuritySchemeType]bool{},
-		contextPath:               os.Getenv("HASURA_PLUGIN_CONNECTOR_CONTEXT_PATH"),
+		contextPath:               contextPath,
 	}
 
 	for _, item := range schemas {
@@ -68,7 +71,7 @@ func (cv *ConfigValidator) HasError() bool {
 // Render renders the help text.
 func (cv *ConfigValidator) Render(w io.Writer) {
 	if len(cv.errors) > 0 {
-		_, _ = w.Write([]byte("ERROR:"))
+		writeErrorIf(w, ":", cv.noColor)
 		for ns, errs := range cv.errors {
 			_, _ = w.Write([]byte("\n\n"))
 			_, _ = w.Write([]byte(ns))
@@ -80,7 +83,7 @@ func (cv *ConfigValidator) Render(w io.Writer) {
 	}
 
 	if len(cv.warnings) > 0 || len(cv.requiredHeadersForwarding) > 0 {
-		_, _ = w.Write([]byte("Warning:\n"))
+		writeWarningIf(w, ":\n", cv.noColor)
 		if len(cv.requiredHeadersForwarding) > 0 && (!cv.config.ForwardHeaders.Enabled || cv.config.ForwardHeaders.ArgumentField == nil || *cv.config.ForwardHeaders.ArgumentField == "") {
 			_, _ = w.Write([]byte(fmt.Sprintf("\n  * Headers forwarding should be enabled for the following authentication schemes: %v", utils.GetSortedKeys(cv.requiredHeadersForwarding))))
 			_, _ = w.Write([]byte("\n    See https://github.com/hasura/ndc-http/blob/main/docs/authentication.md#headers-forwarding for more information."))
@@ -97,13 +100,13 @@ func (cv *ConfigValidator) Render(w io.Writer) {
 	}
 
 	if len(cv.requiredVariables) > 0 {
-		_, _ = w.Write([]byte("\n\nEnvironment Variables:\n"))
+		writeColorTextIf(w, "\n\nEnvironment Variables:\n", ansiBrightYellow, cv.noColor)
 
 		prefix := ""
 		connectorName := cv.findConnectorName()
 		subgraphName := cv.findSubgraphName()
 		if connectorName != "" && subgraphName != "" {
-			prefix = fmt.Sprintf("%s_%s_", subgraphName, connectorName)
+			prefix = fmt.Sprintf("%s_%s_", strings.ToUpper(subgraphName), strings.ToUpper(connectorName))
 		}
 		variables := make([][]string, 0, len(cv.requiredVariables))
 		for _, key := range utils.GetSortedKeys(cv.requiredVariables) {

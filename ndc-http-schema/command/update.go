@@ -19,14 +19,14 @@ type UpdateCommandArguments struct {
 }
 
 // UpdateConfiguration updates the configuration for the HTTP connector
-func UpdateConfiguration(args *UpdateCommandArguments, logger *slog.Logger) error {
+func UpdateConfiguration(args *UpdateCommandArguments, logger *slog.Logger, noColor bool) error {
 	start := time.Now()
 	config, schemas, err := configuration.UpdateHTTPConfiguration(args.Dir, logger)
 	if err != nil {
 		return err
 	}
 
-	validStatus, err := configuration.ValidateConfiguration(config, schemas, logger)
+	validStatus, err := configuration.ValidateConfiguration(config, args.Dir, schemas, logger, noColor)
 	if err != nil {
 		return err
 	}

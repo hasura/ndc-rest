@@ -15,6 +15,7 @@ import (
 
 var cli struct {
 	LogLevel  string                                `default:"info" enum:"debug,info,warn,error"                                                                                    help:"Log level."`
+	NoColor   bool                                  `default:"false" help:"Disable printing color to standard output"`
 	Update    command.UpdateCommandArguments        `cmd:""         help:"Update HTTP connector configuration"`
 	Convert   configuration.ConvertCommandArguments `cmd:""         help:"Convert API spec to NDC schema. For example:\n ndc-http-schema convert -f petstore.yaml -o petstore.json"`
 	Json2Yaml command.Json2YamlCommandArguments     `cmd:""         help:"Convert JSON file to YAML. For example:\n ndc-http-schema json2yaml -f petstore.json -o petstore.yaml"    name:"json2yaml"`
@@ -23,7 +24,7 @@ var cli struct {
 
 func main() {
 	cmd := kong.Parse(&cli, kong.UsageOnError())
-	logger, err := initLogger(cli.LogLevel)
+	logger, err := initLogger(cli.LogLevel, cli.NoColor)
 	if err != nil {
 		slog.Error(err.Error())
 		os.Exit(1)
@@ -33,7 +34,7 @@ func main() {
 
 	switch cmd.Command() {
 	case "update":
-		err = command.UpdateConfiguration(&cli.Update, logger)
+		err = command.UpdateConfiguration(&cli.Update, logger, cli.NoColor)
 	case "convert":
 		err = command.CommandConvertToNDCSchema(&cli.Convert, logger)
 	case "json2yaml":
@@ -50,7 +51,7 @@ func main() {
 	}
 }
 
-func initLogger(logLevel string) (*slog.Logger, error) {
+func initLogger(logLevel string, noColor bool) (*slog.Logger, error) {
 	var level slog.Level
 	err := level.UnmarshalText([]byte(strings.ToUpper(logLevel)))
 	if err != nil {
@@ -60,6 +61,7 @@ func initLogger(logLevel string) (*slog.Logger, error) {
 	logger := slog.New(tint.NewHandler(os.Stderr, &tint.Options{
 		Level:      level,
 		TimeFormat: "15:04",
+		NoColor:    noColor,
 	}))
 	slog.SetDefault(logger)
 

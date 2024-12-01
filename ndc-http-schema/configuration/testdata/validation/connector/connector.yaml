@@ -1,0 +1,8 @@
+kind: Connector
+version: v2
+definition:
+  name: myapi
+  subgraph: myapi
+  source: hasura/http:v0.5.0
+  context: .
+  envMapping: {}

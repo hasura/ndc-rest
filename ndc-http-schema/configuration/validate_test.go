@@ -31,8 +31,9 @@ func TestConfigValidator(t *testing.T) {
 
 	for _, tc := range testCases {
 		t.Run(tc.Dir, func(t *testing.T) {
+			connectorDir := filepath.Join(tc.Dir, "connector")
 			expectedBytes, err := os.ReadFile(filepath.Join(tc.Dir, "expected.tpl"))
-			config, schemas, err := UpdateHTTPConfiguration(tc.Dir, slog.Default())
+			config, schemas, err := UpdateHTTPConfiguration(connectorDir, slog.Default())
 			if tc.ErrorMsg != "" {
 				assert.ErrorContains(t, err, tc.ErrorMsg)
 
@@ -41,7 +42,7 @@ func TestConfigValidator(t *testing.T) {
 
 			assert.NilError(t, err)
 
-			validStatus, err := ValidateConfiguration(config, schemas, slog.Default())
+			validStatus, err := ValidateConfiguration(config, connectorDir, schemas, slog.Default(), true)
 			assert.NilError(t, err)
 
 			var buf bytes.Buffer

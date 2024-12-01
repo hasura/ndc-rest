@@ -1,3 +1,4 @@
+# yaml-language-server: $schema=../../../../jsonschema/ndc-http-schema.schema.json
 settings:
   servers:
     - url:
@@ -45,15 +46,15 @@ settings:
         # Explicit cipher suites can be set. If left blank, a safe default list is used (optional).
         cipherSuites:
           - TLS_AES_128_GCM_SHA256
-collections: []
 functions:
   findCats:
     request:
       url: "/cat"
       method: get
+      response:
+        contentType: application/json
     arguments: {}
     description: Finds Cats
-    name: findCats
     result_type:
       element_type:
         name: Pet
@@ -72,6 +73,7 @@ object_types:
         type:
           name: String
           type: named
+procedures: {}
 scalar_types:
   Int:
     aggregate_functions: {}

@@ -1,4 +1,4 @@
-# yaml-language-server: $schema=../../../jsonschema/configuration.schema.json
+# yaml-language-server: $schema=../../../../jsonschema/configuration.schema.json
 strict: true
 forwardHeaders:
   enabled: false
@@ -10,6 +10,4 @@ concurrency:
   http: 0
 files:
   - file: schema.yaml
-    spec: ndc
-  - file: schema2.yaml
     spec: ndc

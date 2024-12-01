@@ -216,7 +216,7 @@ func buildSchemaFile(config *Configuration, configDir string, configItem *Config
 			return nil, err
 		}
 		if err := templates.ExecuteTemplate(os.Stderr, templateEmptySettings, map[string]any{
-			"ContextPath": os.Getenv(hasuraPluginConnectorContextPath),
+			"ContextPath": configDir,
 			"Namespace":   configItem.ConvertConfig.File,
 		}); err != nil {
 			logger.Warn(err.Error())
