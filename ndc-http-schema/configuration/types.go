@@ -12,6 +12,8 @@ import (
 	"github.com/hasura/ndc-sdk-go/utils"
 )
 
+const hasuraPluginConnectorContextPath = "HASURA_PLUGIN_CONNECTOR_CONTEXT_PATH"
+
 var (
 	errFilePathRequired   = errors.New("file path is empty")
 	errHTTPMethodRequired = errors.New("the HTTP method is required")

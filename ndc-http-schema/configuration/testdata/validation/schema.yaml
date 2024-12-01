@@ -1,0 +1,481 @@
+# yaml-language-server: $schema=../../../jsonschema/ndc-http-schema.schema.json
+settings:
+  servers:
+    - url:
+        env: PET_STORE_URL
+  headers:
+    X-Test-Header:
+      env: PET_STORE_TEST_HEADER
+  securitySchemes:
+    api_key:
+      type: apiKey
+      value:
+        env: PET_STORE_API_KEY
+      in: header
+      name: api_key
+    bearer:
+      type: http
+      header: Authorization
+      value:
+        env: PET_STORE_BEARER_TOKEN
+      scheme: bearer
+    basic:
+      type: basic
+      header: Authorization
+      username:
+        value: user
+      password:
+        value: password
+    petstore_auth:
+      type: oauth2
+      flows:
+        clientCredentials:
+          tokenUrl:
+            value: http://localhost:4444/oauth2/token
+          clientId:
+            env: OAUTH2_CLIENT_ID
+          clientSecret:
+            env: OAUTH2_CLIENT_SECRET
+          scopes:
+            read:pets: read your pets
+            write:pets: modify pets in your account
+    cookie:
+      type: cookie
+    oidc:
+      type: openIdConnect
+      openIdConnectUrl: http://localhost:4444/oauth2/token
+  security:
+    - api_key: []
+  version: 1.0.18
+  tls:
+    # Path to the TLS cert to use for TLS required connections.
+    certFile:
+      env: PET_STORE_CERT_FILE
+    # Alternative to cert_file. Provide the certificate contents as a base64-encoded string instead of a filepath.
+    certPem:
+      env: PET_STORE_CERT_PEM
+    # Path to the TLS key to use for TLS required connections.
+    keyFile:
+      env: PET_STORE_KEY_FILE
+    # Alternative to key_file. Provide the key contents as a base64-encoded string instead of a filepath.
+    keyPem:
+      env: PET_STORE_KEY_PEM
+    # Path to the CA cert.
+    caFile:
+      env: PET_STORE_CA_FILE
+    # Alternative to ca_file. Provide the CA cert contents as a base64-encoded string instead of a filepath.
+    caPem:
+      env: PET_STORE_CA_PEM
+    # Additionally you can configure TLS to be enabled but skip verifying the server's certificate chain (optional).
+    insecureSkipVerify:
+      env: PET_STORE_INSECURE_SKIP_VERIFY
+      value: false
+    # Whether to load the system certificate authorities pool alongside the certificate authority (optional).
+    includeSystemCACertsPool:
+      env: PET_STORE_INCLUDE_SYSTEM_CA_CERT_POOL
+      value: false
+    # ServerName requested by client for virtual hosting (optional).
+    serverName:
+      env: PET_STORE_SERVER_NAME
+    # Minimum acceptable TLS version (optional).
+    minVersion: "1.0"
+    # Maximum acceptable TLS version (optional).
+    maxVersion: "1.3"
+    # Explicit cipher suites can be set. If left blank, a safe default list is used (optional).
+    cipherSuites:
+      - TLS_AES_128_GCM_SHA256
+functions:
+  findPets:
+    request:
+      url: "/pet"
+      method: get
+      security: []
+      response:
+        contentType: application/json
+    arguments: {}
+    description: Finds Pets
+    result_type:
+      element_type:
+        name: Pet
+        type: named
+      type: array
+  findPetsByStatus:
+    request:
+      url: "/pet/findByStatus"
+      method: get
+      security:
+        - bearer: []
+      response:
+        contentType: application/json
+    arguments:
+      status:
+        description: Status values that need to be considered for filter
+        type:
+          type: nullable
+          underlying_type:
+            name: String
+            type: named
+        http:
+          in: query
+          schema:
+            type: [string]
+    description: Finds Pets by status
+    result_type:
+      element_type:
+        name: Pet
+        type: named
+      type: array
+  petRetry:
+    request:
+      url: "/pet/retry"
+      method: get
+      security: []
+      response:
+        contentType: application/json
+    arguments: {}
+    result_type:
+      element_type:
+        name: Pet
+        type: named
+      type: array
+  findPetsOAuth:
+    request:
+      url: "/pet/oauth"
+      method: get
+      security:
+        - petstore_auth: []
+      response:
+        contentType: application/json
+    arguments: {}
+    result_type:
+      element_type:
+        name: Pet
+        type: named
+      type: array
+  findPetsOAuthPassword:
+    request:
+      url: "/pet/oauth"
+      method: get
+      security:
+        - oauth_password: []
+      response:
+        contentType: application/json
+    arguments: {}
+    result_type:
+      element_type:
+        name: Pet
+        type: named
+      type: array
+  findPetsCookie:
+    request:
+      url: "/pet/cookie"
+      method: get
+      security:
+        - cookie: []
+      response:
+        contentType: application/json
+    arguments:
+      headers:
+        type:
+          type: nullable
+          underlying_type:
+            name: JSON
+            type: named
+        http: {}
+    result_type:
+      element_type:
+        name: Pet
+        type: named
+      type: array
+procedures:
+  addPet:
+    request:
+      url: "/pet"
+      method: post
+      headers:
+        Content-Type:
+          value: application/json
+      security:
+        - api_key: []
+      requestBody:
+        contentType: application/json
+      response:
+        contentType: application/json
+    arguments:
+      body:
+        description: Request body of /pet
+        type:
+          name: Pet
+          type: named
+        http:
+          in: body
+    description: Add a new pet to the store
+    result_type:
+      name: Pet
+      type: named
+  addPetOidc:
+    request:
+      url: "/pet/oidc"
+      method: post
+      headers:
+        Content-Type:
+          value: application/json
+      security:
+        - oidc: []
+      requestBody:
+        contentType: application/json
+      response:
+        contentType: application/json
+    arguments:
+      body:
+        description: Request body of /pet
+        type:
+          name: Pet
+          type: named
+        http:
+          in: body
+    description: Add a new pet to the store
+    result_type:
+      name: Pet
+      type: named
+  createModel:
+    request:
+      url: /model
+      method: post
+      security:
+        - basic: []
+      requestBody:
+        contentType: application/json
+      response:
+        contentType: application/x-ndjson
+    arguments:
+      body:
+        description: Request body of POST /api/create
+        type:
+          name: CreateModelRequest
+          type: named
+    result_type:
+      element_type:
+        name: ProgressResponse
+        type: named
+      type: array
+  putPetXml:
+    request:
+      url: "/pet/xml"
+      method: put
+      security: []
+      requestBody:
+        contentType: application/xml
+      response:
+        contentType: application/xml
+    arguments:
+      body:
+        description: Request body of PUT /pet/xml
+        type:
+          name: PetXml
+          type: named
+        http:
+          in: body
+    description: Update an existing pet
+    result_type:
+      name: PetXml
+      type: named
+object_types:
+  Pet:
+    fields:
+      id:
+        type:
+          type: nullable
+          underlying_type:
+            name: Int
+            type: named
+      name:
+        type:
+          name: String
+          type: named
+  PetXml:
+    fields:
+      category:
+        type:
+          type: nullable
+          underlying_type:
+            name: Category
+            type: named
+        http:
+          type:
+            - object
+          xml:
+            name: category
+      field:
+        description:
+          This empty field is returned instead of the list of scopes if the
+          user making the call doesn't have the authorization required.
+        type:
+          type: nullable
+          underlying_type:
+            name: JSON
+            type: named
+        http:
+          type: []
+      id:
+        type:
+          type: nullable
+          underlying_type:
+            name: Int64
+            type: named
+        http:
+          type:
+            - integer
+          format: int64
+      name:
+        type:
+          name: String
+          type: named
+        http:
+          type:
+            - string
+      photoUrls:
+        type:
+          element_type:
+            name: String
+            type: named
+          type: array
+        http:
+          type:
+            - array
+          items:
+            type:
+              - string
+            xml:
+              name: photoUrl
+          xml:
+            name: ""
+            wrapped: true
+      status:
+        description: pet status in the store
+        type:
+          type: nullable
+          underlying_type:
+            name: String
+            type: named
+        http:
+          type:
+            - string
+      tags:
+        type:
+          type: nullable
+          underlying_type:
+            element_type:
+              name: Tag
+              type: named
+            type: array
+        http:
+          type:
+            - array
+          xml:
+            name: ""
+            wrapped: true
+    xml:
+      name: pet
+  Tag:
+    fields:
+      id:
+        type:
+          type: nullable
+          underlying_type:
+            name: Int64
+            type: named
+        http:
+          type:
+            - integer
+          format: int64
+      name:
+        type:
+          type: nullable
+          underlying_type:
+            name: String
+            type: named
+        http:
+          type:
+            - string
+    xml:
+      name: tag
+  Category:
+    fields:
+      id:
+        type:
+          type: nullable
+          underlying_type:
+            name: Int64
+            type: named
+        http:
+          type:
+            - integer
+          format: int64
+      name:
+        type:
+          type: nullable
+          underlying_type:
+            name: String
+            type: named
+        http:
+          type:
+            - string
+    xml:
+      name: category
+  CreateModelRequest:
+    fields:
+      model:
+        description: The name of the model to create
+        type:
+          type: nullable
+          underlying_type:
+            name: String
+            type: named
+  ProgressResponse:
+    fields:
+      completed:
+        description: The completed size of the task
+        type:
+          type: nullable
+          underlying_type:
+            name: Int32
+            type: named
+      status:
+        description: The status of the request
+        type:
+          type: nullable
+          underlying_type:
+            name: String
+            type: named
+scalar_types:
+  Boolean:
+    aggregate_functions: {}
+    comparison_operators: {}
+    representation:
+      type: boolean
+  Int:
+    aggregate_functions: {}
+    comparison_operators: {}
+    representation:
+      type: int32
+  Int32:
+    aggregate_functions: {}
+    comparison_operators: {}
+    representation:
+      type: int32
+  Int64:
+    aggregate_functions: {}
+    comparison_operators: {}
+    representation:
+      type: int64
+  JSON:
+    aggregate_functions: {}
+    comparison_operators: {}
+    representation:
+      type: json
+  String:
+    aggregate_functions: {}
+    comparison_operators: {}
+    representation:
+      type: string

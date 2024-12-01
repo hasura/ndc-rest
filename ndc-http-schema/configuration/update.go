@@ -13,17 +13,17 @@ import (
 )
 
 // UpdateHTTPConfiguration validates and updates the HTTP configuration
-func UpdateHTTPConfiguration(configurationDir string, logger *slog.Logger) error {
+func UpdateHTTPConfiguration(configurationDir string, logger *slog.Logger) (*Configuration, []NDCHttpRuntimeSchema, error) {
 	config, err := ReadConfigurationFile(configurationDir)
 	if err != nil {
-		return err
+		return nil, nil, err
 	}
 
 	schemas, errs := BuildSchemaFromConfig(config, configurationDir, logger)
 	if len(errs) > 0 {
 		printSchemaValidationError(logger, errs)
 		if config.Strict {
-			return errors.New("failed to build schema files")
+			return nil, nil, errors.New("failed to build schema files")
 		}
 	}
 
@@ -31,16 +31,18 @@ func UpdateHTTPConfiguration(configurationDir string, logger *slog.Logger) error
 	if len(errs) > 0 {
 		printSchemaValidationError(logger, errs)
 		if validatedSchemas == nil || config.Strict {
-			return errors.New("invalid http schema")
+			return nil, nil, errors.New("invalid http schema")
 		}
 	}
 
 	// cache the output file to disk
-	if config.Output == "" {
-		return nil
+	if config.Output != "" {
+		if err := utils.WriteSchemaFile(filepath.Join(configurationDir, config.Output), schemas); err != nil {
+			return nil, nil, err
+		}
 	}
 
-	return utils.WriteSchemaFile(filepath.Join(configurationDir, config.Output), schemas)
+	return config, schemas, nil
 }
 
 func printSchemaValidationError(logger *slog.Logger, errors map[string][]string) {

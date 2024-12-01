@@ -3,7 +3,7 @@
 HTTP Connector allows you to quickly convert HTTP APIs to NDC schema and proxy requests from GraphQL Engine v3 to remote services.
 The connector can automatically transform OpenAPI 2.0 and 3.0 definitions to NDC schema.
 
-![HTTP connector](./assets/rest_connector.png)
+![HTTP connector](./docs/assets/rest_connector.png)
 
 > [!NOTE]
 > HTTP connector is configuration-based HTTP engine and isn't limited to the OpenAPI specs only. Use [OpenAPI Connector](https://hasura.io/docs/3.0/connectors/external-apis/open-api) if you want to take more control of OpenAPI via code generation.

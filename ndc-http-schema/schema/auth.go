@@ -485,7 +485,7 @@ func ParseOAuthFlowType(value string) (OAuthFlowType, error) {
 type OAuthFlow struct {
 	AuthorizationURL string                     `json:"authorizationUrl,omitempty" mapstructure:"authorizationUrl" yaml:"authorizationUrl,omitempty"`
 	TokenURL         *utils.EnvString           `json:"tokenUrl,omitempty"         mapstructure:"tokenUrl"         yaml:"tokenUrl,omitempty"`
-	RefreshURL       *utils.EnvString           `json:"refreshUrl,omitempty"       mapstructure:"refreshUrl"       yaml:"refreshUrl,omitempty"`
+	RefreshURL       string                     `json:"refreshUrl,omitempty"       mapstructure:"refreshUrl"       yaml:"refreshUrl,omitempty"`
 	Scopes           map[string]string          `json:"scopes,omitempty"           mapstructure:"scopes"           yaml:"scopes,omitempty"`
 	ClientID         *utils.EnvString           `json:"clientId,omitempty"         mapstructure:"clientId"         yaml:"clientId,omitempty"`
 	ClientSecret     *utils.EnvString           `json:"clientSecret,omitempty"     mapstructure:"clientSecret"     yaml:"clientSecret,omitempty"`

@@ -412,6 +412,7 @@ func (oc *OAS3Builder) populateWriteSchemaType(schemaType schema.Type) (schema.T
 func (oc *OAS3Builder) convertV3OAuthFLow(key string, input *v3.OAuthFlow) rest.OAuthFlow {
 	result := rest.OAuthFlow{
 		AuthorizationURL: input.AuthorizationUrl,
+		RefreshURL:       input.RefreshUrl,
 	}
 
 	tokenURL := sdkUtils.NewEnvStringVariable(utils.StringSliceToConstantCase([]string{oc.EnvPrefix, key, "TOKEN_URL"}))
@@ -419,11 +420,6 @@ func (oc *OAS3Builder) convertV3OAuthFLow(key string, input *v3.OAuthFlow) rest.
 		tokenURL.Value = &input.TokenUrl
 	}
 	result.TokenURL = &tokenURL
-
-	if input.RefreshUrl != "" {
-		refreshURL := sdkUtils.NewEnvString(utils.StringSliceToConstantCase([]string{oc.EnvPrefix, key, "REFRESH_URL"}), input.TokenUrl)
-		result.RefreshURL = &refreshURL
-	}
 
 	if input.Scopes != nil {
 		scopes := make(map[string]string)
