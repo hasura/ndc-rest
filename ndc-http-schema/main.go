@@ -14,12 +14,12 @@ import (
 )
 
 var cli struct {
-	LogLevel  string                                `default:"info" enum:"debug,info,warn,error"                                                                                    help:"Log level."`
+	LogLevel  string                                `default:"info"  enum:"debug,info,warn,error"                                                                                    help:"Log level."`
 	NoColor   bool                                  `default:"false" help:"Disable printing color to standard output"`
-	Update    command.UpdateCommandArguments        `cmd:""         help:"Update HTTP connector configuration"`
-	Convert   configuration.ConvertCommandArguments `cmd:""         help:"Convert API spec to NDC schema. For example:\n ndc-http-schema convert -f petstore.yaml -o petstore.json"`
-	Json2Yaml command.Json2YamlCommandArguments     `cmd:""         help:"Convert JSON file to YAML. For example:\n ndc-http-schema json2yaml -f petstore.json -o petstore.yaml"    name:"json2yaml"`
-	Version   struct{}                              `cmd:""         help:"Print the CLI version."`
+	Update    command.UpdateCommandArguments        `cmd:""          help:"Update HTTP connector configuration"`
+	Convert   configuration.ConvertCommandArguments `cmd:""          help:"Convert API spec to NDC schema. For example:\n ndc-http-schema convert -f petstore.yaml -o petstore.json"`
+	Json2Yaml command.Json2YamlCommandArguments     `cmd:""          help:"Convert JSON file to YAML. For example:\n ndc-http-schema json2yaml -f petstore.json -o petstore.yaml"    name:"json2yaml"`
+	Version   struct{}                              `cmd:""          help:"Print the CLI version."`
 }
 
 func main() {
