@@ -114,32 +114,6 @@
       "additionalProperties": false,
       "type": "object"
     },
-    "EnvInt": {
-      "anyOf": [
-        {
-          "required": [
-            "value"
-          ],
-          "title": "value"
-        },
-        {
-          "required": [
-            "env"
-          ],
-          "title": "env"
-        }
-      ],
-      "properties": {
-        "value": {
-          "type": "integer"
-        },
-        "env": {
-          "type": "string"
-        }
-      },
-      "additionalProperties": false,
-      "type": "object"
-    },
     "EnvString": {
       "anyOf": [
         {
@@ -235,6 +209,9 @@
         },
         "version": {
           "type": "string"
+        },
+        "tls": {
+          "$ref": "#/$defs/TLSConfig"
         }
       },
       "additionalProperties": false,
@@ -806,7 +783,7 @@
         },
         "certPem": {
           "$ref": "#/$defs/EnvString",
-          "description": "Alternative to cert_file. Provide the certificate contents as a string instead of a filepath."
+          "description": "Alternative to cert_file. Provide the certificate contents as a base64-encoded string instead of a filepath."
         },
         "keyFile": {
           "$ref": "#/$defs/EnvString",
@@ -814,7 +791,7 @@
         },
         "keyPem": {
           "$ref": "#/$defs/EnvString",
-          "description": "Alternative to key_file. Provide the key contents as a string instead of a filepath."
+          "description": "Alternative to key_file. Provide the key contents as a base64-encoded string instead of a filepath."
         },
         "caFile": {
           "$ref": "#/$defs/EnvString",
@@ -822,7 +799,7 @@
         },
         "caPem": {
           "$ref": "#/$defs/EnvString",
-          "description": "Alternative to ca_file. Provide the CA cert contents as a string instead of a filepath."
+          "description": "Alternative to ca_file. Provide the CA cert contents as a base64-encoded string instead of a filepath."
         },
         "insecureSkipVerify": {
           "$ref": "#/$defs/EnvBool",
@@ -833,11 +810,11 @@
           "description": "Whether to load the system certificate authorities pool alongside the certificate authority."
         },
         "minVersion": {
-          "$ref": "#/$defs/EnvString",
+          "type": "string",
           "description": "Minimum acceptable TLS version."
         },
         "maxVersion": {
-          "$ref": "#/$defs/EnvString",
+          "type": "string",
           "description": "Maximum acceptable TLS version."
         },
         "cipherSuites": {
@@ -847,9 +824,9 @@
           "type": "array",
           "description": "Explicit cipher suites can be set. If left blank, a safe default list is used.\nSee https://go.dev/src/crypto/tls/cipher_suites.go for a list of supported cipher suites."
         },
-        "reloadInterval": {
-          "$ref": "#/$defs/EnvInt",
-          "description": "Specifies the duration after which the certificate will be reloaded. If not set, it will never be reloaded.\nThe interval unit is minute"
+        "serverName": {
+          "$ref": "#/$defs/EnvString",
+          "description": "ServerName requested by client for virtual hosting.\nThis sets the ServerName in the TLSConfig. Please refer to\nhttps://godoc.org/crypto/tls#Config for more information. (optional)"
         }
       },
       "additionalProperties": false,

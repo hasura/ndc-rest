@@ -1,0 +1,70 @@
+# yaml-language-server: $schema=../../../ndc-http-schema/jsonschema/ndc-http-schema.schema.json
+settings:
+  servers:
+    - url:
+        env: PET_STORE_URL
+    - url:
+        env: PET_STORE_S1_URL
+      tls:
+        caFile:
+          env: PET_STORE_S1_CA_FILE
+        caPem:
+          env: PET_STORE_S1_CA_PEM
+        certFile:
+          env: PET_STORE_S1_CERT_FILE
+        certPem:
+          env: PET_STORE_S1_CERT_PEM
+        keyFile:
+          env: PET_STORE_S1_KEY_FILE
+        keyPem:
+          env: PET_STORE_S1_KEY_PEM
+  securitySchemes:
+    mtls:
+      type: mutualTLS
+  tls:
+    caFile:
+      env: PET_STORE_CA_FILE
+    certFile:
+      env: PET_STORE_CERT_FILE
+    keyFile:
+      env: PET_STORE_KEY_FILE
+functions:
+  findPets:
+    request:
+      url: "/pet"
+      method: get
+      security: []
+      response:
+        contentType: application/json
+    arguments: {}
+    description: Finds Pets
+    result_type:
+      element_type:
+        name: Pet
+        type: named
+      type: array
+procedures: {}
+object_types:
+  Pet:
+    fields:
+      id:
+        type:
+          type: nullable
+          underlying_type:
+            name: Int
+            type: named
+      name:
+        type:
+          name: String
+          type: named
+scalar_types:
+  Int:
+    aggregate_functions: {}
+    comparison_operators: {}
+    representation:
+      type: int32
+  String:
+    aggregate_functions: {}
+    comparison_operators: {}
+    representation:
+      type: string

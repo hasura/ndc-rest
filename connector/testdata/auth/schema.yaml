@@ -23,7 +23,6 @@ settings:
         value: user
       password:
         value: password
-      scheme: bearer
     petstore_auth:
       type: oauth2
       flows:

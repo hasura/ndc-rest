@@ -1,4 +1,4 @@
-package auth
+package security
 
 import (
 	"context"
@@ -52,36 +52,38 @@ func NewCredential(ctx context.Context, httpClient *http.Client, security schema
 		cred, err := NewCookieCredential(httpClient)
 
 		return cred, true, err
+	case *schema.MutualTLSAuthConfig:
+		return NewNoopCredential(httpClient), false, nil
 	}
 
-	return NewMockCredential(httpClient), true, nil
+	return NewNoopCredential(httpClient), true, nil
 }
 
-// MockCredential implements a mock credential.
-type MockCredential struct {
+// NoopCredential implements a no-op credential.
+type NoopCredential struct {
 	client *http.Client
 }
 
-var _ Credential = &MockCredential{}
+var _ Credential = &NoopCredential{}
 
-// NewMockCredential creates a new MockCredential instance.
-func NewMockCredential(client *http.Client) *MockCredential {
-	return &MockCredential{
+// NewNoopCredential creates a new NoopCredential instance.
+func NewNoopCredential(client *http.Client) *NoopCredential {
+	return &NoopCredential{
 		client: client,
 	}
 }
 
 // GetClient gets the HTTP client that is compatible with the current credential.
-func (cc MockCredential) GetClient() *http.Client {
+func (cc NoopCredential) GetClient() *http.Client {
 	return cc.client
 }
 
 // Inject the credential into the incoming request
-func (cc MockCredential) Inject(req *http.Request) (bool, error) {
+func (cc NoopCredential) Inject(req *http.Request) (bool, error) {
 	return false, nil
 }
 
 // InjectMock injects the mock credential into the incoming request for explain APIs.
-func (cc MockCredential) InjectMock(req *http.Request) bool {
+func (cc NoopCredential) InjectMock(req *http.Request) bool {
 	return false
 }

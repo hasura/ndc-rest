@@ -10,6 +10,7 @@ import (
 	rest "github.com/hasura/ndc-http/ndc-http-schema/schema"
 	"github.com/hasura/ndc-http/ndc-http-schema/utils"
 	"github.com/hasura/ndc-sdk-go/schema"
+	sdkUtils "github.com/hasura/ndc-sdk-go/utils"
 	"github.com/pb33f/libopenapi/datamodel/high/base"
 	"gopkg.in/yaml.v3"
 )
@@ -461,4 +462,28 @@ func isXMLLeafObject(objectType rest.ObjectType) bool {
 	}
 
 	return true
+}
+
+func createTLSConfig(keys []string) *rest.TLSConfig {
+	caPem := sdkUtils.NewEnvStringVariable(utils.StringSliceToConstantCase(append(keys, "CA_PEM")))
+	caFile := sdkUtils.NewEnvStringVariable(utils.StringSliceToConstantCase(append(keys, "CA_FILE")))
+	certPem := sdkUtils.NewEnvStringVariable(utils.StringSliceToConstantCase(append(keys, "CERT_PEM")))
+	certFile := sdkUtils.NewEnvStringVariable(utils.StringSliceToConstantCase(append(keys, "CERT_FILE")))
+	keyPem := sdkUtils.NewEnvStringVariable(utils.StringSliceToConstantCase(append(keys, "KEY_PEM")))
+	keyFile := sdkUtils.NewEnvStringVariable(utils.StringSliceToConstantCase(append(keys, "KEY_FILE")))
+	serverName := sdkUtils.NewEnvStringVariable(utils.StringSliceToConstantCase(append(keys, "SERVER_NAME")))
+	insecureSkipVerify := sdkUtils.NewEnvBool(utils.StringSliceToConstantCase(append(keys, "INSECURE_SKIP_VERIFY")), false)
+	includeSystemCACertsPool := sdkUtils.NewEnvBool(utils.StringSliceToConstantCase(append(keys, "INCLUDE_SYSTEM_CA_CERTS_POOL")), false)
+
+	return &rest.TLSConfig{
+		CAFile:                   &caFile,
+		CAPem:                    &caPem,
+		CertFile:                 &certFile,
+		CertPem:                  &certPem,
+		KeyFile:                  &keyFile,
+		KeyPem:                   &keyPem,
+		InsecureSkipVerify:       &insecureSkipVerify,
+		IncludeSystemCACertsPool: &includeSystemCACertsPool,
+		ServerName:               &serverName,
+	}
 }

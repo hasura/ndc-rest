@@ -15,7 +15,6 @@ import (
 	"slices"
 	"strconv"
 	"strings"
-	"sync"
 	"time"
 
 	"github.com/hasura/ndc-http/connector/internal/contenttype"
@@ -114,29 +113,28 @@ func (client *HTTPClient) sendSequence(ctx context.Context, requests []Retryable
 
 // execute a request to a list of remote servers in parallel
 func (client *HTTPClient) sendParallel(ctx context.Context, requests []RetryableRequest, selection schema.NestedField, resultType schema.Type, httpOptions *HTTPOptions) (*DistributedResponse[any], http.Header) {
-	results := NewDistributedResponse[any]()
 	var firstHeaders http.Header
-	var lock sync.Mutex
+	results := make([]*DistributedResult[any], len(requests))
+	errs := make([]*DistributedError, len(requests))
+
 	eg, ctx := errgroup.WithContext(ctx)
 	if httpOptions.Concurrency > 0 {
 		eg.SetLimit(int(httpOptions.Concurrency))
 	}
 
-	sendFunc := func(req RetryableRequest) {
+	sendFunc := func(req RetryableRequest, index int) {
 		eg.Go(func() error {
 			result, headers, err := client.sendSingle(ctx, &req, selection, resultType, "parallel")
-			lock.Lock()
-			defer lock.Unlock()
 			if err != nil {
-				results.Errors = append(results.Errors, DistributedError{
+				errs[index] = &DistributedError{
 					Server:         req.ServerID,
 					ConnectorError: *err,
-				})
+				}
 			} else {
-				results.Results = append(results.Results, DistributedResult[any]{
+				results[index] = &DistributedResult[any]{
 					Server: req.ServerID,
 					Data:   result,
-				})
+				}
 				if firstHeaders == nil {
 					firstHeaders = headers
 				}
@@ -146,13 +144,26 @@ func (client *HTTPClient) sendParallel(ctx context.Context, requests []Retryable
 		})
 	}
 
-	for _, req := range requests {
-		sendFunc(req)
+	for i, req := range requests {
+		sendFunc(req, i)
 	}
 
 	_ = eg.Wait()
 
-	return results, firstHeaders
+	r := NewDistributedResponse[any]()
+	for _, item := range results {
+		if item != nil {
+			r.Results = append(r.Results, *item)
+		}
+	}
+
+	for _, err := range errs {
+		if err != nil {
+			r.Errors = append(r.Errors, *err)
+		}
+	}
+
+	return r, firstHeaders
 }
 
 // execute a request to the remote server with retries
