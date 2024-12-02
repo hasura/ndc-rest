@@ -248,7 +248,7 @@ func TestNDCHttpSettings(t *testing.T) {
 								ImplicitFlow: {
 									AuthorizationURL: "https://petstore3.swagger.io/oauth/authorize",
 									TokenURL:         utils.ToPtr(utils.NewEnvStringValue("https://petstore3.swagger.io/oauth/token")),
-									RefreshURL:       utils.ToPtr(utils.NewEnvString("PET_STORE_AUTH_REFRESH_URL", "https://petstore3.swagger.io/oauth/token")),
+									RefreshURL:       "https://petstore3.swagger.io/oauth/token",
 									Scopes: map[string]string{
 										"read:pets":  "read your pets",
 										"write:pets": "modify pets in your account",

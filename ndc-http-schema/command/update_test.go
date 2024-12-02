@@ -23,6 +23,7 @@ func TestUpdateCommand(t *testing.T) {
 		{
 			Argument: UpdateCommandArguments{
 				Dir: "testdata/patch",
+				Yes: true,
 			},
 			Expected: "testdata/patch/expected.json",
 		},
@@ -30,6 +31,7 @@ func TestUpdateCommand(t *testing.T) {
 		{
 			Argument: UpdateCommandArguments{
 				Dir: "testdata/auth",
+				Yes: true,
 			},
 			Expected: "testdata/auth/expected.json",
 		},
@@ -37,7 +39,7 @@ func TestUpdateCommand(t *testing.T) {
 
 	for _, tc := range testCases {
 		t.Run(tc.Argument.Dir, func(t *testing.T) {
-			assert.NilError(t, UpdateConfiguration(&tc.Argument, slog.Default()))
+			assert.NilError(t, UpdateConfiguration(&tc.Argument, slog.Default(), true))
 
 			output := readRuntimeSchemaFile(t, tc.Argument.Dir+"/schema.output.json")
 			expected := readRuntimeSchemaFile(t, tc.Argument.Dir+"/expected.json")

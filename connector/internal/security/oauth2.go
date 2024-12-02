@@ -13,16 +13,18 @@ import (
 
 // OAuth2Client represent the client of the OAuth2 client credentials
 type OAuth2Client struct {
-	client *http.Client
+	client  *http.Client
+	isEmpty bool
 }
 
 var _ Credential = &OAuth2Client{}
 
 // NewOAuth2Client creates an OAuth2 client from the security scheme
 func NewOAuth2Client(ctx context.Context, httpClient *http.Client, flowType schema.OAuthFlowType, config *schema.OAuthFlow) (*OAuth2Client, error) {
-	if flowType != schema.ClientCredentialsFlow {
+	if flowType != schema.ClientCredentialsFlow || config.TokenURL == nil || config.ClientID == nil || config.ClientSecret == nil {
 		return &OAuth2Client{
-			client: httpClient,
+			client:  httpClient,
+			isEmpty: true,
 		}, nil
 	}
 
@@ -52,11 +54,13 @@ func NewOAuth2Client(ctx context.Context, httpClient *http.Client, flowType sche
 
 	var endpointParams url.Values
 	for key, envValue := range config.EndpointParams {
-		value, err := envValue.Get()
+		value, err := envValue.GetOrDefault("")
 		if err != nil {
 			return nil, fmt.Errorf("endpointParams[%s]: %w", key, err)
 		}
-		endpointParams.Set(key, value)
+		if value != "" {
+			endpointParams.Set(key, value)
+		}
 	}
 
 	ctx = context.WithValue(ctx, oauth2.HTTPClient, httpClient)
@@ -82,11 +86,15 @@ func (oc OAuth2Client) GetClient() *http.Client {
 
 // Inject the credential into the incoming request
 func (oc OAuth2Client) Inject(req *http.Request) (bool, error) {
-	return true, nil
+	return !oc.isEmpty, nil
 }
 
 // InjectMock injects the mock credential into the incoming request for explain APIs.
 func (oc OAuth2Client) InjectMock(req *http.Request) bool {
+	if oc.isEmpty {
+		return false
+	}
+
 	req.Header.Set(schema.AuthorizationHeader, "Bearer xxx")
 
 	return true

@@ -1,0 +1,21 @@
+  Make sure that the following environment variables were added to your subgraph configuration:
+
+  ``` {{ .ContextPath }}/docker.yaml
+  services:
+    {{ .ServiceName }}:
+      environment:
+        {{range $index, $variable := .Variables }}{{ index $variable 0 }}: ${{ index $variable 1 }}
+        {{end}}# ...
+  ```
+
+  ``` {{ .ContextPath }}/connector.yaml
+  envMapping:
+    {{range $index, $variable := .Variables }}{{ index $variable 0 }}
+      fromEnv: {{ index $variable 1 }}
+    {{end}}# ...
+  ```
+
+  ``` .env
+  {{range $index, $variable := .Variables }}{{ index $variable 1 }}=
+  {{end}}# ...
+  ```

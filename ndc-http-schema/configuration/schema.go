@@ -211,6 +211,17 @@ func buildSchemaFile(config *Configuration, configDir string, configItem *Config
 	}
 
 	if ndcSchema.Settings == nil || len(ndcSchema.Settings.Servers) == 0 {
+		templates, err := getTemplates()
+		if err != nil {
+			return nil, err
+		}
+		if err := templates.ExecuteTemplate(os.Stderr, templateEmptySettings, map[string]any{
+			"ContextPath": configDir,
+			"Namespace":   configItem.ConvertConfig.File,
+		}); err != nil {
+			logger.Warn(err.Error())
+		}
+
 		return nil, fmt.Errorf("the servers setting of schema %s is empty", configItem.ConvertConfig.File)
 	}
 

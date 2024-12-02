@@ -1,0 +1,19 @@
+Empty `settings.servers`. Modify the API definition file or add a JSON patch config:
+
+``` {{ .ContextPath }}/config.yaml
+files:
+  - file: {{ .Namespace }}
+    patchAfter:
+      - path: patch-settings.yaml
+        strategy: merge 
+```
+
+``` {{ .ContextPath }}/patch-settings.yaml
+# yaml-language-server: $schema=https://raw.githubusercontent.com/hasura/ndc-http/refs/heads/main/ndc-http-schema/jsonschema/ndc-http-schema.schema.json",
+settings: 
+  servers: 
+    - url:
+        # Set either value or env. If both fields are set the value field is default.
+        # value: http://localhost:1234
+        env: SERVER_URL
+```

@@ -220,6 +220,15 @@ func (oc *OAS2Builder) convertComponentSchemas(schemaItem orderedmap.Pair[string
 		typeName = getNamedType(typeEncoder, true, "")
 	}
 
+	if schemaResult != nil {
+		if schemaResult.XML == nil {
+			schemaResult.XML = &rest.XMLSchema{}
+		}
+		if schemaResult.XML.Name == "" {
+			schemaResult.XML.Name = typeKey
+		}
+	}
+
 	cacheKey := "#/definitions/" + typeKey
 	// treat no-property objects as a Arbitrary JSON scalar
 	if typeEncoder == nil || typeName == string(rest.ScalarJSON) {

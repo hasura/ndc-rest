@@ -5,7 +5,7 @@ go 1.23.0
 toolchain go1.23.1
 
 require (
-	github.com/alecthomas/kong v1.4.0
+	github.com/alecthomas/kong v1.5.0
 	github.com/evanphx/json-patch v0.5.2
 	github.com/google/go-cmp v0.6.0
 	github.com/hasura/ndc-sdk-go v1.6.3-0.20241127025002-02d7a257e75f

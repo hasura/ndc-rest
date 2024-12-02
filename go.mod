@@ -7,7 +7,7 @@ toolchain go1.23.1
 require (
 	github.com/go-viper/mapstructure/v2 v2.2.1
 	github.com/google/uuid v1.6.0
-	github.com/hasura/ndc-http/ndc-http-schema v0.0.0-20241124160706-95bf5710211d
+	github.com/hasura/ndc-http/ndc-http-schema v0.0.0-20241201015041-4da425f13917
 	github.com/hasura/ndc-sdk-go v1.6.3-0.20241127025002-02d7a257e75f
 	go.opentelemetry.io/otel v1.32.0
 	go.opentelemetry.io/otel/trace v1.32.0
@@ -17,7 +17,7 @@ require (
 )
 
 require (
-	github.com/alecthomas/kong v1.4.0 // indirect
+	github.com/alecthomas/kong v1.5.0 // indirect
 	github.com/bahlo/generic-list-go v0.2.0 // indirect
 	github.com/beorn7/perks v1.0.1 // indirect
 	github.com/buger/jsonparser v1.1.1 // indirect

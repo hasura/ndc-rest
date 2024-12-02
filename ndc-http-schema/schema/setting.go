@@ -42,7 +42,7 @@ func (rs *NDCHttpSettings) Validate() error {
 	return nil
 }
 
-// ServerConfig contains server configurations
+// ServerConfig contains server configurations.
 type ServerConfig struct {
 	URL             utils.EnvString            `json:"url"                       mapstructure:"url"             yaml:"url"`
 	ID              string                     `json:"id,omitempty"              mapstructure:"id"              yaml:"id,omitempty"`

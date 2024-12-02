@@ -1375,20 +1375,20 @@ func TestConnectorTLS(t *testing.T) {
 	testServer := connServer.BuildTestServer()
 	defer testServer.Close()
 
-	t.Run("default_cert", func(t *testing.T) {
+	func() {
 		findPetsBody := []byte(`{
-		"collection": "findPets",
-		"query": {
-			"fields": {
-				"__value": {
-					"type": "column",
-					"column": "__value"
+			"collection": "findPets",
+			"query": {
+				"fields": {
+					"__value": {
+						"type": "column",
+						"column": "__value"
+					}
 				}
-			}
-		},
-		"arguments": {},
-		"collection_relationships": {}
-	}`)
+			},
+			"arguments": {},
+			"collection_relationships": {}
+		}`)
 
 		res, err := http.Post(fmt.Sprintf("%s/query", testServer.URL), "application/json", bytes.NewBuffer(findPetsBody))
 		assert.NilError(t, err)
@@ -1401,9 +1401,9 @@ func TestConnectorTLS(t *testing.T) {
 				},
 			},
 		})
-	})
+	}()
 
-	t.Run("server1_cert", func(t *testing.T) {
+	func() {
 		findPetsBody := []byte(`{
 			"collection": "findPets",
 			"query": {
@@ -1436,7 +1436,7 @@ func TestConnectorTLS(t *testing.T) {
 				},
 			},
 		})
-	})
+	}()
 
 	time.Sleep(2 * time.Second)
 	assert.Equal(t, 1, mockServer.Count())
