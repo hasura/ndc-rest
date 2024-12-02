@@ -2,20 +2,20 @@
 
   ``` {{ .ContextPath }}/docker.yaml
   services:
-    <subgraph>_<connector>:
+    {{ .ServiceName }}:
       environment:
         {{range $index, $variable := .Variables }}{{ index $variable 0 }}: ${{ index $variable 1 }}
-        {{end}}
+        {{end}}# ...
   ```
 
   ``` {{ .ContextPath }}/connector.yaml
   envMapping:
     {{range $index, $variable := .Variables }}{{ index $variable 0 }}
       fromEnv: {{ index $variable 1 }}
-    {{end}}
+    {{end}}# ...
   ```
 
   ``` .env
   {{range $index, $variable := .Variables }}{{ index $variable 1 }}=
-  {{end}}
+  {{end}}# ...
   ```

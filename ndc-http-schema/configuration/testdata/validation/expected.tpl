@@ -8,7 +8,7 @@ Environment Variables:
 
   ``` testdata/validation/connector/docker.yaml
   services:
-    <subgraph>_<connector>:
+    app_myapi:
       environment:
         CAT_PET_HEADER: $APP_MYAPI_CAT_PET_HEADER
         CAT_STORE_CA_PEM: $APP_MYAPI_CAT_STORE_CA_PEM
@@ -24,6 +24,7 @@ Environment Variables:
         PET_STORE_KEY_PEM: $APP_MYAPI_PET_STORE_KEY_PEM
         PET_STORE_TEST_HEADER: $APP_MYAPI_PET_STORE_TEST_HEADER
         PET_STORE_URL: $APP_MYAPI_PET_STORE_URL
+        # ...
 
   ```
 
@@ -57,6 +58,7 @@ Environment Variables:
       fromEnv: APP_MYAPI_PET_STORE_TEST_HEADER
     PET_STORE_URL
       fromEnv: APP_MYAPI_PET_STORE_URL
+    # ...
 
   ```
 
@@ -75,5 +77,6 @@ Environment Variables:
   APP_MYAPI_PET_STORE_KEY_PEM=
   APP_MYAPI_PET_STORE_TEST_HEADER=
   APP_MYAPI_PET_STORE_URL=
+  # ...
   
   ```

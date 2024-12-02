@@ -2,11 +2,13 @@ package configuration
 
 import (
 	"bytes"
+	"errors"
 	"fmt"
 	"io"
 	"log/slog"
 	"os"
 	"path/filepath"
+	"slices"
 	"strings"
 	"text/template"
 
@@ -102,11 +104,10 @@ func (cv *ConfigValidator) Render(w io.Writer) {
 	if len(cv.requiredVariables) > 0 {
 		writeColorTextIf(w, "\n\nEnvironment Variables:\n", ansiBrightYellow, cv.noColor)
 
-		prefix := ""
-		connectorName := cv.findConnectorName()
-		subgraphName := cv.findSubgraphName()
-		if connectorName != "" && subgraphName != "" {
-			prefix = fmt.Sprintf("%s_%s_", strings.ToUpper(subgraphName), strings.ToUpper(connectorName))
+		var prefix string
+		serviceName := cv.getServiceName()
+		if serviceName != "" {
+			prefix = strings.ToUpper(serviceName) + "_"
 		}
 		variables := make([][]string, 0, len(cv.requiredVariables))
 		for _, key := range utils.GetSortedKeys(cv.requiredVariables) {
@@ -115,6 +116,7 @@ func (cv *ConfigValidator) Render(w io.Writer) {
 
 		err := cv.templates.ExecuteTemplate(w, templateEnvVariables, map[string]any{
 			"ContextPath": cv.contextPath,
+			"ServiceName": serviceName,
 			"Variables":   variables,
 		})
 
@@ -122,6 +124,20 @@ func (cv *ConfigValidator) Render(w io.Writer) {
 			slog.Error(fmt.Sprintf("failed to render environment variables: %s", err))
 		}
 	}
+}
+
+func (cv *ConfigValidator) getServiceName() string {
+	subgraphName := cv.findSubgraphName()
+	if subgraphName == "" {
+		return ""
+	}
+
+	connectorName := cv.findConnectorName()
+	if connectorName == "" {
+		return ""
+	}
+
+	return subgraphName + "_" + connectorName
 }
 
 func (cv *ConfigValidator) evaluateSchema(ndcSchema *NDCHttpRuntimeSchema) error {
@@ -425,4 +441,23 @@ func (cv *ConfigValidator) addError(namespace string, value string) {
 	} else {
 		cv.errors[namespace] = append(cv.errors[namespace], value)
 	}
+}
+
+// PrintWarningConfirmation prints the warning confirmation prompt.
+func (cv *ConfigValidator) PrintWarningConfirmation() error {
+	fmt.Fprint(os.Stderr, "\nDetected configuration warnings. Check your configuration and continue [Y/n]: ")
+	var shouldContinue string
+	_, err := fmt.Scan(&shouldContinue)
+	if err != nil {
+		return err
+	}
+
+	if !slices.Contains([]string{"y", "yes"}, strings.ToLower(shouldContinue)) {
+		err := errors.New("stop the introspection.")
+		fmt.Fprint(os.Stderr, err.Error())
+
+		return err
+	}
+
+	return nil
 }

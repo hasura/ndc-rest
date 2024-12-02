@@ -2,11 +2,8 @@ package command
 
 import (
 	"errors"
-	"fmt"
 	"log/slog"
 	"os"
-	"slices"
-	"strings"
 	"time"
 
 	"github.com/hasura/ndc-http/ndc-http-schema/configuration"
@@ -41,15 +38,8 @@ func UpdateConfiguration(args *UpdateCommandArguments, logger *slog.Logger, noCo
 	}
 
 	if !args.Yes {
-		fmt.Fprint(os.Stderr, "\n\nDeleted configuration warnings. Check your configuration and continue [Y/n]: ")
-		var shouldContinue string
-		_, err = fmt.Scan(&shouldContinue)
-		if err != nil {
+		if err := validStatus.PrintWarningConfirmation(); err != nil {
 			return err
-		}
-
-		if !slices.Contains([]string{"y", "yes"}, strings.ToLower(shouldContinue)) {
-			return errors.New("Stop the introspection.")
 		}
 	}
 
