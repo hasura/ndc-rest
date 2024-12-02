@@ -273,11 +273,13 @@ func (oc *OAS3Builder) convertComponentSchemas(schemaItem orderedmap.Pair[string
 		typeName = getNamedType(typeEncoder, true, "")
 	}
 
-	if schemaResult.XML == nil {
-		schemaResult.XML = &rest.XMLSchema{}
-	}
-	if schemaResult.XML.Name == "" {
-		schemaResult.XML.Name = typeKey
+	if schemaResult != nil {
+		if schemaResult.XML == nil {
+			schemaResult.XML = &rest.XMLSchema{}
+		}
+		if schemaResult.XML.Name == "" {
+			schemaResult.XML.Name = typeKey
+		}
 	}
 
 	cacheKey := "#/components/schemas/" + typeKey
