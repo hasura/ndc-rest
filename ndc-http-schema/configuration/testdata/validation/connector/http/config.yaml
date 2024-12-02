@@ -1,4 +1,4 @@
-# yaml-language-server: $schema=../../../../jsonschema/configuration.schema.json
+# yaml-language-server: $schema=../../../../../jsonschema/configuration.schema.json
 strict: true
 forwardHeaders:
   enabled: false
