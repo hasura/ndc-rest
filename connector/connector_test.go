@@ -1438,7 +1438,6 @@ func TestConnectorTLS(t *testing.T) {
 		})
 	}()
 
-	time.Sleep(2 * time.Second)
 	assert.Equal(t, 1, mockServer.Count())
 	assert.Equal(t, 1, mockServer1.Count())
 }
