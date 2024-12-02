@@ -3,9 +3,8 @@
 set -e
 
 pushd `dirname $0` > /dev/null
-SCRIPTPATH=`pwd -P`
+SCRIPT_PATH=`pwd -P`
 popd > /dev/null
-SCRIPTFILE=`basename $0`
 
 DAYS=36500
 
@@ -24,10 +23,10 @@ function generate_client() {
 }
 
 function generate_cert() {
-  rm -r ${SCRIPTPATH}/$1
-  mkdir -p ${SCRIPTPATH}/$1
+  rm -r ${SCRIPT_PATH}/$1
+  mkdir -p ${SCRIPT_PATH}/$1
 
-  pushd ${SCRIPTPATH}/$1
+  pushd ${SCRIPT_PATH}/$1
 
   # generate a self-signed rootCA file that would be used to sign both the server and client cert.
   # Alternatively, we can use different CA files to sign the server and client, but for our use case, we would use a single CA.
