@@ -6,7 +6,7 @@ WARNING:
 Environment Variables:
   Make sure that the following environment variables were added to your subgraph configuration:
 
-  ``` testdata/validation/connector/docker.yaml
+  ``` testdata/validation/connector/http/docker.yaml
   services:
     app_myapi:
       environment:
@@ -28,7 +28,7 @@ Environment Variables:
 
   ```
 
-  ``` testdata/validation/connector/connector.yaml
+  ``` testdata/validation/connector/http/connector.yaml
   envMapping:
     CAT_PET_HEADER
       fromEnv: APP_MYAPI_CAT_PET_HEADER

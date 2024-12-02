@@ -2,13 +2,11 @@ package configuration
 
 import (
 	"bytes"
-	"errors"
 	"fmt"
 	"io"
 	"log/slog"
 	"os"
 	"path/filepath"
-	"slices"
 	"strings"
 	"text/template"
 
@@ -398,7 +396,7 @@ func (cv *ConfigValidator) findSubgraphName() string {
 		return ""
 	}
 
-	connectorPath := filepath.Join(cv.contextPath, "..", "subgraph.yaml")
+	connectorPath := filepath.Join(cv.contextPath, "..", "..", "subgraph.yaml")
 	rawBytes, err := os.ReadFile(connectorPath)
 	if err != nil {
 		cv.logger.Error(fmt.Sprintf("failed to read the subgraph manifest: %s", err))
@@ -441,23 +439,4 @@ func (cv *ConfigValidator) addError(namespace string, value string) {
 	} else {
 		cv.errors[namespace] = append(cv.errors[namespace], value)
 	}
-}
-
-// PrintWarningConfirmation prints the warning confirmation prompt.
-func (cv *ConfigValidator) PrintWarningConfirmation() error {
-	fmt.Fprint(os.Stderr, "\nDetected configuration warnings. Check your configuration and continue [Y/n]: ")
-	var shouldContinue string
-	_, err := fmt.Scan(&shouldContinue)
-	if err != nil {
-		return err
-	}
-
-	if !slices.Contains([]string{"y", "yes"}, strings.ToLower(shouldContinue)) {
-		err := errors.New("stop the introspection.")
-		fmt.Fprint(os.Stderr, err.Error()+"\n")
-
-		return err
-	}
-
-	return nil
 }

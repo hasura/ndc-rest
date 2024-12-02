@@ -23,7 +23,6 @@ func TestUpdateCommand(t *testing.T) {
 		{
 			Argument: UpdateCommandArguments{
 				Dir: "testdata/patch",
-				Yes: true,
 			},
 			Expected: "testdata/patch/expected.json",
 		},
@@ -31,7 +30,6 @@ func TestUpdateCommand(t *testing.T) {
 		{
 			Argument: UpdateCommandArguments{
 				Dir: "testdata/auth",
-				Yes: true,
 			},
 			Expected: "testdata/auth/expected.json",
 		},
