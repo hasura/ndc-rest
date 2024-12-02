@@ -454,7 +454,7 @@ func (cv *ConfigValidator) PrintWarningConfirmation() error {
 
 	if !slices.Contains([]string{"y", "yes"}, strings.ToLower(shouldContinue)) {
 		err := errors.New("stop the introspection.")
-		fmt.Fprint(os.Stderr, err.Error())
+		fmt.Fprint(os.Stderr, err.Error()+"\n")
 
 		return err
 	}
