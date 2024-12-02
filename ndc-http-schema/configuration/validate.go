@@ -398,7 +398,7 @@ func (cv *ConfigValidator) findSubgraphName() string {
 		return ""
 	}
 
-	connectorPath := filepath.Join(cv.contextPath, "..", "subgraph.yaml")
+	connectorPath := filepath.Join(cv.contextPath, "..", "..", "subgraph.yaml")
 	rawBytes, err := os.ReadFile(connectorPath)
 	if err != nil {
 		cv.logger.Error(fmt.Sprintf("failed to read the subgraph manifest: %s", err))
