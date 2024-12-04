@@ -32,29 +32,24 @@ import (
 	"golang.org/x/sync/errgroup"
 )
 
+var tracer = connector.NewTracer("HTTPClient")
+
 // HTTPClient represents a http client wrapper with advanced methods
 type HTTPClient struct {
 	manager        *UpstreamManager
 	metadata       *configuration.NDCHttpRuntimeSchema
 	forwardHeaders configuration.ForwardHeadersSettings
-	tracer         *connector.Tracer
 	propagator     propagation.TextMapPropagator
 }
 
 // NewHTTPClient creates a http client wrapper
-func NewHTTPClient(upstreams *UpstreamManager, metadata *configuration.NDCHttpRuntimeSchema, forwardHeaders configuration.ForwardHeadersSettings, tracer *connector.Tracer) *HTTPClient {
+func NewHTTPClient(upstreams *UpstreamManager, metadata *configuration.NDCHttpRuntimeSchema, forwardHeaders configuration.ForwardHeadersSettings) *HTTPClient {
 	return &HTTPClient{
 		manager:        upstreams,
-		tracer:         tracer,
 		metadata:       metadata,
 		forwardHeaders: forwardHeaders,
 		propagator:     otel.GetTextMapPropagator(),
 	}
-}
-
-// SetTracer sets the tracer instance
-func (client *HTTPClient) SetTracer(tracer *connector.Tracer) {
-	client.tracer = tracer
 }
 
 // Send creates and executes the request and evaluate response selection
@@ -168,7 +163,7 @@ func (client *HTTPClient) sendParallel(ctx context.Context, requests []Retryable
 
 // execute a request to the remote server with retries
 func (client *HTTPClient) sendSingle(ctx context.Context, request *RetryableRequest, selection schema.NestedField, resultType schema.Type, mode string) (any, http.Header, *schema.ConnectorError) {
-	ctx, span := client.tracer.Start(ctx, "Send Request to Server "+request.ServerID)
+	ctx, span := tracer.Start(ctx, "Send Request to Server "+request.ServerID)
 	defer span.End()
 
 	span.SetAttributes(attribute.String("execution.mode", mode))
@@ -273,7 +268,7 @@ func (client *HTTPClient) sendSingle(ctx context.Context, request *RetryableRequ
 
 func (client *HTTPClient) doRequest(ctx context.Context, request *RetryableRequest, port int, retryCount int) (*http.Response, []byte, context.CancelFunc, error) {
 	method := strings.ToUpper(request.RawRequest.Method)
-	ctx, span := client.tracer.Start(ctx, fmt.Sprintf("%s %s", method, request.RawRequest.URL), trace.WithSpanKind(trace.SpanKindClient))
+	ctx, span := tracer.Start(ctx, fmt.Sprintf("%s %s", method, request.RawRequest.URL), trace.WithSpanKind(trace.SpanKindClient))
 	defer span.End()
 
 	urlAttr := cloneURL(&request.URL)
@@ -382,11 +377,12 @@ func (client *HTTPClient) evalHTTPResponse(ctx context.Context, span trace.Span,
 
 		result = string(respBody)
 	case contentType == rest.ContentTypeXML:
-		field, err := client.extractResultType(resultType)
-		if err != nil {
-			return nil, nil, schema.NewConnectorError(http.StatusInternalServerError, "failed to extract forwarded headers response: "+err.Error(), nil)
+		field, extractErr := client.extractResultType(resultType)
+		if extractErr != nil {
+			return nil, nil, extractErr
 		}
 
+		var err error
 		result, err = contenttype.NewXMLDecoder(client.metadata.NDCHttpSchema).Decode(resp.Body, field)
 		if err != nil {
 			return nil, nil, schema.NewConnectorError(http.StatusInternalServerError, err.Error(), nil)
@@ -414,16 +410,26 @@ func (client *HTTPClient) evalHTTPResponse(ctx context.Context, span trace.Span,
 			}
 		}
 
-		err := json.NewDecoder(resp.Body).Decode(&result)
+		responseType, extractErr := client.extractResultType(resultType)
+		if extractErr != nil {
+			return nil, nil, extractErr
+		}
+
+		var err error
+		result, err = contenttype.NewJSONDecoder(client.metadata.NDCHttpSchema).Decode(resp.Body, responseType)
 		if err != nil {
 			return nil, nil, schema.NewConnectorError(http.StatusInternalServerError, err.Error(), nil)
 		}
 	case contentType == rest.ContentTypeNdJSON:
+		responseType, extractErr := client.extractResultType(resultType)
+		if extractErr != nil {
+			return nil, nil, extractErr
+		}
+
 		var results []any
 		decoder := json.NewDecoder(resp.Body)
 		for decoder.More() {
-			var r any
-			err := decoder.Decode(&r)
+			r, err := contenttype.NewJSONDecoder(client.metadata.NDCHttpSchema).Decode(resp.Body, responseType)
 			if err != nil {
 				return nil, nil, schema.NewConnectorError(http.StatusInternalServerError, err.Error(), nil)
 			}
@@ -456,12 +462,17 @@ func (client *HTTPClient) evalHTTPResponse(ctx context.Context, span trace.Span,
 	return result, resp.Header, nil
 }
 
-func (client *HTTPClient) extractResultType(resultType schema.Type) (schema.Type, error) {
+func (client *HTTPClient) extractResultType(resultType schema.Type) (schema.Type, *schema.ConnectorError) {
 	if !client.forwardHeaders.Enabled || client.forwardHeaders.ResponseHeaders == nil || client.forwardHeaders.ResponseHeaders.ResultField == "" {
 		return resultType, nil
 	}
 
-	return client.extractForwardedHeadersResultType(resultType)
+	result, err := client.extractForwardedHeadersResultType(resultType)
+	if err != nil {
+		return nil, schema.NewConnectorError(http.StatusInternalServerError, "failed to extract forwarded headers response: "+err.Error(), nil)
+	}
+
+	return result, nil
 }
 
 func (client *HTTPClient) extractForwardedHeadersResultType(resultType schema.Type) (schema.Type, error) {

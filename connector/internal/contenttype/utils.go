@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"reflect"
 	"strconv"
+
+	"github.com/hasura/ndc-sdk-go/schema"
 )
 
 // StringifySimpleScalar converts a simple scalar value to string.
@@ -23,5 +25,22 @@ func StringifySimpleScalar(val reflect.Value, kind reflect.Kind) (string, error)
 		return fmt.Sprint(val.Interface()), nil
 	default:
 		return "", fmt.Errorf("invalid value: %v", val.Interface())
+	}
+}
+
+// UnwrapNullableType unwraps the underlying type of the nullable type
+func UnwrapNullableType(input schema.Type) (schema.TypeEncoder, bool, error) {
+	switch ty := input.Interface().(type) {
+	case *schema.NullableType:
+		childType, _, err := UnwrapNullableType(ty.UnderlyingType)
+		if err != nil {
+			return nil, false, err
+		}
+
+		return childType, true, nil
+	case *schema.NamedType, *schema.ArrayType:
+		return ty, false, nil
+	default:
+		return nil, false, fmt.Errorf("invalid type %v", input)
 	}
 }

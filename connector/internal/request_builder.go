@@ -449,7 +449,7 @@ func (c *RequestBuilder) getRequestUploadBody(rawRequest *rest.Request, bodyInfo
 		return rawRequest.RequestBody
 	}
 
-	bi, ok, err := UnwrapNullableType(bodyInfo.Type)
+	bi, ok, err := contenttype.UnwrapNullableType(bodyInfo.Type)
 	if err != nil || !ok {
 		return nil
 	}

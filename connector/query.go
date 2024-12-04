@@ -153,7 +153,7 @@ func (c *HTTPConnector) execQuery(ctx context.Context, state *State, request *sc
 	}
 
 	httpOptions.Concurrency = c.config.Concurrency.HTTP
-	client := internal.NewHTTPClient(c.upstreams, metadata, c.config.ForwardHeaders, state.Tracer)
+	client := internal.NewHTTPClient(c.upstreams, metadata, c.config.ForwardHeaders)
 	result, _, err := client.Send(ctx, httpRequest, queryFields, function.ResultType, httpOptions)
 	if err != nil {
 		span.SetStatus(codes.Error, "failed to execute the http request")

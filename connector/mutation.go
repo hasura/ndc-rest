@@ -138,7 +138,7 @@ func (c *HTTPConnector) execMutationOperation(parentCtx context.Context, state *
 	}
 
 	httpOptions.Concurrency = c.config.Concurrency.HTTP
-	client := internal.NewHTTPClient(c.upstreams, metadata, c.config.ForwardHeaders, state.Tracer)
+	client := internal.NewHTTPClient(c.upstreams, metadata, c.config.ForwardHeaders)
 	result, _, err := client.Send(ctx, httpRequest, operation.Fields, procedure.ResultType, httpOptions)
 	if err != nil {
 		span.SetStatus(codes.Error, "failed to execute mutation")

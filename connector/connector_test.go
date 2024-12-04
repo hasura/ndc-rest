@@ -159,7 +159,7 @@ func TestHTTPConnector_authentication(t *testing.T) {
 							"headers": map[string]any{
 								"Content-Type": string("application/json"),
 							},
-							"response": map[string]any{},
+							"response": []any{map[string]any{"id": float64(1)}},
 						},
 					},
 				},
@@ -268,7 +268,7 @@ func TestHTTPConnector_authentication(t *testing.T) {
 						{
 							"__value": map[string]any{
 								"headers":  map[string]any{"Content-Type": string("application/json")},
-								"response": map[string]any{},
+								"response": []any{map[string]any{}},
 							},
 						},
 					},
@@ -310,7 +310,7 @@ func TestHTTPConnector_authentication(t *testing.T) {
 							"headers": map[string]any{
 								"Content-Type": string("application/json"),
 							},
-							"response": map[string]any{},
+							"response": []any{map[string]any{}},
 						},
 					},
 				},
@@ -584,17 +584,17 @@ func TestHTTPConnector_distribution(t *testing.T) {
 		Name string `json:"name"`
 	}
 
-	expectedResults := []internal.DistributedResult[distributedResultData]{
+	expectedResults := []internal.DistributedResult[[]distributedResultData]{
 		{
 			Server: "cat",
-			Data: distributedResultData{
-				Name: "cat",
+			Data: []distributedResultData{
+				{Name: "cat"},
 			},
 		},
 		{
 			Server: "dog",
-			Data: distributedResultData{
-				Name: "dog",
+			Data: []distributedResultData{
+				{Name: "dog"},
 			},
 		},
 	}
@@ -656,8 +656,8 @@ func TestHTTPConnector_distribution(t *testing.T) {
 		var body []struct {
 			Rows []struct {
 				Value struct {
-					Errors  []internal.DistributedError                         `json:"errors"`
-					Results []internal.DistributedResult[distributedResultData] `json:"results"`
+					Errors  []internal.DistributedError                           `json:"errors"`
+					Results []internal.DistributedResult[[]distributedResultData] `json:"results"`
 				} `json:"__value"`
 			} `json:"rows"`
 		}
@@ -670,7 +670,7 @@ func TestHTTPConnector_distribution(t *testing.T) {
 		assert.Equal(t, 0, len(row.Value.Errors))
 		assert.Equal(t, 2, len(row.Value.Results))
 
-		slices.SortFunc(row.Value.Results, func(a internal.DistributedResult[distributedResultData], b internal.DistributedResult[distributedResultData]) int {
+		slices.SortFunc(row.Value.Results, func(a internal.DistributedResult[[]distributedResultData], b internal.DistributedResult[[]distributedResultData]) int {
 			return strings.Compare(a.Server, b.Server)
 		})
 
@@ -731,8 +731,8 @@ func TestHTTPConnector_distribution(t *testing.T) {
 		var body struct {
 			OperationResults []struct {
 				Result struct {
-					Errors  []internal.DistributedError                         `json:"errors"`
-					Results []internal.DistributedResult[distributedResultData] `json:"results"`
+					Errors  []internal.DistributedError                           `json:"errors"`
+					Results []internal.DistributedResult[[]distributedResultData] `json:"results"`
 				} `json:"result"`
 			} `json:"operation_results"`
 		}
@@ -744,7 +744,7 @@ func TestHTTPConnector_distribution(t *testing.T) {
 		assert.Equal(t, 0, len(row.Errors))
 		assert.Equal(t, 2, len(row.Results))
 
-		slices.SortFunc(row.Results, func(a internal.DistributedResult[distributedResultData], b internal.DistributedResult[distributedResultData]) int {
+		slices.SortFunc(row.Results, func(a internal.DistributedResult[[]distributedResultData], b internal.DistributedResult[[]distributedResultData]) int {
 			return strings.Compare(a.Server, b.Server)
 		})
 
@@ -801,8 +801,8 @@ func TestHTTPConnector_distribution(t *testing.T) {
 						"errors": []any{},
 						"results": []any{
 							map[string]any{
-								"data": map[string]any{
-									"name": "cat",
+								"data": []any{
+									map[string]any{"name": "cat"},
 								},
 								"server": string("cat"),
 							},
@@ -851,8 +851,8 @@ func TestHTTPConnector_multiSchemas(t *testing.T) {
 	assertHTTPResponse(t, res, http.StatusOK, schema.QueryResponse{
 		{
 			Rows: []map[string]any{
-				{"__value": map[string]any{
-					"name": "cat",
+				{"__value": []any{
+					map[string]any{"name": "cat"},
 				}},
 			},
 		},
@@ -880,8 +880,10 @@ func TestHTTPConnector_multiSchemas(t *testing.T) {
 	assertHTTPResponse(t, res, http.StatusOK, schema.QueryResponse{
 		{
 			Rows: []map[string]any{
-				{"__value": map[string]any{
-					"name": "dog",
+				{"__value": []any{
+					map[string]any{
+						"name": "dog",
+					},
 				}},
 			},
 		},
@@ -908,7 +910,14 @@ func createMockServer(t *testing.T, apiKey string, bearerToken string) *httptest
 				t.FailNow()
 				return
 			}
-			writeResponse(w, "{}")
+
+			if r.Method == http.MethodGet {
+				writeResponse(w, `[{"id": "1"}]`)
+
+				return
+			}
+
+			writeResponse(w, `{}`)
 		default:
 			w.WriteHeader(http.StatusMethodNotAllowed)
 			return
@@ -931,7 +940,7 @@ func createMockServer(t *testing.T, apiKey string, bearerToken string) *httptest
 				t.Fatalf("expected query param: status=available, got: %s", r.URL.Query().Encode())
 				return
 			}
-			writeResponse(w, "{}")
+			writeResponse(w, "[{}]")
 		default:
 			w.WriteHeader(http.StatusMethodNotAllowed)
 			return
@@ -1016,7 +1025,7 @@ func createMockServer(t *testing.T, apiKey string, bearerToken string) *httptest
 			authCookie, err := r.Cookie("auth")
 			assert.NilError(t, err)
 			assert.Equal(t, "auth_token", authCookie.Value)
-			writeResponse(w, "{}")
+			writeResponse(w, "[{}]")
 		default:
 			w.WriteHeader(http.StatusMethodNotAllowed)
 			return
@@ -1063,7 +1072,7 @@ func (mds *mockDistributedServer) createServer(t *testing.T) *httptest.Server {
 			}
 			switch r.Method {
 			case http.MethodGet:
-				writeResponse(w, []byte(fmt.Sprintf(`{"name": "%s"}`, name)))
+				writeResponse(w, []byte(fmt.Sprintf(`[{"name": "%s"}]`, name)))
 			case http.MethodPost:
 				rawBody, err := io.ReadAll(r.Body)
 				assert.NilError(t, err)
@@ -1075,7 +1084,7 @@ func (mds *mockDistributedServer) createServer(t *testing.T) *httptest.Server {
 				err = json.Unmarshal(rawBody, &body)
 				assert.NilError(t, err)
 				assert.Equal(t, "pet", body.Name)
-				writeResponse(w, []byte(fmt.Sprintf(`{"name": "%s"}`, name)))
+				writeResponse(w, []byte(fmt.Sprintf(`[{"name": "%s"}]`, name)))
 			default:
 				w.WriteHeader(http.StatusMethodNotAllowed)
 				return
@@ -1118,7 +1127,7 @@ func (mds *mockMultiSchemaServer) createServer() *httptest.Server {
 
 					return
 				}
-				writeResponse(w, []byte(fmt.Sprintf(`{"name": "%s"}`, name)))
+				writeResponse(w, []byte(fmt.Sprintf(`[{"name": "%s"}]`, name)))
 			default:
 				w.WriteHeader(http.StatusMethodNotAllowed)
 				return
@@ -1304,9 +1313,9 @@ func (mts *mockTLSServer) createMockTLSServer(t *testing.T, dir string) *httptes
 	}
 	mux.HandleFunc("/pet", func(w http.ResponseWriter, r *http.Request) {
 		switch r.Method {
-		case http.MethodGet, http.MethodPost:
+		case http.MethodGet:
 			mts.IncreaseCount()
-			writeResponse(w, "{}")
+			writeResponse(w, "[]")
 		default:
 			w.WriteHeader(http.StatusMethodNotAllowed)
 			return
@@ -1396,7 +1405,7 @@ func TestConnectorTLS(t *testing.T) {
 			{
 				Rows: []map[string]any{
 					{
-						"__value": map[string]any{},
+						"__value": []any{},
 					},
 				},
 			},
@@ -1431,7 +1440,7 @@ func TestConnectorTLS(t *testing.T) {
 			{
 				Rows: []map[string]any{
 					{
-						"__value": map[string]any{},
+						"__value": []any{},
 					},
 				},
 			},
