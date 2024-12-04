@@ -3,7 +3,6 @@ package contenttype
 import (
 	"encoding/json"
 	"fmt"
-	"io"
 	"strconv"
 	"strings"
 
@@ -25,7 +24,7 @@ func NewJSONDecoder(httpSchema *rest.NDCHttpSchema) *JSONDecoder {
 }
 
 // Decode unmarshals json and evaluate the schema type.
-func (c *JSONDecoder) Decode(r io.Reader, resultType schema.Type) (any, error) {
+func (c *JSONDecoder) Decode(decoder *json.Decoder, resultType schema.Type) (any, error) {
 	underlyingType, _, err := UnwrapNullableType(resultType)
 	if err != nil {
 		return nil, err
@@ -34,7 +33,7 @@ func (c *JSONDecoder) Decode(r io.Reader, resultType schema.Type) (any, error) {
 	switch t := underlyingType.(type) {
 	case *schema.ArrayType:
 		var rawResult []any
-		err := json.NewDecoder(r).Decode(&rawResult)
+		err := decoder.Decode(&rawResult)
 		if err != nil {
 			return nil, err
 		}
@@ -46,7 +45,7 @@ func (c *JSONDecoder) Decode(r io.Reader, resultType schema.Type) (any, error) {
 		return c.evalArrayType(rawResult, t, []string{})
 	case *schema.NamedType:
 		var result any
-		err := json.NewDecoder(r).Decode(&result)
+		err := decoder.Decode(&result)
 		if err != nil {
 			return nil, err
 		}
@@ -58,7 +57,7 @@ func (c *JSONDecoder) Decode(r io.Reader, resultType schema.Type) (any, error) {
 		return c.evalNamedType(result, t, []string{})
 	default:
 		var result any
-		err := json.NewDecoder(r).Decode(&result)
+		err := decoder.Decode(&result)
 
 		return result, err
 	}

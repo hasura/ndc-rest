@@ -109,7 +109,7 @@ func TestHTTPConnector_emptyServer(t *testing.T) {
 func TestHTTPConnector_authentication(t *testing.T) {
 	apiKey := "random_api_key"
 	bearerToken := "random_bearer_token"
-	slog.SetLogLoggerLevel(slog.LevelDebug)
+	// slog.SetLogLoggerLevel(slog.LevelDebug)
 	server := createMockServer(t, apiKey, bearerToken)
 	defer server.Close()
 
@@ -831,7 +831,8 @@ func TestHTTPConnector_multiSchemas(t *testing.T) {
 	testServer := connServer.BuildTestServer()
 	defer testServer.Close()
 
-	slog.SetLogLoggerLevel(slog.LevelDebug)
+	// slog.SetLogLoggerLevel(slog.LevelDebug)
+
 	reqBody := []byte(`{
 			"collection": "findCats",
 			"query": {
@@ -1012,7 +1013,7 @@ func createMockServer(t *testing.T, apiKey string, bearerToken string) *httptest
 			assert.Equal(t, "test-client", result.CLientID)
 			assert.Equal(t, true, result.Active)
 
-			writeResponse(w, "{}")
+			writeResponse(w, "[{}]")
 		default:
 			w.WriteHeader(http.StatusMethodNotAllowed)
 			return
@@ -1275,7 +1276,7 @@ func TestConnectorOAuth(t *testing.T) {
 						"headers": map[string]any{
 							"Content-Type": string("application/json"),
 						},
-						"response": map[string]any{},
+						"response": []any{map[string]any{}},
 					},
 				},
 			},

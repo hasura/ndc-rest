@@ -416,20 +416,16 @@ func (client *HTTPClient) evalHTTPResponse(ctx context.Context, span trace.Span,
 		}
 
 		var err error
-		result, err = contenttype.NewJSONDecoder(client.metadata.NDCHttpSchema).Decode(resp.Body, responseType)
+		result, err = contenttype.NewJSONDecoder(client.metadata.NDCHttpSchema).Decode(json.NewDecoder(resp.Body), responseType)
 		if err != nil {
 			return nil, nil, schema.NewConnectorError(http.StatusInternalServerError, err.Error(), nil)
 		}
 	case contentType == rest.ContentTypeNdJSON:
-		responseType, extractErr := client.extractResultType(resultType)
-		if extractErr != nil {
-			return nil, nil, extractErr
-		}
-
 		var results []any
 		decoder := json.NewDecoder(resp.Body)
 		for decoder.More() {
-			r, err := contenttype.NewJSONDecoder(client.metadata.NDCHttpSchema).Decode(resp.Body, responseType)
+			var r any
+			err := decoder.Decode(&r)
 			if err != nil {
 				return nil, nil, schema.NewConnectorError(http.StatusInternalServerError, err.Error(), nil)
 			}
