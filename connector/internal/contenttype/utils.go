@@ -22,6 +22,8 @@ func StringifySimpleScalar(val reflect.Value, kind reflect.Kind) (string, error)
 		return val.String(), nil
 	case reflect.Bool:
 		return strconv.FormatBool(val.Bool()), nil
+	case reflect.Interface:
+		return fmt.Sprint(val.Interface()), nil
 	default:
 		value := val.Interface()
 		if stringer, ok := value.(fmt.Stringer); ok {
