@@ -1,6 +1,7 @@
 package contenttype
 
 import (
+	"encoding/json"
 	"fmt"
 	"reflect"
 	"strconv"
@@ -21,10 +22,18 @@ func StringifySimpleScalar(val reflect.Value, kind reflect.Kind) (string, error)
 		return val.String(), nil
 	case reflect.Bool:
 		return strconv.FormatBool(val.Bool()), nil
-	case reflect.Interface:
-		return fmt.Sprint(val.Interface()), nil
 	default:
-		return "", fmt.Errorf("invalid value: %v", val.Interface())
+		value := val.Interface()
+		if stringer, ok := value.(fmt.Stringer); ok {
+			return stringer.String(), nil
+		}
+
+		j, err := json.Marshal(value)
+		if err != nil {
+			return "", err
+		}
+
+		return string(j), nil
 	}
 }
 

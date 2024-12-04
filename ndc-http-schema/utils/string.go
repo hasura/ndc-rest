@@ -196,7 +196,11 @@ func StripHTMLTags(str string) string {
 }
 
 // RemoveYAMLSpecialCharacters remote special characters to avoid YAML unmarshaling error
-func RemoveYAMLSpecialCharacters(input []byte) []byte {
+func RemoveYAMLSpecialCharacters(input []byte) string {
+	if len(input) == 0 {
+		return ""
+	}
+
 	var sb strings.Builder
 	inputLength := len(input)
 	for i := 0; i < inputLength; i++ {
@@ -212,10 +216,16 @@ func RemoveYAMLSpecialCharacters(input []byte) []byte {
 				i++
 			case 'u':
 				u := getu4(input[i:])
-				if u > -1 && utf8.ValidRune(u) {
-					sb.WriteRune(u)
+				if u > -1 {
+					i += 5
+				} else {
+					sb.WriteRune(r)
+					i++
 				}
-				i += 5
+			case '\\':
+				sb.WriteRune(r)
+				sb.WriteRune(r)
+				i++
 			default:
 				sb.WriteByte(c)
 			}
@@ -224,7 +234,7 @@ func RemoveYAMLSpecialCharacters(input []byte) []byte {
 		}
 	}
 
-	return []byte(strings.ToValidUTF8(sb.String(), ""))
+	return strings.ToValidUTF8(sb.String(), "")
 }
 
 // getu4 decodes \uXXXX from the beginning of s, returning the hex value,

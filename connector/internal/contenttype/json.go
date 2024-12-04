@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"reflect"
 	"strconv"
 	"strings"
 
@@ -152,6 +153,14 @@ func (c *JSONDecoder) evalScalarType(value any, scalarType schema.ScalarType) (a
 		return utils.DecodeFloat[float64](value)
 	case *schema.TypeRepresentationInt8, *schema.TypeRepresentationInt16, *schema.TypeRepresentationInt32:
 		return utils.DecodeInt[int64](value)
+	case *schema.TypeRepresentationString:
+		if s, ok := value.(string); ok {
+			return s, nil
+		}
+
+		reflectType := reflect.ValueOf(value)
+
+		return StringifySimpleScalar(reflectType, reflectType.Kind())
 	default:
 		return value, nil
 	}

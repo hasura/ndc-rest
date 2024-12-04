@@ -13,7 +13,7 @@ type ConvertOptions internal.ConvertOptions
 
 // OpenAPIv3ToNDCSchema converts OpenAPI v3 JSON bytes to NDC HTTP schema
 func OpenAPIv3ToNDCSchema(input []byte, options ConvertOptions) (*rest.NDCHttpSchema, []error) {
-	input = utils.RemoveYAMLSpecialCharacters(input)
+	input = []byte(utils.RemoveYAMLSpecialCharacters(input))
 	document, err := libopenapi.NewDocument(input)
 	if err != nil {
 		return nil, []error{err}
