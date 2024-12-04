@@ -416,7 +416,7 @@ func (client *HTTPClient) evalHTTPResponse(ctx context.Context, span trace.Span,
 		}
 
 		var err error
-		result, err = contenttype.NewJSONDecoder(client.metadata.NDCHttpSchema).Decode(json.NewDecoder(resp.Body), responseType)
+		result, err = contenttype.NewJSONDecoder(client.metadata.NDCHttpSchema).Decode(resp.Body, responseType)
 		if err != nil {
 			return nil, nil, schema.NewConnectorError(http.StatusInternalServerError, err.Error(), nil)
 		}
