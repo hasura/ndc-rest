@@ -35,7 +35,6 @@ func ConvertToNDCSchema(config *ConvertConfig, logger *slog.Logger) (*schema.NDC
 		NoDeprecation:       config.NoDeprecation,
 		Logger:              logger,
 	}
-	rawContent = utils.RemoveYAMLSpecialCharacters(rawContent)
 
 	switch config.Spec {
 	case schema.OpenAPIv3Spec, schema.OAS3Spec:

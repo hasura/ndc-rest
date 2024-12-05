@@ -231,7 +231,7 @@ func createSchemaFromOpenAPISchema(input *base.Schema) *rest.TypeSchema {
 	}
 	ps.Type = evaluateOpenAPITypes(input.Type)
 	ps.Format = input.Format
-	ps.Pattern = input.Pattern
+	ps.Pattern = utils.RemoveYAMLSpecialCharacters([]byte(input.Pattern))
 	ps.Maximum = input.Maximum
 	ps.Minimum = input.Minimum
 	ps.MaxLength = input.MaxLength

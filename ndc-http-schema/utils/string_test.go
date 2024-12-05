@@ -13,7 +13,11 @@ func TestRemoveYAMLSpecialCharacters(t *testing.T) {
 	}{
 		{
 			Input:    "\b\t\u0009Some\u0000thing\\u0002",
-			Expected: "  Something",
+			Expected: "  Something",
+		},
+		{
+			Input:    "^[a-zA-Z\\u0080-\\u024F\\s\\/\\-\\)\\(\\`\\.\\\"\\']+$",
+			Expected: "^[a-zA-Z-\\s\\/\\-\\)\\(\\`\\.\\\"\\']+$",
 		},
 	}
 

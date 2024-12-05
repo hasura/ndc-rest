@@ -65,9 +65,7 @@ func TestCreateMultipartForm(t *testing.T) {
         }
       }`,
 			Expected: map[string]string{
-				"address.street":      `street 1`,
-				"address.location[0]": `0`,
-				"address.location[1]": `1`,
+				"address": `{"location":[0,1],"street":"street 1"}`,
 			},
 			ExpectedHeaders: map[string]http.Header{},
 		},
