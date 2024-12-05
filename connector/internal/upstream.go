@@ -386,7 +386,7 @@ func (sm *UpstreamManager) registerSecurityCredentials(ctx context.Context, http
 
 		credentials[key] = cred
 		if headerForwardRequired && (!sm.config.ForwardHeaders.Enabled || sm.config.ForwardHeaders.ArgumentField == nil || *sm.config.ForwardHeaders.ArgumentField == "") {
-			logger.Warn("%s: the security scheme needs header forwarding enabled with argumentField set", slog.String("scheme", key))
+			logger.Warn("the security scheme needs header forwarding enabled with argumentField set", slog.String("scheme", key))
 		}
 	}
 

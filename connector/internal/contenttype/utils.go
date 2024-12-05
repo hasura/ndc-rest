@@ -2,6 +2,7 @@ package contenttype
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"reflect"
 	"strconv"
@@ -11,6 +12,12 @@ import (
 )
 
 var quoteEscaper = strings.NewReplacer("\\", "\\\\", `"`, "\\\"")
+
+var (
+	errArgumentRequired        = errors.New("argument is required")
+	errRequestBodyRequired     = errors.New("request body is required")
+	errRequestBodyTypeRequired = errors.New("failed to decode request body, empty body type")
+)
 
 func escapeQuotes(s string) string {
 	return quoteEscaper.Replace(s)
