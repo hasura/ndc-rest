@@ -1,131 +1,249 @@
-package internal
+package contenttype
 
 import (
 	"encoding/json"
 	"io"
-	"mime"
-	"mime/multipart"
-	"net/http"
-	"os"
+	"net/url"
 	"slices"
 	"strings"
 	"testing"
 
 	rest "github.com/hasura/ndc-http/ndc-http-schema/schema"
+	"github.com/hasura/ndc-sdk-go/utils"
 	"gotest.tools/v3/assert"
 )
 
-func TestCreateMultipartForm(t *testing.T) {
+func TestEvalQueryParameterURL(t *testing.T) {
 	testCases := []struct {
-		Name            string
-		RawArguments    string
-		Expected        map[string]string
-		ExpectedHeaders map[string]http.Header
+		name     string
+		param    *rest.RequestParameter
+		keys     []Key
+		values   []string
+		expected string
 	}{
 		{
-			Name: "PostFiles",
-			RawArguments: `{
-		    "body": {
-		      "expand": ["foo"],
-		      "expand_json": ["foo","bar"],
-		      "file": "aGVsbG8gd29ybGQ=",
-		      "file_link_data": {
-		        "create": true,
-		        "expires_at": 181320689
-		      },
-		      "purpose": "business_icon"
-		    },
-				"headerXRateLimitLimit": 10
-		  }`,
-			Expected: map[string]string{
-				"expand[]":                  `foo`,
-				"expand_json":               `["foo","bar"]`,
-				"file":                      "hello world",
-				"file_link_data.create":     "true",
-				"file_link_data.expires_at": "181320689",
-				"purpose":                   "business_icon",
-			},
-			ExpectedHeaders: map[string]http.Header{
-				"expand": {
-					"Content-Type": []string{"application/json"},
-				},
-				"file": {
-					"X-Rate-Limit-Limit": []string{"10"},
-				},
-			},
+			name:     "empty",
+			param:    &rest.RequestParameter{},
+			keys:     []Key{NewKey("")},
+			values:   []string{},
+			expected: "",
 		},
 		{
-			Name: "uploadPetMultipart",
-			RawArguments: `{
-        "body": {
-          "address": {
-            "street": "street 1",
-            "location": [0, 1]
-          }
-        }
-      }`,
-			Expected: map[string]string{
-				"address": `{"location":[0,1],"street":"street 1"}`,
+			name: "form_explode_single",
+			param: &rest.RequestParameter{
+				Name: "id",
+				EncodingObject: rest.EncodingObject{
+					Explode: utils.ToPtr(true),
+					Style:   rest.EncodingStyleForm,
+				},
 			},
-			ExpectedHeaders: map[string]http.Header{},
+			keys:     []Key{},
+			values:   []string{"3"},
+			expected: "id=3",
+		},
+		{
+			name: "form_single",
+			param: &rest.RequestParameter{
+				Name: "id",
+				EncodingObject: rest.EncodingObject{
+					Explode: utils.ToPtr(false),
+					Style:   rest.EncodingStyleForm,
+				},
+			},
+			keys:     []Key{NewKey("")},
+			values:   []string{"3"},
+			expected: "id=3",
+		},
+		{
+			name: "form_explode_multiple",
+			param: &rest.RequestParameter{
+				Name: "id",
+				EncodingObject: rest.EncodingObject{
+					Explode: utils.ToPtr(true),
+					Style:   rest.EncodingStyleForm,
+				},
+			},
+			keys:     []Key{NewKey("")},
+			values:   []string{"3", "4", "5"},
+			expected: "id=3&id=4&id=5",
+		},
+		{
+			name: "spaceDelimited_multiple",
+			param: &rest.RequestParameter{
+				Name: "id",
+				EncodingObject: rest.EncodingObject{
+					Explode: utils.ToPtr(false),
+					Style:   rest.EncodingStyleSpaceDelimited,
+				},
+			},
+			keys:     []Key{NewKey("")},
+			values:   []string{"3", "4", "5"},
+			expected: "id=3 4 5",
+		},
+		{
+			name: "spaceDelimited_explode_multiple",
+			param: &rest.RequestParameter{
+				Name: "id",
+				EncodingObject: rest.EncodingObject{
+					Explode: utils.ToPtr(true),
+					Style:   rest.EncodingStyleSpaceDelimited,
+				},
+			},
+			keys:     []Key{NewKey("")},
+			values:   []string{"3", "4", "5"},
+			expected: "id=3&id=4&id=5",
+		},
+
+		{
+			name: "pipeDelimited_multiple",
+			param: &rest.RequestParameter{
+				Name: "id",
+				EncodingObject: rest.EncodingObject{
+					Explode: utils.ToPtr(false),
+					Style:   rest.EncodingStylePipeDelimited,
+				},
+			},
+			keys:     []Key{NewKey("")},
+			values:   []string{"3", "4", "5"},
+			expected: "id=3|4|5",
+		},
+		{
+			name: "pipeDelimited_explode_multiple",
+			param: &rest.RequestParameter{
+				Name: "id",
+				EncodingObject: rest.EncodingObject{
+					Explode: utils.ToPtr(true),
+					Style:   rest.EncodingStylePipeDelimited,
+				},
+			},
+			keys:     []Key{NewKey("")},
+			values:   []string{"3", "4", "5"},
+			expected: "id=3&id=4&id=5",
+		},
+		{
+			name: "deepObject_explode_multiple",
+			param: &rest.RequestParameter{
+				Name: "id",
+				EncodingObject: rest.EncodingObject{
+					Explode: utils.ToPtr(true),
+					Style:   rest.EncodingStyleDeepObject,
+				},
+			},
+			keys:     []Key{NewKey("")},
+			values:   []string{"3", "4", "5"},
+			expected: "id[]=3&id[]=4&id[]=5",
+		},
+		{
+			name: "form_object",
+			param: &rest.RequestParameter{
+				Name: "id",
+				EncodingObject: rest.EncodingObject{
+					Explode: utils.ToPtr(false),
+					Style:   rest.EncodingStyleForm,
+				},
+			},
+			keys:     []Key{NewKey("role")},
+			values:   []string{"admin"},
+			expected: "id=role,admin",
+		},
+		{
+			name: "form_explode_object",
+			param: &rest.RequestParameter{
+				Name: "id",
+				EncodingObject: rest.EncodingObject{
+					Explode: utils.ToPtr(true),
+					Style:   rest.EncodingStyleForm,
+				},
+			},
+			keys:     []Key{NewKey("role")},
+			values:   []string{"admin"},
+			expected: "role=admin",
+		},
+		{
+			name: "deepObject_explode_object",
+			param: &rest.RequestParameter{
+				Name: "id",
+				EncodingObject: rest.EncodingObject{
+					Explode: utils.ToPtr(true),
+					Style:   rest.EncodingStyleDeepObject,
+				},
+			},
+			keys:     []Key{NewKey("role")},
+			values:   []string{"admin"},
+			expected: "id[role]=admin",
+		},
+		{
+			name: "form_array_object",
+			param: &rest.RequestParameter{
+				Name: "id",
+				EncodingObject: rest.EncodingObject{
+					Explode: utils.ToPtr(false),
+					Style:   rest.EncodingStyleForm,
+				},
+			},
+			keys:     []Key{NewKey("role"), NewKey(""), NewKey("user"), NewKey("")},
+			values:   []string{"admin"},
+			expected: "id=role[][user],admin",
+		},
+		{
+			name: "form_explode_array_object",
+			param: &rest.RequestParameter{
+				Name: "id",
+				EncodingObject: rest.EncodingObject{
+					Explode: utils.ToPtr(true),
+					Style:   rest.EncodingStyleForm,
+				},
+			},
+			keys:     []Key{NewKey("role"), NewKey(""), NewKey("user"), NewKey("")},
+			values:   []string{"admin"},
+			expected: "role[][user]=admin",
+		},
+		{
+			name: "form_explode_array_object_multiple",
+			param: &rest.RequestParameter{
+				Name: "id",
+				EncodingObject: rest.EncodingObject{
+					Explode: utils.ToPtr(true),
+					Style:   rest.EncodingStyleForm,
+				},
+			},
+			keys:     []Key{NewKey("role"), NewKey(""), NewKey("user"), NewKey("")},
+			values:   []string{"admin", "anonymous"},
+			expected: "id[role][][user]=admin&id[role][][user]=anonymous",
+		},
+		{
+			name: "deepObject_explode_array_object",
+			param: &rest.RequestParameter{
+				Name: "id",
+				EncodingObject: rest.EncodingObject{
+					Explode: utils.ToPtr(true),
+					Style:   rest.EncodingStyleDeepObject,
+				},
+			},
+			keys:     []Key{NewKey("role"), NewKey(""), NewKey("user"), NewKey("")},
+			values:   []string{"admin"},
+			expected: "id[role][][user][]=admin",
+		},
+		{
+			name: "deepObject_explode_array_object_multiple",
+			param: &rest.RequestParameter{
+				Name: "id",
+				EncodingObject: rest.EncodingObject{
+					Explode: utils.ToPtr(true),
+					Style:   rest.EncodingStyleDeepObject,
+				},
+			},
+			keys:     []Key{NewKey("role"), NewKey(""), NewKey("user"), NewKey("")},
+			values:   []string{"admin", "anonymous"},
+			expected: "id[role][][user][]=admin&id[role][][user][]=anonymous",
 		},
 	}
 
-	ndcSchema := createMockSchema(t)
 	for _, tc := range testCases {
-		t.Run(tc.Name, func(t *testing.T) {
-			var info *rest.OperationInfo
-			for key, f := range ndcSchema.Procedures {
-				if key == tc.Name {
-					info = &f
-					break
-				}
-			}
-			assert.Assert(t, info != nil)
-
-			var arguments map[string]any
-			assert.NilError(t, json.Unmarshal([]byte(tc.RawArguments), &arguments))
-			builder := RequestBuilder{
-				Schema:    ndcSchema,
-				Operation: info,
-				Arguments: arguments,
-			}
-			buf, mediaType, err := builder.createMultipartForm(arguments["body"])
-			assert.NilError(t, err)
-
-			_, params, err := mime.ParseMediaType(mediaType)
-			assert.NilError(t, err)
-
-			reader := multipart.NewReader(buf, params["boundary"])
-			var count int
-			results := make(map[string]string)
-			for {
-				form, err := reader.NextPart()
-				if err != nil && strings.Contains(err.Error(), io.EOF.Error()) {
-					break
-				}
-				assert.NilError(t, err)
-				count++
-				name := form.FormName()
-
-				expected, ok := tc.Expected[name]
-				if !ok {
-					t.Fatalf("field %s does not exist", name)
-				} else {
-					result, err := io.ReadAll(form)
-					assert.NilError(t, err)
-					assert.Equal(t, expected, string(result))
-					results[name] = string(result)
-					expectedHeader := tc.ExpectedHeaders[name]
-
-					for key, value := range expectedHeader {
-						assert.DeepEqual(t, value, form.Header[key])
-					}
-				}
-			}
-			if len(tc.Expected) != count {
-				assert.DeepEqual(t, tc.Expected, results)
-			}
+		t.Run(tc.name, func(t *testing.T) {
+			qValues := make(url.Values)
+			EvalQueryParameterURL(&qValues, tc.param.Name, tc.param.EncodingObject, tc.keys, tc.values)
+			assert.Equal(t, tc.expected, EncodeQueryValues(qValues, true))
 		})
 	}
 }
@@ -573,25 +691,12 @@ func TestCreateFormURLEncoded(t *testing.T) {
 			var arguments map[string]any
 			assert.NilError(t, json.Unmarshal([]byte(tc.RawArguments), &arguments))
 			argumentInfo := info.Arguments["body"]
-			builder := RequestBuilder{
-				Schema:    ndcSchema,
-				Operation: info,
-				Arguments: arguments,
-			}
-			buf, err := builder.createFormURLEncoded(&argumentInfo, arguments["body"])
+			builder := NewURLParameterEncoder(ndcSchema)
+			buf, err := builder.Encode(&argumentInfo, arguments["body"])
 			assert.NilError(t, err)
 			result, err := io.ReadAll(buf)
 			assert.NilError(t, err)
 			assert.DeepEqual(t, parseQueryAndSort(tc.Expected), parseQueryAndSort(string(result)))
 		})
 	}
-}
-
-func createMockSchema(t *testing.T) *rest.NDCHttpSchema {
-	var ndcSchema rest.NDCHttpSchema
-	rawSchemaBytes, err := os.ReadFile("../../ndc-http-schema/openapi/testdata/petstore3/expected.json")
-	assert.NilError(t, err)
-	assert.NilError(t, json.Unmarshal(rawSchemaBytes, &ndcSchema))
-
-	return &ndcSchema
 }
