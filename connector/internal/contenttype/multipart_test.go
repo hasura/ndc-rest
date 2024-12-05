@@ -44,10 +44,14 @@ func TestCreateMultipartForm(t *testing.T) {
 				"purpose":                   "business_icon",
 			},
 			ExpectedHeaders: map[string]http.Header{
-				"expand": {
+				"expand[]": {
+					"Content-Type": []string{rest.ContentTypeTextPlain},
+				},
+				"expand_json": {
 					"Content-Type": []string{"application/json"},
 				},
 				"file": {
+					"Content-Type":       []string{rest.ContentTypeOctetStream},
 					"X-Rate-Limit-Limit": []string{"10"},
 				},
 			},

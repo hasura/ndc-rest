@@ -79,6 +79,10 @@ func (w *MultipartWriter) WriteJSON(fieldName string, value any, headers http.He
 // WriteField calls CreateFormField and then writes the given value.
 func (w *MultipartWriter) WriteField(fieldName, value string, headers http.Header) error {
 	h := createFieldMIMEHeader(fieldName, headers)
+	if h.Get(schema.ContentTypeHeader) == "" {
+		h.Set(schema.ContentTypeHeader, schema.ContentTypeTextPlain)
+	}
+
 	p, err := w.CreatePart(h)
 	if err != nil {
 		return err
