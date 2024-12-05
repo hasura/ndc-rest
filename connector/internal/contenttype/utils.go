@@ -5,9 +5,16 @@ import (
 	"fmt"
 	"reflect"
 	"strconv"
+	"strings"
 
 	"github.com/hasura/ndc-sdk-go/schema"
 )
+
+var quoteEscaper = strings.NewReplacer("\\", "\\\\", `"`, "\\\"")
+
+func escapeQuotes(s string) string {
+	return quoteEscaper.Replace(s)
+}
 
 // StringifySimpleScalar converts a simple scalar value to string.
 func StringifySimpleScalar(val reflect.Value, kind reflect.Kind) (string, error) {

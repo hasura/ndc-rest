@@ -7,17 +7,10 @@ import (
 	"mime/multipart"
 	"net/http"
 	"net/textproto"
-	"strings"
 
 	"github.com/hasura/ndc-http/ndc-http-schema/schema"
 	"github.com/hasura/ndc-sdk-go/utils"
 )
-
-var quoteEscaper = strings.NewReplacer("\\", "\\\\", `"`, "\\\"")
-
-func escapeQuotes(s string) string {
-	return quoteEscaper.Replace(s)
-}
 
 // MultipartWriter extends multipart.Writer with helpers
 type MultipartWriter struct {
