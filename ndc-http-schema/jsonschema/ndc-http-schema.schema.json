@@ -35,6 +35,79 @@
       ],
       "description": "ArgumentInfo the information of HTTP request argument"
     },
+    "ArgumentPreset": {
+      "properties": {
+        "argument": {
+          "type": "string"
+        },
+        "value": {
+          "$ref": "#/$defs/ArgumentPresetValue"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object",
+      "required": [
+        "argument",
+        "value"
+      ],
+      "description": "ArgumentPreset represents an argument preset configuration,"
+    },
+    "ArgumentPresetValue": {
+      "oneOf": [
+        {
+          "properties": {
+            "type": {
+              "type": "string",
+              "enum": [
+                "literal"
+              ]
+            },
+            "value": true
+          },
+          "type": "object",
+          "required": [
+            "type",
+            "value"
+          ]
+        },
+        {
+          "properties": {
+            "type": {
+              "type": "string",
+              "enum": [
+                "env"
+              ]
+            },
+            "name": {
+              "type": "string"
+            }
+          },
+          "type": "object",
+          "required": [
+            "type",
+            "name"
+          ]
+        },
+        {
+          "properties": {
+            "type": {
+              "type": "string",
+              "enum": [
+                "forwardHeader"
+              ]
+            },
+            "name": {
+              "type": "string"
+            }
+          },
+          "type": "object",
+          "required": [
+            "type",
+            "name"
+          ]
+        }
+      ]
+    },
     "AuthSecurities": {
       "items": {
         "$ref": "#/$defs/AuthSecurity"
@@ -198,6 +271,12 @@
           },
           "type": "object"
         },
+        "argumentPresets": {
+          "items": {
+            "$ref": "#/$defs/ArgumentPreset"
+          },
+          "type": "array"
+        },
         "securitySchemes": {
           "additionalProperties": {
             "$ref": "#/$defs/SecurityScheme"
@@ -230,7 +309,7 @@
           "$ref": "#/$defs/EnvString"
         },
         "refreshUrl": {
-          "$ref": "#/$defs/EnvString"
+          "type": "string"
         },
         "scopes": {
           "additionalProperties": {
@@ -749,6 +828,12 @@
         "id": {
           "type": "string"
         },
+        "argumentPresets": {
+          "items": {
+            "$ref": "#/$defs/ArgumentPreset"
+          },
+          "type": "array"
+        },
         "headers": {
           "additionalProperties": {
             "$ref": "#/$defs/EnvString"
@@ -773,7 +858,7 @@
       "required": [
         "url"
       ],
-      "description": "ServerConfig contains server configurations"
+      "description": "ServerConfig contains server configurations."
     },
     "TLSConfig": {
       "properties": {
