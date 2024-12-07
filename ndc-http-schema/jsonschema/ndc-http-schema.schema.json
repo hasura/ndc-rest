@@ -35,22 +35,32 @@
       ],
       "description": "ArgumentInfo the information of HTTP request argument"
     },
-    "ArgumentPreset": {
+    "ArgumentPresetConfig": {
       "properties": {
-        "argument": {
-          "type": "string"
+        "path": {
+          "type": "string",
+          "description": "The JSON path of the argument field."
         },
         "value": {
-          "$ref": "#/$defs/ArgumentPresetValue"
+          "$ref": "#/$defs/ArgumentPresetValue",
+          "description": "The value to be set."
+        },
+        "targets": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array",
+          "description": "Target operations to be applied."
         }
       },
       "additionalProperties": false,
       "type": "object",
       "required": [
-        "argument",
-        "value"
+        "path",
+        "value",
+        "targets"
       ],
-      "description": "ArgumentPreset represents an argument preset configuration,"
+      "description": "ArgumentPresetConfig represents an argument preset configuration."
     },
     "ArgumentPresetValue": {
       "oneOf": [
@@ -273,7 +283,7 @@
         },
         "argumentPresets": {
           "items": {
-            "$ref": "#/$defs/ArgumentPreset"
+            "$ref": "#/$defs/ArgumentPresetConfig"
           },
           "type": "array"
         },
@@ -830,7 +840,7 @@
         },
         "argumentPresets": {
           "items": {
-            "$ref": "#/$defs/ArgumentPreset"
+            "$ref": "#/$defs/ArgumentPresetConfig"
           },
           "type": "array"
         },

@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"regexp"
 
+	rest "github.com/hasura/ndc-http/ndc-http-schema/schema"
 	"github.com/hasura/ndc-sdk-go/schema"
 	"github.com/hasura/ndc-sdk-go/utils"
 )
@@ -22,6 +23,7 @@ var (
 
 var defaultRetryHTTPStatus = []int{429, 500, 502, 503}
 var sensitiveHeaderRegex = regexp.MustCompile(`auth|key|secret|token`)
+var urlAndHeaderLocations = []rest.ParameterLocation{rest.InPath, rest.InQuery, rest.InHeader}
 
 // HTTPOptions represent execution options for HTTP requests
 type HTTPOptions struct {

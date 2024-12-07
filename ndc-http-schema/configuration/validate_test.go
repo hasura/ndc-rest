@@ -2,6 +2,7 @@ package configuration
 
 import (
 	"bytes"
+	"log"
 	"log/slog"
 	"os"
 	"path/filepath"
@@ -48,6 +49,7 @@ func TestConfigValidator(t *testing.T) {
 			var buf bytes.Buffer
 			validStatus.Render(&buf)
 			assert.Equal(t, tc.IsOk, validStatus.IsOk())
+			log.Println(validStatus.errors)
 			assert.Equal(t, tc.HasError, validStatus.HasError())
 			assert.Equal(t, spacesRegex.ReplaceAllString(string(expectedBytes), "\n"), spacesRegex.ReplaceAllString(buf.String(), "\n"))
 		})

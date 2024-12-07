@@ -5,20 +5,22 @@ import (
 	"errors"
 	"fmt"
 	"net/url"
+	"regexp"
 	"slices"
 	"strings"
 
 	"github.com/hasura/ndc-sdk-go/utils"
 	"github.com/invopop/jsonschema"
+	"github.com/theory/jsonpath"
+	"github.com/theory/jsonpath/spec"
 	orderedmap "github.com/wk8/go-ordered-map/v2"
-	"gopkg.in/yaml.v3"
 )
 
 // NDCHttpSettings represent global settings of the HTTP API, including base URL, headers, etc...
 type NDCHttpSettings struct {
 	Servers         []ServerConfig             `json:"servers"                   mapstructure:"servers"         yaml:"servers"`
 	Headers         map[string]utils.EnvString `json:"headers,omitempty"         mapstructure:"headers"         yaml:"headers,omitempty"`
-	ArgumentPresets []ArgumentPreset           `json:"argumentPresets,omitempty" mapstructure:"argumentPresets" yaml:"argumentPresets,omitempty"`
+	ArgumentPresets []ArgumentPresetConfig     `json:"argumentPresets,omitempty" mapstructure:"argumentPresets" yaml:"argumentPresets,omitempty"`
 	SecuritySchemes map[string]SecurityScheme  `json:"securitySchemes,omitempty" mapstructure:"securitySchemes" yaml:"securitySchemes,omitempty"`
 	Security        AuthSecurities             `json:"security,omitempty"        mapstructure:"security"        yaml:"security,omitempty"`
 	Version         string                     `json:"version,omitempty"         mapstructure:"version"         yaml:"version,omitempty"`
@@ -39,6 +41,12 @@ func (rs *NDCHttpSettings) Validate() error {
 		}
 	}
 
+	for i, preset := range rs.ArgumentPresets {
+		if _, _, err := preset.Validate(); err != nil {
+			return fmt.Errorf("argumentPresets[%d]: %w", i, err)
+		}
+	}
+
 	if rs.TLS != nil {
 		if err := rs.TLS.Validate(); err != nil {
 			return err
@@ -52,7 +60,7 @@ func (rs *NDCHttpSettings) Validate() error {
 type ServerConfig struct {
 	URL             utils.EnvString            `json:"url"                       mapstructure:"url"             yaml:"url"`
 	ID              string                     `json:"id,omitempty"              mapstructure:"id"              yaml:"id,omitempty"`
-	ArgumentPresets []ArgumentPreset           `json:"argumentPresets,omitempty" mapstructure:"argumentPresets" yaml:"argumentPresets,omitempty"`
+	ArgumentPresets []ArgumentPresetConfig     `json:"argumentPresets,omitempty" mapstructure:"argumentPresets" yaml:"argumentPresets,omitempty"`
 	Headers         map[string]utils.EnvString `json:"headers,omitempty"         mapstructure:"headers"         yaml:"headers,omitempty"`
 	SecuritySchemes map[string]SecurityScheme  `json:"securitySchemes,omitempty" mapstructure:"securitySchemes" yaml:"securitySchemes,omitempty"`
 	Security        AuthSecurities             `json:"security,omitempty"        mapstructure:"security"        yaml:"security,omitempty"`
@@ -96,6 +104,65 @@ func (ss ServerConfig) GetURL() (*url.URL, error) {
 	}
 
 	return urlValue, nil
+}
+
+// ArgumentPresetConfig represents an argument preset configuration.
+type ArgumentPresetConfig struct {
+	// The JSON path of the argument field.
+	Path string `json:"path" mapstructure:"path" yaml:"path"`
+	// The value to be set.
+	Value ArgumentPresetValue `json:"value" mapstructure:"value" yaml:"value"`
+	// Target operations to be applied.
+	Targets []string `json:"targets" mapstructure:"targets" yaml:"targets"`
+}
+
+// Validate checks if the configuration is valid.
+func (apc ArgumentPresetConfig) Validate() (*jsonpath.Path, []regexp.Regexp, error) {
+	if apc.Path == "" {
+		return nil, nil, errors.New("require path in ArgumentPresetConfig")
+	}
+
+	if apc.Value.inner == nil {
+		return nil, nil, errors.New("require value in ArgumentPresetConfig")
+	}
+
+	rawPath := apc.Path
+	switch rawPath[0] {
+	case '$':
+	case '.':
+		rawPath = "$" + rawPath
+	default:
+		rawPath = "$." + rawPath
+	}
+
+	jsonPath, err := jsonpath.Parse(rawPath)
+	if err != nil {
+		return nil, nil, fmt.Errorf("failed to parse the json path: %w", err)
+	}
+
+	if len(jsonPath.Query().Segments()) == 0 {
+		return nil, nil, errors.New("json path in ArgumentPresetConfig is empty")
+	}
+
+	firstSegment := jsonPath.Query().Segments()[0]
+	if firstSegment.IsDescendant() {
+		return nil, nil, errors.New("invalid json path. It should be selected the root field")
+	}
+
+	if selector, ok := firstSegment.Selectors()[0].(spec.Name); !ok || selector.String() == "" {
+		return nil, nil, errors.New("invalid json path. The root selector must be an object name")
+	}
+
+	targets := make([]regexp.Regexp, len(apc.Targets))
+	for i, target := range apc.Targets {
+		rg, err := regexp.Compile(target)
+		if err != nil {
+			return nil, nil, fmt.Errorf("failed to compile argument preset target expression %s: %w", target, err)
+		}
+		targets[i] = *rg
+	}
+
+	return jsonPath, targets, nil
 }
 
 // ArgumentPresetValue represents an argument preset value type.
@@ -146,12 +213,6 @@ func ParseArgumentPresetValueType(value string) (ArgumentPresetValueType, error)
 	}
 
 	return result, nil
-}
-
-// ArgumentPreset represents an argument preset configuration,
-type ArgumentPreset struct {
-	Argument string              `json:"argument" mapstructure:"argument" yaml:"argument"`
-	Value    ArgumentPresetValue `json:"value"    mapstructure:"value"    yaml:"value"`
 }
 
 // ArgumentPresetValue represents an argument preset value information.
@@ -207,54 +268,6 @@ func (j *ArgumentPresetValue) UnmarshalJSON(b []byte) error {
 			Type: valueType,
 			Name: name,
 		}
-	}
-
-	return nil
-}
-
-// MarshalYAML implements yaml.Marshaler.
-func (j ArgumentPresetValue) MarshalYAML() (any, error) {
-	return j.inner, nil
-}
-
-// UnmarshalYAML implements yaml.Unmarshaler.
-func (j *ArgumentPresetValue) UnmarshalYAML(value *yaml.Node) error {
-	var rawType string
-	for i, node := range value.Content {
-		if node.Value != "type" {
-			continue
-		}
-		if len(value.Content) > i+1 {
-			rawType = value.Content[i+1].Value
-		}
-
-		break
-	}
-
-	valueType, err := ParseArgumentPresetValueType(rawType)
-	if err != nil {
-		return fmt.Errorf("ArgumentPresetValue.type: %w", err)
-	}
-
-	switch valueType {
-	case ArgumentPresetValueTypeLiteral:
-		var result ArgumentPresetValueLiteral
-		if err := value.Decode(&result); err != nil {
-			return err
-		}
-		j.inner = &result
-	case ArgumentPresetValueTypeEnv:
-		var result ArgumentPresetValueEnv
-		if err := value.Decode(&result); err != nil {
-			return err
-		}
-		j.inner = &result
-	case ArgumentPresetValueTypeForwardHeader:
-		var result ArgumentPresetValueForwardHeader
-		if err := value.Decode(&result); err != nil {
-			return err
-		}
-		j.inner = &result
 	}
 
 	return nil

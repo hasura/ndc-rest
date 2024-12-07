@@ -14,6 +14,7 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/hasura/ndc-http/connector/internal/argument"
 	"github.com/hasura/ndc-http/connector/internal/security"
 	"github.com/hasura/ndc-http/ndc-http-schema/configuration"
 	rest "github.com/hasura/ndc-http/ndc-http-schema/schema"
@@ -24,27 +25,32 @@ import (
 
 // Server contains server settings.
 type Server struct {
-	URL         *url.URL
-	Headers     map[string]string
-	Credentials map[string]security.Credential
-	Security    rest.AuthSecurities
-	HTTPClient  *http.Client
+	URL             *url.URL
+	Headers         map[string]string
+	Credentials     map[string]security.Credential
+	ArgumentPresets *argument.ArgumentPresets
+	Security        rest.AuthSecurities
+	HTTPClient      *http.Client
 }
 
+// UpstreamSetting represents a setting for upstream servers.
 type UpstreamSetting struct {
-	httpClient  *http.Client
-	servers     map[string]Server
-	headers     map[string]string
-	security    rest.AuthSecurities
-	credentials map[string]security.Credential
+	httpClient      *http.Client
+	servers         map[string]Server
+	headers         map[string]string
+	security        rest.AuthSecurities
+	credentials     map[string]security.Credential
+	argumentPresets *argument.ArgumentPresets
 }
 
+// UpstreamManager represents a manager for an upstream.
 type UpstreamManager struct {
 	config        *configuration.Configuration
 	defaultClient *http.Client
 	upstreams     map[string]UpstreamSetting
 }
 
+// NewUpstreamManager creates a new UpstreamManager instance.
 func NewUpstreamManager(httpClient *http.Client, config *configuration.Configuration) *UpstreamManager {
 	return &UpstreamManager{
 		config:        config,
@@ -53,12 +59,14 @@ func NewUpstreamManager(httpClient *http.Client, config *configuration.Configura
 	}
 }
 
-func (sm *UpstreamManager) Register(ctx context.Context, namespace string, rawSettings *rest.NDCHttpSettings) error {
+// Register evaluates and registers an upstream from config.
+func (sm *UpstreamManager) Register(ctx context.Context, httpSchema *configuration.NDCHttpRuntimeSchema) error {
 	logger := connector.GetLogger(ctx)
+	namespace := httpSchema.Name
 	httpClient := sm.defaultClient
 
-	if rawSettings.TLS != nil {
-		tlsClient, err := security.NewHTTPClientTLS(httpClient, rawSettings.TLS)
+	if httpSchema.Settings.TLS != nil {
+		tlsClient, err := security.NewHTTPClientTLS(httpClient, httpSchema.Settings.TLS)
 		if err != nil {
 			return fmt.Errorf("%s: %w", namespace, err)
 		}
@@ -70,13 +78,21 @@ func (sm *UpstreamManager) Register(ctx context.Context, namespace string, rawSe
 
 	settings := UpstreamSetting{
 		servers:     make(map[string]Server),
-		security:    rawSettings.Security,
-		headers:     sm.getHeadersFromEnv(logger, namespace, rawSettings.Headers),
-		credentials: sm.registerSecurityCredentials(ctx, httpClient, rawSettings.SecuritySchemes, logger.With(slog.String("namespace", namespace))),
+		security:    httpSchema.Settings.Security,
+		headers:     sm.getHeadersFromEnv(logger, namespace, httpSchema.Settings.Headers),
+		credentials: sm.registerSecurityCredentials(ctx, httpClient, httpSchema.Settings.SecuritySchemes, logger.With(slog.String("namespace", namespace))),
 		httpClient:  httpClient,
 	}
 
-	for i, server := range rawSettings.Servers {
+	if len(httpSchema.Settings.ArgumentPresets) > 0 {
+		argumentPresets, err := argument.NewArgumentPresets(httpSchema.NDCHttpSchema, httpSchema.Settings.ArgumentPresets)
+		if err != nil {
+			return fmt.Errorf("%s: %w", namespace, err)
+		}
+		settings.argumentPresets = argumentPresets
+	}
+
+	for i, server := range httpSchema.Settings.Servers {
 		serverID := server.ID
 		if serverID == "" {
 			serverID = strconv.Itoa(i)
@@ -111,6 +127,14 @@ func (sm *UpstreamManager) Register(ctx context.Context, namespace string, rawSe
 			HTTPClient:  serverClient,
 		}
 
+		if len(server.ArgumentPresets) > 0 {
+			argumentPresets, err := argument.NewArgumentPresets(httpSchema.NDCHttpSchema, server.ArgumentPresets)
+			if err != nil {
+				return fmt.Errorf("%s.server[%s]: %w", namespace, serverID, err)
+			}
+			newServer.ArgumentPresets = argumentPresets
+		}
+
 		settings.servers[serverID] = newServer
 	}
 
@@ -119,6 +143,7 @@ func (sm *UpstreamManager) Register(ctx context.Context, namespace string, rawSe
 	return nil
 }
 
+// ExecuteRequest executes a request to the upstream server.
 func (sm *UpstreamManager) ExecuteRequest(ctx context.Context, request *RetryableRequest, namespace string) (*http.Response, context.CancelFunc, error) {
 	req, cancel, err := request.CreateRequest(ctx)
 	if err != nil {
@@ -391,4 +416,22 @@ func (sm *UpstreamManager) registerSecurityCredentials(ctx context.Context, http
 	}
 
 	return credentials
+}
+
+// ApplyArgumentPresents apply argument presets to raw arguments.
+func (sm *UpstreamManager) ApplyArgumentPresents(operationName string, arguments map[string]any, namespace string) (map[string]any, error) {
+	settings, ok := sm.upstreams[namespace]
+	if !ok {
+		return arguments, nil
+	}
+
+	var err error
+	if settings.argumentPresets != nil {
+		arguments, err = settings.argumentPresets.Apply(operationName, arguments)
+		if err != nil {
+			return nil, schema.InternalServerError(fmt.Sprintf("%s: %s", namespace, err.Error()), nil)
+		}
+	}
+
+	return arguments, nil
 }
