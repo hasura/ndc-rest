@@ -37,30 +37,26 @@ var tracer = connector.NewTracer("HTTPClient")
 // HTTPClient represents a http client wrapper with advanced methods
 type HTTPClient struct {
 	manager        *UpstreamManager
-	metadata       *configuration.NDCHttpRuntimeSchema
+	requests       *RequestBuilderResults
 	forwardHeaders configuration.ForwardHeadersSettings
 	propagator     propagation.TextMapPropagator
 }
 
 // NewHTTPClient creates a http client wrapper
-func NewHTTPClient(upstreams *UpstreamManager, metadata *configuration.NDCHttpRuntimeSchema, forwardHeaders configuration.ForwardHeadersSettings) *HTTPClient {
+func NewHTTPClient(upstreams *UpstreamManager, requests *RequestBuilderResults, forwardHeaders configuration.ForwardHeadersSettings) *HTTPClient {
 	return &HTTPClient{
 		manager:        upstreams,
-		metadata:       metadata,
+		requests:       requests,
 		forwardHeaders: forwardHeaders,
 		propagator:     otel.GetTextMapPropagator(),
 	}
 }
 
 // Send creates and executes the request and evaluate response selection
-func (client *HTTPClient) Send(ctx context.Context, request *RetryableRequest, selection schema.NestedField, resultType schema.Type, httpOptions *HTTPOptions) (any, http.Header, error) {
-	requests, err := client.manager.BuildDistributedRequestsWithOptions(request, httpOptions)
-	if err != nil {
-		return nil, nil, err
-	}
-
+func (client *HTTPClient) Send(ctx context.Context, selection schema.NestedField) (any, http.Header, error) {
+	httpOptions := client.requests.HTTPOptions
 	if !httpOptions.Distributed {
-		result, headers, err := client.sendSingle(ctx, &requests[0], selection, resultType, "single")
+		result, headers, err := client.sendSingle(ctx, client.requests.Requests[0], selection, "single")
 		if err != nil {
 			return nil, nil, err
 		}
@@ -68,24 +64,23 @@ func (client *HTTPClient) Send(ctx context.Context, request *RetryableRequest, s
 		return result, headers, nil
 	}
 
-	if !httpOptions.Parallel || httpOptions.Concurrency <= 1 {
-		results, headers := client.sendSequence(ctx, requests, selection, resultType)
+	if !httpOptions.Parallel || httpOptions.Concurrency <= 1 || len(client.requests.Requests) == 1 {
+		results, headers := client.sendSequence(ctx, client.requests.Requests, selection)
 
 		return results, headers, nil
 	}
 
-	results, headers := client.sendParallel(ctx, requests, selection, resultType, httpOptions)
+	results, headers := client.sendParallel(ctx, client.requests.Requests, selection)
 
 	return results, headers, nil
 }
 
 // execute a request to a list of remote servers in sequence
-func (client *HTTPClient) sendSequence(ctx context.Context, requests []RetryableRequest, selection schema.NestedField, resultType schema.Type) (*DistributedResponse[any], http.Header) {
+func (client *HTTPClient) sendSequence(ctx context.Context, requests []*RetryableRequest, selection schema.NestedField) (*DistributedResponse[any], http.Header) {
 	results := NewDistributedResponse[any]()
 	var firstHeaders http.Header
-
 	for _, req := range requests {
-		result, headers, err := client.sendSingle(ctx, &req, selection, resultType, "sequence")
+		result, headers, err := client.sendSingle(ctx, req, selection, "sequence")
 		if err != nil {
 			results.Errors = append(results.Errors, DistributedError{
 				Server:         req.ServerID,
@@ -107,8 +102,9 @@ func (client *HTTPClient) sendSequence(ctx context.Context, requests []Retryable
 }
 
 // execute a request to a list of remote servers in parallel
-func (client *HTTPClient) sendParallel(ctx context.Context, requests []RetryableRequest, selection schema.NestedField, resultType schema.Type, httpOptions *HTTPOptions) (*DistributedResponse[any], http.Header) {
+func (client *HTTPClient) sendParallel(ctx context.Context, requests []*RetryableRequest, selection schema.NestedField) (*DistributedResponse[any], http.Header) {
 	var firstHeaders http.Header
+	httpOptions := client.requests.HTTPOptions
 	results := make([]*DistributedResult[any], len(requests))
 	errs := make([]*DistributedError, len(requests))
 
@@ -119,7 +115,7 @@ func (client *HTTPClient) sendParallel(ctx context.Context, requests []Retryable
 
 	sendFunc := func(req RetryableRequest, index int) {
 		eg.Go(func() error {
-			result, headers, err := client.sendSingle(ctx, &req, selection, resultType, "parallel")
+			result, headers, err := client.sendSingle(ctx, &req, selection, "parallel")
 			if err != nil {
 				errs[index] = &DistributedError{
 					Server:         req.ServerID,
@@ -140,7 +136,7 @@ func (client *HTTPClient) sendParallel(ctx context.Context, requests []Retryable
 	}
 
 	for i, req := range requests {
-		sendFunc(req, i)
+		sendFunc(*req, i)
 	}
 
 	_ = eg.Wait()
@@ -162,7 +158,7 @@ func (client *HTTPClient) sendParallel(ctx context.Context, requests []Retryable
 }
 
 // execute a request to the remote server with retries
-func (client *HTTPClient) sendSingle(ctx context.Context, request *RetryableRequest, selection schema.NestedField, resultType schema.Type, mode string) (any, http.Header, *schema.ConnectorError) {
+func (client *HTTPClient) sendSingle(ctx context.Context, request *RetryableRequest, selection schema.NestedField, mode string) (any, http.Header, *schema.ConnectorError) {
 	ctx, span := tracer.Start(ctx, "Send Request to Server "+request.ServerID)
 	defer span.End()
 
@@ -255,7 +251,7 @@ func (client *HTTPClient) sendSingle(ctx context.Context, request *RetryableRequ
 		return nil, nil, schema.NewConnectorError(resp.StatusCode, resp.Status, details)
 	}
 
-	result, headers, evalErr := client.evalHTTPResponse(ctx, span, resp, contentType, selection, resultType, logger)
+	result, headers, evalErr := client.evalHTTPResponse(ctx, span, resp, contentType, selection, logger)
 	if evalErr != nil {
 		span.SetStatus(codes.Error, "failed to decode the http response")
 		span.RecordError(evalErr)
@@ -301,7 +297,7 @@ func (client *HTTPClient) doRequest(ctx context.Context, request *RetryableReque
 
 	client.propagator.Inject(ctx, propagation.HeaderCarrier(request.Headers))
 
-	resp, cancel, err := client.manager.ExecuteRequest(ctx, request, client.metadata.Name)
+	resp, cancel, err := client.manager.ExecuteRequest(ctx, request, client.requests.Schema.Name)
 	if err != nil {
 		span.SetStatus(codes.Error, "error happened when executing the request")
 		span.RecordError(err)
@@ -328,7 +324,8 @@ func (client *HTTPClient) doRequest(ctx context.Context, request *RetryableReque
 	return resp, body, cancel, nil
 }
 
-func (client *HTTPClient) evalHTTPResponse(ctx context.Context, span trace.Span, resp *http.Response, contentType string, selection schema.NestedField, resultType schema.Type, logger *slog.Logger) (any, http.Header, *schema.ConnectorError) {
+func (client *HTTPClient) evalHTTPResponse(ctx context.Context, span trace.Span, resp *http.Response, contentType string, selection schema.NestedField, logger *slog.Logger) (any, http.Header, *schema.ConnectorError) {
+	resultType := client.requests.Operation.ResultType
 	if logger.Enabled(ctx, slog.LevelDebug) {
 		logAttrs := []any{
 			slog.Int("http_status", resp.StatusCode),
@@ -383,7 +380,7 @@ func (client *HTTPClient) evalHTTPResponse(ctx context.Context, span trace.Span,
 		}
 
 		var err error
-		result, err = contenttype.NewXMLDecoder(client.metadata.NDCHttpSchema).Decode(resp.Body, field)
+		result, err = contenttype.NewXMLDecoder(client.requests.Schema.NDCHttpSchema).Decode(resp.Body, field)
 		if err != nil {
 			return nil, nil, schema.NewConnectorError(http.StatusInternalServerError, err.Error(), nil)
 		}
@@ -416,7 +413,7 @@ func (client *HTTPClient) evalHTTPResponse(ctx context.Context, span trace.Span,
 		}
 
 		var err error
-		result, err = contenttype.NewJSONDecoder(client.metadata.NDCHttpSchema).Decode(resp.Body, responseType)
+		result, err = contenttype.NewJSONDecoder(client.requests.Schema.NDCHttpSchema).Decode(resp.Body, responseType)
 		if err != nil {
 			return nil, nil, schema.NewConnectorError(http.StatusInternalServerError, err.Error(), nil)
 		}
@@ -479,7 +476,7 @@ func (client *HTTPClient) extractForwardedHeadersResultType(resultType schema.Ty
 	case *schema.ArrayType:
 		return nil, errors.New("expected object type, got array")
 	case *schema.NamedType:
-		objectType, ok := client.metadata.NDCHttpSchema.ObjectTypes[t.Name]
+		objectType, ok := client.requests.Schema.NDCHttpSchema.ObjectTypes[t.Name]
 		if !ok {
 			return nil, fmt.Errorf("%s: expected object type", t.Name)
 		}

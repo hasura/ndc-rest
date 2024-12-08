@@ -44,6 +44,8 @@ func ValidateConfiguration(config *Configuration, contextPath string, schemas []
 		requiredVariables:         make(map[string]bool),
 		requiredHeadersForwarding: map[schema.SecuritySchemeType]bool{},
 		contextPath:               contextPath,
+		errors:                    map[string][]string{},
+		warnings:                  map[string][]string{},
 	}
 
 	for _, item := range schemas {
@@ -153,37 +155,6 @@ func (cv *ConfigValidator) evaluateSchema(ndcSchema *NDCHttpRuntimeSchema) error
 		return nil
 	}
 
-	for i, server := range ndcSchema.Settings.Servers {
-		if server.URL.Value == nil {
-			_, err := server.URL.Get()
-			if err == nil {
-				continue
-			}
-
-			if server.URL.Variable != nil {
-				cv.requiredVariables[*server.URL.Variable] = true
-			} else {
-				cv.addError(ndcSchema.Name, fmt.Sprintf("settings.server[%d]: %s", i, err))
-			}
-		}
-
-		for _, header := range server.Headers {
-			_, err := header.Get()
-			if err != nil && header.Variable != nil {
-				cv.requiredVariables[*header.Variable] = true
-			}
-		}
-
-		for key, ss := range server.SecuritySchemes {
-			schemeKey := fmt.Sprintf("settings.server[%d].securitySchemes.%s", i, key)
-			cv.validateSecurityScheme(ndcSchema.Name, schemeKey, ss)
-		}
-
-		if server.TLS != nil {
-			cv.validateTLS(ndcSchema.Name, fmt.Sprintf("settings.server[%d].tls", i), server.TLS)
-		}
-	}
-
 	for _, header := range ndcSchema.Settings.Headers {
 		_, err := header.Get()
 		if err != nil && header.Variable != nil {
@@ -200,7 +171,60 @@ func (cv *ConfigValidator) evaluateSchema(ndcSchema *NDCHttpRuntimeSchema) error
 		cv.validateTLS(ndcSchema.Name, "settings.tls", ndcSchema.Settings.TLS)
 	}
 
+	cv.validateArgumentPresets(ndcSchema.Name, "settings.argumentPresets", ndcSchema.Settings.ArgumentPresets)
+
+	for i, server := range ndcSchema.Settings.Servers {
+		serverPath := fmt.Sprintf("settings.server[%d]", i)
+		if server.URL.Value == nil {
+			_, err := server.URL.Get()
+			if err == nil {
+				continue
+			}
+
+			if server.URL.Variable != nil {
+				cv.requiredVariables[*server.URL.Variable] = true
+			} else {
+				cv.addError(ndcSchema.Name, fmt.Sprintf("%s: %s", serverPath, err))
+			}
+		}
+
+		for _, header := range server.Headers {
+			_, err := header.Get()
+			if err != nil && header.Variable != nil {
+				cv.requiredVariables[*header.Variable] = true
+			}
+		}
+
+		for key, ss := range server.SecuritySchemes {
+			schemeKey := fmt.Sprintf("%s.securitySchemes.%s", serverPath, key)
+			cv.validateSecurityScheme(ndcSchema.Name, schemeKey, ss)
+		}
+
+		if server.TLS != nil {
+			cv.validateTLS(ndcSchema.Name, serverPath+".tls", server.TLS)
+		}
+
+		cv.validateArgumentPresets(ndcSchema.Name, serverPath+".argumentPresets", server.ArgumentPresets)
+	}
+
 	return nil
+}
+
+func (cv *ConfigValidator) validateArgumentPresets(namespace string, key string, argumentPresets []schema.ArgumentPresetConfig) {
+	for i, preset := range argumentPresets {
+		_, _, err := preset.Validate()
+		if err != nil {
+			cv.addError(namespace, fmt.Sprintf("%s[%d]: %s", key, i, err))
+
+			continue
+		}
+
+		if env, ok := preset.Value.Interface().(*schema.ArgumentPresetValueEnv); ok {
+			if _, envOk := os.LookupEnv(env.Name); !envOk {
+				cv.requiredVariables[env.Name] = true
+			}
+		}
+	}
 }
 
 func (cv *ConfigValidator) validateTLS(namespace string, key string, tlsConfig *schema.TLSConfig) {

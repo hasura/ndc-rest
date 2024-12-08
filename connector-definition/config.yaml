@@ -21,4 +21,3 @@ files:
         value: 0
       delay:
         value: 1000
-      httpStatus: [429, 500, 502, 503]

@@ -111,10 +111,7 @@ func TestNDCHttpSettings(t *testing.T) {
 								"tokenUrl": {
 									"value": "https://petstore3.swagger.io/oauth/token"
 								},
-								"refreshUrl": {
-									"value": "https://petstore3.swagger.io/oauth/token",
-									"env": "PET_STORE_AUTH_REFRESH_URL"
-								},
+								"refreshUrl": "https://petstore3.swagger.io/oauth/token",
 								"scopes": {
 									"read:pets": "read your pets",
 									"write:pets": "modify pets in your account"
@@ -163,7 +160,33 @@ func TestNDCHttpSettings(t *testing.T) {
 					"minVersion": "1.0",
 					"maxVersion": "1.3",
 					"cipherSuites": ["TLS_AES_128_GCM_SHA256"]
-				}
+				},
+				"argumentPresets": [
+					{
+						"path": "body.id",
+						"value": {
+							"type": "literal",
+							"value": 1
+						},
+						"targets": ["addPet"]
+					},
+					{
+						"path": "body.name",
+						"value": {
+							"type": "env",
+							"name": "DEFAULT_PET_NAME"
+						},
+						"targets": ["updatePet"]
+					},
+					{
+						"path": "body.header",
+						"value": {
+							"type": "forwardHeader",
+							"name": "X-Test-Header"
+						},
+						"targets": ["updatePet"]
+					}
+				]
 			}`,
 			expected: NDCHttpSettings{
 				Servers: []ServerConfig{
@@ -297,6 +320,38 @@ func TestNDCHttpSettings(t *testing.T) {
 					MaxVersion:   "1.3",
 					CipherSuites: []string{"TLS_AES_128_GCM_SHA256"},
 				},
+				ArgumentPresets: []ArgumentPresetConfig{
+					{
+						Path: "body.id",
+						Value: ArgumentPresetValue{
+							inner: ArgumentPresetValueLiteral{
+								Type:  "literal",
+								Value: 1,
+							},
+						},
+						Targets: []string{"addPet"},
+					},
+					{
+						Path: "body.name",
+						Value: ArgumentPresetValue{
+							inner: ArgumentPresetValueEnv{
+								Type: "env",
+								Name: "DEFAULT_PET_NAME",
+							},
+						},
+						Targets: []string{"updatePet"},
+					},
+					{
+						Path: "body.header",
+						Value: ArgumentPresetValue{
+							inner: ArgumentPresetValueForwardHeader{
+								Type: ArgumentPresetValueTypeForwardHeader,
+								Name: "X-Test-Header",
+							},
+						},
+						Targets: []string{"updatePet"},
+					},
+				},
 			},
 		},
 	}
@@ -323,6 +378,12 @@ func TestNDCHttpSettings(t *testing.T) {
 			assert.DeepEqual(t, tc.expected.Version, result.Version)
 			assert.DeepEqual(t, *tc.expected.TLS, *result.TLS)
 			assert.NilError(t, result.TLS.Validate())
+
+			for _, preset := range tc.expected.ArgumentPresets {
+				valueType := preset.Value.inner.GetType()
+				valueType.JSONSchema()
+				preset.Value.JSONSchema()
+			}
 
 			_, err := json.Marshal(tc.expected)
 			if err != nil {

@@ -47,6 +47,19 @@ settings:
   security:
     - api_key: []
   version: 1.0.18
+  argumentPresets:
+    - path: body.id
+      value:
+        type: literal
+        value: 1
+      targets:
+        - addPet
+    - path: body.name
+      value:
+        type: env
+        name: DEFAULT_PET_NAME
+      targets:
+        - addPet
   tls:
     # Path to the TLS cert to use for TLS required connections.
     certFile:
