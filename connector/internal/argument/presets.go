@@ -14,14 +14,24 @@ type ArgumentPresets struct {
 
 // NewArgumentPresets create a new ArgumentPresets instance.
 func NewArgumentPresets(httpSchema *rest.NDCHttpSchema, presets []rest.ArgumentPresetConfig) (*ArgumentPresets, error) {
-	return &ArgumentPresets{
+	result := &ArgumentPresets{
 		httpSchema: httpSchema,
 		presets:    nil,
-	}, nil
+	}
+	for i, item := range presets {
+		preset, err := NewArgumentPreset(httpSchema, item)
+		if err != nil {
+			return nil, fmt.Errorf("%d: %w", i, err)
+		}
+
+		result.presets = append(result.presets, *preset)
+	}
+
+	return result, nil
 }
 
 // ApplyArgumentPresents replace argument preset values into request arguments.
-func (ap ArgumentPresets) Apply(operationName string, arguments map[string]any) (map[string]any, error) {
+func (ap ArgumentPresets) Apply(operationName string, arguments map[string]any, headers map[string]string) (map[string]any, error) {
 	for _, preset := range ap.presets {
 		if len(preset.Targets) > 0 {
 			if _, ok := preset.Targets[operationName]; !ok {
@@ -30,7 +40,7 @@ func (ap ArgumentPresets) Apply(operationName string, arguments map[string]any) 
 		}
 
 		var err error
-		arguments, err = ap.Apply(operationName, arguments)
+		arguments, err = preset.Evaluate(operationName, arguments, headers)
 		if err != nil {
 			return nil, fmt.Errorf("failed to apply argument preset: %w", err)
 		}

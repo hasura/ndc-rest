@@ -8,7 +8,6 @@ import (
 
 	"github.com/hasura/ndc-http/connector/internal"
 	"github.com/hasura/ndc-http/ndc-http-schema/configuration"
-	rest "github.com/hasura/ndc-http/ndc-http-schema/schema"
 	"github.com/hasura/ndc-sdk-go/schema"
 	"github.com/hasura/ndc-sdk-go/utils"
 	"go.opentelemetry.io/otel/codes"
@@ -40,49 +39,28 @@ func (c *HTTPConnector) QueryExplain(ctx context.Context, configuration *configu
 		requestVars = []schema.QueryRequestVariablesElem{make(schema.QueryRequestVariablesElem)}
 	}
 
-	httpRequest, _, metadata, httpOptions, err := c.explainQuery(request, requestVars[0])
+	requests, err := c.explainQuery(request, requestVars[0])
 	if err != nil {
 		return nil, err
 	}
 
-	return c.serializeExplainResponse(ctx, httpRequest, metadata, httpOptions)
+	return c.serializeExplainResponse(ctx, requests)
 }
 
-func (c *HTTPConnector) explainQuery(request *schema.QueryRequest, variables map[string]any) (*internal.RetryableRequest, *rest.OperationInfo, *configuration.NDCHttpRuntimeSchema, *internal.HTTPOptions, error) {
+func (c *HTTPConnector) explainQuery(request *schema.QueryRequest, variables map[string]any) (*internal.RequestBuilderResults, error) {
 	function, metadata, err := c.metadata.GetFunction(request.Collection)
 	if err != nil {
-		return nil, nil, nil, nil, err
+		return nil, err
 	}
 
-	// 1. resolve arguments, evaluate URL and query parameters
 	rawArgs, err := utils.ResolveArgumentVariables(request.Arguments, variables)
 	if err != nil {
-		return nil, nil, nil, nil, schema.UnprocessableContentError("failed to resolve argument variables", map[string]any{
+		return nil, schema.UnprocessableContentError("failed to resolve argument variables", map[string]any{
 			"cause": err.Error(),
 		})
 	}
 
-	// 2. build the request
-	req, err := internal.NewRequestBuilder(c.schema, function, rawArgs, metadata.Runtime).Build()
-	if err != nil {
-		return nil, nil, nil, nil, err
-	}
-	req.Namespace = metadata.Name
-
-	if err := c.evalForwardedHeaders(req, rawArgs); err != nil {
-		return nil, nil, nil, nil, schema.UnprocessableContentError("invalid forwarded headers", map[string]any{
-			"cause": err.Error(),
-		})
-	}
-
-	httpOptions, err := c.parseHTTPOptionsFromArguments(function.Arguments, rawArgs)
-	if err != nil {
-		return nil, nil, nil, nil, schema.UnprocessableContentError("invalid http options", map[string]any{
-			"cause": err.Error(),
-		})
-	}
-
-	return req, function, &metadata, httpOptions, err
+	return c.upstreams.BuildRequests(metadata, request.Collection, function, rawArgs)
 }
 
 func (c *HTTPConnector) execQuerySync(ctx context.Context, state *State, request *schema.QueryRequest, valueField schema.NestedField, requestVars []schema.QueryRequestVariablesElem) ([]schema.RowSet, error) {
@@ -144,7 +122,7 @@ func (c *HTTPConnector) execQuery(ctx context.Context, state *State, request *sc
 	ctx, span := state.Tracer.Start(ctx, fmt.Sprintf("Execute Query %d", index))
 	defer span.End()
 
-	httpRequest, function, metadata, httpOptions, err := c.explainQuery(request, variables)
+	requests, err := c.explainQuery(request, variables)
 	if err != nil {
 		span.SetStatus(codes.Error, "failed to explain query")
 		span.RecordError(err)
@@ -152,9 +130,8 @@ func (c *HTTPConnector) execQuery(ctx context.Context, state *State, request *sc
 		return nil, err
 	}
 
-	httpOptions.Concurrency = c.config.Concurrency.HTTP
-	client := internal.NewHTTPClient(c.upstreams, metadata, c.config.ForwardHeaders)
-	result, _, err := client.Send(ctx, httpRequest, queryFields, function.ResultType, httpOptions)
+	client := internal.NewHTTPClient(c.upstreams, requests, c.config.ForwardHeaders)
+	result, _, err := client.Send(ctx, queryFields)
 	if err != nil {
 		span.SetStatus(codes.Error, "failed to execute the http request")
 		span.RecordError(err)
@@ -165,10 +142,11 @@ func (c *HTTPConnector) execQuery(ctx context.Context, state *State, request *sc
 	return result, nil
 }
 
-func (c *HTTPConnector) serializeExplainResponse(ctx context.Context, httpRequest *internal.RetryableRequest, metadata *configuration.NDCHttpRuntimeSchema, httpOptions *internal.HTTPOptions) (*schema.ExplainResponse, error) {
+func (c *HTTPConnector) serializeExplainResponse(ctx context.Context, requests *internal.RequestBuilderResults) (*schema.ExplainResponse, error) {
 	explainResp := &schema.ExplainResponse{
 		Details: schema.ExplainResponseDetails{},
 	}
+	httpRequest := requests.Requests[0]
 	if httpRequest.Body != nil {
 		bodyBytes, err := io.ReadAll(httpRequest.Body)
 		if err != nil {
@@ -180,13 +158,6 @@ func (c *HTTPConnector) serializeExplainResponse(ctx context.Context, httpReques
 		explainResp.Details["body"] = string(bodyBytes)
 	}
 
-	httpOptions.Distributed = false
-	httpOptions.Explain = true
-	requests, err := c.upstreams.BuildDistributedRequestsWithOptions(httpRequest, httpOptions)
-	if err != nil {
-		return nil, err
-	}
-
 	if httpRequest.Body != nil {
 		bodyBytes, err := io.ReadAll(httpRequest.Body)
 		if err != nil {
@@ -198,13 +169,13 @@ func (c *HTTPConnector) serializeExplainResponse(ctx context.Context, httpReques
 		explainResp.Details["body"] = string(bodyBytes)
 	}
 
-	req, cancel, err := requests[0].CreateRequest(ctx)
+	req, cancel, err := httpRequest.CreateRequest(ctx)
 	if err != nil {
 		return nil, err
 	}
 	defer cancel()
 
-	c.upstreams.InjectMockRequestSettings(req, metadata.Name, requests[0].RawRequest.Security)
+	c.upstreams.InjectMockRequestSettings(req, requests.Schema.Name, httpRequest.RawRequest.Security)
 
 	explainResp.Details["url"] = req.URL.String()
 	rawHeaders, err := json.Marshal(req.Header)

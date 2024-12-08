@@ -26,6 +26,17 @@ func setHeaderAttributes(span trace.Span, prefix string, httpHeaders http.Header
 	}
 }
 
+func evalForwardedHeaders(req *RetryableRequest, headers map[string]string) error {
+	for key, value := range headers {
+		if req.Headers.Get(key) != "" {
+			continue
+		}
+		req.Headers.Set(key, value)
+	}
+
+	return nil
+}
+
 func cloneURL(input *url.URL) *url.URL {
 	return &url.URL{
 		Scheme:      input.Scheme,

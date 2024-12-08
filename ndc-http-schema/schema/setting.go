@@ -149,7 +149,7 @@ func (apc ArgumentPresetConfig) Validate() (*jsonpath.Path, []regexp.Regexp, err
 		return nil, nil, errors.New("invalid json path. It should be selected the root field")
 	}
 
-	if selector, ok := firstSegment.Selectors()[0].(spec.Name); !ok || selector.String() == "" {
+	if selector, ok := firstSegment.Selectors()[0].(spec.Name); !ok || selector == "" {
 		return nil, nil, errors.New("invalid json path. The root selector must be an object name")
 	}
 
