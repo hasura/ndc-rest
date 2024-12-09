@@ -33,10 +33,8 @@ func NewArgumentPresets(httpSchema *rest.NDCHttpSchema, presets []rest.ArgumentP
 // ApplyArgumentPresents replace argument preset values into request arguments.
 func (ap ArgumentPresets) Apply(operationName string, arguments map[string]any, headers map[string]string) (map[string]any, error) {
 	for _, preset := range ap.presets {
-		if len(preset.Targets) > 0 {
-			if _, ok := preset.Targets[operationName]; !ok {
-				continue
-			}
+		if len(preset.Targets) == 0 {
+			continue
 		}
 
 		var err error

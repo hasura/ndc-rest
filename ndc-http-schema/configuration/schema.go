@@ -139,6 +139,7 @@ func MergeNDCHttpSchemas(config *Configuration, schemas []NDCHttpRuntimeSchema) 
 				slog.Warn(fmt.Sprintf("Scalar type %s is conflicted", name))
 			}
 		}
+
 		for name, object := range item.ObjectTypes {
 			if _, ok := ndcSchema.ObjectTypes[name]; !ok {
 				ndcSchema.ObjectTypes[name] = object

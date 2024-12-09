@@ -6,7 +6,6 @@ import (
 	"log/slog"
 
 	"github.com/hasura/ndc-http/ndc-http-schema/configuration"
-	rest "github.com/hasura/ndc-http/ndc-http-schema/schema"
 	"github.com/hasura/ndc-sdk-go/schema"
 )
 
@@ -26,7 +25,7 @@ func (c *HTTPConnector) ApplyNDCHttpSchemas(ctx context.Context, config *configu
 	}
 
 	for _, meta := range metadata {
-		if err := c.upstreams.Register(ctx, &meta); err != nil {
+		if err := c.upstreams.Register(ctx, &meta, ndcSchema); err != nil {
 			return err
 		}
 	}
@@ -36,10 +35,6 @@ func (c *HTTPConnector) ApplyNDCHttpSchemas(ctx context.Context, config *configu
 		return err
 	}
 
-	c.schema = &rest.NDCHttpSchema{
-		ScalarTypes: ndcSchema.ScalarTypes,
-		ObjectTypes: ndcSchema.ObjectTypes,
-	}
 	c.metadata = metadata
 	c.rawSchema = schema.NewRawSchemaResponseUnsafe(schemaBytes)
 

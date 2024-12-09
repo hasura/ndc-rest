@@ -10,6 +10,7 @@ import (
 	"github.com/hasura/ndc-http/connector/internal/argument"
 	"github.com/hasura/ndc-http/connector/internal/security"
 	"github.com/hasura/ndc-http/ndc-http-schema/configuration"
+	"github.com/hasura/ndc-http/ndc-http-schema/schema"
 	rest "github.com/hasura/ndc-http/ndc-http-schema/schema"
 	"github.com/hasura/ndc-sdk-go/connector"
 	"github.com/hasura/ndc-sdk-go/utils"
@@ -32,13 +33,13 @@ func NewUpstreamManager(httpClient *http.Client, config *configuration.Configura
 }
 
 // Register evaluates and registers an upstream from config.
-func (um *UpstreamManager) Register(ctx context.Context, httpSchema *configuration.NDCHttpRuntimeSchema) error {
+func (um *UpstreamManager) Register(ctx context.Context, runtimeSchema *configuration.NDCHttpRuntimeSchema, ndcSchema *schema.NDCHttpSchema) error {
 	logger := connector.GetLogger(ctx)
-	namespace := httpSchema.Name
+	namespace := runtimeSchema.Name
 	httpClient := um.defaultClient
 
-	if httpSchema.Settings.TLS != nil {
-		tlsClient, err := security.NewHTTPClientTLS(httpClient, httpSchema.Settings.TLS)
+	if runtimeSchema.Settings.TLS != nil {
+		tlsClient, err := security.NewHTTPClientTLS(httpClient, runtimeSchema.Settings.TLS)
 		if err != nil {
 			return fmt.Errorf("%s: %w", namespace, err)
 		}
@@ -50,21 +51,21 @@ func (um *UpstreamManager) Register(ctx context.Context, httpSchema *configurati
 
 	settings := UpstreamSetting{
 		servers:     make(map[string]Server),
-		security:    httpSchema.Settings.Security,
-		headers:     um.getHeadersFromEnv(logger, namespace, httpSchema.Settings.Headers),
-		credentials: um.registerSecurityCredentials(ctx, httpClient, httpSchema.Settings.SecuritySchemes, logger.With(slog.String("namespace", namespace))),
+		security:    runtimeSchema.Settings.Security,
+		headers:     um.getHeadersFromEnv(logger, namespace, runtimeSchema.Settings.Headers),
+		credentials: um.registerSecurityCredentials(ctx, httpClient, runtimeSchema.Settings.SecuritySchemes, logger.With(slog.String("namespace", namespace))),
 		httpClient:  httpClient,
 	}
 
-	if len(httpSchema.Settings.ArgumentPresets) > 0 {
-		argumentPresets, err := argument.NewArgumentPresets(httpSchema.NDCHttpSchema, httpSchema.Settings.ArgumentPresets)
+	if len(runtimeSchema.Settings.ArgumentPresets) > 0 {
+		argumentPresets, err := argument.NewArgumentPresets(runtimeSchema.NDCHttpSchema, runtimeSchema.Settings.ArgumentPresets)
 		if err != nil {
 			return fmt.Errorf("%s: %w", namespace, err)
 		}
 		settings.argumentPresets = argumentPresets
 	}
 
-	for i, server := range httpSchema.Settings.Servers {
+	for i, server := range runtimeSchema.Settings.Servers {
 		serverID := server.ID
 		if serverID == "" {
 			serverID = strconv.Itoa(i)
@@ -100,7 +101,7 @@ func (um *UpstreamManager) Register(ctx context.Context, httpSchema *configurati
 		}
 
 		if len(server.ArgumentPresets) > 0 {
-			argumentPresets, err := argument.NewArgumentPresets(httpSchema.NDCHttpSchema, server.ArgumentPresets)
+			argumentPresets, err := argument.NewArgumentPresets(ndcSchema, server.ArgumentPresets)
 			if err != nil {
 				return fmt.Errorf("%s.server[%s]: %w", namespace, serverID, err)
 			}

@@ -8,41 +8,42 @@ import (
 	"os"
 	"path/filepath"
 
+	"github.com/hasura/ndc-http/ndc-http-schema/schema"
 	"github.com/hasura/ndc-http/ndc-http-schema/utils"
 	"gopkg.in/yaml.v3"
 )
 
 // UpdateHTTPConfiguration validates and updates the HTTP configuration
-func UpdateHTTPConfiguration(configurationDir string, logger *slog.Logger) (*Configuration, []NDCHttpRuntimeSchema, error) {
+func UpdateHTTPConfiguration(configurationDir string, logger *slog.Logger) (*Configuration, []NDCHttpRuntimeSchema, *schema.NDCHttpSchema, error) {
 	config, err := ReadConfigurationFile(configurationDir)
 	if err != nil {
-		return nil, nil, err
+		return nil, nil, nil, err
 	}
 
 	schemas, errs := BuildSchemaFromConfig(config, configurationDir, logger)
 	if len(errs) > 0 {
 		printSchemaValidationError(logger, errs)
 		if config.Strict {
-			return nil, nil, errors.New("failed to build schema files")
+			return nil, nil, nil, errors.New("failed to build schema files")
 		}
 	}
 
-	_, validatedSchemas, errs := MergeNDCHttpSchemas(config, schemas)
+	mergedSchema, validatedSchemas, errs := MergeNDCHttpSchemas(config, schemas)
 	if len(errs) > 0 {
 		printSchemaValidationError(logger, errs)
 		if validatedSchemas == nil || config.Strict {
-			return nil, nil, errors.New("invalid http schema")
+			return nil, nil, nil, errors.New("invalid http schema")
 		}
 	}
 
 	// cache the output file to disk
 	if config.Output != "" {
 		if err := utils.WriteSchemaFile(filepath.Join(configurationDir, config.Output), schemas); err != nil {
-			return nil, nil, err
+			return nil, nil, nil, err
 		}
 	}
 
-	return config, schemas, nil
+	return config, schemas, mergedSchema, nil
 }
 
 func printSchemaValidationError(logger *slog.Logger, errors map[string][]string) {

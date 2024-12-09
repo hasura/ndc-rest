@@ -17,11 +17,12 @@ import (
 
 // ConfigValidator manages the validation and status of upstreams.
 type ConfigValidator struct {
-	config      *Configuration
-	templates   *template.Template
-	logger      *slog.Logger
-	contextPath string
-	noColor     bool
+	config       *Configuration
+	templates    *template.Template
+	mergedSchema *schema.NDCHttpSchema
+	logger       *slog.Logger
+	contextPath  string
+	noColor      bool
 
 	requiredVariables         map[string]bool
 	requiredHeadersForwarding map[schema.SecuritySchemeType]bool
@@ -30,7 +31,7 @@ type ConfigValidator struct {
 }
 
 // ValidateConfiguration evaluates, validates the configuration and suggests required actions to make the connector working.
-func ValidateConfiguration(config *Configuration, contextPath string, schemas []NDCHttpRuntimeSchema, logger *slog.Logger, noColor bool) (*ConfigValidator, error) {
+func ValidateConfiguration(config *Configuration, contextPath string, schemas []NDCHttpRuntimeSchema, mergedSchema *schema.NDCHttpSchema, logger *slog.Logger, noColor bool) (*ConfigValidator, error) {
 	templates, err := getTemplates()
 	if err != nil {
 		return nil, err
@@ -41,6 +42,7 @@ func ValidateConfiguration(config *Configuration, contextPath string, schemas []
 		logger:                    logger,
 		templates:                 templates,
 		noColor:                   noColor,
+		mergedSchema:              mergedSchema,
 		requiredVariables:         make(map[string]bool),
 		requiredHeadersForwarding: map[schema.SecuritySchemeType]bool{},
 		contextPath:               contextPath,
@@ -212,7 +214,7 @@ func (cv *ConfigValidator) evaluateSchema(ndcSchema *NDCHttpRuntimeSchema) error
 
 func (cv *ConfigValidator) validateArgumentPresets(namespace string, key string, argumentPresets []schema.ArgumentPresetConfig) {
 	for i, preset := range argumentPresets {
-		_, _, err := preset.Validate()
+		_, _, err := ValidateArgumentPreset(cv.mergedSchema, preset)
 		if err != nil {
 			cv.addError(namespace, fmt.Sprintf("%s[%d]: %s", key, i, err))
 
