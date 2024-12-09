@@ -1451,3 +1451,137 @@ func TestConnectorTLS(t *testing.T) {
 	assert.Equal(t, 1, mockServer.Count())
 	assert.Equal(t, 1, mockServer1.Count())
 }
+
+func TestConnectorArgumentPresets(t *testing.T) {
+	mux := http.NewServeMux()
+	writeResponse := func(w http.ResponseWriter, data []byte) {
+		w.Header().Add("Content-Type", "application/json")
+		w.WriteHeader(http.StatusOK)
+		_, _ = w.Write(data)
+	}
+
+	mux.HandleFunc("/pet/findByStatus", func(w http.ResponseWriter, r *http.Request) {
+		switch r.Method {
+		case http.MethodGet:
+			assert.Equal(t, "active", r.URL.Query().Get("status"))
+			writeResponse(w, []byte(`[{"id": 1, "name": "test"}]`))
+		default:
+			w.WriteHeader(http.StatusMethodNotAllowed)
+			return
+		}
+	})
+
+	mux.HandleFunc("/pet", func(w http.ResponseWriter, r *http.Request) {
+		switch r.Method {
+		case http.MethodPost:
+			var body map[string]any
+			assert.NilError(t, json.NewDecoder(r.Body).Decode(&body))
+			assert.DeepEqual(t, map[string]any{
+				"id":   float64(1),
+				"name": "Dog",
+			}, body)
+
+			writeResponse(w, []byte(`[{"id": 1, "name": "Dog"}]`))
+		default:
+			w.WriteHeader(http.StatusMethodNotAllowed)
+			return
+		}
+	})
+
+	httpServer := httptest.NewServer(mux)
+	defer httpServer.Close()
+
+	t.Setenv("PET_STORE_URL", httpServer.URL)
+	t.Setenv("PET_NAME", "Dog")
+	connServer, err := connector.NewServer(NewHTTPConnector(), &connector.ServerOptions{
+		Configuration: "testdata/presets",
+	}, connector.WithoutRecovery())
+	assert.NilError(t, err)
+	testServer := connServer.BuildTestServer()
+	defer testServer.Close()
+
+	t.Run("/schema", func(t *testing.T) {
+		res, err := http.Get(fmt.Sprintf("%s/schema", testServer.URL))
+		assert.NilError(t, err)
+		schemaBytes, err := os.ReadFile("testdata/presets/schema.json")
+		var expected map[string]any
+		assert.NilError(t, json.Unmarshal(schemaBytes, &expected))
+		assertHTTPResponse(t, res, http.StatusOK, expected)
+	})
+
+	t.Run("/pet/findByStatus", func(t *testing.T) {
+		reqBody := []byte(`{
+		"collection": "findPetsByStatus",
+		"arguments": {
+			"headers": {
+				"type": "literal",
+				"value": {
+					"X-Pet-Status": "active"
+				}
+			}
+		},
+		"query": {
+			"fields": {
+				"__value": {
+					"type": "column",
+					"column": "__value",
+					"fields": {
+						"type": "array",
+						"fields": {
+							"type": "object",
+							"fields": {
+								"id": { "type": "column", "column": "id", "fields": null },
+								"name": { "type": "column", "column": "name", "fields": null }
+							}
+						}
+					}
+				}
+			}
+		},
+		"arguments": {},
+		"collection_relationships": {}
+	}`)
+
+		res, err := http.Post(fmt.Sprintf("%s/query", testServer.URL), "application/json", bytes.NewBuffer(reqBody))
+		assert.NilError(t, err)
+		assertHTTPResponse(t, res, http.StatusOK, schema.QueryResponse{
+			{
+				Rows: []map[string]any{
+					{"__value": []any{
+						map[string]any{
+							"id":   float64(1),
+							"name": "test",
+						},
+					}},
+				},
+			},
+		})
+	})
+
+	t.Run("POST /pet", func(t *testing.T) {
+		reqBody := []byte(`{
+			"operations": [
+				{
+					"type": "procedure",
+					"name": "addPet",
+					"arguments": {}
+				}
+			],
+			"collection_relationships": {}
+		}`)
+
+		res, err := http.Post(fmt.Sprintf("%s/mutation", testServer.URL), "application/json", bytes.NewBuffer(reqBody))
+		assert.NilError(t, err)
+
+		assertHTTPResponse(t, res, http.StatusOK, schema.MutationResponse{
+			OperationResults: []schema.MutationOperationResults{
+				schema.NewProcedureResult([]any{
+					map[string]any{
+						"id":   float64(1),
+						"name": "Dog",
+					},
+				}).Encode(),
+			},
+		})
+	})
+}

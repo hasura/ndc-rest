@@ -1,0 +1,20 @@
+# yaml-language-server: $schema=../../../ndc-http-schema/jsonschema/configuration.schema.json
+strict: true
+forwardHeaders:
+  enabled: true
+  argumentField: headers
+  responseHeaders: null
+concurrency:
+  query: 1
+  mutation: 1
+  http: 0
+files:
+  - file: petstore.json
+    spec: ndc
+    timeout:
+      value: 10
+    retry:
+      times:
+        value: 1
+      delay:
+        value: 500

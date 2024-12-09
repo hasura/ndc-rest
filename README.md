@@ -15,6 +15,7 @@ The connector can automatically transform OpenAPI 2.0 and 3.0 definitions to NDC
 - [Supported many API specifications](#supported-specs).
 - [Supported authentication](./docs/authentication.md).
 - [Supported headers forwarding](./docs/authentication.md#headers-forwarding).
+- [Supported argument presets](./docs/argument_presets.md).
 - [Supported timeout and retry](#timeout-and-retry).
 - Supported concurrency and [sending distributed requests](./docs/distribution.md) to multiple servers.
 
@@ -66,6 +67,7 @@ go run ./server serve --configuration ./connector/testdata/jsonplaceholder
 
 - [NDC HTTP schema](./ndc-http-schema)
 - [Authentication](./docs/authentication.md)
+- [Argument Presets](./docs/argument_presets.md)
 - [Distributed Execution](./docs/distribution.md)
 - [Recipes](https://github.com/hasura/ndc-http-recipes/tree/main): You can find or request pre-built configuration recipes of popular API services here.
 

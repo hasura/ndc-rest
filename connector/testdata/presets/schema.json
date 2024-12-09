@@ -1,0 +1,77 @@
+{
+  "collections": [],
+  "functions": [
+    {
+      "arguments": {
+        "headers": {
+          "description": "Headers forwarded from the Hasura engine",
+          "type": {
+            "type": "nullable",
+            "underlying_type": { "name": "JSON", "type": "named" }
+          }
+        }
+      },
+      "description": "Finds Pets by status",
+      "name": "findPetsByStatus",
+      "result_type": {
+        "element_type": { "name": "Pet", "type": "named" },
+        "type": "array"
+      }
+    }
+  ],
+  "object_types": {
+    "Pet": {
+      "fields": {
+        "id": {
+          "type": {
+            "type": "nullable",
+            "underlying_type": { "name": "Int", "type": "named" }
+          }
+        },
+        "name": {
+          "type": {
+            "type": "nullable",
+            "underlying_type": { "name": "String", "type": "named" }
+          }
+        }
+      }
+    }
+  },
+  "procedures": [
+    {
+      "arguments": {
+        "body": {
+          "description": "Request body of /pet",
+          "type": { "name": "Pet", "type": "named" }
+        },
+        "headers": {
+          "description": "Headers forwarded from the Hasura engine",
+          "type": {
+            "type": "nullable",
+            "underlying_type": { "name": "JSON", "type": "named" }
+          }
+        }
+      },
+      "description": "Add a new pet to the store",
+      "name": "addPet",
+      "result_type": { "name": "Pet", "type": "named" }
+    }
+  ],
+  "scalar_types": {
+    "Int": {
+      "aggregate_functions": {},
+      "comparison_operators": {},
+      "representation": { "type": "int32" }
+    },
+    "JSON": {
+      "aggregate_functions": {},
+      "comparison_operators": {},
+      "representation": { "type": "json" }
+    },
+    "String": {
+      "aggregate_functions": {},
+      "comparison_operators": {},
+      "representation": { "type": "string" }
+    }
+  }
+}

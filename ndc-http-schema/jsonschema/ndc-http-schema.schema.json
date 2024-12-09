@@ -35,6 +35,89 @@
       ],
       "description": "ArgumentInfo the information of HTTP request argument"
     },
+    "ArgumentPresetConfig": {
+      "properties": {
+        "path": {
+          "type": "string",
+          "description": "The JSON path of the argument field."
+        },
+        "value": {
+          "$ref": "#/$defs/ArgumentPresetValue",
+          "description": "The value to be set."
+        },
+        "targets": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array",
+          "description": "Target operations to be applied."
+        }
+      },
+      "additionalProperties": false,
+      "type": "object",
+      "required": [
+        "path",
+        "value",
+        "targets"
+      ],
+      "description": "ArgumentPresetConfig represents an argument preset configuration."
+    },
+    "ArgumentPresetValue": {
+      "oneOf": [
+        {
+          "properties": {
+            "type": {
+              "type": "string",
+              "enum": [
+                "literal"
+              ]
+            },
+            "value": true
+          },
+          "type": "object",
+          "required": [
+            "type",
+            "value"
+          ]
+        },
+        {
+          "properties": {
+            "type": {
+              "type": "string",
+              "enum": [
+                "env"
+              ]
+            },
+            "name": {
+              "type": "string"
+            }
+          },
+          "type": "object",
+          "required": [
+            "type",
+            "name"
+          ]
+        },
+        {
+          "properties": {
+            "type": {
+              "type": "string",
+              "enum": [
+                "forwardHeader"
+              ]
+            },
+            "name": {
+              "type": "string"
+            }
+          },
+          "type": "object",
+          "required": [
+            "type",
+            "name"
+          ]
+        }
+      ]
+    },
     "AuthSecurities": {
       "items": {
         "$ref": "#/$defs/AuthSecurity"
@@ -198,6 +281,12 @@
           },
           "type": "object"
         },
+        "argumentPresets": {
+          "items": {
+            "$ref": "#/$defs/ArgumentPresetConfig"
+          },
+          "type": "array"
+        },
         "securitySchemes": {
           "additionalProperties": {
             "$ref": "#/$defs/SecurityScheme"
@@ -230,7 +319,7 @@
           "$ref": "#/$defs/EnvString"
         },
         "refreshUrl": {
-          "$ref": "#/$defs/EnvString"
+          "type": "string"
         },
         "scopes": {
           "additionalProperties": {
@@ -749,6 +838,12 @@
         "id": {
           "type": "string"
         },
+        "argumentPresets": {
+          "items": {
+            "$ref": "#/$defs/ArgumentPresetConfig"
+          },
+          "type": "array"
+        },
         "headers": {
           "additionalProperties": {
             "$ref": "#/$defs/EnvString"
@@ -773,7 +868,7 @@
       "required": [
         "url"
       ],
-      "description": "ServerConfig contains server configurations"
+      "description": "ServerConfig contains server configurations."
     },
     "TLSConfig": {
       "properties": {

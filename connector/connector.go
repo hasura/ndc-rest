@@ -8,7 +8,6 @@ import (
 
 	"github.com/hasura/ndc-http/connector/internal"
 	"github.com/hasura/ndc-http/ndc-http-schema/configuration"
-	rest "github.com/hasura/ndc-http/ndc-http-schema/schema"
 	"github.com/hasura/ndc-sdk-go/connector"
 	"github.com/hasura/ndc-sdk-go/schema"
 )
@@ -19,7 +18,6 @@ type HTTPConnector struct {
 	metadata     internal.MetadataCollection
 	capabilities *schema.RawCapabilitiesResponse
 	rawSchema    *schema.RawSchemaResponse
-	schema       *rest.NDCHttpSchema
 	httpClient   *http.Client
 	upstreams    *internal.UpstreamManager
 }
