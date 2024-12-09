@@ -1,0 +1,150 @@
+{
+  "$schema": "../../../ndc-http-schema/jsonschema/ndc-http-schema.schema.json",
+  "settings": {
+    "servers": [
+      {
+        "url": {
+          "env": "PET_STORE_URL"
+        },
+        "argumentPresets": [
+          {
+            "path": "body.name",
+            "value": {
+              "type": "env",
+              "name": "PET_NAME"
+            },
+            "targets": ["addPet"]
+          }
+        ]
+      }
+    ],
+    "argumentPresets": [
+      {
+        "path": "status",
+        "value": {
+          "type": "forwardHeader",
+          "name": "X-Pet-Status"
+        },
+        "targets": ["findPetsByStatus"]
+      },
+      {
+        "path": "body.id",
+        "value": {
+          "type": "literal",
+          "value": 1
+        },
+        "targets": ["addPet"]
+      }
+    ]
+  },
+  "functions": {
+    "findPetsByStatus": {
+      "request": {
+        "url": "/pet/findByStatus",
+        "method": "get",
+        "response": {
+          "contentType": "application/json"
+        }
+      },
+      "arguments": {
+        "status": {
+          "description": "Status values that need to be considered for filter",
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "String",
+              "type": "named"
+            }
+          },
+          "http": {
+            "in": "query",
+            "schema": {
+              "type": ["string"]
+            }
+          }
+        }
+      },
+      "description": "Finds Pets by status",
+      "result_type": {
+        "element_type": {
+          "name": "Pet",
+          "type": "named"
+        },
+        "type": "array"
+      }
+    }
+  },
+  "procedures": {
+    "addPet": {
+      "request": {
+        "url": "/pet",
+        "method": "post",
+        "headers": {
+          "Content-Type": {
+            "value": "application/json"
+          }
+        },
+        "requestBody": {
+          "contentType": "application/json"
+        },
+        "response": {
+          "contentType": "application/json"
+        }
+      },
+      "arguments": {
+        "body": {
+          "description": "Request body of /pet",
+          "type": {
+            "name": "Pet",
+            "type": "named"
+          },
+          "http": {
+            "in": "body"
+          }
+        }
+      },
+      "description": "Add a new pet to the store",
+      "result_type": {
+        "name": "Pet",
+        "type": "named"
+      }
+    }
+  },
+  "object_types": {
+    "Pet": {
+      "fields": {
+        "id": {
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "Int",
+              "type": "named"
+            }
+          }
+        },
+        "name": {
+          "type": {
+            "name": "String",
+            "type": "named"
+          }
+        }
+      }
+    }
+  },
+  "scalar_types": {
+    "Int": {
+      "aggregate_functions": {},
+      "comparison_operators": {},
+      "representation": {
+        "type": "int32"
+      }
+    },
+    "String": {
+      "aggregate_functions": {},
+      "comparison_operators": {},
+      "representation": {
+        "type": "string"
+      }
+    }
+  }
+}

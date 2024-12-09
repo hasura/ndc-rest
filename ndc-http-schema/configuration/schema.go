@@ -152,6 +152,7 @@ func MergeNDCHttpSchemas(config *Configuration, schemas []NDCHttpRuntimeSchema) 
 			if fnItem.Request == nil || fnItem.Request.URL == "" {
 				continue
 			}
+
 			req, err := validateRequestSchema(fnItem.Request, "get")
 			if err != nil {
 				errs = append(errs, fmt.Sprintf("function %s: %s", fnName, err))
@@ -159,20 +160,15 @@ func MergeNDCHttpSchemas(config *Configuration, schemas []NDCHttpRuntimeSchema) 
 				continue
 			}
 
-			fn := rest.OperationInfo{
-				Request:     req,
-				Arguments:   fnItem.Arguments,
-				Description: fnItem.Description,
-				ResultType:  fnItem.ResultType,
-			}
-			meta.Functions[fnName] = fn
-			ndcSchema.Functions[fnName] = fn
+			meta.Functions[fnName] = cloneOperationInfo(fnItem, req)
+			ndcSchema.Functions[fnName] = cloneOperationInfo(fnItem, req)
 		}
 
 		for procName, procItem := range item.Procedures {
 			if procItem.Request == nil || procItem.Request.URL == "" {
 				continue
 			}
+
 			req, err := validateRequestSchema(procItem.Request, "")
 			if err != nil {
 				errs = append(errs, fmt.Sprintf("procedure %s: %s", procName, err))
@@ -180,14 +176,8 @@ func MergeNDCHttpSchemas(config *Configuration, schemas []NDCHttpRuntimeSchema) 
 				continue
 			}
 
-			proc := rest.OperationInfo{
-				Request:     req,
-				Arguments:   procItem.Arguments,
-				Description: procItem.Description,
-				ResultType:  procItem.ResultType,
-			}
-			meta.Procedures[procName] = proc
-			ndcSchema.Procedures[procName] = proc
+			meta.Procedures[procName] = cloneOperationInfo(procItem, req)
+			ndcSchema.Procedures[procName] = cloneOperationInfo(procItem, req)
 		}
 
 		if len(errs) > 0 {
@@ -455,4 +445,18 @@ func createHeaderForwardingResponseTypes(restSchema *rest.NDCHttpSchema, operati
 	restSchema.ObjectTypes[objectName] = objectType
 
 	return schema.NewNamedType(objectName).Encode()
+}
+
+func cloneOperationInfo(operation rest.OperationInfo, req *rest.Request) rest.OperationInfo {
+	args := make(map[string]rest.ArgumentInfo)
+	for key, arg := range operation.Arguments {
+		args[key] = arg
+	}
+
+	return rest.OperationInfo{
+		Request:     req,
+		Arguments:   args,
+		Description: operation.Description,
+		ResultType:  operation.ResultType,
+	}
 }

@@ -68,23 +68,29 @@ func evalTypeRepresentationFromJSONPath(httpSchema *rest.NDCHttpSchema, jsonPath
 	}
 
 	segments := jsonPath.Query().Segments()
-	rootSelector, ok := segments[0].Selectors()[0].(spec.Name)
-	if !ok || rootSelector == "" {
+	rootSelectorName, ok := segments[0].Selectors()[0].(spec.Name)
+	if !ok || rootSelectorName == "" {
 		return nil, errors.New("invalid json path. The root selector must be an object name")
 	}
 
-	argument, ok := operation.Arguments[string(rootSelector)]
+	rootSelector := string(rootSelectorName)
+	argument, ok := operation.Arguments[rootSelector]
 	if !ok {
 		return nil, nil
 	}
 
-	argumentType, typeRep, err := evalArgumentFromJSONPath(httpSchema, argument.Type, segments[1:], []string{string(rootSelector)})
+	argumentType, typeRep, err := evalArgumentFromJSONPath(httpSchema, argument.Type, segments[1:], []string{rootSelector})
 	if err != nil {
 		return nil, err
 	}
 
-	argument.Type = argumentType.Encode()
-	operation.Arguments[string(rootSelector)] = argument
+	// if the json path selects the root field only, remove the argument field
+	if len(segments) == 1 {
+		delete(operation.Arguments, rootSelector)
+	} else {
+		argument.Type = argumentType.Encode()
+		operation.Arguments[rootSelector] = argument
+	}
 
 	return typeRep, nil
 }
@@ -127,23 +133,24 @@ func evalArgumentFromJSONPath(httpSchema *rest.NDCHttpSchema, typeSchema schema.
 			return schema.NewNullableType(t), schema.NewTypeRepresentationJSON().Encode(), nil
 		}
 
-		selector, ok := segments[0].Selectors()[0].(spec.Name)
-		if !ok || selector == "" {
+		selectorName, ok := segments[0].Selectors()[0].(spec.Name)
+		if !ok || selectorName == "" {
 			return nil, nil, errors.New("invalid json path: " + segments[0].String())
 		}
 
-		field, ok := objectType.Fields[string(selector)]
+		selector := string(selectorName)
+		field, ok := objectType.Fields[selector]
 		if !ok {
 			return nil, nil, nil
 		}
 
-		newFieldType, typeRep, err := evalArgumentFromJSONPath(httpSchema, field.Type, segments[1:], append(fieldPaths, string(selector)))
+		newFieldType, typeRep, err := evalArgumentFromJSONPath(httpSchema, field.Type, segments[1:], append(fieldPaths, selector))
 		if err != nil {
 			return nil, nil, err
 		}
 
 		field.Type = newFieldType.Encode()
-		objectType.Fields[string(selector)] = field
+		objectType.Fields[selector] = field
 		httpSchema.ObjectTypes[t.Name] = objectType
 
 		return t, typeRep, nil

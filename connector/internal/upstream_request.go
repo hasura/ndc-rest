@@ -57,7 +57,6 @@ func (um *UpstreamManager) BuildRequests(runtimeSchema *configuration.NDCHttpRun
 		Schema:      runtimeSchema,
 		HTTPOptions: httpOptions,
 	}
-
 	results.HTTPOptions.Concurrency = um.config.Concurrency.HTTP
 
 	if strings.HasPrefix(operation.Request.URL, "http") {

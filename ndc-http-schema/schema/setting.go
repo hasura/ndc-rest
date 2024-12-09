@@ -308,7 +308,9 @@ func (j ArgumentPresetValueLiteral) JSONSchema() *jsonschema.Schema {
 		Enum: []any{ArgumentPresetValueTypeLiteral},
 	})
 
-	properties.Set("value", &jsonschema.Schema{})
+	properties.Set("value", &jsonschema.Schema{
+		Description: "The literal value",
+	})
 
 	return &jsonschema.Schema{
 		Type:       "object",
@@ -337,7 +339,8 @@ func (j ArgumentPresetValueEnv) JSONSchema() *jsonschema.Schema {
 	})
 
 	properties.Set("name", &jsonschema.Schema{
-		Type: "string",
+		Description: "Environment variable name",
+		Type:        "string",
 	})
 
 	return &jsonschema.Schema{
@@ -367,7 +370,8 @@ func (j ArgumentPresetValueForwardHeader) JSONSchema() *jsonschema.Schema {
 	})
 
 	properties.Set("name", &jsonschema.Schema{
-		Type: "string",
+		Description: "Header name, require enable headers forwarding",
+		Type:        "string",
 	})
 
 	return &jsonschema.Schema{

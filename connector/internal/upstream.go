@@ -58,7 +58,7 @@ func (um *UpstreamManager) Register(ctx context.Context, runtimeSchema *configur
 	}
 
 	if len(runtimeSchema.Settings.ArgumentPresets) > 0 {
-		argumentPresets, err := argument.NewArgumentPresets(runtimeSchema.NDCHttpSchema, runtimeSchema.Settings.ArgumentPresets)
+		argumentPresets, err := argument.NewArgumentPresets(ndcSchema, runtimeSchema.Settings.ArgumentPresets)
 		if err != nil {
 			return fmt.Errorf("%s: %w", namespace, err)
 		}

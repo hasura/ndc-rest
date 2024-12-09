@@ -1500,6 +1500,15 @@ func TestConnectorArgumentPresets(t *testing.T) {
 	testServer := connServer.BuildTestServer()
 	defer testServer.Close()
 
+	t.Run("/schema", func(t *testing.T) {
+		res, err := http.Get(fmt.Sprintf("%s/schema", testServer.URL))
+		assert.NilError(t, err)
+		schemaBytes, err := os.ReadFile("testdata/presets/schema.json")
+		var expected map[string]any
+		assert.NilError(t, json.Unmarshal(schemaBytes, &expected))
+		assertHTTPResponse(t, res, http.StatusOK, expected)
+	})
+
 	t.Run("/pet/findByStatus", func(t *testing.T) {
 		reqBody := []byte(`{
 		"collection": "findPetsByStatus",

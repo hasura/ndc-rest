@@ -3,6 +3,13 @@ settings:
   servers:
     - url:
         env: PET_STORE_URL
+      argumentPresets:
+        - path: body.name
+          value:
+            type: env
+            name: DEFAULT_PET_NAME
+          targets:
+            - addPet
   headers:
     X-Test-Header:
       env: PET_STORE_TEST_HEADER
@@ -52,12 +59,6 @@ settings:
       value:
         type: literal
         value: 1
-      targets:
-        - addPet
-    - path: body.name
-      value:
-        type: env
-        name: DEFAULT_PET_NAME
       targets:
         - addPet
   tls:

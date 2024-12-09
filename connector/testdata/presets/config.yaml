@@ -9,7 +9,7 @@ concurrency:
   mutation: 1
   http: 0
 files:
-  - file: schema.json
+  - file: petstore.json
     spec: ndc
     timeout:
       value: 10
