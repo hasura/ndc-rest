@@ -7,6 +7,7 @@ import (
 	"os"
 	"path/filepath"
 	"reflect"
+	"slices"
 	"strconv"
 
 	rest "github.com/hasura/ndc-http/ndc-http-schema/schema"
@@ -19,6 +20,8 @@ import (
 func BuildSchemaFromConfig(config *Configuration, configDir string, logger *slog.Logger) ([]NDCHttpRuntimeSchema, map[string][]string) {
 	schemas := make([]NDCHttpRuntimeSchema, len(config.Files))
 	errors := make(map[string][]string)
+	existedFileIDs := []string{}
+
 	for i, file := range config.Files {
 		schemaOutput, err := buildSchemaFile(config, configDir, &file, logger)
 		if err != nil {
@@ -28,18 +31,25 @@ func BuildSchemaFromConfig(config *Configuration, configDir string, logger *slog
 		if schemaOutput == nil {
 			continue
 		}
+		fileID := file.File
+		if slices.Contains(existedFileIDs, fileID) {
+			logger.Warn(fmt.Sprintf("the file %s is duplicated. Make sure that is intended", fileID))
+			fileID += "_" + strconv.Itoa(i)
+		}
+
 		ndcSchema := NDCHttpRuntimeSchema{
-			Name:          file.File,
+			Name:          fileID,
 			NDCHttpSchema: schemaOutput,
 		}
 
 		runtime, err := file.GetRuntimeSettings()
 		if err != nil {
-			errors[file.File] = []string{err.Error()}
+			errors[fileID] = []string{err.Error()}
 		} else {
 			ndcSchema.Runtime = *runtime
 		}
 
+		existedFileIDs = append(existedFileIDs, fileID)
 		schemas[i] = ndcSchema
 	}
 

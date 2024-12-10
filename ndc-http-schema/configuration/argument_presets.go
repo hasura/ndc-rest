@@ -135,7 +135,11 @@ func evalArgumentFromJSONPath(httpSchema *rest.NDCHttpSchema, typeSchema schema.
 
 		selectorName, ok := segments[0].Selectors()[0].(spec.Name)
 		if !ok || selectorName == "" {
-			return nil, nil, errors.New("invalid json path: " + segments[0].String())
+			return nil, nil, errors.New("unsupported json path selector: " + segments[0].String())
+		}
+
+		if selectorName == "" {
+			return nil, nil, errors.New("invalid json path, empty selector name: " + segments[0].String())
 		}
 
 		selector := string(selectorName)

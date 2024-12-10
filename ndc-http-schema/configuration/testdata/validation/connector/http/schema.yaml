@@ -61,6 +61,12 @@ settings:
         value: 1
       targets:
         - addPet
+    - path: status
+      value:
+        type: forwardHeader
+        name: X-Pet-Status
+      targets:
+        - findPetsByStatus
   tls:
     # Path to the TLS cert to use for TLS required connections.
     certFile:

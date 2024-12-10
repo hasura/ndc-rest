@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"path/filepath"
 
 	"github.com/hasura/ndc-http/connector/internal"
 	"github.com/hasura/ndc-http/ndc-http-schema/configuration"
@@ -68,6 +69,7 @@ func (c *HTTPConnector) ParseConfiguration(ctx context.Context, configurationDir
 
 	var errs map[string][]string
 	if schemas == nil {
+		logger.Debug(fmt.Sprintf("output file at %s does not exist. Parsing files...", filepath.Join(configurationDir, config.Output)))
 		schemas, errs = configuration.BuildSchemaFromConfig(config, configurationDir, logger)
 		if len(errs) > 0 {
 			printSchemaValidationError(logger, errs)
