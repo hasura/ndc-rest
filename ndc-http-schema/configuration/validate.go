@@ -89,15 +89,16 @@ func (cv *ConfigValidator) Render(w io.Writer) {
 	if len(cv.warnings) > 0 || len(cv.requiredHeadersForwarding) > 0 {
 		writeWarningIf(w, ":\n", cv.noColor)
 		if len(cv.requiredHeadersForwarding) > 0 && (!cv.config.ForwardHeaders.Enabled || cv.config.ForwardHeaders.ArgumentField == nil || *cv.config.ForwardHeaders.ArgumentField == "") {
-			_, _ = w.Write([]byte(fmt.Sprintf("\n  * Headers forwarding should be enabled for the following authentication schemes: %v", utils.GetSortedKeys(cv.requiredHeadersForwarding))))
+			_, _ = w.Write([]byte(fmt.Sprintf("\n  * Authorization header must be forwarded for the following authentication schemes: %v", utils.GetSortedKeys(cv.requiredHeadersForwarding))))
 			_, _ = w.Write([]byte("\n    See https://github.com/hasura/ndc-http/blob/main/docs/authentication.md#headers-forwarding for more information."))
 		}
 
 		for ns, errs := range cv.warnings {
-			_, _ = w.Write([]byte("\n\n"))
+			_, _ = w.Write([]byte("\n\n  "))
 			_, _ = w.Write([]byte(ns))
+			_, _ = w.Write([]byte("\n"))
 			for _, err := range errs {
-				_, _ = w.Write([]byte("\n  * "))
+				_, _ = w.Write([]byte("\n    * "))
 				_, _ = w.Write([]byte(err))
 			}
 		}
@@ -221,10 +222,13 @@ func (cv *ConfigValidator) validateArgumentPresets(namespace string, key string,
 			continue
 		}
 
-		if env, ok := preset.Value.Interface().(*schema.ArgumentPresetValueEnv); ok {
-			if _, envOk := os.LookupEnv(env.Name); !envOk {
-				cv.requiredVariables[env.Name] = true
+		switch t := preset.Value.Interface().(type) {
+		case *schema.ArgumentPresetValueEnv:
+			if _, envOk := os.LookupEnv(t.Name); !envOk {
+				cv.requiredVariables[t.Name] = true
 			}
+		case *schema.ArgumentPresetValueForwardHeader:
+			cv.addWarning(namespace, fmt.Sprintf("Make sure that the %s header is added to the header forwarding list.", t.Name))
 		}
 	}
 }
