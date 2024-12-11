@@ -121,7 +121,35 @@ See the configuration example in [Hasura docs](https://hasura.io/docs/3.0/recipe
 
 ## Mutual TLS
 
+### Basic
+
 If the `mutualTLS` security scheme exists the TLS configuration will be generated in the `settings` field.
+
+```yaml
+settings:
+  servers:
+    - url:
+        env: PET_STORE_URL
+  securitySchemes:
+    mtls:
+      type: mutualTLS
+  tls:
+    # Provide the certificate contents as a base64-encoded string.
+    certPem:
+      env: PET_STORE_CERT_PEM
+    # Provide the key contents as a base64-encoded string.
+    keyPem:
+      env: PET_STORE_KEY_PEM
+    # Provide the CA cert contents as a base64-encoded string.
+    caPem:
+      env: PET_STORE_CA_PEM
+    # Additionally you can configure TLS to be enabled but skip verifying the server's certificate chain (optional).
+    insecureSkipVerify:
+      env: PET_STORE_INSECURE_SKIP_VERIFY
+      value: false
+```
+
+### Full Configuration:
 
 ```yaml
 settings:
@@ -158,19 +186,25 @@ settings:
     includeSystemCACertsPool:
       env: PET_STORE_INCLUDE_SYSTEM_CA_CERT_POOL
       value: false
-    # ServerName requested by client for virtual hosting (optional).
+
+    ## ServerName requested by client for virtual hosting (optional).
     serverName:
       env: PET_STORE_SERVER_NAME
-    # Minimum acceptable TLS version (optional).
+
+    ## Minimum acceptable TLS version (optional).
     minVersion: "1.0"
-    # Maximum acceptable TLS version (optional).
+
+    ## Maximum acceptable TLS version (optional).
     maxVersion: "1.3"
-    # Explicit cipher suites can be set. If left blank, a safe default list is used (optional).
-    cipherSuites:
-      - TLS_AES_128_GCM_SHA256
+
+    ## Explicit cipher suites can be set. If left blank, a safe default list is used (optional).
+    # cipherSuites:
+    #   - TLS_AES_128_GCM_SHA256
 ```
 
 You can configure either file path `*_FILE` or inline bases64-encoded PEM data `*_PEM`.
+
+### Different Certificates per servers.
 
 If the service has many servers, you can configure different TLS configurations for each server. However, you need to [manually patch the configuration](../README.md#json-patch):
 
