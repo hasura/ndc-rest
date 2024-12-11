@@ -1338,7 +1338,7 @@ func (mts *mockTLSServer) createMockTLSServer(t *testing.T, dir string) *httptes
 	tlsConfig := &tls.Config{
 		ClientCAs:    caCertPool,
 		Certificates: []tls.Certificate{cert},
-		ClientAuth:   tls.RequireAndVerifyClientCert,
+		ClientAuth:   tls.RequestClientCert,
 	}
 
 	server := httptest.NewUnstartedServer(mux)
@@ -1448,8 +1448,56 @@ func TestConnectorTLS(t *testing.T) {
 		})
 	}()
 
+	time.Sleep(1)
 	assert.Equal(t, 1, mockServer.Count())
 	assert.Equal(t, 1, mockServer1.Count())
+}
+
+func TestConnectorTLSInsecure(t *testing.T) {
+	mockServer := &mockTLSServer{}
+	server := mockServer.createMockTLSServer(t, "testdata/tls/certs")
+	defer server.Close()
+
+	t.Setenv("PET_STORE_URL", server.URL)
+	t.Setenv("PET_STORE_S1_URL", server.URL)
+	t.Setenv("PET_STORE_INSECURE_SKIP_VERIFY", "true")
+
+	connServer, err := connector.NewServer(NewHTTPConnector(), &connector.ServerOptions{
+		Configuration: "testdata/tls",
+	}, connector.WithoutRecovery())
+	assert.NilError(t, err)
+	testServer := connServer.BuildTestServer()
+	defer testServer.Close()
+
+	func() {
+		findPetsBody := []byte(`{
+			"collection": "findPets",
+			"query": {
+				"fields": {
+					"__value": {
+						"type": "column",
+						"column": "__value"
+					}
+				}
+			},
+			"arguments": {},
+			"collection_relationships": {}
+		}`)
+
+		res, err := http.Post(fmt.Sprintf("%s/query", testServer.URL), "application/json", bytes.NewBuffer(findPetsBody))
+		assert.NilError(t, err)
+		assertHTTPResponse(t, res, http.StatusOK, schema.QueryResponse{
+			{
+				Rows: []map[string]any{
+					{
+						"__value": []any{},
+					},
+				},
+			},
+		})
+	}()
+
+	assert.Equal(t, 1, mockServer.Count())
 }
 
 func TestConnectorArgumentPresets(t *testing.T) {

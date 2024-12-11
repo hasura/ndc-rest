@@ -151,6 +151,9 @@ settings:
 
 ### Full Configuration:
 
+[!NOTE]
+It's recommended to use inline bases64-encoded PEM data `*_PEM` variables if you deploy the connector to Hasura DDN cloud.
+
 ```yaml
 settings:
   servers:
@@ -201,8 +204,6 @@ settings:
     # cipherSuites:
     #   - TLS_AES_128_GCM_SHA256
 ```
-
-You can configure either file path `*_FILE` or inline bases64-encoded PEM data `*_PEM`.
 
 ### Different Certificates per servers.
 

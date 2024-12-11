@@ -68,17 +68,17 @@ func loadTLSConfig(tlsConfig *schema.TLSConfig, logger *slog.Logger) (*tls.Confi
 		}
 	}
 
-	cert, err := loadCertificate(tlsConfig, logger)
-	if err != nil {
-		return nil, err
-	}
-
 	var insecureSkipVerify bool
 	if tlsConfig.InsecureSkipVerify != nil {
 		insecureSkipVerify, err = tlsConfig.InsecureSkipVerify.GetOrDefault(false)
 		if err != nil {
 			return nil, fmt.Errorf("failed to parse insecureSkipVerify: %w", err)
 		}
+	}
+
+	cert, err := loadCertificate(tlsConfig, insecureSkipVerify, logger)
+	if err != nil {
+		return nil, err
 	}
 
 	var certificates []tls.Certificate
@@ -172,7 +172,7 @@ func loadCertPem(certPem []byte, includeSystemCACertsPool bool) (*x509.CertPool,
 	return certPool, nil
 }
 
-func loadCertificate(tlsConfig *schema.TLSConfig, logger *slog.Logger) (*tls.Certificate, error) {
+func loadCertificate(tlsConfig *schema.TLSConfig, insecureSkipVerify bool, logger *slog.Logger) (*tls.Certificate, error) {
 	var certData, keyData []byte
 	var certPem, keyPem string
 	var err error
@@ -203,7 +203,7 @@ func loadCertificate(tlsConfig *schema.TLSConfig, logger *slog.Logger) (*tls.Cer
 		}
 	}
 
-	if len(certData) == 0 {
+	if len(certData) == 0 && !insecureSkipVerify {
 		logger.Warn("both certificate PEM and file are empty")
 	}
 
@@ -233,7 +233,7 @@ func loadCertificate(tlsConfig *schema.TLSConfig, logger *slog.Logger) (*tls.Cer
 		}
 	}
 
-	if len(keyData) == 0 {
+	if len(keyData) == 0 && !insecureSkipVerify {
 		logger.Warn("both key PEM and file are empty")
 	}
 
