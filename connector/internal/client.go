@@ -373,7 +373,7 @@ func (client *HTTPClient) evalHTTPResponse(ctx context.Context, span trace.Span,
 		}
 
 		result = string(respBody)
-	case contentType == rest.ContentTypeXML:
+	case contentType == rest.ContentTypeXML || strings.HasSuffix(contentType, "+xml"):
 		field, extractErr := client.extractResultType(resultType)
 		if extractErr != nil {
 			return nil, nil, extractErr
@@ -384,7 +384,7 @@ func (client *HTTPClient) evalHTTPResponse(ctx context.Context, span trace.Span,
 		if err != nil {
 			return nil, nil, schema.NewConnectorError(http.StatusInternalServerError, err.Error(), nil)
 		}
-	case contentType == rest.ContentTypeJSON:
+	case contentType == rest.ContentTypeJSON || strings.HasSuffix(contentType, "+json"):
 		if len(resultType) > 0 {
 			namedType, err := resultType.AsNamed()
 			if err == nil && namedType.Name == string(rest.ScalarString) {

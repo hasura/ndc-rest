@@ -12,6 +12,7 @@ import (
 )
 
 const (
+	acceptHeader               = "Accept"
 	contentTypeHeader          = "Content-Type"
 	defaultTimeoutSeconds uint = 30
 	defaultRetryDelays    uint = 1000

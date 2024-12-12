@@ -56,6 +56,10 @@ func (c *RequestBuilder) Build() (*RetryableRequest, error) {
 		return nil, err
 	}
 
+	if rawRequest.Response.ContentType != "" && request.Headers.Get(acceptHeader) == "" {
+		request.Headers.Set(acceptHeader, rawRequest.Response.ContentType)
+	}
+
 	if rawRequest.RuntimeSettings != nil {
 		if rawRequest.RuntimeSettings.Timeout > 0 {
 			request.Runtime.Timeout = rawRequest.RuntimeSettings.Timeout
