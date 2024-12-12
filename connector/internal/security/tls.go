@@ -6,6 +6,7 @@ import (
 	"encoding/base64"
 	"errors"
 	"fmt"
+	"log/slog"
 	"net/http"
 	"os"
 	"path/filepath"
@@ -16,13 +17,13 @@ import (
 var systemCertPool = x509.SystemCertPool
 
 // NewHTTPClientTLS creates a new HTTP Client with TLS configuration.
-func NewHTTPClientTLS(baseClient *http.Client, tlsConfig *schema.TLSConfig) (*http.Client, error) {
+func NewHTTPClientTLS(baseClient *http.Client, tlsConfig *schema.TLSConfig, logger *slog.Logger) (*http.Client, error) {
 	baseTransport, ok := baseClient.Transport.(*http.Transport)
 	if !ok {
 		baseTransport, _ = http.DefaultTransport.(*http.Transport)
 	}
 
-	tlsCfg, err := loadTLSConfig(tlsConfig)
+	tlsCfg, err := loadTLSConfig(tlsConfig, logger)
 	if err != nil {
 		return nil, fmt.Errorf("failed to load TLS config: %w", err)
 	}
@@ -40,7 +41,7 @@ func NewHTTPClientTLS(baseClient *http.Client, tlsConfig *schema.TLSConfig) (*ht
 
 // loadTLSConfig loads TLS certificates and returns a tls.Config.
 // This will set the RootCAs and Certificates of a tls.Config.
-func loadTLSConfig(tlsConfig *schema.TLSConfig) (*tls.Config, error) {
+func loadTLSConfig(tlsConfig *schema.TLSConfig, logger *slog.Logger) (*tls.Config, error) {
 	certPool, err := loadCACertPool(tlsConfig)
 	if err != nil {
 		return nil, err
@@ -67,11 +68,6 @@ func loadTLSConfig(tlsConfig *schema.TLSConfig) (*tls.Config, error) {
 		}
 	}
 
-	cert, err := loadCertificate(tlsConfig)
-	if err != nil {
-		return nil, err
-	}
-
 	var insecureSkipVerify bool
 	if tlsConfig.InsecureSkipVerify != nil {
 		insecureSkipVerify, err = tlsConfig.InsecureSkipVerify.GetOrDefault(false)
@@ -80,13 +76,21 @@ func loadTLSConfig(tlsConfig *schema.TLSConfig) (*tls.Config, error) {
 		}
 	}
 
-	if cert == nil && !insecureSkipVerify {
+	cert, err := loadCertificate(tlsConfig, insecureSkipVerify, logger)
+	if err != nil {
+		return nil, err
+	}
+
+	var certificates []tls.Certificate
+	if cert != nil {
+		certificates = append(certificates, *cert)
+	} else if !insecureSkipVerify {
 		return nil, nil
 	}
 
 	result := &tls.Config{
 		RootCAs:            certPool,
-		Certificates:       []tls.Certificate{*cert},
+		Certificates:       certificates,
 		MinVersion:         minTLS,
 		MaxVersion:         maxTLS,
 		CipherSuites:       cipherSuites,
@@ -168,7 +172,7 @@ func loadCertPem(certPem []byte, includeSystemCACertsPool bool) (*x509.CertPool,
 	return certPool, nil
 }
 
-func loadCertificate(tlsConfig *schema.TLSConfig) (*tls.Certificate, error) {
+func loadCertificate(tlsConfig *schema.TLSConfig, insecureSkipVerify bool, logger *slog.Logger) (*tls.Certificate, error) {
 	var certData, keyData []byte
 	var certPem, keyPem string
 	var err error
@@ -199,6 +203,10 @@ func loadCertificate(tlsConfig *schema.TLSConfig) (*tls.Certificate, error) {
 		}
 	}
 
+	if len(certData) == 0 && !insecureSkipVerify {
+		logger.Warn("both certificate PEM and file are empty")
+	}
+
 	if tlsConfig.KeyPem != nil {
 		keyPem, err = tlsConfig.KeyPem.GetOrDefault("")
 		if err != nil {
@@ -223,6 +231,10 @@ func loadCertificate(tlsConfig *schema.TLSConfig) (*tls.Certificate, error) {
 				return nil, fmt.Errorf("failed to read key file: %w", err)
 			}
 		}
+	}
+
+	if len(keyData) == 0 && !insecureSkipVerify {
+		logger.Warn("both key PEM and file are empty")
 	}
 
 	if len(keyData) == 0 && len(certData) == 0 {

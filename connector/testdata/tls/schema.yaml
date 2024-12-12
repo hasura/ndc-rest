@@ -28,6 +28,11 @@ settings:
       env: PET_STORE_CERT_FILE
     keyFile:
       env: PET_STORE_KEY_FILE
+    insecureSkipVerify:
+      env: PET_STORE_INSECURE_SKIP_VERIFY
+      value: false
+    includeSystemCACertsPool:
+      value: true
 functions:
   findPets:
     request:

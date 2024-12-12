@@ -39,7 +39,7 @@ func (um *UpstreamManager) Register(ctx context.Context, runtimeSchema *configur
 	httpClient := um.defaultClient
 
 	if runtimeSchema.Settings.TLS != nil {
-		tlsClient, err := security.NewHTTPClientTLS(httpClient, runtimeSchema.Settings.TLS)
+		tlsClient, err := security.NewHTTPClientTLS(httpClient, runtimeSchema.Settings.TLS, logger)
 		if err != nil {
 			return fmt.Errorf("%s: %w", namespace, err)
 		}
@@ -82,7 +82,7 @@ func (um *UpstreamManager) Register(ctx context.Context, runtimeSchema *configur
 
 		serverClient := httpClient
 		if server.TLS != nil {
-			tlsClient, err := security.NewHTTPClientTLS(um.defaultClient, server.TLS)
+			tlsClient, err := security.NewHTTPClientTLS(um.defaultClient, server.TLS, logger)
 			if err != nil {
 				return fmt.Errorf("%s.server[%s]: %w", namespace, serverID, err)
 			}
