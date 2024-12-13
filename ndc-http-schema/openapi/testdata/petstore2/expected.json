@@ -564,6 +564,38 @@
         "type": "named"
       }
     },
+    "get_subject": {
+      "request": {
+        "url": "/id/{identifier}",
+        "method": "get",
+        "response": {
+          "contentType": "application/json"
+        }
+      },
+      "arguments": {
+        "identifier": {
+          "description": "The identifier path of the `subject` you're looking for",
+          "type": {
+            "name": "String",
+            "type": "named"
+          },
+          "http": {
+            "name": "identifier",
+            "in": "path",
+            "schema": {
+              "type": [
+                "string"
+              ]
+            }
+          }
+        }
+      },
+      "description": "Explore details about a given subject node",
+      "result_type": {
+        "name": "JSON",
+        "type": "named"
+      }
+    },
     "listOAuth2Clients": {
       "request": {
         "url": "/clients",

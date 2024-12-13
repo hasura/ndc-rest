@@ -143,7 +143,7 @@ func TestHTTPConnector_authentication(t *testing.T) {
 		assertHTTPResponse(t, res, http.StatusOK, schema.ExplainResponse{
 			Details: schema.ExplainResponseDetails{
 				"url":     server.URL + "/pet",
-				"headers": `{"Api_key":["ran*******(14)"],"Content-Type":["application/json"]}`,
+				"headers": `{"Accept":["application/json"],"Api_key":["ran*******(14)"],"Content-Type":["application/json"]}`,
 			},
 		})
 	})
@@ -201,7 +201,7 @@ func TestHTTPConnector_authentication(t *testing.T) {
 		assertHTTPResponse(t, res, http.StatusOK, schema.ExplainResponse{
 			Details: schema.ExplainResponseDetails{
 				"url":     server.URL + "/pet",
-				"headers": `{"Api_key":["ran*******(14)"],"Content-Type":["application/json"]}`,
+				"headers": `{"Accept":["application/json"],"Api_key":["ran*******(14)"],"Content-Type":["application/json"]}`,
 				"body":    `{"name":"pet"}`,
 			},
 		})
@@ -253,7 +253,7 @@ func TestHTTPConnector_authentication(t *testing.T) {
 		assertHTTPResponse(t, res, http.StatusOK, schema.ExplainResponse{
 			Details: schema.ExplainResponseDetails{
 				"url":     server.URL + "/pet/findByStatus?status=available",
-				"headers": `{"Authorization":["Bearer ran*******(19)"],"Content-Type":["application/json"],"X-Custom-Header":["This is a test"]}`,
+				"headers": `{"Accept":["application/json"],"Authorization":["Bearer ran*******(19)"],"Content-Type":["application/json"],"X-Custom-Header":["This is a test"]}`,
 			},
 		})
 	})

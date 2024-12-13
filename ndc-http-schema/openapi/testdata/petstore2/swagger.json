@@ -904,6 +904,30 @@
           }
         ]
       }
+    },
+    "/id/{identifier}": {
+      "get": {
+        "operationId": "get subject",
+        "parameters": [
+          {
+            "description": "The identifier path of the `subject` you're looking for\n",
+            "in": "path",
+            "name": "identifier",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "produces": ["text/html", "application/ld+json", "application/json"],
+        "responses": {
+          "200": {
+            "description": "`subject` found\n"
+          },
+          "404": {
+            "description": "`subject` not found\n"
+          }
+        },
+        "summary": "Explore details about a given subject node"
+      }
     }
   },
   "securityDefinitions": {

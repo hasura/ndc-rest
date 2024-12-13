@@ -31,7 +31,6 @@ type HTTPOptions struct {
 	Servers  []string `json:"serverIds" yaml:"serverIds"`
 	Parallel bool     `json:"parallel"  yaml:"parallel"`
 
-	Explain     bool `json:"-" yaml:"-"`
 	Distributed bool `json:"-" yaml:"-"`
 	Concurrency uint `json:"-" yaml:"-"`
 }

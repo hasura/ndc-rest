@@ -77,9 +77,69 @@ func TestEvalURLAndHeaderParameters(t *testing.T) {
 	}
 }
 
+func TestEvalURLAndHeaderParametersOAS2(t *testing.T) {
+	testCases := []struct {
+		name         string
+		rawArguments string
+		expectedURL  string
+		errorMsg     string
+		headers      map[string]string
+	}{
+		{
+			name: "get_subject",
+			rawArguments: `{
+				"identifier": "thesauri/material/AAT.11914"
+			}`,
+			expectedURL: "/id/thesauri/material/AAT.11914",
+		},
+	}
+
+	ndcSchema := createMockSchemaOAS2(t)
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			var info *rest.OperationInfo
+			for key, f := range ndcSchema.Functions {
+				if key == tc.name {
+					info = &f
+					break
+				}
+			}
+			var arguments map[string]any
+			assert.NilError(t, json.Unmarshal([]byte(tc.rawArguments), &arguments))
+
+			builder := RequestBuilder{
+				Schema:    ndcSchema,
+				Operation: info,
+				Arguments: arguments,
+			}
+			result, headers, err := builder.evalURLAndHeaderParameters()
+			if tc.errorMsg != "" {
+				assert.ErrorContains(t, err, tc.errorMsg)
+			} else {
+				assert.NilError(t, err)
+				decodedValue, err := url.QueryUnescape(result.String())
+				assert.NilError(t, err)
+				assert.Equal(t, tc.expectedURL, decodedValue)
+				for k, v := range tc.headers {
+					assert.Equal(t, v, headers.Get(k))
+				}
+			}
+		})
+	}
+}
+
 func createMockSchema(t *testing.T) *rest.NDCHttpSchema {
 	var ndcSchema rest.NDCHttpSchema
 	rawSchemaBytes, err := os.ReadFile("../../ndc-http-schema/openapi/testdata/petstore3/expected.json")
+	assert.NilError(t, err)
+	assert.NilError(t, json.Unmarshal(rawSchemaBytes, &ndcSchema))
+
+	return &ndcSchema
+}
+
+func createMockSchemaOAS2(t *testing.T) *rest.NDCHttpSchema {
+	var ndcSchema rest.NDCHttpSchema
+	rawSchemaBytes, err := os.ReadFile("../../ndc-http-schema/openapi/testdata/petstore2/expected.json")
 	assert.NilError(t, err)
 	assert.NilError(t, json.Unmarshal(rawSchemaBytes, &ndcSchema))
 

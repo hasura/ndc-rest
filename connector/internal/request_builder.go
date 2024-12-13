@@ -57,7 +57,7 @@ func (c *RequestBuilder) Build() (*RetryableRequest, error) {
 	}
 
 	if rawRequest.Response.ContentType != "" && request.Headers.Get(acceptHeader) == "" {
-		request.Headers.Set(acceptHeader, rawRequest.Response.ContentType)
+		request.Headers.Set(acceptHeader, evalAcceptContentType(rawRequest.Response.ContentType))
 	}
 
 	if rawRequest.RuntimeSettings != nil {

@@ -262,6 +262,23 @@
     },
     {
       "arguments": {
+        "identifier": {
+          "description": "The identifier path of the `subject` you're looking for",
+          "type": {
+            "name": "String",
+            "type": "named"
+          }
+        }
+      },
+      "description": "Explore details about a given subject node",
+      "name": "get_subject",
+      "result_type": {
+        "name": "JSON",
+        "type": "named"
+      }
+    },
+    {
+      "arguments": {
         "client_name": {
           "description": "The name of the clients to filter by.",
           "type": {

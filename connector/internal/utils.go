@@ -10,13 +10,29 @@ import (
 	"go.opentelemetry.io/otel/trace"
 )
 
+// IsSensitiveHeader checks if the header name is sensitive.
+func IsSensitiveHeader(name string) bool {
+	return sensitiveHeaderRegex.MatchString(strings.ToLower(name))
+}
+
+func evalAcceptContentType(contentType string) string {
+	switch {
+	case strings.HasPrefix(contentType, "image/"):
+		return "image/*"
+	case strings.HasPrefix(contentType, "video/"):
+		return "video/*"
+	default:
+		return contentType
+	}
+}
+
 func setHeaderAttributes(span trace.Span, prefix string, httpHeaders http.Header) {
 	for key, headers := range httpHeaders {
 		if len(headers) == 0 {
 			continue
 		}
 		values := headers
-		if sensitiveHeaderRegex.MatchString(strings.ToLower(key)) {
+		if IsSensitiveHeader(key) {
 			values = make([]string, len(headers))
 			for i, header := range headers {
 				values[i] = utils.MaskString(header)
