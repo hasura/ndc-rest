@@ -262,6 +262,10 @@ func (oc *OAS3Builder) convertComponentSchemas(schemaItem orderedmap.Pair[string
 	if _, ok := oc.schema.ObjectTypes[typeKey]; ok {
 		return nil
 	}
+	if _, ok := oc.schema.ScalarTypes[typeKey]; ok {
+		return nil
+	}
+
 	typeEncoder, schemaResult, err := newOAS3SchemaBuilder(oc, "", rest.InBody, false).
 		getSchemaType(typeSchema, []string{typeKey})
 	if err != nil {
@@ -280,6 +284,13 @@ func (oc *OAS3Builder) convertComponentSchemas(schemaItem orderedmap.Pair[string
 		if schemaResult.XML.Name == "" {
 			schemaResult.XML.Name = typeKey
 		}
+	}
+
+	// If the result type is a scalar, the builder returns the raw scalar name (String, Int).
+	// We should check and add the alias type to scalar objects
+	pascalTypeName := utils.ToPascalCase(typeKey)
+	if scalarType, ok := oc.schema.ScalarTypes[typeName]; ok && pascalTypeName != typeName {
+		oc.schema.ScalarTypes[pascalTypeName] = scalarType
 	}
 
 	cacheKey := "#/components/schemas/" + typeKey

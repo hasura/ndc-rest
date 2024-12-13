@@ -8,6 +8,7 @@ import (
 
 	"github.com/hasura/ndc-http/connector/internal"
 	"github.com/hasura/ndc-http/ndc-http-schema/configuration"
+	restUtils "github.com/hasura/ndc-http/ndc-http-schema/utils"
 	"github.com/hasura/ndc-sdk-go/schema"
 	"github.com/hasura/ndc-sdk-go/utils"
 	"go.opentelemetry.io/otel/codes"
@@ -174,6 +175,13 @@ func (c *HTTPConnector) serializeExplainResponse(ctx context.Context, requests *
 		return nil, err
 	}
 	defer cancel()
+
+	// mask sensitive forwarded headers if exists
+	for key := range req.Header {
+		if internal.IsSensitiveHeader(key) {
+			req.Header.Set(key, restUtils.MaskString(req.Header.Get(key)))
+		}
+	}
 
 	c.upstreams.InjectMockRequestSettings(req, requests.Schema.Name, httpRequest.RawRequest.Security)
 
