@@ -129,7 +129,7 @@ func (c *RequestBuilder) buildRequestBody(request *RetryableRequest, rawRequest 
 
 			return nil
 		case contentType == rest.ContentTypeFormURLEncoded:
-			r, err := contenttype.NewURLParameterEncoder(c.Schema).Encode(&bodyInfo, bodyData)
+			r, err := contenttype.NewURLParameterEncoder(c.Schema, rest.ContentTypeFormURLEncoded).Encode(&bodyInfo, bodyData)
 			if err != nil {
 				return err
 			}
@@ -237,7 +237,7 @@ func (c *RequestBuilder) evalURLAndHeaderParameterBySchema(endpoint *url.URL, he
 	if argumentInfo.HTTP.Name != "" {
 		argumentKey = argumentInfo.HTTP.Name
 	}
-	queryParams, err := contenttype.NewURLParameterEncoder(c.Schema).EncodeParameterValues(&rest.ObjectField{
+	queryParams, err := contenttype.NewURLParameterEncoder(c.Schema, rest.ContentTypeFormURLEncoded).EncodeParameterValues(&rest.ObjectField{
 		ObjectField: schema.ObjectField{
 			Type: argumentInfo.Type,
 		},
