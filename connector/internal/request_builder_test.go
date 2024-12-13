@@ -2,6 +2,7 @@ package internal
 
 import (
 	"encoding/json"
+	"io"
 	"net/url"
 	"os"
 	"testing"
@@ -10,7 +11,7 @@ import (
 	"gotest.tools/v3/assert"
 )
 
-func TestEvalURLAndHeaderParameters(t *testing.T) {
+func TestQueryEvalURLAndHeaderParameters(t *testing.T) {
 	testCases := []struct {
 		name         string
 		rawArguments string
@@ -73,6 +74,80 @@ func TestEvalURLAndHeaderParameters(t *testing.T) {
 					assert.Equal(t, v, headers.Get(k))
 				}
 			}
+		})
+	}
+}
+
+func TestMutationEvalURLAndHeaderParameters(t *testing.T) {
+	testCases := []struct {
+		name         string
+		rawArguments string
+		expectedURL  string
+		expectedBody string
+		errorMsg     string
+		headers      map[string]string
+	}{
+		{
+			name: "PostBillingMeterEvents",
+			rawArguments: `{
+        "body": {
+          "event_name": "k8hAOi2B52",
+          "identifier": "identifier_123",
+          "payload": {
+            "value": "25",
+            "stripe_customer_id": "cus_NciAYcXfLnqBoz"
+          },
+          "timestamp": 931468280
+        }
+			}`,
+			expectedURL:  "/v1/billing/meter_events",
+			expectedBody: "event_name=k8hAOi2B52&identifier=identifier_123&payload[value]=25&payload[stripe_customer_id]=cus_NciAYcXfLnqBoz&timestamp=931468280",
+		},
+	}
+
+	ndcSchema := createMockSchema(t)
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			var info *rest.OperationInfo
+			for key, f := range ndcSchema.Procedures {
+				if key == tc.name {
+					info = &f
+					break
+				}
+			}
+			var arguments map[string]any
+			assert.NilError(t, json.Unmarshal([]byte(tc.rawArguments), &arguments))
+
+			builder := RequestBuilder{
+				Schema:    ndcSchema,
+				Operation: info,
+				Arguments: arguments,
+			}
+
+			result, err := builder.Build()
+			if tc.errorMsg != "" {
+				assert.ErrorContains(t, err, tc.errorMsg)
+
+				return
+			}
+
+			assert.NilError(t, err)
+			decodedValue, err := url.QueryUnescape(result.URL.String())
+			assert.NilError(t, err)
+			assert.Equal(t, tc.expectedURL, decodedValue)
+
+			for k, v := range tc.headers {
+				assert.Equal(t, v, result.Headers.Get(k))
+			}
+
+			bodyBytes, err := io.ReadAll(result.Body)
+			assert.NilError(t, err)
+			expected, err := url.ParseQuery(tc.expectedBody)
+			assert.NilError(t, err)
+			body, err := url.ParseQuery(string(bodyBytes))
+			assert.NilError(t, err)
+
+			assert.DeepEqual(t, expected, body)
 		})
 	}
 }

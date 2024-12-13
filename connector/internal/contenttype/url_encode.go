@@ -119,6 +119,7 @@ func (c *URLParameterEncoder) EncodeParameterValues(objectField *rest.ObjectFiel
 			if !ok {
 				return nil, fmt.Errorf("%s: failed to evaluate object, got <%s> %v", strings.Join(fieldPaths, ""), kind, anyValue)
 			}
+
 			for key, fieldInfo := range objectInfo.Fields {
 				fieldVal := object[key]
 				output, err := c.EncodeParameterValues(&fieldInfo, reflect.ValueOf(fieldVal), append(fieldPaths, "."+key))
@@ -248,12 +249,6 @@ func encodeParameterReflectionValues(reflectValue reflect.Value, fieldPaths []st
 	}
 
 	kind := reflectValue.Kind()
-	if result, err := StringifySimpleScalar(reflectValue, kind); err == nil {
-		return []ParameterItem{
-			NewParameterItem([]Key{}, []string{result}),
-		}, nil
-	}
-
 	switch kind {
 	case reflect.Slice, reflect.Array:
 		return encodeParameterReflectionSlice(reflectValue, fieldPaths)
@@ -262,6 +257,12 @@ func encodeParameterReflectionValues(reflectValue reflect.Value, fieldPaths []st
 	case reflect.Struct:
 		return encodeParameterReflectionStruct(reflectValue, fieldPaths)
 	default:
+		if result, err := StringifySimpleScalar(reflectValue, kind); err == nil {
+			return []ParameterItem{
+				NewParameterItem([]Key{}, []string{result}),
+			}, nil
+		}
+
 		return nil, fmt.Errorf("%s: failed to encode parameter, got %s", strings.Join(fieldPaths, ""), kind)
 	}
 }
