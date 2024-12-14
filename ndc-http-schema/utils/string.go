@@ -3,6 +3,7 @@ package utils
 import (
 	"fmt"
 	"regexp"
+	"slices"
 	"strings"
 	"unicode"
 	"unicode/utf8"
@@ -218,6 +219,9 @@ func RemoveYAMLSpecialCharacters(input []byte) string {
 				u := getu4(input[i:])
 				if u > -1 {
 					i += 5
+					if slices.Contains([]rune{'<', '>', '&'}, u) {
+						sb.WriteRune(u)
+					}
 				} else {
 					sb.WriteRune(r)
 					i++

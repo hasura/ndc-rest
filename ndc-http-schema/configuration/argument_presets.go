@@ -91,6 +91,10 @@ func evalTypeRepresentationFromJSONPath(httpSchema *rest.NDCHttpSchema, jsonPath
 		return nil, err
 	}
 
+	if typeRep == nil {
+		return nil, nil
+	}
+
 	// if the json path selects the root field only, remove the argument field
 	if len(segments) == 1 && isGlobal {
 		delete(operation.Arguments, rootSelector)
@@ -113,6 +117,10 @@ func evalArgumentFromJSONPath(httpSchema *rest.NDCHttpSchema, typeSchema schema.
 		underlyingType, typeRep, err := evalArgumentFromJSONPath(httpSchema, t.UnderlyingType, segments, fieldPaths)
 		if err != nil {
 			return nil, nil, err
+		}
+
+		if underlyingType == nil {
+			return nil, nil, nil
 		}
 
 		if _, ok := underlyingType.(*schema.NullableType); ok {

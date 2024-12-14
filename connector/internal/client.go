@@ -248,7 +248,12 @@ func (client *HTTPClient) sendSingle(ctx context.Context, request *RetryableRequ
 
 		span.SetStatus(codes.Error, "received error from remote server")
 
-		return nil, nil, schema.NewConnectorError(resp.StatusCode, resp.Status, details)
+		statusCode := resp.StatusCode
+		if statusCode < 500 {
+			statusCode = http.StatusUnprocessableEntity
+		}
+
+		return nil, nil, schema.NewConnectorError(statusCode, resp.Status, details)
 	}
 
 	result, headers, evalErr := client.evalHTTPResponse(ctx, span, resp, contentType, selection, logger)
