@@ -179,6 +179,19 @@
         }
       }
     },
+    "ExportEventsSuccessResponse": {
+      "fields": {
+        "csv_file_url": {
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "String",
+              "type": "named"
+            }
+          }
+        }
+      }
+    },
     "Filter": {
       "fields": {
         "field": {
@@ -758,6 +771,30 @@
     },
     {
       "arguments": {
+        "app_id": {
+          "description": "The ID of the app that the notification belongs to.",
+          "type": {
+            "name": "String",
+            "type": "named"
+          }
+        },
+        "notification_id": {
+          "description": "The ID of the notification to export events from.",
+          "type": {
+            "name": "String",
+            "type": "named"
+          }
+        }
+      },
+      "description": "Export CSV of Events",
+      "name": "export_events",
+      "result_type": {
+        "name": "ExportEventsSuccessResponse",
+        "type": "named"
+      }
+    },
+    {
+      "arguments": {
         "body": {
           "description": "Request body of POST /notifications/{notification_id}/history",
           "type": {
@@ -794,8 +831,8 @@
       "comparison_operators": {},
       "representation": {
         "one_of": [
-          "\u003e",
-          "\u003c",
+          ">",
+          "<",
           "=",
           "!=",
           "exists",

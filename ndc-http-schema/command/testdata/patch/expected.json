@@ -16,31 +16,8 @@
               "value": {
                 "value": "dog-secret"
               }
-            },
-            "basic": {
-              "type": "basic",
-              "header": "Authorization",
-              "username": {
-                "value": "user"
-              },
-              "password": {
-                "value": "password"
-              }
-            },
-            "bearer": {
-              "type": "http",
-              "header": "",
-              "scheme": "bearer",
-              "value": {
-                "env": "PET_STORE_BEARER_TOKEN"
-              }
             }
-          },
-          "security": [
-            {
-              "api_key": []
-            }
-          ]
+          }
         },
         {
           "url": {
@@ -55,31 +32,8 @@
               "value": {
                 "value": "cat-secret"
               }
-            },
-            "basic": {
-              "type": "basic",
-              "header": "Authorization",
-              "username": {
-                "value": "user"
-              },
-              "password": {
-                "value": "password"
-              }
-            },
-            "bearer": {
-              "type": "http",
-              "header": "",
-              "scheme": "bearer",
-              "value": {
-                "env": "PET_STORE_BEARER_TOKEN"
-              }
             }
-          },
-          "security": [
-            {
-              "api_key": []
-            }
-          ]
+          }
         }
       ],
       "securitySchemes": {

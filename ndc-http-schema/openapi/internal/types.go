@@ -12,6 +12,7 @@ import (
 
 var (
 	bracketRegexp         = regexp.MustCompile(`[\{\}]`)
+	oasVariableRegex      = regexp.MustCompile(`^\{([a-zA-Z0-9_-]+)\}$`)
 	schemaRefNameV2Regexp = regexp.MustCompile(`^#/definitions/(.+)$`)
 	schemaRefNameV3Regexp = regexp.MustCompile(`^#/components/schemas/(.+)$`)
 )

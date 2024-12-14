@@ -265,7 +265,7 @@
           }
         },
         "return": {
-          "description": "XPath expression that defines which values will be returned.  Instead of returning a collection of projects or packages, the result will be a collection of:   - contents of elements, when that XPath expression match elements, or,   - values of atttributes, when that XPath expression match atttributes.  Example of result, for a query string like `?in=projects\u0026match=repository/arch='x86_64'\u0026return=repository/name`: ```    openSUSE_Tumbleweed   15.3  ```",
+          "description": "XPath expression that defines which values will be returned.  Instead of returning a collection of projects or packages, the result will be a collection of:   - contents of elements, when that XPath expression match elements, or,   - values of atttributes, when that XPath expression match atttributes.  Example of result, for a query string like `?in=projects&match=repository/arch='x86_64'&return=repository/name`: ```    openSUSE_Tumbleweed   15.3  ```",
           "type": {
             "type": "nullable",
             "underlying_type": {
@@ -275,7 +275,7 @@
           }
         },
         "values": {
-          "description": "When set to `1`, return a list of values, instead of returning a list of projects or packages.  The result will be a collection of:   - contents of elements, when the expression defined in the `match` query parameter match elements.     For example: `match=repository/arch`.   - values of atttributes, when the expression defined in the `match` query parameter match atttributes.     For example: `match=repository/name`.  Example of result, for a query string like `?in=projects\u0026match=repository/path/project\u0026values=1`: ```    openSUSE.org:openSUSE:Factory   openSUSE.org:openSUSE:Leap:15.3  ```",
+          "description": "When set to `1`, return a list of values, instead of returning a list of projects or packages.  The result will be a collection of:   - contents of elements, when the expression defined in the `match` query parameter match elements.     For example: `match=repository/arch`.   - values of atttributes, when the expression defined in the `match` query parameter match atttributes.     For example: `match=repository/name`.  Example of result, for a query string like `?in=projects&match=repository/path/project&values=1`: ```    openSUSE.org:openSUSE:Factory   openSUSE.org:openSUSE:Leap:15.3  ```",
           "type": {
             "type": "nullable",
             "underlying_type": {
@@ -4681,7 +4681,7 @@
       "result_type": {
         "type": "nullable",
         "underlying_type": {
-          "name": "Boolean",
+          "name": "JSON",
           "type": "named"
         }
       }
@@ -4710,7 +4710,7 @@
       "result_type": {
         "type": "nullable",
         "underlying_type": {
-          "name": "Boolean",
+          "name": "JSON",
           "type": "named"
         }
       }
@@ -4730,7 +4730,7 @@
       "result_type": {
         "type": "nullable",
         "underlying_type": {
-          "name": "Boolean",
+          "name": "JSON",
           "type": "named"
         }
       }
@@ -4864,7 +4864,7 @@
       "result_type": {
         "type": "nullable",
         "underlying_type": {
-          "name": "Boolean",
+          "name": "JSON",
           "type": "named"
         }
       }

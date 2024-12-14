@@ -332,6 +332,24 @@
         }
       }
     },
+    "ExportEventsSuccessResponse": {
+      "fields": {
+        "csv_file_url": {
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "String",
+              "type": "named"
+            }
+          },
+          "http": {
+            "type": [
+              "string"
+            ]
+          }
+        }
+      }
+    },
     "Filter": {
       "fields": {
         "field": {
@@ -1234,6 +1252,54 @@
         "type": "named"
       }
     },
+    "export_events": {
+      "request": {
+        "url": "/notifications/{notification_id}/export_events",
+        "method": "post",
+        "response": {
+          "contentType": "application/json"
+        }
+      },
+      "arguments": {
+        "app_id": {
+          "description": "The ID of the app that the notification belongs to.",
+          "type": {
+            "name": "String",
+            "type": "named"
+          },
+          "http": {
+            "name": "app_id",
+            "in": "query",
+            "schema": {
+              "type": [
+                "string"
+              ]
+            }
+          }
+        },
+        "notification_id": {
+          "description": "The ID of the notification to export events from.",
+          "type": {
+            "name": "String",
+            "type": "named"
+          },
+          "http": {
+            "name": "notification_id",
+            "in": "path",
+            "schema": {
+              "type": [
+                "string"
+              ]
+            }
+          }
+        }
+      },
+      "description": "Export CSV of Events",
+      "result_type": {
+        "name": "ExportEventsSuccessResponse",
+        "type": "named"
+      }
+    },
     "get_notification_history": {
       "request": {
         "url": "/notifications/{notification_id}/history",
@@ -1298,8 +1364,8 @@
       "comparison_operators": {},
       "representation": {
         "one_of": [
-          "\u003e",
-          "\u003c",
+          ">",
+          "<",
           "=",
           "!=",
           "exists",

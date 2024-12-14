@@ -67,16 +67,21 @@ func (oc *oas3OperationBuilder) BuildFunction(itemGet *v3.Operation) (*rest.Oper
 	}
 
 	description := oc.getOperationDescription(itemGet)
+	requestURL, arguments, err := evalOperationPath(oc.builder.schema, oc.pathKey, oc.Arguments)
+	if err != nil {
+		return nil, "", fmt.Errorf("%s: %w", funcName, err)
+	}
+
 	function := rest.OperationInfo{
 		Request: &rest.Request{
-			URL:      oc.pathKey,
+			URL:      requestURL,
 			Method:   "get",
 			Security: convertSecurities(itemGet.Security),
 			Servers:  oc.builder.convertServers(itemGet.Servers),
 			Response: *schemaResponse,
 		},
 		Description: &description,
-		Arguments:   oc.Arguments,
+		Arguments:   arguments,
 		ResultType:  resultType.Encode(),
 	}
 
@@ -137,9 +142,14 @@ func (oc *oas3OperationBuilder) BuildProcedure(operation *v3.Operation) (*rest.O
 	}
 
 	description := oc.getOperationDescription(operation)
+	requestURL, arguments, err := evalOperationPath(oc.builder.schema, oc.pathKey, oc.Arguments)
+	if err != nil {
+		return nil, "", fmt.Errorf("%s: %w", procName, err)
+	}
+
 	procedure := rest.OperationInfo{
 		Request: &rest.Request{
-			URL:         oc.pathKey,
+			URL:         requestURL,
 			Method:      oc.method,
 			Security:    convertSecurities(operation.Security),
 			Servers:     oc.builder.convertServers(operation.Servers),
@@ -147,7 +157,7 @@ func (oc *oas3OperationBuilder) BuildProcedure(operation *v3.Operation) (*rest.O
 			Response:    *schemaResponse,
 		},
 		Description: &description,
-		Arguments:   oc.Arguments,
+		Arguments:   arguments,
 		ResultType:  resultType.Encode(),
 	}
 
@@ -374,12 +384,15 @@ func (oc *oas3OperationBuilder) convertResponse(responses *v3.Responses, apiPath
 		}
 	}
 
-	// return nullable boolean type if the response content is null
+	// return nullable JSON type if the response content is null
 	if resp == nil || resp.Content == nil {
-		scalarName := string(rest.ScalarBoolean)
-		oc.builder.schema.AddScalar(scalarName, *defaultScalarTypes[rest.ScalarBoolean])
+		scalarName := rest.ScalarJSON
+		if statusCode == 204 {
+			scalarName = rest.ScalarBoolean
+		}
+		oc.builder.schema.AddScalar(string(scalarName), *defaultScalarTypes[scalarName])
 
-		return schema.NewNullableNamedType(scalarName), &rest.Response{
+		return schema.NewNullableNamedType(string(scalarName)), &rest.Response{
 			ContentType: rest.ContentTypeJSON,
 		}, nil
 	}

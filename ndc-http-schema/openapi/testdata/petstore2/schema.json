@@ -273,8 +273,11 @@
       "description": "Explore details about a given subject node",
       "name": "get_subject",
       "result_type": {
-        "name": "JSON",
-        "type": "named"
+        "type": "nullable",
+        "underlying_type": {
+          "name": "JSON",
+          "type": "named"
+        }
       }
     },
     {
@@ -1350,7 +1353,7 @@
       "result_type": {
         "type": "nullable",
         "underlying_type": {
-          "name": "Boolean",
+          "name": "JSON",
           "type": "named"
         }
       }
@@ -1379,7 +1382,7 @@
       "result_type": {
         "type": "nullable",
         "underlying_type": {
-          "name": "Boolean",
+          "name": "JSON",
           "type": "named"
         }
       }
@@ -1408,7 +1411,7 @@
       "result_type": {
         "type": "nullable",
         "underlying_type": {
-          "name": "Boolean",
+          "name": "JSON",
           "type": "named"
         }
       }
@@ -1428,7 +1431,7 @@
       "result_type": {
         "type": "nullable",
         "underlying_type": {
-          "name": "Boolean",
+          "name": "JSON",
           "type": "named"
         }
       }
@@ -1481,7 +1484,7 @@
       "result_type": {
         "type": "nullable",
         "underlying_type": {
-          "name": "Boolean",
+          "name": "JSON",
           "type": "named"
         }
       }
@@ -1501,7 +1504,7 @@
       "result_type": {
         "type": "nullable",
         "underlying_type": {
-          "name": "Boolean",
+          "name": "JSON",
           "type": "named"
         }
       }
@@ -1528,7 +1531,7 @@
       "result_type": {
         "type": "nullable",
         "underlying_type": {
-          "name": "Boolean",
+          "name": "JSON",
           "type": "named"
         }
       }
@@ -1555,7 +1558,7 @@
       "result_type": {
         "type": "nullable",
         "underlying_type": {
-          "name": "Boolean",
+          "name": "JSON",
           "type": "named"
         }
       }
