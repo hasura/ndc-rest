@@ -202,7 +202,7 @@ func TestHTTPConnector_authentication(t *testing.T) {
 			Details: schema.ExplainResponseDetails{
 				"url":     server.URL + "/pet",
 				"headers": `{"Accept":["application/json"],"Api_key":["ran*******(14)"],"Content-Type":["application/json"]}`,
-				"body":    `{"name":"pet"}`,
+				"body":    "{\"name\":\"pet\"}\n",
 			},
 		})
 	})
@@ -380,7 +380,7 @@ func TestHTTPConnector_authentication(t *testing.T) {
 
 		res, err := http.Post(fmt.Sprintf("%s/query", testServer.URL), "application/json", bytes.NewBuffer(reqBody))
 		assert.NilError(t, err)
-		assert.Equal(t, http.StatusTooManyRequests, res.StatusCode)
+		assert.Equal(t, http.StatusUnprocessableEntity, res.StatusCode)
 	})
 
 	t.Run("encoding-ndjson", func(t *testing.T) {
