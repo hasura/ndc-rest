@@ -38,6 +38,12 @@ func UpdateHTTPConfiguration(configurationDir string, logger *slog.Logger) (*Con
 
 	// cache the output file to disk
 	if config.Output != "" {
+		// remove jsonschema reference inside schemas
+		for i, s := range schemas {
+			s.SchemaRef = ""
+			schemas[i] = s
+		}
+
 		if err := utils.WriteSchemaFile(filepath.Join(configurationDir, config.Output), schemas); err != nil {
 			return nil, nil, nil, err
 		}

@@ -28,15 +28,15 @@ func NewCredential(ctx context.Context, httpClient *http.Client, security schema
 	case *schema.APIKeyAuthConfig:
 		cred, err := NewApiKeyCredential(httpClient, ss)
 
-		return cred, err == nil, err
+		return cred, err != nil, err
 	case *schema.BasicAuthConfig:
 		cred, err := NewBasicCredential(httpClient, ss)
 
-		return cred, err == nil, err
+		return cred, err != nil, err
 	case *schema.HTTPAuthConfig:
 		cred, err := NewHTTPCredential(httpClient, ss)
 
-		return cred, err == nil, err
+		return cred, err != nil, err
 	case *schema.OAuth2Config:
 		var headerForwardingRequired bool
 		for flowType, flow := range ss.Flows {

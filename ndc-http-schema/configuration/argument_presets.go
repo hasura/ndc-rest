@@ -3,6 +3,8 @@ package configuration
 import (
 	"errors"
 	"fmt"
+	"regexp"
+	"slices"
 
 	rest "github.com/hasura/ndc-http/ndc-http-schema/schema"
 	"github.com/hasura/ndc-sdk-go/schema"
@@ -11,47 +13,52 @@ import (
 )
 
 // ValidateArgumentPreset validates the argument preset.
-func ValidateArgumentPreset(httpSchema *rest.NDCHttpSchema, preset rest.ArgumentPresetConfig) (*jsonpath.Path, map[string]schema.TypeRepresentation, error) {
+func ValidateArgumentPreset(httpSchema *rest.NDCHttpSchema, preset rest.ArgumentPresetConfig, isGlobal bool) (*jsonpath.Path, map[string]schema.TypeRepresentation, error) {
 	jsonPath, targetExpressions, err := preset.Validate()
 	if err != nil {
 		return nil, nil, err
 	}
 
+	exprLen := len(targetExpressions)
 	targets := make(map[string]schema.TypeRepresentation)
-	for _, expr := range targetExpressions {
-		for key, op := range httpSchema.Functions {
-			if !expr.MatchString(key) {
-				continue
-			}
-			typeRep, err := evalTypeRepresentationFromJSONPath(httpSchema, jsonPath, &op)
-			if err != nil {
-				return nil, nil, err
-			}
-
-			if typeRep == nil {
-				continue
-			}
-
-			httpSchema.Functions[key] = op
-			targets[BuildArgumentPresetJSONPathKey(key, jsonPath)] = typeRep
+	for key, op := range httpSchema.Functions {
+		if exprLen > 0 && !slices.ContainsFunc(targetExpressions, func(expr regexp.Regexp) bool {
+			return expr.MatchString(key)
+		}) {
+			continue
 		}
 
-		for key, op := range httpSchema.Procedures {
-			if !expr.MatchString(key) {
-				continue
-			}
-			typeRep, err := evalTypeRepresentationFromJSONPath(httpSchema, jsonPath, &op)
-			if err != nil {
-				return nil, nil, err
-			}
-
-			if typeRep == nil {
-				continue
-			}
-
-			httpSchema.Procedures[key] = op
-			targets[BuildArgumentPresetJSONPathKey(key, jsonPath)] = typeRep
+		typeRep, err := evalTypeRepresentationFromJSONPath(httpSchema, jsonPath, &op, isGlobal)
+		if err != nil {
+			return nil, nil, err
 		}
+
+		if typeRep == nil {
+			continue
+		}
+
+		httpSchema.Functions[key] = op
+		targets[BuildArgumentPresetJSONPathKey(key, jsonPath)] = typeRep
+	}
+
+	for key, op := range httpSchema.Procedures {
+		if exprLen > 0 && !slices.ContainsFunc(targetExpressions, func(expr regexp.Regexp) bool {
+			return expr.MatchString(key)
+		}) {
+			continue
+		}
+
+		typeRep, err := evalTypeRepresentationFromJSONPath(httpSchema, jsonPath, &op, isGlobal)
+		if err != nil {
+			return nil, nil, err
+		}
+
+		if typeRep == nil {
+			continue
+		}
+
+		httpSchema.Procedures[key] = op
+		targets[BuildArgumentPresetJSONPathKey(key, jsonPath)] = typeRep
 	}
 
 	return jsonPath, targets, err
@@ -62,7 +69,7 @@ func BuildArgumentPresetJSONPathKey(operationName string, jsonPath *jsonpath.Pat
 	return fmt.Sprintf("%s:%s", operationName, jsonPath.String())
 }
 
-func evalTypeRepresentationFromJSONPath(httpSchema *rest.NDCHttpSchema, jsonPath *jsonpath.Path, operation *rest.OperationInfo) (schema.TypeRepresentation, error) {
+func evalTypeRepresentationFromJSONPath(httpSchema *rest.NDCHttpSchema, jsonPath *jsonpath.Path, operation *rest.OperationInfo, isGlobal bool) (schema.TypeRepresentation, error) {
 	if len(operation.Arguments) == 0 {
 		return nil, nil
 	}
@@ -85,7 +92,7 @@ func evalTypeRepresentationFromJSONPath(httpSchema *rest.NDCHttpSchema, jsonPath
 	}
 
 	// if the json path selects the root field only, remove the argument field
-	if len(segments) == 1 {
+	if len(segments) == 1 && isGlobal {
 		delete(operation.Arguments, rootSelector)
 	} else {
 		argument.Type = argumentType.Encode()

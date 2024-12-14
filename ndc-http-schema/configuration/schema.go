@@ -101,32 +101,6 @@ func MergeNDCHttpSchemas(config *Configuration, schemas []NDCHttpRuntimeSchema) 
 		settings := item.Settings
 		if settings == nil {
 			settings = &rest.NDCHttpSettings{}
-		} else {
-			for i, server := range settings.Servers {
-				if server.Security.IsEmpty() {
-					server.Security = settings.Security
-				}
-				if server.SecuritySchemes == nil {
-					server.SecuritySchemes = make(map[string]rest.SecurityScheme)
-				}
-				for key, scheme := range settings.SecuritySchemes {
-					_, ok := server.SecuritySchemes[key]
-					if !ok {
-						server.SecuritySchemes[key] = scheme
-					}
-				}
-
-				if server.Headers == nil {
-					server.Headers = make(map[string]utils.EnvString)
-				}
-				for key, value := range settings.Headers {
-					_, ok := server.Headers[key]
-					if !ok {
-						server.Headers[key] = value
-					}
-				}
-				settings.Servers[i] = server
-			}
 		}
 
 		meta := NDCHttpRuntimeSchema{

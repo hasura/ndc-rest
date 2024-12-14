@@ -9,6 +9,15 @@
             "type": "nullable",
             "underlying_type": { "name": "JSON", "type": "named" }
           }
+        },
+        "kind": {
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "String",
+              "type": "named"
+            }
+          }
         }
       },
       "description": "Finds Pets by status",
