@@ -612,7 +612,7 @@
           }
         },
         "return": {
-          "description": "XPath expression that defines which values will be returned.  Instead of returning a collection of projects or packages, the result will be a collection of:   - contents of elements, when that XPath expression match elements, or,   - values of atttributes, when that XPath expression match atttributes.  Example of result, for a query string like `?in=projects\u0026match=repository/arch='x86_64'\u0026return=repository/name`: ```    openSUSE_Tumbleweed   15.3  ```",
+          "description": "XPath expression that defines which values will be returned.  Instead of returning a collection of projects or packages, the result will be a collection of:   - contents of elements, when that XPath expression match elements, or,   - values of atttributes, when that XPath expression match atttributes.  Example of result, for a query string like `?in=projects&match=repository/arch='x86_64'&return=repository/name`: ```    openSUSE_Tumbleweed   15.3  ```",
           "type": {
             "type": "nullable",
             "underlying_type": {
@@ -631,7 +631,7 @@
           }
         },
         "values": {
-          "description": "When set to `1`, return a list of values, instead of returning a list of projects or packages.  The result will be a collection of:   - contents of elements, when the expression defined in the `match` query parameter match elements.     For example: `match=repository/arch`.   - values of atttributes, when the expression defined in the `match` query parameter match atttributes.     For example: `match=repository/name`.  Example of result, for a query string like `?in=projects\u0026match=repository/path/project\u0026values=1`: ```    openSUSE.org:openSUSE:Factory   openSUSE.org:openSUSE:Leap:15.3  ```",
+          "description": "When set to `1`, return a list of values, instead of returning a list of projects or packages.  The result will be a collection of:   - contents of elements, when the expression defined in the `match` query parameter match elements.     For example: `match=repository/arch`.   - values of atttributes, when the expression defined in the `match` query parameter match atttributes.     For example: `match=repository/name`.  Example of result, for a query string like `?in=projects&match=repository/path/project&values=1`: ```    openSUSE.org:openSUSE:Factory   openSUSE.org:openSUSE:Leap:15.3  ```",
           "type": {
             "type": "nullable",
             "underlying_type": {
@@ -870,6 +870,99 @@
       },
       "xml": {
         "name": "##default"
+      }
+    },
+    "BillingMeterEvent": {
+      "description": "Meter events represent actions that customers take in your system. You can use meter events to bill a customer based on their usage. Meter events are associated with billing meters, which define both the contents of the events payload and how to aggregate those events.",
+      "fields": {
+        "created": {
+          "description": "Time at which the object was created. Measured in seconds since the Unix epoch.",
+          "type": {
+            "name": "UnixTime",
+            "type": "named"
+          },
+          "http": {
+            "type": [
+              "integer"
+            ],
+            "format": "unix-time"
+          }
+        },
+        "event_name": {
+          "description": "The name of the meter event. Corresponds with the `event_name` field on a meter.",
+          "type": {
+            "name": "String",
+            "type": "named"
+          },
+          "http": {
+            "type": [
+              "string"
+            ],
+            "maxLength": 100
+          }
+        },
+        "identifier": {
+          "description": "A unique identifier for the event.",
+          "type": {
+            "name": "String",
+            "type": "named"
+          },
+          "http": {
+            "type": [
+              "string"
+            ],
+            "maxLength": 5000
+          }
+        },
+        "livemode": {
+          "description": "Has the value `true` if the object exists in live mode or the value `false` if the object exists in test mode.",
+          "type": {
+            "name": "Boolean",
+            "type": "named"
+          },
+          "http": {
+            "type": [
+              "boolean"
+            ]
+          }
+        },
+        "object": {
+          "description": "String representing the object's type. Objects of the same type share the same value.",
+          "type": {
+            "name": "BillingMeterEventObject",
+            "type": "named"
+          },
+          "http": {
+            "type": [
+              "string"
+            ]
+          }
+        },
+        "payload": {
+          "description": "The payload of the event. This contains the fields corresponding to a meter's `customer_mapping.event_payload_key` (default is `stripe_customer_id`) and `value_settings.event_payload_key` (default is `value`). Read more about the [payload](https://stripe.com/docs/billing/subscriptions/usage-based/recording-usage#payload-key-overrides).",
+          "type": {
+            "name": "JSON",
+            "type": "named"
+          },
+          "http": {
+            "type": [
+              "object"
+            ]
+          }
+        },
+        "timestamp": {
+          "description": "The timestamp passed in when creating the event. Measured in seconds since the Unix epoch.",
+          "type": {
+            "name": "UnixTime",
+            "type": "named"
+          },
+          "http": {
+            "type": [
+              "integer"
+            ],
+            "format": "unix-time"
+          }
+        }
       }
     },
     "Book": {
@@ -1455,6 +1548,91 @@
       },
       "xml": {
         "name": "pet"
+      }
+    },
+    "PostBillingMeterEventsBody": {
+      "fields": {
+        "event_name": {
+          "description": "The name of the meter event. Corresponds with the `event_name` field on a meter.",
+          "type": {
+            "name": "String",
+            "type": "named"
+          },
+          "http": {
+            "type": [
+              "string"
+            ],
+            "maxLength": 100
+          }
+        },
+        "expand": {
+          "description": "Specifies which fields in the response should be expanded.",
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "element_type": {
+                "name": "String",
+                "type": "named"
+              },
+              "type": "array"
+            }
+          },
+          "http": {
+            "type": [
+              "array"
+            ],
+            "items": {
+              "type": [
+                "string"
+              ],
+              "maxLength": 5000
+            }
+          }
+        },
+        "identifier": {
+          "description": "A unique identifier for the event. If not provided, one is generated. We recommend using UUID-like identifiers. We will enforce uniqueness within a rolling period of at least 24 hours. The enforcement of uniqueness primarily addresses issues arising from accidental retries or other problems occurring within extremely brief time intervals. This approach helps prevent duplicate entries and ensures data integrity in high-frequency operations.",
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "String",
+              "type": "named"
+            }
+          },
+          "http": {
+            "type": [
+              "string"
+            ],
+            "maxLength": 100
+          }
+        },
+        "payload": {
+          "description": "The payload of the event. This must contain the fields corresponding to a meter's `customer_mapping.event_payload_key` (default is `stripe_customer_id`) and `value_settings.event_payload_key` (default is `value`). Read more about the [payload](https://docs.stripe.com/billing/subscriptions/usage-based/recording-usage#payload-key-overrides).",
+          "type": {
+            "name": "JSON",
+            "type": "named"
+          },
+          "http": {
+            "type": [
+              "object"
+            ]
+          }
+        },
+        "timestamp": {
+          "description": "The time of the event. Measured in seconds since the Unix epoch. Must be within the past 35 calendar days or up to 5 minutes in the future. Defaults to current timestamp if not specified.",
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "UnixTime",
+              "type": "named"
+            }
+          },
+          "http": {
+            "type": [
+              "integer"
+            ],
+            "format": "unix-time"
+          }
+        }
       }
     },
     "PostCheckoutSessionsBody": {
@@ -7232,6 +7410,45 @@
         "type": "named"
       }
     },
+    "PostBillingMeterEvents": {
+      "request": {
+        "url": "/v1/billing/meter_events",
+        "method": "post",
+        "requestBody": {
+          "contentType": "application/x-www-form-urlencoded",
+          "encoding": {
+            "expand": {
+              "style": "deepObject",
+              "explode": true
+            },
+            "payload": {
+              "style": "deepObject",
+              "explode": true
+            }
+          }
+        },
+        "response": {
+          "contentType": "application/json"
+        }
+      },
+      "arguments": {
+        "body": {
+          "description": "Request body of POST /v1/billing/meter_events",
+          "type": {
+            "name": "PostBillingMeterEventsBody",
+            "type": "named"
+          },
+          "http": {
+            "in": "body"
+          }
+        }
+      },
+      "description": "Create a billing meter event",
+      "result_type": {
+        "name": "BillingMeterEvent",
+        "type": "named"
+      }
+    },
     "PostCheckoutSessions": {
       "request": {
         "url": "/v1/checkout/sessions",
@@ -7353,7 +7570,7 @@
         "servers": [
           {
             "url": {
-              "value": "https://files.stripe.com/",
+              "value": "https://files.stripe.com",
               "env": "PET_STORE_SERVER_URL"
             }
           }
@@ -7632,7 +7849,7 @@
       "result_type": {
         "type": "nullable",
         "underlying_type": {
-          "name": "Boolean",
+          "name": "JSON",
           "type": "named"
         }
       }
@@ -7694,7 +7911,7 @@
       "result_type": {
         "type": "nullable",
         "underlying_type": {
-          "name": "Boolean",
+          "name": "JSON",
           "type": "named"
         }
       }
@@ -7729,7 +7946,7 @@
       "result_type": {
         "type": "nullable",
         "underlying_type": {
-          "name": "Boolean",
+          "name": "JSON",
           "type": "named"
         }
       }
@@ -7981,7 +8198,7 @@
       "result_type": {
         "type": "nullable",
         "underlying_type": {
-          "name": "Boolean",
+          "name": "JSON",
           "type": "named"
         }
       }
@@ -8131,6 +8348,16 @@
     }
   },
   "scalar_types": {
+    "BillingMeterEventObject": {
+      "aggregate_functions": {},
+      "comparison_operators": {},
+      "representation": {
+        "one_of": [
+          "billing.meter_event"
+        ],
+        "type": "enum"
+      }
+    },
     "Binary": {
       "aggregate_functions": {},
       "comparison_operators": {},

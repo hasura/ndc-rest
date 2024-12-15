@@ -3,6 +3,7 @@ package internal
 import (
 	"fmt"
 	"log/slog"
+	"net/url"
 	"slices"
 	"strings"
 	"unicode"
@@ -486,4 +487,76 @@ func createTLSConfig(keys []string) *rest.TLSConfig {
 		IncludeSystemCACertsPool: &includeSystemCACertsPool,
 		ServerName:               &serverName,
 	}
+}
+
+func evalOperationPath(httpSchema *rest.NDCHttpSchema, rawPath string, arguments map[string]rest.ArgumentInfo) (string, map[string]rest.ArgumentInfo, error) {
+	var pathURL *url.URL
+	var isAbsolute bool
+	var err error
+
+	if strings.HasPrefix(rawPath, "http") {
+		isAbsolute = true
+		pathURL, err = url.Parse(rawPath)
+		if err != nil {
+			return "", nil, err
+		}
+	} else {
+		pathURL, err = url.Parse("http://example.local" + rawPath)
+		if err != nil {
+			return "", nil, err
+		}
+	}
+
+	var newQuery url.Values
+	q := pathURL.Query()
+	for key, value := range q {
+		if len(value) == 0 || value[0] == "" {
+			continue
+		}
+
+		matches := oasVariableRegex.FindStringSubmatch(value[0])
+		if len(matches) < 2 {
+			newQuery.Set(key, value[0])
+
+			continue
+		}
+
+		variableName := matches[1]
+		if _, ok := arguments[variableName]; ok {
+			// the argument exists, skip the next value
+			continue
+		}
+
+		httpSchema.AddScalar(string(rest.ScalarString), *defaultScalarTypes[rest.ScalarString])
+		arguments[variableName] = rest.ArgumentInfo{
+			ArgumentInfo: schema.ArgumentInfo{
+				Type: schema.NewNamedType(string(rest.ScalarString)).Encode(),
+			},
+			HTTP: &rest.RequestParameter{
+				Name: variableName,
+				In:   rest.InQuery,
+				Schema: &rest.TypeSchema{
+					Type: []string{"string"},
+				},
+			},
+		}
+	}
+
+	pathURL.RawQuery = newQuery.Encode()
+	if isAbsolute {
+		return pathURL.String(), arguments, nil
+	}
+
+	queryString := pathURL.Query().Encode()
+
+	if queryString != "" {
+		queryString = "?" + queryString
+	}
+
+	fragment := pathURL.EscapedFragment()
+	if fragment != "" {
+		fragment = "#" + fragment
+	}
+
+	return pathURL.Path + queryString + fragment, arguments, nil
 }

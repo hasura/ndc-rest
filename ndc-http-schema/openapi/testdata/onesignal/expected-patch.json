@@ -30,7 +30,6 @@
     },
     "version": "1.2.2"
   },
-  "collections": [],
   "procedures": {
     "create_notification": {
       "request": {
@@ -64,7 +63,6 @@
         }
       },
       "description": "Create notification",
-      "name": "create_notification",
       "result_type": {
         "name": "CreateNotificationSuccessResponse",
         "type": "named"
@@ -128,9 +126,52 @@
         }
       },
       "description": "Stop a scheduled or currently outgoing notification",
-      "name": "cancel_notification",
       "result_type": {
         "name": "CancelNotificationSuccessResponse",
+        "type": "named"
+      }
+    },
+    "export_events": {
+      "request": {
+        "url": "/notifications/{notification_id}/export_events",
+        "method": "post",
+        "response": {
+          "contentType": "application/json"
+        }
+      },
+      "arguments": {
+        "app_id": {
+          "description": "The ID of the app that the notification belongs to.",
+          "type": {
+            "name": "String",
+            "type": "named"
+          },
+          "http": {
+            "name": "app_id",
+            "in": "query",
+            "schema": {
+              "type": ["string"]
+            }
+          }
+        },
+        "notification_id": {
+          "description": "The ID of the notification to export events from.",
+          "type": {
+            "name": "String",
+            "type": "named"
+          },
+          "http": {
+            "name": "notification_id",
+            "in": "path",
+            "schema": {
+              "type": ["string"]
+            }
+          }
+        }
+      },
+      "description": "Export CSV of Events",
+      "result_type": {
+        "name": "ExportEventsSuccessResponse",
         "type": "named"
       }
     }
@@ -146,8 +187,8 @@
       "comparison_operators": {},
       "representation": {
         "one_of": [
-          "\u003e",
-          "\u003c",
+          ">",
+          "<",
           "=",
           "!=",
           "exists",

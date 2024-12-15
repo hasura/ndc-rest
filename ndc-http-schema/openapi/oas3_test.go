@@ -4,11 +4,8 @@ import (
 	"encoding/json"
 	"errors"
 	"os"
-	"reflect"
 	"testing"
 
-	"github.com/google/go-cmp/cmp"
-	"github.com/google/go-cmp/cmp/cmpopts"
 	"github.com/hasura/ndc-http/ndc-http-schema/schema"
 	"gotest.tools/v3/assert"
 )
@@ -129,9 +126,5 @@ func assertRESTSchemaEqual(t *testing.T, expected *schema.NDCHttpSchema, output 
 
 func assertDeepEqual(t *testing.T, expected any, reality any) {
 	t.Helper()
-	assert.DeepEqual(t,
-		expected, reality,
-		cmpopts.IgnoreUnexported(schema.ServerConfig{}, schema.NDCHttpSettings{}),
-		cmp.Exporter(func(t reflect.Type) bool { return true }),
-	)
+	assert.DeepEqual(t, expected, reality)
 }

@@ -174,7 +174,7 @@ func (cv *ConfigValidator) evaluateSchema(ndcSchema *NDCHttpRuntimeSchema) error
 		cv.validateTLS(ndcSchema.Name, "settings.tls", ndcSchema.Settings.TLS)
 	}
 
-	cv.validateArgumentPresets(ndcSchema.Name, "settings.argumentPresets", ndcSchema.Settings.ArgumentPresets)
+	cv.validateArgumentPresets(ndcSchema.Name, "settings.argumentPresets", ndcSchema.Settings.ArgumentPresets, true)
 
 	for i, server := range ndcSchema.Settings.Servers {
 		serverPath := fmt.Sprintf("settings.server[%d]", i)
@@ -207,15 +207,15 @@ func (cv *ConfigValidator) evaluateSchema(ndcSchema *NDCHttpRuntimeSchema) error
 			cv.validateTLS(ndcSchema.Name, serverPath+".tls", server.TLS)
 		}
 
-		cv.validateArgumentPresets(ndcSchema.Name, serverPath+".argumentPresets", server.ArgumentPresets)
+		cv.validateArgumentPresets(ndcSchema.Name, serverPath+".argumentPresets", server.ArgumentPresets, false)
 	}
 
 	return nil
 }
 
-func (cv *ConfigValidator) validateArgumentPresets(namespace string, key string, argumentPresets []schema.ArgumentPresetConfig) {
+func (cv *ConfigValidator) validateArgumentPresets(namespace string, key string, argumentPresets []schema.ArgumentPresetConfig, isGlobal bool) {
 	for i, preset := range argumentPresets {
-		_, _, err := ValidateArgumentPreset(cv.mergedSchema, preset)
+		_, _, err := ValidateArgumentPreset(cv.mergedSchema, preset, isGlobal)
 		if err != nil {
 			cv.addError(namespace, fmt.Sprintf("%s[%d]: %s", key, i, err))
 

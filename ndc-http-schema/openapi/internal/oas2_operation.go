@@ -54,16 +54,20 @@ func (oc *oas2OperationBuilder) BuildFunction(operation *v2.Operation, commonPar
 	}
 
 	description := oc.getOperationDescription(operation)
+	requestURL, arguments, err := evalOperationPath(oc.builder.schema, oc.pathKey, oc.Arguments)
+	if err != nil {
+		return nil, "", fmt.Errorf("%s: %w", funcName, err)
+	}
 	function := rest.OperationInfo{
 		Request: &rest.Request{
-			URL:         oc.pathKey,
+			URL:         requestURL,
 			Method:      "get",
 			RequestBody: reqBody,
 			Response:    *response,
 			Security:    convertSecurities(operation.Security),
 		},
 		Description: &description,
-		Arguments:   oc.Arguments,
+		Arguments:   arguments,
 		ResultType:  resultType.Encode(),
 	}
 
@@ -99,16 +103,20 @@ func (oc *oas2OperationBuilder) BuildProcedure(operation *v2.Operation, commonPa
 	}
 
 	description := oc.getOperationDescription(operation)
+	requestURL, arguments, err := evalOperationPath(oc.builder.schema, oc.pathKey, oc.Arguments)
+	if err != nil {
+		return nil, "", fmt.Errorf("%s: %w", procName, err)
+	}
 	procedure := rest.OperationInfo{
 		Request: &rest.Request{
-			URL:         oc.pathKey,
+			URL:         requestURL,
 			Method:      oc.method,
 			RequestBody: reqBody,
 			Security:    convertSecurities(operation.Security),
 			Response:    *response,
 		},
 		Description: &description,
-		Arguments:   oc.Arguments,
+		Arguments:   arguments,
 		ResultType:  resultType.Encode(),
 	}
 
@@ -316,13 +324,14 @@ func (oc *oas2OperationBuilder) convertResponse(operation *v2.Operation, fieldPa
 	}
 
 	// return nullable boolean type if the response content is null
-	if resp == nil || (resp.Schema == nil && statusCode == 204) {
-		scalarName := string(rest.ScalarBoolean)
-		if _, ok := oc.builder.schema.ScalarTypes[scalarName]; !ok {
-			oc.builder.schema.ScalarTypes[scalarName] = *defaultScalarTypes[rest.ScalarBoolean]
+	if resp == nil || resp.Schema == nil {
+		scalarName := rest.ScalarJSON
+		if statusCode == 204 {
+			scalarName = rest.ScalarBoolean
 		}
+		oc.builder.schema.AddScalar(string(scalarName), *defaultScalarTypes[scalarName])
 
-		return schema.NewNullableNamedType(scalarName), response, nil
+		return schema.NewNullableNamedType(string(scalarName)), response, nil
 	}
 
 	if resp.Schema == nil {

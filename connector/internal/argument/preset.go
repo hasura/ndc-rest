@@ -18,8 +18,8 @@ type ArgumentPreset struct {
 }
 
 // NewArgumentPreset create a new ArgumentPreset instance.
-func NewArgumentPreset(httpSchema *rest.NDCHttpSchema, preset rest.ArgumentPresetConfig) (*ArgumentPreset, error) {
-	jsonPath, targets, err := configuration.ValidateArgumentPreset(httpSchema, preset)
+func NewArgumentPreset(httpSchema *rest.NDCHttpSchema, preset rest.ArgumentPresetConfig, isGlobal bool) (*ArgumentPreset, error) {
+	jsonPath, targets, err := configuration.ValidateArgumentPreset(httpSchema, preset, isGlobal)
 	if err != nil {
 		return nil, err
 	}

@@ -13,13 +13,13 @@ type ArgumentPresets struct {
 }
 
 // NewArgumentPresets create a new ArgumentPresets instance.
-func NewArgumentPresets(httpSchema *rest.NDCHttpSchema, presets []rest.ArgumentPresetConfig) (*ArgumentPresets, error) {
+func NewArgumentPresets(httpSchema *rest.NDCHttpSchema, presets []rest.ArgumentPresetConfig, isGlobal bool) (*ArgumentPresets, error) {
 	result := &ArgumentPresets{
 		httpSchema: httpSchema,
 		presets:    nil,
 	}
 	for i, item := range presets {
-		preset, err := NewArgumentPreset(httpSchema, item)
+		preset, err := NewArgumentPreset(httpSchema, item, isGlobal)
 		if err != nil {
 			return nil, fmt.Errorf("%d: %w", i, err)
 		}

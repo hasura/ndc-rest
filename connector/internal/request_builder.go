@@ -129,7 +129,7 @@ func (c *RequestBuilder) buildRequestBody(request *RetryableRequest, rawRequest 
 
 			return nil
 		case contentType == rest.ContentTypeFormURLEncoded:
-			r, err := contenttype.NewURLParameterEncoder(c.Schema).Encode(&bodyInfo, bodyData)
+			r, err := contenttype.NewURLParameterEncoder(c.Schema, rest.ContentTypeFormURLEncoded).Encode(&bodyInfo, bodyData)
 			if err != nil {
 				return err
 			}
@@ -137,14 +137,16 @@ func (c *RequestBuilder) buildRequestBody(request *RetryableRequest, rawRequest 
 
 			return nil
 		case contentType == rest.ContentTypeJSON || contentType == "":
+			var buf bytes.Buffer
+			enc := json.NewEncoder(&buf)
+			enc.SetEscapeHTML(false)
 
-			bodyBytes, err := json.Marshal(bodyData)
-			if err != nil {
+			if err := enc.Encode(bodyData); err != nil {
 				return err
 			}
 
-			request.ContentLength = int64(len(bodyBytes))
-			request.Body = bytes.NewReader(bodyBytes)
+			request.ContentLength = int64(buf.Len())
+			request.Body = bytes.NewReader(buf.Bytes())
 
 			return nil
 		case contentType == rest.ContentTypeXML:
@@ -237,7 +239,7 @@ func (c *RequestBuilder) evalURLAndHeaderParameterBySchema(endpoint *url.URL, he
 	if argumentInfo.HTTP.Name != "" {
 		argumentKey = argumentInfo.HTTP.Name
 	}
-	queryParams, err := contenttype.NewURLParameterEncoder(c.Schema).EncodeParameterValues(&rest.ObjectField{
+	queryParams, err := contenttype.NewURLParameterEncoder(c.Schema, rest.ContentTypeFormURLEncoded).EncodeParameterValues(&rest.ObjectField{
 		ObjectField: schema.ObjectField{
 			Type: argumentInfo.Type,
 		},

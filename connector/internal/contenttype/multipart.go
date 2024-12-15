@@ -23,7 +23,7 @@ type MultipartFormEncoder struct {
 func NewMultipartFormEncoder(schema *rest.NDCHttpSchema, operation *rest.OperationInfo, arguments map[string]any) *MultipartFormEncoder {
 	return &MultipartFormEncoder{
 		schema:       schema,
-		paramEncoder: NewURLParameterEncoder(schema),
+		paramEncoder: NewURLParameterEncoder(schema, rest.ContentTypeMultipartFormData),
 		operation:    operation,
 		arguments:    arguments,
 	}

@@ -58,7 +58,7 @@ func (um *UpstreamManager) Register(ctx context.Context, runtimeSchema *configur
 	}
 
 	if len(runtimeSchema.Settings.ArgumentPresets) > 0 {
-		argumentPresets, err := argument.NewArgumentPresets(ndcSchema, runtimeSchema.Settings.ArgumentPresets)
+		argumentPresets, err := argument.NewArgumentPresets(ndcSchema, runtimeSchema.Settings.ArgumentPresets, true)
 		if err != nil {
 			return fmt.Errorf("%s: %w", namespace, err)
 		}
@@ -101,7 +101,7 @@ func (um *UpstreamManager) Register(ctx context.Context, runtimeSchema *configur
 		}
 
 		if len(server.ArgumentPresets) > 0 {
-			argumentPresets, err := argument.NewArgumentPresets(ndcSchema, server.ArgumentPresets)
+			argumentPresets, err := argument.NewArgumentPresets(ndcSchema, server.ArgumentPresets, false)
 			if err != nil {
 				return fmt.Errorf("%s.server[%s]: %w", namespace, serverID, err)
 			}

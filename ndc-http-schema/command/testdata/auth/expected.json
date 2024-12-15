@@ -6,52 +6,7 @@
         {
           "url": {
             "env": "PET_STORE_URL"
-          },
-          "securitySchemes": {
-            "api_key": {
-              "type": "apiKey",
-              "in": "header",
-              "name": "api_key",
-              "value": {
-                "env": "PET_STORE_API_KEY"
-              }
-            },
-            "basic": {
-              "type": "basic",
-              "header": "Authorization",
-              "username": {
-                "value": "user"
-              },
-              "password": {
-                "value": "password"
-              }
-            },
-            "bearer": {
-              "type": "http",
-              "header": "",
-              "scheme": "bearer",
-              "value": {
-                "env": "PET_STORE_BEARER_TOKEN"
-              }
-            },
-            "petstore_auth": {
-              "type": "oauth2",
-              "flows": {
-                "implicit": {
-                  "authorizationUrl": "https://petstore3.swagger.io/oauth/authorize",
-                  "scopes": {
-                    "read:pets": "read your pets",
-                    "write:pets": "modify pets in your account"
-                  }
-                }
-              }
-            }
-          },
-          "security": [
-            {
-              "api_key": []
-            }
-          ]
+          }
         }
       ],
       "securitySchemes": {

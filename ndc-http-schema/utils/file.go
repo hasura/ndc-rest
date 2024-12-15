@@ -26,6 +26,7 @@ func MarshalSchema(content any, format schema.SchemaFileFormat) ([]byte, error) 
 	case schema.SchemaFileJSON:
 		encoder := json.NewEncoder(&fileBuffer)
 		encoder.SetIndent("", "  ")
+		encoder.SetEscapeHTML(false)
 
 		if err := encoder.Encode(content); err != nil {
 			return nil, fmt.Errorf("failed to encode NDC HTTP schema: %w", err)
