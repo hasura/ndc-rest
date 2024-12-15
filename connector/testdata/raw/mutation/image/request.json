@@ -1,0 +1,13 @@
+{
+  "collection_relationships": {},
+  "operations": [
+    {
+      "type": "procedure",
+      "name": "sendHttpRequest",
+      "arguments": {
+        "method": "get",
+        "url": "https://github.githubassets.com/favicons/favicon.svg"
+      }
+    }
+  ]
+}

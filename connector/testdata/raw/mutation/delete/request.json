@@ -1,0 +1,13 @@
+{
+  "collection_relationships": {},
+  "operations": [
+    {
+      "type": "procedure",
+      "name": "sendHttpRequest",
+      "arguments": {
+        "method": "delete",
+        "url": "https://jsonplaceholder.typicode.com/posts/1"
+      }
+    }
+  ]
+}

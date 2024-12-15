@@ -2,6 +2,7 @@ package main
 
 import (
 	rest "github.com/hasura/ndc-http/connector"
+	"github.com/hasura/ndc-http/ndc-http-schema/version"
 	"github.com/hasura/ndc-sdk-go/connector"
 )
 
@@ -17,6 +18,7 @@ func main() {
 		rest.NewHTTPConnector(),
 		connector.WithMetricsPrefix("ndc_http"),
 		connector.WithDefaultServiceName("ndc_http"),
+		connector.WithVersion(version.BuildVersion),
 	); err != nil {
 		panic(err)
 	}

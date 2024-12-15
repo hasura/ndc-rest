@@ -173,6 +173,27 @@ type RetryPolicy struct {
 	HTTPStatus []int `json:"httpStatus,omitempty" mapstructure:"httpStatus" yaml:"httpStatus,omitempty"`
 }
 
+// Schema returns the object type schema of this type
+func (rp RetryPolicy) Schema() schema.ObjectType {
+	return schema.ObjectType{
+		Description: utils.ToPtr("Retry policy of request"),
+		Fields: schema.ObjectTypeFields{
+			"times": {
+				Description: utils.ToPtr("Number of retry times"),
+				Type:        schema.NewNamedType(string(ScalarInt32)).Encode(),
+			},
+			"delay": {
+				Description: utils.ToPtr("Delay retry delay in milliseconds"),
+				Type:        schema.NewNullableType(schema.NewNamedType(string(ScalarInt32))).Encode(),
+			},
+			"httpStatus": {
+				Description: utils.ToPtr("List of HTTP status the connector will retry on"),
+				Type:        schema.NewNullableType(schema.NewArrayType(schema.NewNamedType(string(ScalarInt32)))).Encode(),
+			},
+		},
+	}
+}
+
 // EncodingObject represents the [Encoding Object] that contains serialization strategy for application/x-www-form-urlencoded
 //
 // [Encoding Object]: https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#encoding-object

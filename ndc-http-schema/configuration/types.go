@@ -284,13 +284,6 @@ var distributedObjectType rest.ObjectType = rest.ObjectType{
 	},
 }
 
-var headersArguments = rest.ArgumentInfo{
-	ArgumentInfo: schema.ArgumentInfo{
-		Description: utils.ToPtr("Headers forwarded from the Hasura engine"),
-		Type:        schema.NewNullableNamedType(string(rest.ScalarJSON)).Encode(),
-	},
-}
-
 var httpSingleOptionsArgument = rest.ArgumentInfo{
 	ArgumentInfo: schema.ArgumentInfo{
 		Description: singleObjectType.Description,

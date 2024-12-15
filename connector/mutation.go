@@ -24,13 +24,16 @@ func (c *HTTPConnector) Mutation(ctx context.Context, configuration *configurati
 // MutationExplain explains a mutation by creating an execution plan.
 func (c *HTTPConnector) MutationExplain(ctx context.Context, configuration *configuration.Configuration, state *State, request *schema.MutationRequest) (*schema.ExplainResponse, error) {
 	if len(request.Operations) == 0 {
-		return &schema.ExplainResponse{
-			Details: schema.ExplainResponseDetails{},
-		}, nil
+		return nil, schema.BadRequestError("mutation operations must not be empty", nil)
 	}
+
 	operation := request.Operations[0]
 	switch operation.Type {
 	case schema.MutationOperationProcedure:
+		if operation.Name == internal.ProcedureSendHTTPRequest {
+			return internal.NewRawRequestBuilder(operation, configuration.ForwardHeaders).Explain()
+		}
+
 		requests, err := c.explainProcedure(&operation)
 		if err != nil {
 			return nil, err
@@ -106,7 +109,15 @@ func (c *HTTPConnector) execMutationOperation(parentCtx context.Context, state *
 	ctx, span := state.Tracer.Start(parentCtx, fmt.Sprintf("Execute Operation %d", index))
 	defer span.End()
 
-	requests, err := c.explainProcedure(&operation)
+	var requests *internal.RequestBuilderResults
+	var err error
+	if operation.Name == internal.ProcedureSendHTTPRequest {
+		requests, err = internal.NewRawRequestBuilder(operation, c.config.ForwardHeaders).Build()
+		requests.Operation = &c.procSendHttpRequest
+	} else {
+		requests, err = c.explainProcedure(&operation)
+	}
+
 	if err != nil {
 		span.SetStatus(codes.Error, "failed to explain mutation")
 		span.RecordError(err)

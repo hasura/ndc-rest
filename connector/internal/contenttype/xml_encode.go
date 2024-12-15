@@ -49,6 +49,23 @@ func (c *XMLEncoder) Encode(bodyInfo *rest.ArgumentInfo, bodyData any) ([]byte, 
 	return append([]byte(xml.Header), buf.Bytes()...), nil
 }
 
+// Encode marshals the arbitrary body to xml bytes.
+func (c *XMLEncoder) EncodeArbitrary(bodyData any) ([]byte, error) {
+	var buf bytes.Buffer
+	enc := xml.NewEncoder(&buf)
+
+	err := c.encodeSimpleScalar(enc, "xml", reflect.ValueOf(bodyData), nil, []string{})
+	if err != nil {
+		return nil, err
+	}
+
+	if err := enc.Flush(); err != nil {
+		return nil, err
+	}
+
+	return append([]byte(xml.Header), buf.Bytes()...), nil
+}
+
 func (c *XMLEncoder) evalXMLField(enc *xml.Encoder, name string, field rest.ObjectField, value any, fieldPaths []string) error {
 	rawType, err := field.Type.InterfaceT()
 	var innerValue reflect.Value
@@ -134,7 +151,7 @@ func (c *XMLEncoder) evalXMLField(enc *xml.Encoder, name string, field rest.Obje
 		}
 
 		if _, ok := c.schema.ScalarTypes[t.Name]; ok {
-			if err := c.encodeSimpleScalar(enc, xmlName, reflect.ValueOf(value), attributes); err != nil {
+			if err := c.encodeSimpleScalar(enc, xmlName, reflect.ValueOf(value), attributes, fieldPaths); err != nil {
 				return fmt.Errorf("%s: %w", strings.Join(fieldPaths, "."), err)
 			}
 
@@ -301,25 +318,113 @@ func (c *XMLEncoder) encodeXMLText(schemaType schema.Type, value reflect.Value, 
 	}
 }
 
-func (c *XMLEncoder) encodeSimpleScalar(enc *xml.Encoder, name string, value reflect.Value, attributes []xml.Attr) error {
-	str, err := StringifySimpleScalar(value, value.Kind())
-	if err != nil {
-		return err
+func (c *XMLEncoder) encodeSimpleScalar(enc *xml.Encoder, name string, reflectValue reflect.Value, attributes []xml.Attr, fieldPaths []string) error {
+	reflectValue, ok := utils.UnwrapPointerFromReflectValue(reflectValue)
+	if !ok {
+		return nil
 	}
 
-	err = enc.EncodeToken(xml.StartElement{
-		Name: xml.Name{Space: "", Local: name},
+	kind := reflectValue.Kind()
+	switch kind {
+	case reflect.Slice, reflect.Array:
+		if len(fieldPaths) == 0 {
+			err := enc.EncodeToken(xml.StartElement{
+				Name: xml.Name{Local: name},
+			})
+			if err != nil {
+				return err
+			}
+		}
+
+		for i := 0; i < reflectValue.Len(); i++ {
+			item := reflectValue.Index(i)
+			if err := c.encodeSimpleScalar(enc, name, item, attributes, append(fieldPaths, strconv.Itoa(i))); err != nil {
+				return err
+			}
+		}
+
+		if len(fieldPaths) == 0 {
+			err := enc.EncodeToken(xml.EndElement{
+				Name: xml.Name{Local: name},
+			})
+			if err != nil {
+				return err
+			}
+		}
+
+		return nil
+	case reflect.Map:
+		ri := reflectValue.Interface()
+		valueMap, ok := ri.(map[string]any)
+		if !ok {
+			return fmt.Errorf("%s: expected map[string]any, got: %v", strings.Join(fieldPaths, "."), ri)
+		}
+
+		return c.encodeScalarMap(enc, name, valueMap, attributes, fieldPaths)
+	case reflect.Interface:
+		ri := reflectValue.Interface()
+		valueMap, ok := ri.(map[string]any)
+		if ok {
+			return c.encodeScalarMap(enc, name, valueMap, attributes, fieldPaths)
+		}
+
+		return c.encodeScalarString(enc, name, reflectValue, kind, attributes, fieldPaths)
+	default:
+		return c.encodeScalarString(enc, name, reflectValue, kind, attributes, fieldPaths)
+	}
+}
+
+func (c *XMLEncoder) encodeScalarMap(enc *xml.Encoder, name string, valueMap map[string]any, attributes []xml.Attr, fieldPaths []string) error {
+	err := enc.EncodeToken(xml.StartElement{
+		Name: xml.Name{Local: name},
 		Attr: attributes,
 	})
 	if err != nil {
-		return err
+		return fmt.Errorf("%s: %w", strings.Join(fieldPaths, "."), err)
+	}
+
+	keys := utils.GetSortedKeys(valueMap)
+	for _, key := range keys {
+		item := valueMap[key]
+		if err := c.encodeSimpleScalar(enc, key, reflect.ValueOf(item), nil, append(fieldPaths, key)); err != nil {
+			return err
+		}
+	}
+
+	err = enc.EncodeToken(xml.EndElement{
+		Name: xml.Name{Local: name},
+	})
+	if err != nil {
+		return fmt.Errorf("%s: %w", strings.Join(fieldPaths, "."), err)
+	}
+
+	return nil
+}
+
+func (c *XMLEncoder) encodeScalarString(enc *xml.Encoder, name string, reflectValue reflect.Value, kind reflect.Kind, attributes []xml.Attr, fieldPaths []string) error {
+	str, err := StringifySimpleScalar(reflectValue, kind)
+	if err != nil {
+		return fmt.Errorf("%s: %w", strings.Join(fieldPaths, "."), err)
+	}
+
+	err = enc.EncodeToken(xml.StartElement{
+		Name: xml.Name{Local: name},
+		Attr: attributes,
+	})
+	if err != nil {
+		return fmt.Errorf("%s: %w", strings.Join(fieldPaths, "."), err)
 	}
 
 	if err := enc.EncodeToken(xml.CharData(str)); err != nil {
-		return err
+		return fmt.Errorf("%s: %w", strings.Join(fieldPaths, "."), err)
 	}
 
-	return enc.EncodeToken(xml.EndElement{
-		Name: xml.Name{Space: "", Local: name},
+	err = enc.EncodeToken(xml.EndElement{
+		Name: xml.Name{Local: name},
 	})
+	if err != nil {
+		return fmt.Errorf("%s: %w", strings.Join(fieldPaths, "."), err)
+	}
+
+	return nil
 }

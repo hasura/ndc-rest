@@ -33,7 +33,7 @@ func NewURLParameterEncoder(schema *rest.NDCHttpSchema, contentType string) *URL
 	}
 }
 
-func (c *URLParameterEncoder) Encode(bodyInfo *rest.ArgumentInfo, bodyData any) (io.ReadSeeker, error) {
+func (c *URLParameterEncoder) Encode(bodyInfo *rest.ArgumentInfo, bodyData any) (io.ReadSeeker, int64, error) {
 	queryParams, err := c.EncodeParameterValues(&rest.ObjectField{
 		ObjectField: schema.ObjectField{
 			Type: bodyInfo.Type,
@@ -41,11 +41,11 @@ func (c *URLParameterEncoder) Encode(bodyInfo *rest.ArgumentInfo, bodyData any) 
 		HTTP: bodyInfo.HTTP.Schema,
 	}, reflect.ValueOf(bodyData), []string{"body"})
 	if err != nil {
-		return nil, err
+		return nil, 0, err
 	}
 
 	if len(queryParams) == 0 {
-		return nil, nil
+		return nil, 0, nil
 	}
 	q := url.Values{}
 	for _, qp := range queryParams {
@@ -53,8 +53,31 @@ func (c *URLParameterEncoder) Encode(bodyInfo *rest.ArgumentInfo, bodyData any) 
 		EvalQueryParameterURL(&q, "", bodyInfo.HTTP.EncodingObject, keys, qp.Values())
 	}
 	rawQuery := EncodeQueryValues(q, true)
+	result := bytes.NewReader([]byte(rawQuery))
 
-	return bytes.NewReader([]byte(rawQuery)), nil
+	return result, result.Size(), nil
+}
+
+// Encode marshals the arbitrary body to xml bytes.
+func (c *URLParameterEncoder) EncodeArbitrary(bodyData any) (io.ReadSeeker, int64, error) {
+	queryParams, err := c.encodeParameterReflectionValues(reflect.ValueOf(bodyData), []string{"body"})
+	if err != nil {
+		return nil, 0, err
+	}
+
+	if len(queryParams) == 0 {
+		return nil, 0, nil
+	}
+	q := url.Values{}
+	encObject := rest.EncodingObject{}
+	for _, qp := range queryParams {
+		keys := qp.Keys()
+		EvalQueryParameterURL(&q, "", encObject, keys, qp.Values())
+	}
+	rawQuery := EncodeQueryValues(q, true)
+	result := bytes.NewReader([]byte(rawQuery))
+
+	return result, result.Size(), nil
 }
 
 func (c *URLParameterEncoder) EncodeParameterValues(objectField *rest.ObjectField, reflectValue reflect.Value, fieldPaths []string) (ParameterItems, error) {
@@ -382,6 +405,7 @@ func buildParamQueryKey(name string, encObject rest.EncodingObject, keys Keys, v
 	return strings.Join(resultKeys, "")
 }
 
+// EvalQueryParameterURL evaluate the query parameter URL
 func EvalQueryParameterURL(q *url.Values, name string, encObject rest.EncodingObject, keys Keys, values []string) {
 	if len(values) == 0 {
 		return
@@ -411,6 +435,7 @@ func EvalQueryParameterURL(q *url.Values, name string, encObject rest.EncodingOb
 	}
 }
 
+// EncodeQueryValues encode query values to string.
 func EncodeQueryValues(qValues url.Values, allowReserved bool) string {
 	if !allowReserved {
 		return qValues.Encode()
@@ -433,6 +458,7 @@ func EncodeQueryValues(qValues url.Values, allowReserved bool) string {
 	return builder.String()
 }
 
+// SetHeaderParameters set parameters to request headers
 func SetHeaderParameters(header *http.Header, param *rest.RequestParameter, queryParams ParameterItems) {
 	defaultParam := queryParams.FindDefault()
 	// the param is an array

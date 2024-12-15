@@ -1,0 +1,23 @@
+{
+  "collection_relationships": {},
+  "operations": [
+    {
+      "type": "procedure",
+      "name": "sendHttpRequest",
+      "arguments": {
+        "additionalHeaders": {
+          "Accept": "application/xml"
+        },
+        "body": null,
+        "method": "get",
+        "retry": {
+          "delay": 1000,
+          "httpStatus": [500],
+          "times": 1
+        },
+        "timeout": 30,
+        "url": "https://api.nbp.pl/api/cenyzlota/2013-01-01/2013-01-31"
+      }
+    }
+  ]
+}

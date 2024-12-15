@@ -44,6 +44,10 @@ func (c *XMLDecoder) Decode(r io.Reader, resultType schema.Type) (any, error) {
 				return nil, fmt.Errorf("failed to decode the xml result: %w", err)
 			}
 
+			if c.schema == nil {
+				return decodeArbitraryXMLBlock(xmlTree), nil
+			}
+
 			result, err := c.evalXMLField(xmlTree, "", rest.ObjectField{
 				ObjectField: schema.ObjectField{
 					Type: resultType,

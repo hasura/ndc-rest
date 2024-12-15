@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"log/slog"
 
+	"github.com/hasura/ndc-http/connector/internal"
 	"github.com/hasura/ndc-http/ndc-http-schema/configuration"
 	"github.com/hasura/ndc-sdk-go/schema"
 )
@@ -16,27 +17,29 @@ func (c *HTTPConnector) GetSchema(ctx context.Context, configuration *configurat
 
 // ApplyNDCHttpSchemas applies slice of raw NDC HTTP schemas to the connector
 func (c *HTTPConnector) ApplyNDCHttpSchemas(ctx context.Context, config *configuration.Configuration, schemas []configuration.NDCHttpRuntimeSchema, logger *slog.Logger) error {
-	ndcSchema, metadata, errs := configuration.MergeNDCHttpSchemas(config, schemas)
+	httpSchema, metadata, errs := configuration.MergeNDCHttpSchemas(config, schemas)
 	if len(errs) > 0 {
 		printSchemaValidationError(logger, errs)
-		if ndcSchema == nil || config.Strict {
+		if httpSchema == nil || config.Strict {
 			return errBuildSchemaFailed
 		}
 	}
 
 	for _, meta := range metadata {
-		if err := c.upstreams.Register(ctx, &meta, ndcSchema); err != nil {
+		if err := c.upstreams.Register(ctx, &meta, httpSchema); err != nil {
 			return err
 		}
 	}
 
-	schemaBytes, err := json.Marshal(ndcSchema.ToSchemaResponse())
+	ndcSchema, procSendHttp := internal.ApplyDefaultConnectorSchema(httpSchema.ToSchemaResponse(), config.ForwardHeaders)
+	schemaBytes, err := json.Marshal(ndcSchema)
 	if err != nil {
 		return err
 	}
 
 	c.metadata = metadata
 	c.rawSchema = schema.NewRawSchemaResponseUnsafe(schemaBytes)
+	c.procSendHttpRequest = procSendHttp
 
 	return nil
 }

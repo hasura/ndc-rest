@@ -12,6 +12,7 @@ import (
 	"github.com/hasura/ndc-http/ndc-http-schema/configuration"
 	"github.com/hasura/ndc-http/ndc-http-schema/schema"
 	rest "github.com/hasura/ndc-http/ndc-http-schema/schema"
+	"github.com/hasura/ndc-http/ndc-http-schema/version"
 	"github.com/hasura/ndc-sdk-go/connector"
 	"github.com/hasura/ndc-sdk-go/utils"
 )
@@ -130,6 +131,7 @@ func (um *UpstreamManager) ExecuteRequest(ctx context.Context, request *Retryabl
 		return nil, nil, err
 	}
 
+	req.Header.Set("User-Agent", "ndc-http/"+version.BuildVersion)
 	resp, err := httpClient.Do(req)
 	if err != nil {
 		cancel()

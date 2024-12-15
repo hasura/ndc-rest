@@ -35,6 +35,17 @@ definition:
             type: json
           aggregate_functions: {}
           comparison_operators: {}
+        RawHttpMethod:
+          representation:
+            type: enum
+            one_of:
+              - get
+              - post
+              - put
+              - patch
+              - delete
+          aggregate_functions: {}
+          comparison_operators: {}
         String:
           representation:
             type: string
@@ -156,6 +167,30 @@ definition:
                 underlying_type:
                   type: named
                   name: Int64
+        RetryPolicy:
+          description: Retry policy of request
+          fields:
+            delay:
+              description: Delay retry delay in milliseconds
+              type:
+                type: nullable
+                underlying_type:
+                  type: named
+                  name: Int32
+            httpStatus:
+              description: List of HTTP status the connector will retry on
+              type:
+                type: nullable
+                underlying_type:
+                  type: array
+                  element_type:
+                    type: named
+                    name: Int32
+            times:
+              description: Number of retry times
+              type:
+                type: named
+                name: Int32
         Todo:
           fields:
             completed:
@@ -707,6 +742,61 @@ definition:
           result_type:
             type: named
             name: Post
+        - name: sendHttpRequest
+          description: Send an HTTP request
+          arguments:
+            additionalHeaders:
+              description: Additional request headers
+              type:
+                type: nullable
+                underlying_type:
+                  type: named
+                  name: JSON
+            body:
+              description: Request body
+              type:
+                type: nullable
+                underlying_type:
+                  type: named
+                  name: JSON
+            headers:
+              description: Headers forwarded from the Hasura engine
+              type:
+                type: nullable
+                underlying_type:
+                  type: named
+                  name: JSON
+            method:
+              description: Request method
+              type:
+                type: nullable
+                underlying_type:
+                  type: named
+                  name: RawHttpMethod
+            retry:
+              description: Retry policy
+              type:
+                type: nullable
+                underlying_type:
+                  type: named
+                  name: RetryPolicy
+            timeout:
+              description: Request timeout in seconds
+              type:
+                type: nullable
+                underlying_type:
+                  type: named
+                  name: Int32
+            url:
+              description: Request URL
+              type:
+                type: named
+                name: String
+          result_type:
+            type: nullable
+            underlying_type:
+              type: named
+              name: JSON
     capabilities:
       version: 0.1.6
       capabilities:
