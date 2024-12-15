@@ -336,7 +336,7 @@ func (c *XMLEncoder) encodeSimpleScalar(enc *xml.Encoder, name string, reflectVa
 			}
 		}
 
-		for i := 0; i < reflectValue.Len(); i++ {
+		for i := range reflectValue.Len() {
 			item := reflectValue.Index(i)
 			if err := c.encodeSimpleScalar(enc, name, item, attributes, append(fieldPaths, strconv.Itoa(i))); err != nil {
 				return err
