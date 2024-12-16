@@ -1,6 +1,6 @@
 # Schemaless Requests
 
-## How it work
+## How it works
 
 The connector can be used as an HTTP proxy. You can send schemaless HTTP requests through the `sendHttpRequest` operation.
 
