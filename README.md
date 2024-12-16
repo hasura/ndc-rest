@@ -12,12 +12,13 @@ The connector can automatically transform OpenAPI 2.0 and 3.0 definitions to NDC
 
 - [No code. Configuration based](#configuration).
 - Composable API collections.
-- [Supported many API specifications](#supported-specs).
+- [Supported many API specifications](./docs/configuration.md#supported-specs).
 - [Supported authentication](./docs/authentication.md).
 - [Supported headers forwarding](./docs/authentication.md#headers-forwarding).
 - [Supported argument presets](./docs/argument_presets.md).
 - [Supported timeout and retry](#timeout-and-retry).
 - Supported concurrency and [sending distributed requests](./docs/distribution.md) to multiple servers.
+- [GraphQL-to-REST proxy](./docs/schemaless_request.md).
 
 **Supported request types**
 
@@ -55,96 +56,19 @@ The connector can automatically transform OpenAPI 2.0 and 3.0 definitions to NDC
 | OAuth 2.0       | ✅        | Built-in support for the `client_credentials` grant. Other grant types require forwarding access tokens from headers by the Hasura engine |
 | mTLS            | ✅        |                                                                                                                                           |
 
-## Quick start
+## Get Started
 
-Start the connector server at http://localhost:8080 using the [JSON Placeholder](https://jsonplaceholder.typicode.com/) APIs.
-
-```go
-go run ./server serve --configuration ./connector/testdata/jsonplaceholder
-```
+Follow the [Quick Start Guide](https://hasura.io/docs/3.0/getting-started/overview/) in Hasura DDN docs. At the `Connect to data` step, choose the `hasura/http` data connector from the dropdown. The connector template includes an example that is ready to run.
 
 ## Documentation
 
-- [NDC HTTP schema](./ndc-http-schema)
+- [Configuration](./docs/configuration.md)
 - [Authentication](./docs/authentication.md)
 - [Argument Presets](./docs/argument_presets.md)
+- [Schemaless Requests](./docs/schemaless_request.md)
 - [Distributed Execution](./docs/distribution.md)
 - [Recipes](https://github.com/hasura/ndc-http-recipes/tree/main): You can find or request pre-built configuration recipes of popular API services here.
-
-## Configuration
-
-The connector reads `config.{json,yaml}` file in the configuration folder. The file contains information about the schema file path and its specification:
-
-```yaml
-files:
-  - file: swagger.json
-    spec: openapi2
-  - file: openapi.yaml
-    spec: openapi3
-    trimPrefix: /v1
-    envPrefix: PET_STORE
-  - file: schema.json
-    spec: ndc
-```
-
-The config of each element follows the [config schema](https://github.com/hasura/ndc-http/ndc-http-schema/blob/main/config.example.yaml) of `ndc-http-schema`.
-
-You can add many API documentation files into the same connector.
-
-> [!IMPORTANT]
-> Conflicted object and scalar types will be ignored. Only the type of the first file is kept in the schema.
-
-### Supported specs
-
-#### OpenAPI
-
-HTTP connector supports both OpenAPI 2 and 3 specifications.
-
-- `oas3`/`openapi3`: OpenAPI 3.0/3.1.
-- `oas2`/`openapi2`: OpenAPI 2.0.
-
-#### HTTP Connector schema
-
-Enum: `ndc`
-
-HTTP schema is the native configuration schema which other specs will be converted to behind the scene. The schema extends the NDC Specification with HTTP configuration and can be converted from other specs by the [NDC HTTP schema CLI](./ndc-http-schema).
-
-### Timeout and retry
-
-The global timeout and retry strategy can be configured in each file:
-
-```yaml
-files:
-  - file: swagger.json
-    spec: oas2
-    timeout:
-      value: 30
-    retry:
-      times:
-        value: 1
-      delay:
-        # delay between each retry in milliseconds
-        value: 500
-      httpStatus: [429, 500, 502, 503]
-```
-
-### JSON Patch
-
-You can add JSON patches to extend API documentation files. HTTP connector supports `merge` and `json6902` strategies. JSON patches can be applied before or after the conversion from OpenAPI to HTTP schema configuration. It will be useful if you need to extend or fix some fields in the API documentation such as server URL.
-
-```yaml
-files:
-  - file: openapi.yaml
-    spec: oas3
-    patchBefore:
-      - path: patch-before.yaml
-        strategy: merge
-    patchAfter:
-      - path: patch-after.yaml
-        strategy: json6902
-```
-
-See [the example](./ndc-http-schema/command/testdata/patch) for more context.
+- [NDC HTTP schema](./ndc-http-schema)
 
 ## License
 
