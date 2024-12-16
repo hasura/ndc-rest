@@ -44,6 +44,35 @@
           }
         }
       }
+    },
+    "RetryPolicy": {
+      "description": "Retry policy of request",
+      "fields": {
+        "delay": {
+          "description": "Delay retry delay in milliseconds",
+          "type": {
+            "type": "nullable",
+            "underlying_type": { "name": "Int32", "type": "named" }
+          }
+        },
+        "httpStatus": {
+          "description": "List of HTTP status the connector will retry on",
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "element_type": { "name": "Int32", "type": "named" },
+              "type": "array"
+            }
+          }
+        },
+        "times": {
+          "description": "Number of retry times",
+          "type": {
+            "name": "Int32",
+            "type": "named"
+          }
+        }
+      }
     }
   },
   "procedures": [
@@ -64,6 +93,86 @@
       "description": "Add a new pet to the store",
       "name": "addPet",
       "result_type": { "name": "Pet", "type": "named" }
+    },
+    {
+      "name": "sendHttpRequest",
+      "description": "Send an HTTP request",
+      "arguments": {
+        "additionalHeaders": {
+          "description": "Additional request headers",
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "type": "named",
+              "name": "JSON"
+            }
+          }
+        },
+        "body": {
+          "description": "Request body",
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "type": "named",
+              "name": "JSON"
+            }
+          }
+        },
+        "headers": {
+          "description": "Headers forwarded from the Hasura engine",
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "type": "named",
+              "name": "JSON"
+            }
+          }
+        },
+        "method": {
+          "description": "Request method",
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "type": "named",
+              "name": "RawHttpMethod"
+            }
+          }
+        },
+        "retry": {
+          "description": "Retry policy",
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "type": "named",
+              "name": "RetryPolicy"
+            }
+          }
+        },
+        "timeout": {
+          "description": "Request timeout in seconds",
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "type": "named",
+              "name": "Int32"
+            }
+          }
+        },
+        "url": {
+          "description": "Request URL",
+          "type": {
+            "type": "named",
+            "name": "String"
+          }
+        }
+      },
+      "result_type": {
+        "type": "nullable",
+        "underlying_type": {
+          "type": "named",
+          "name": "JSON"
+        }
+      }
     }
   ],
   "scalar_types": {
@@ -72,15 +181,34 @@
       "comparison_operators": {},
       "representation": { "type": "int32" }
     },
-    "JSON": {
+    "Int32": {
+      "representation": {
+        "type": "int32"
+      },
       "aggregate_functions": {},
-      "comparison_operators": {},
-      "representation": { "type": "json" }
+      "comparison_operators": {}
+    },
+    "JSON": {
+      "representation": {
+        "type": "json"
+      },
+      "aggregate_functions": {},
+      "comparison_operators": {}
+    },
+    "RawHttpMethod": {
+      "representation": {
+        "type": "enum",
+        "one_of": ["get", "post", "put", "patch", "delete"]
+      },
+      "aggregate_functions": {},
+      "comparison_operators": {}
     },
     "String": {
+      "representation": {
+        "type": "string"
+      },
       "aggregate_functions": {},
-      "comparison_operators": {},
-      "representation": { "type": "string" }
+      "comparison_operators": {}
     }
   }
 }

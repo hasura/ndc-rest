@@ -2,11 +2,16 @@
 FROM golang:1.23 AS builder
 
 WORKDIR /app
+
+ARG VERSION
 COPY ndc-http-schema ./ndc-http-schema
 COPY go.mod go.sum go.work ./
 RUN go mod download
 COPY . .
-RUN CGO_ENABLED=0 go build -v -o ndc-cli ./server
+
+RUN CGO_ENABLED=0 go build \
+  -ldflags "-X github.com/hasura/ndc-http/ndc-http-schema/version.BuildVersion=${VERSION}" \
+  -v -o ndc-cli ./server
 
 # stage 2: production image
 FROM gcr.io/distroless/static-debian12:nonroot

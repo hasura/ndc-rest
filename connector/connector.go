@@ -9,18 +9,20 @@ import (
 
 	"github.com/hasura/ndc-http/connector/internal"
 	"github.com/hasura/ndc-http/ndc-http-schema/configuration"
+	rest "github.com/hasura/ndc-http/ndc-http-schema/schema"
 	"github.com/hasura/ndc-sdk-go/connector"
 	"github.com/hasura/ndc-sdk-go/schema"
 )
 
 // HTTPConnector implements the SDK interface of NDC specification
 type HTTPConnector struct {
-	config       *configuration.Configuration
-	metadata     internal.MetadataCollection
-	capabilities *schema.RawCapabilitiesResponse
-	rawSchema    *schema.RawSchemaResponse
-	httpClient   *http.Client
-	upstreams    *internal.UpstreamManager
+	config              *configuration.Configuration
+	metadata            internal.MetadataCollection
+	capabilities        *schema.RawCapabilitiesResponse
+	rawSchema           *schema.RawSchemaResponse
+	httpClient          *http.Client
+	upstreams           *internal.UpstreamManager
+	procSendHttpRequest rest.OperationInfo
 }
 
 // NewHTTPConnector creates a HTTP connector instance

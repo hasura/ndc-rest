@@ -51,6 +51,8 @@ jobs:
           tags: ${{ steps.docker-metadata.outputs.tags }}
           labels: ${{ steps.docker-metadata.outputs.labels }}
           platforms: linux/amd64,linux/arm64
+          build-args: |
+            VERSION=${{ steps.get-version.outputs.tagged_version }}
 
   build-cli-and-manifests:
     name: Build the CLI binaries and manifests

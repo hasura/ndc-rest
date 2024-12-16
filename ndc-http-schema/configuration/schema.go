@@ -330,7 +330,7 @@ func buildHeadersForwardingResponse(config *Configuration, restSchema *rest.NDCH
 
 func applyForwardingHeadersArgument(config *Configuration, info *rest.OperationInfo) {
 	if config.ForwardHeaders.Enabled && config.ForwardHeaders.ArgumentField != nil {
-		info.Arguments[*config.ForwardHeaders.ArgumentField] = headersArguments
+		info.Arguments[*config.ForwardHeaders.ArgumentField] = NewHeadersArgumentInfo()
 	}
 }
 
@@ -411,20 +411,7 @@ func validateRequestSchema(req *rest.Request, defaultMethod string) (*rest.Reque
 
 func createHeaderForwardingResponseTypes(restSchema *rest.NDCHttpSchema, operationName string, resultType schema.Type, settings *ForwardResponseHeadersSettings) schema.Type {
 	objectName := restUtils.ToPascalCase(operationName) + "HeadersResponse"
-	objectType := rest.ObjectType{
-		Fields: map[string]rest.ObjectField{
-			settings.HeadersField: {
-				ObjectField: schema.ObjectField{
-					Type: schema.NewNullableNamedType(string(rest.ScalarJSON)).Encode(),
-				},
-			},
-			settings.ResultField: {
-				ObjectField: schema.ObjectField{
-					Type: resultType,
-				},
-			},
-		},
-	}
+	objectType := NewHeaderForwardingResponseObjectType(resultType, settings)
 
 	restSchema.ObjectTypes[objectName] = objectType
 
@@ -442,5 +429,33 @@ func cloneOperationInfo(operation rest.OperationInfo, req *rest.Request) rest.Op
 		Arguments:   args,
 		Description: operation.Description,
 		ResultType:  operation.ResultType,
+	}
+}
+
+// NewHeaderForwardingResponseObjectType creates a new type for header forwarding response.
+func NewHeaderForwardingResponseObjectType(resultType schema.Type, settings *ForwardResponseHeadersSettings) rest.ObjectType {
+	return rest.ObjectType{
+		Fields: map[string]rest.ObjectField{
+			settings.HeadersField: {
+				ObjectField: schema.ObjectField{
+					Type: schema.NewNullableNamedType(string(rest.ScalarJSON)).Encode(),
+				},
+			},
+			settings.ResultField: {
+				ObjectField: schema.ObjectField{
+					Type: resultType,
+				},
+			},
+		},
+	}
+}
+
+// NewHeadersArgumentInfo creates a new forwarding headers argument information
+func NewHeadersArgumentInfo() rest.ArgumentInfo {
+	return rest.ArgumentInfo{
+		ArgumentInfo: schema.ArgumentInfo{
+			Description: utils.ToPtr("Headers forwarded from the Hasura engine"),
+			Type:        schema.NewNullableNamedType(string(rest.ScalarJSON)).Encode(),
+		},
 	}
 }

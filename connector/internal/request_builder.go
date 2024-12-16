@@ -129,14 +129,15 @@ func (c *RequestBuilder) buildRequestBody(request *RetryableRequest, rawRequest 
 
 			return nil
 		case contentType == rest.ContentTypeFormURLEncoded:
-			r, err := contenttype.NewURLParameterEncoder(c.Schema, rest.ContentTypeFormURLEncoded).Encode(&bodyInfo, bodyData)
+			r, size, err := contenttype.NewURLParameterEncoder(c.Schema, rest.ContentTypeFormURLEncoded).Encode(&bodyInfo, bodyData)
 			if err != nil {
 				return err
 			}
 			request.Body = r
+			request.ContentLength = size
 
 			return nil
-		case contentType == rest.ContentTypeJSON || contentType == "":
+		case contentType == rest.ContentTypeJSON || contentType == "" || strings.HasSuffix(contentType, "+json"):
 			var buf bytes.Buffer
 			enc := json.NewEncoder(&buf)
 			enc.SetEscapeHTML(false)
@@ -149,7 +150,7 @@ func (c *RequestBuilder) buildRequestBody(request *RetryableRequest, rawRequest 
 			request.Body = bytes.NewReader(buf.Bytes())
 
 			return nil
-		case contentType == rest.ContentTypeXML:
+		case contentType == rest.ContentTypeXML || strings.HasSuffix(contentType, "+xml"):
 			bodyBytes, err := contenttype.NewXMLEncoder(c.Schema).Encode(&bodyInfo, bodyData)
 			if err != nil {
 				return err

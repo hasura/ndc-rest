@@ -692,7 +692,7 @@ func TestCreateFormURLEncoded(t *testing.T) {
 			assert.NilError(t, json.Unmarshal([]byte(tc.RawArguments), &arguments))
 			argumentInfo := info.Arguments["body"]
 			builder := NewURLParameterEncoder(ndcSchema, rest.ContentTypeFormURLEncoded)
-			buf, err := builder.Encode(&argumentInfo, arguments["body"])
+			buf, _, err := builder.Encode(&argumentInfo, arguments["body"])
 			assert.NilError(t, err)
 			result, err := io.ReadAll(buf)
 			assert.NilError(t, err)

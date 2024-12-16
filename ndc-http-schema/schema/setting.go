@@ -78,7 +78,7 @@ func (ss *ServerConfig) Validate() error {
 		return errors.New("url is required for server")
 	}
 
-	_, err = parseHttpURL(rawURL)
+	_, err = ParseHttpURL(rawURL)
 	if err != nil {
 		return fmt.Errorf("server url: %w", err)
 	}
@@ -98,7 +98,7 @@ func (ss ServerConfig) GetURL() (*url.URL, error) {
 	if err != nil {
 		return nil, err
 	}
-	urlValue, err := parseHttpURL(rawURL)
+	urlValue, err := ParseHttpURL(rawURL)
 	if err != nil {
 		return nil, fmt.Errorf("server url: %w", err)
 	}
@@ -386,8 +386,8 @@ func (apv ArgumentPresetValueForwardHeader) GetType() ArgumentPresetValueType {
 	return apv.Type
 }
 
-// parseHttpURL parses and validate if the URL has HTTP scheme
-func parseHttpURL(input string) (*url.URL, error) {
+// ParseHttpURL parses and validate if the URL has HTTP scheme
+func ParseHttpURL(input string) (*url.URL, error) {
 	if !strings.HasPrefix(input, "https://") && !strings.HasPrefix(input, "http://") {
 		return nil, errors.New("invalid HTTP URL " + input)
 	}
@@ -400,7 +400,7 @@ func ParseRelativeOrHttpURL(input string) (*url.URL, error) {
 		return &url.URL{Path: input}, nil
 	}
 
-	return parseHttpURL(input)
+	return ParseHttpURL(input)
 }
 
 func getStringFromAnyMap(input map[string]any, key string) (string, error) {

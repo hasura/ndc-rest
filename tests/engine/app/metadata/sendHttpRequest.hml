@@ -1,0 +1,79 @@
+---
+kind: ObjectType
+version: v1
+definition:
+  name: RetryPolicy
+  description: Retry policy of request
+  fields:
+    - name: delay
+      type: Int32
+      description: Delay retry delay in milliseconds
+    - name: httpStatus
+      type: "[Int32!]"
+      description: List of HTTP status the connector will retry on
+    - name: times
+      type: Int32!
+      description: Number of retry times
+  graphql:
+    typeName: RetryPolicy
+    inputTypeName: RetryPolicy_input
+  dataConnectorTypeMapping:
+    - dataConnectorName: myapi
+      dataConnectorObjectType: RetryPolicy
+
+---
+kind: TypePermissions
+version: v1
+definition:
+  typeName: RetryPolicy
+  permissions:
+    - role: admin
+      output:
+        allowedFields:
+          - delay
+          - httpStatus
+          - times
+
+---
+kind: Command
+version: v1
+definition:
+  name: sendHttpRequest
+  outputType: JSON
+  arguments:
+    - name: additionalHeaders
+      type: JSON
+      description: Additional request headers
+    - name: body
+      type: JSON
+      description: Request body
+    - name: method
+      type: RawHttpMethod
+      description: Request method
+    - name: retry
+      type: RetryPolicy
+      description: Retry policy
+    - name: timeout
+      type: Int32
+      description: Request timeout in seconds
+    - name: url
+      type: String!
+      description: Request URL
+  source:
+    dataConnectorName: myapi
+    dataConnectorCommand:
+      procedure: sendHttpRequest
+  graphql:
+    rootFieldName: sendHttpRequest
+    rootFieldKind: Mutation
+  description: Send an HTTP request
+
+---
+kind: CommandPermissions
+version: v1
+definition:
+  commandName: sendHttpRequest
+  permissions:
+    - role: admin
+      allowExecution: true
+

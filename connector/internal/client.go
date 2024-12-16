@@ -292,6 +292,12 @@ func (client *HTTPClient) doRequest(ctx context.Context, request *RetryableReque
 		attribute.String("network.protocol.name", "http"),
 	)
 
+	var namespace string
+	if client.requests.Schema != nil && client.requests.Schema.Name != "" {
+		namespace = client.requests.Schema.Name
+		span.SetAttributes(attribute.String("db.namespace", namespace))
+	}
+
 	if request.ContentLength > 0 {
 		span.SetAttributes(attribute.Int64("http.request.body.size", request.ContentLength))
 	}
@@ -301,8 +307,7 @@ func (client *HTTPClient) doRequest(ctx context.Context, request *RetryableReque
 	setHeaderAttributes(span, "http.request.header.", request.Headers)
 
 	client.propagator.Inject(ctx, propagation.HeaderCarrier(request.Headers))
-
-	resp, cancel, err := client.manager.ExecuteRequest(ctx, request, client.requests.Schema.Name)
+	resp, cancel, err := client.manager.ExecuteRequest(ctx, request, namespace)
 	if err != nil {
 		span.SetStatus(codes.Error, "error happened when executing the request")
 		span.RecordError(err)
@@ -371,7 +376,7 @@ func (client *HTTPClient) evalHTTPResponse(ctx context.Context, span trace.Span,
 
 	var result any
 	switch {
-	case strings.HasPrefix(contentType, "text/"):
+	case strings.HasPrefix(contentType, "text/") || strings.HasPrefix(contentType, "image/svg"):
 		respBody, err := io.ReadAll(resp.Body)
 		if err != nil {
 			return nil, nil, schema.NewConnectorError(http.StatusInternalServerError, err.Error(), nil)
@@ -412,13 +417,18 @@ func (client *HTTPClient) evalHTTPResponse(ctx context.Context, span trace.Span,
 			}
 		}
 
-		responseType, extractErr := client.extractResultType(resultType)
-		if extractErr != nil {
-			return nil, nil, extractErr
+		var err error
+		if client.requests.Schema == nil || client.requests.Schema.NDCHttpSchema == nil {
+			err = json.NewDecoder(resp.Body).Decode(&result)
+		} else {
+			responseType, extractErr := client.extractResultType(resultType)
+			if extractErr != nil {
+				return nil, nil, extractErr
+			}
+
+			result, err = contenttype.NewJSONDecoder(client.requests.Schema.NDCHttpSchema).Decode(resp.Body, responseType)
 		}
 
-		var err error
-		result, err = contenttype.NewJSONDecoder(client.requests.Schema.NDCHttpSchema).Decode(resp.Body, responseType)
 		if err != nil {
 			return nil, nil, schema.NewConnectorError(http.StatusInternalServerError, err.Error(), nil)
 		}

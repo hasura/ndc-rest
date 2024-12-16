@@ -57,6 +57,7 @@ func (mfb *MultipartFormEncoder) evalMultipartForm(w *MultipartWriter, bodyInfo 
 	if !ok {
 		return nil
 	}
+
 	switch bodyType := bodyInfo.Type.Interface().(type) {
 	case *schema.NullableType:
 		return mfb.evalMultipartForm(w, &rest.ArgumentInfo{
@@ -73,6 +74,7 @@ func (mfb *MultipartFormEncoder) evalMultipartForm(w *MultipartWriter, bodyInfo 
 		if !ok {
 			break
 		}
+
 		kind := bodyData.Kind()
 		switch kind {
 		case reflect.Map, reflect.Interface:
@@ -275,4 +277,53 @@ func (mfb *MultipartFormEncoder) evalEncodingHeaders(encHeaders map[string]rest.
 	}
 
 	return results, nil
+}
+
+// EncodeArbitrary encodes the unknown data to multipart/form.
+func (c *MultipartFormEncoder) EncodeArbitrary(bodyData any) (*bytes.Reader, string, error) {
+	buffer := new(bytes.Buffer)
+	writer := NewMultipartWriter(buffer)
+
+	reflectValue, ok := utils.UnwrapPointerFromReflectValue(reflect.ValueOf(bodyData))
+	if ok {
+		valueMap, ok := reflectValue.Interface().(map[string]any)
+		if !ok {
+			return nil, "", fmt.Errorf("invalid body for multipart/form, expected object, got: %s", reflectValue.Kind())
+		}
+
+		for key, value := range valueMap {
+			if err := c.evalFormDataReflection(writer, key, reflect.ValueOf(value)); err != nil {
+				return nil, "", fmt.Errorf("invalid body for multipart/form, %s: %w", key, err)
+			}
+		}
+	}
+
+	if err := writer.Close(); err != nil {
+		return nil, "", err
+	}
+
+	reader := bytes.NewReader(buffer.Bytes())
+	buffer.Reset()
+
+	return reader, writer.FormDataContentType(), nil
+}
+
+func (c *MultipartFormEncoder) evalFormDataReflection(w *MultipartWriter, key string, reflectValue reflect.Value) error {
+	reflectValue, ok := utils.UnwrapPointerFromReflectValue(reflectValue)
+	if !ok {
+		return nil
+	}
+
+	kind := reflectValue.Kind()
+	switch kind {
+	case reflect.Map, reflect.Struct, reflect.Array, reflect.Slice:
+		return w.WriteJSON(key, reflectValue.Interface(), http.Header{})
+	default:
+		value, err := StringifySimpleScalar(reflectValue, kind)
+		if err != nil {
+			return err
+		}
+
+		return w.WriteField(key, value, http.Header{})
+	}
 }

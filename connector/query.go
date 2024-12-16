@@ -159,17 +159,6 @@ func (c *HTTPConnector) serializeExplainResponse(ctx context.Context, requests *
 		explainResp.Details["body"] = string(bodyBytes)
 	}
 
-	if httpRequest.Body != nil {
-		bodyBytes, err := io.ReadAll(httpRequest.Body)
-		if err != nil {
-			return nil, schema.InternalServerError("failed to read request body", map[string]any{
-				"cause": err.Error(),
-			})
-		}
-		httpRequest.Body = nil
-		explainResp.Details["body"] = string(bodyBytes)
-	}
-
 	req, cancel, err := httpRequest.CreateRequest(ctx)
 	if err != nil {
 		return nil, err
@@ -177,9 +166,9 @@ func (c *HTTPConnector) serializeExplainResponse(ctx context.Context, requests *
 	defer cancel()
 
 	// mask sensitive forwarded headers if exists
-	for key := range req.Header {
+	for key, value := range req.Header {
 		if internal.IsSensitiveHeader(key) {
-			req.Header.Set(key, restUtils.MaskString(req.Header.Get(key)))
+			req.Header.Set(key, restUtils.MaskString(value[0]))
 		}
 	}
 

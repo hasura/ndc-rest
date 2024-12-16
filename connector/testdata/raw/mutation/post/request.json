@@ -1,0 +1,19 @@
+{
+  "collection_relationships": {},
+  "operations": [
+    {
+      "type": "procedure",
+      "name": "sendHttpRequest",
+      "arguments": {
+        "body": {
+          "id": 101,
+          "title": "Hello world",
+          "userId": 10,
+          "body": "A test post"
+        },
+        "method": "post",
+        "url": "https://jsonplaceholder.typicode.com/posts"
+      }
+    }
+  ]
+}
