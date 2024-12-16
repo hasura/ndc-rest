@@ -293,7 +293,7 @@ func (client *HTTPClient) doRequest(ctx context.Context, request *RetryableReque
 	)
 
 	var namespace string
-	if client.requests.Schema != nil {
+	if client.requests.Schema != nil && client.requests.Schema.Name != "" {
 		namespace = client.requests.Schema.Name
 		span.SetAttributes(attribute.String("db.namespace", namespace))
 	}
