@@ -212,6 +212,15 @@
             }
           }
         },
+        "excluded_segments": {
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "JSON",
+              "type": "named"
+            }
+          }
+        },
         "filters": {
           "type": {
             "type": "nullable",
@@ -242,6 +251,27 @@
             }
           }
         },
+        "include_player_ids": {
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "element_type": {
+                "name": "String",
+                "type": "named"
+              },
+              "type": "array"
+            }
+          }
+        },
+        "included_segments": {
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "JSON",
+              "type": "named"
+            }
+          }
+        },
         "send_after": {
           "type": {
             "type": "nullable",
@@ -256,6 +286,15 @@
             "type": "nullable",
             "underlying_type": {
               "name": "HasuraStringMap",
+              "type": "named"
+            }
+          }
+        },
+        "target_channel": {
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "HasuraPlayerNotificationTargetTargetChannel",
               "type": "named"
             }
           }
@@ -663,8 +702,8 @@
       "comparison_operators": {},
       "representation": {
         "one_of": [
-          "\u003e",
-          "\u003c",
+          ">",
+          "<",
           "=",
           "!=",
           "exists",

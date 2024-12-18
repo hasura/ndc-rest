@@ -335,6 +335,78 @@ func isNullableType(input schema.TypeEncoder) bool {
 	return ok
 }
 
+func mergeUnionTypes(httpSchema *rest.NDCHttpSchema, a schema.Type, b schema.Type, prefix string) (schema.TypeEncoder, bool) {
+	switch at := a.Interface().(type) {
+	case *schema.NullableType:
+		bt, err := b.AsNullable()
+		buType := b
+		if err == nil {
+			buType = bt.UnderlyingType
+		}
+
+		ut, ok := mergeUnionTypes(httpSchema, at.UnderlyingType, buType, prefix)
+		if ok {
+			return schema.NewNullableType(ut), false
+		}
+
+		return schema.NewNullableType(schema.NewNamedType(string(rest.ScalarJSON))), false
+	case *schema.ArrayType:
+		bt, err := b.AsArray()
+		if err == nil {
+			ut, ok := mergeUnionTypes(httpSchema, at.ElementType, bt.ElementType, prefix)
+			if ok {
+				return schema.NewNullableType(ut), false
+			}
+		}
+	case *schema.NamedType:
+		bt, err := b.AsNamed()
+		if err != nil {
+			break
+		}
+
+		if at.Name == bt.Name {
+			return at, true
+		}
+
+		// if both types are enum scalars, a new enum scalar is created with the merged value set of both enums.
+		scalarA, ok := httpSchema.ScalarTypes[at.Name]
+		if !ok {
+			break
+		}
+		enumA, err := scalarA.Representation.AsEnum()
+		if err != nil {
+			break
+		}
+
+		scalarB, ok := httpSchema.ScalarTypes[bt.Name]
+		if !ok {
+			break
+		}
+		enumB, err := scalarB.Representation.AsEnum()
+		if err != nil {
+			break
+		}
+
+		enumMap := make(map[string]bool)
+		for _, v := range enumA.OneOf {
+			enumMap[v] = true
+		}
+		for _, v := range enumB.OneOf {
+			enumMap[v] = true
+		}
+		enumValues := sdkUtils.GetSortedKeys(enumMap)
+		newScalar := schema.NewScalarType()
+		newScalar.Representation = schema.NewTypeRepresentationEnum(enumValues).Encode()
+
+		newName := utils.StringSliceToPascalCase([]string{prefix, "Enum"}) + "_" + strings.Join(enumValues, "_")
+		httpSchema.ScalarTypes[newName] = *newScalar
+
+		return schema.NewNamedType(newName), true
+	}
+
+	return schema.NewNamedType(string(rest.ScalarJSON)), false
+}
+
 // encodeHeaderArgumentName encodes header key to NDC schema field name
 func encodeHeaderArgumentName(name string) string {
 	return "header" + utils.ToPascalCase(name)

@@ -288,7 +288,7 @@
       "description": "Search in projects or in packages.",
       "name": "getSearchXml",
       "result_type": {
-        "name": "JSON",
+        "name": "GetSearchXmlResult",
         "type": "named"
       }
     },
@@ -679,6 +679,152 @@
           "type": {
             "name": "String",
             "type": "named"
+          }
+        }
+      }
+    },
+    "GetSearchXmlResult": {
+      "fields": {
+        "matches": {
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "Int32",
+              "type": "named"
+            }
+          }
+        },
+        "package": {
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "element_type": {
+                "name": "GetSearchXmlResult1Package",
+                "type": "named"
+              },
+              "type": "array"
+            }
+          }
+        },
+        "project": {
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "element_type": {
+                "name": "GetSearchXmlResult0Project",
+                "type": "named"
+              },
+              "type": "array"
+            }
+          }
+        }
+      }
+    },
+    "GetSearchXmlResult0Project": {
+      "fields": {
+        "description": {
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "String",
+              "type": "named"
+            }
+          }
+        },
+        "name": {
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "String",
+              "type": "named"
+            }
+          }
+        },
+        "person": {
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "GetSearchXmlResult0ProjectPerson",
+              "type": "named"
+            }
+          }
+        },
+        "title": {
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "String",
+              "type": "named"
+            }
+          }
+        }
+      }
+    },
+    "GetSearchXmlResult0ProjectPerson": {
+      "fields": {
+        "role": {
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "String",
+              "type": "named"
+            }
+          }
+        },
+        "userid": {
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "String",
+              "type": "named"
+            }
+          }
+        },
+        "xmlValue": {
+          "description": "Value of the xml field",
+          "type": {
+            "name": "String",
+            "type": "named"
+          }
+        }
+      }
+    },
+    "GetSearchXmlResult1Package": {
+      "fields": {
+        "description": {
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "String",
+              "type": "named"
+            }
+          }
+        },
+        "name": {
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "String",
+              "type": "named"
+            }
+          }
+        },
+        "project": {
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "String",
+              "type": "named"
+            }
+          }
+        },
+        "title": {
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "String",
+              "type": "named"
+            }
           }
         }
       }
