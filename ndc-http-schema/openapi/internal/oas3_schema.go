@@ -126,7 +126,11 @@ func (oc *oas3SchemaBuilder) getSchemaType(typeSchema *base.Schema, fieldPaths [
 		if oc.builder.Strict {
 			return nil, nil, errParameterSchemaEmpty(fieldPaths)
 		}
+
 		result = oc.builder.buildScalarJSON()
+		if typeSchema.Nullable != nil && *typeSchema.Nullable {
+			result = schema.NewNullableType(result)
+		}
 
 		return result, createSchemaFromOpenAPISchema(typeSchema), nil
 	}
@@ -203,7 +207,12 @@ func (oc *oas3SchemaBuilder) evalObjectType(baseSchema *base.Schema, forceProper
 			return nil, nil, nil
 		}
 		// treat no-property objects as a JSON scalar
-		return oc.builder.buildScalarJSON(), typeResult, nil
+		var scalarType schema.TypeEncoder = oc.builder.buildScalarJSON()
+		if baseSchema.Nullable != nil && *baseSchema.Nullable {
+			scalarType = schema.NewNullableType(scalarType)
+		}
+
+		return scalarType, typeResult, nil
 	}
 
 	var result schema.TypeEncoder
@@ -322,6 +331,7 @@ func (oc *oas3SchemaBuilder) buildUnionSchemaType(baseSchema *base.Schema, schem
 
 		return typeEncoder, typeSchema, nil
 	}
+
 	switch len(proxies) {
 	case 0:
 		if len(baseSchema.Type) > 1 || isPrimitiveScalar(baseSchema.Type) {

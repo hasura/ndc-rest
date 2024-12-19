@@ -442,7 +442,7 @@
       "arguments": {},
       "description": "Returns pet inventories by status",
       "result_type": {
-        "name": "GetInventoryResult",
+        "name": "JSON",
         "type": "named"
       }
     },
@@ -2873,13 +2873,6 @@
       "comparison_operators": {},
       "representation": {
         "type": "float64"
-      }
-    },
-    "GetInventoryResult": {
-      "aggregate_functions": {},
-      "comparison_operators": {},
-      "representation": {
-        "type": "json"
       }
     },
     "Int32": {
