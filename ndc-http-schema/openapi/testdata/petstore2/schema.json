@@ -273,11 +273,8 @@
       "description": "Explore details about a given subject node",
       "name": "get_subject",
       "result_type": {
-        "type": "nullable",
-        "underlying_type": {
-          "name": "JSON",
-          "type": "named"
-        }
+        "name": "JSON",
+        "type": "named"
       }
     },
     {
@@ -1351,11 +1348,8 @@
       "description": "Add a new pet to the store",
       "name": "addPet",
       "result_type": {
-        "type": "nullable",
-        "underlying_type": {
-          "name": "JSON",
-          "type": "named"
-        }
+        "name": "JSON",
+        "type": "named"
       }
     },
     {
@@ -1380,11 +1374,8 @@
       "description": "Delete purchase order by ID",
       "name": "deleteOrder",
       "result_type": {
-        "type": "nullable",
-        "underlying_type": {
-          "name": "JSON",
-          "type": "named"
-        }
+        "name": "JSON",
+        "type": "named"
       }
     },
     {
@@ -1409,11 +1400,8 @@
       "description": "Deletes a pet",
       "name": "deletePet",
       "result_type": {
-        "type": "nullable",
-        "underlying_type": {
-          "name": "JSON",
-          "type": "named"
-        }
+        "name": "JSON",
+        "type": "named"
       }
     },
     {
@@ -1429,11 +1417,8 @@
       "description": "Delete user",
       "name": "deleteUser",
       "result_type": {
-        "type": "nullable",
-        "underlying_type": {
-          "name": "JSON",
-          "type": "named"
-        }
+        "name": "JSON",
+        "type": "named"
       }
     },
     {
@@ -1482,11 +1467,8 @@
       "description": "PUT /pet/xml",
       "name": "putPetXml",
       "result_type": {
-        "type": "nullable",
-        "underlying_type": {
-          "name": "JSON",
-          "type": "named"
-        }
+        "name": "JSON",
+        "type": "named"
       }
     },
     {
@@ -1502,11 +1484,8 @@
       "description": "Update an existing pet",
       "name": "updatePet",
       "result_type": {
-        "type": "nullable",
-        "underlying_type": {
-          "name": "JSON",
-          "type": "named"
-        }
+        "name": "JSON",
+        "type": "named"
       }
     },
     {
@@ -1529,11 +1508,8 @@
       "description": "Updates a pet in the store with form data",
       "name": "updatePetWithForm",
       "result_type": {
-        "type": "nullable",
-        "underlying_type": {
-          "name": "JSON",
-          "type": "named"
-        }
+        "name": "JSON",
+        "type": "named"
       }
     },
     {
@@ -1556,11 +1532,8 @@
       "description": "Updated user",
       "name": "updateUser",
       "result_type": {
-        "type": "nullable",
-        "underlying_type": {
-          "name": "JSON",
-          "type": "named"
-        }
+        "name": "JSON",
+        "type": "named"
       }
     },
     {

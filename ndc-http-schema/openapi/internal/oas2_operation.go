@@ -3,6 +3,7 @@ package internal
 import (
 	"fmt"
 	"log/slog"
+	"net/http"
 	"slices"
 	"strconv"
 	"strings"
@@ -325,13 +326,19 @@ func (oc *oas2OperationBuilder) convertResponse(operation *v2.Operation, fieldPa
 
 	// return nullable boolean type if the response content is null
 	if resp == nil || resp.Schema == nil {
-		scalarName := rest.ScalarJSON
-		if statusCode == 204 {
-			scalarName = rest.ScalarBoolean
-		}
-		oc.builder.schema.AddScalar(string(scalarName), *defaultScalarTypes[scalarName])
+		if statusCode == http.StatusNoContent {
+			scalarName := rest.ScalarBoolean
+			oc.builder.schema.AddScalar(string(scalarName), *defaultScalarTypes[scalarName])
 
-		return schema.NewNullableNamedType(string(scalarName)), response, nil
+			return schema.NewNullableNamedType(string(scalarName)), response, nil
+		}
+
+		if contentType != "" {
+			scalarName := guessScalarResultTypeFromContentType(contentType)
+			oc.builder.schema.AddScalar(string(scalarName), *defaultScalarTypes[scalarName])
+
+			return schema.NewNamedType(string(scalarName)), response, nil
+		}
 	}
 
 	if resp.Schema == nil {

@@ -315,6 +315,15 @@
             }
           }
         },
+        "excluded_segments": {
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "JSON",
+              "type": "named"
+            }
+          }
+        },
         "filters": {
           "type": {
             "type": "nullable",
@@ -345,6 +354,15 @@
             }
           }
         },
+        "included_segments": {
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "JSON",
+              "type": "named"
+            }
+          }
+        },
         "send_after": {
           "type": {
             "type": "nullable",
@@ -359,6 +377,15 @@
             "type": "nullable",
             "underlying_type": {
               "name": "StringMap",
+              "type": "named"
+            }
+          }
+        },
+        "target_channel": {
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "PlayerNotificationTargetTargetChannel",
               "type": "named"
             }
           }
