@@ -632,3 +632,15 @@ func evalOperationPath(httpSchema *rest.NDCHttpSchema, rawPath string, arguments
 
 	return pathURL.Path + queryString + fragment, arguments, nil
 }
+
+func guessScalarResultTypeFromContentType(contentType string) rest.ScalarName {
+	ct := strings.TrimSpace(strings.Split(contentType, ";")[0])
+	switch {
+	case utils.IsContentTypeJSON(ct) || utils.IsContentTypeXML(ct) || ct == rest.ContentTypeNdJSON:
+		return rest.ScalarJSON
+	case utils.IsContentTypeText(ct):
+		return rest.ScalarString
+	default:
+		return rest.ScalarBinary
+	}
+}

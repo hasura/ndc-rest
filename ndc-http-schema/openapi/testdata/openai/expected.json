@@ -278,8 +278,11 @@
         "content": {
           "description": "The contents of the message.",
           "type": {
-            "name": "String",
-            "type": "named"
+            "type": "nullable",
+            "underlying_type": {
+              "name": "String",
+              "type": "named"
+            }
           },
           "http": {
             "type": [
@@ -388,11 +391,14 @@
         "bytes": {
           "description": "A list of integers representing the UTF-8 bytes representation of the token. Useful in instances where characters are represented by multiple tokens and their byte representations must be combined to generate the correct text representation. Can be `null` if there is no bytes representation for the token.",
           "type": {
-            "element_type": {
-              "name": "Int32",
-              "type": "named"
-            },
-            "type": "array"
+            "type": "nullable",
+            "underlying_type": {
+              "element_type": {
+                "name": "Int32",
+                "type": "named"
+              },
+              "type": "array"
+            }
           },
           "http": {
             "type": [
@@ -456,11 +462,14 @@
         "bytes": {
           "description": "A list of integers representing the UTF-8 bytes representation of the token. Useful in instances where characters are represented by multiple tokens and their byte representations must be combined to generate the correct text representation. Can be `null` if there is no bytes representation for the token.",
           "type": {
-            "element_type": {
-              "name": "Int32",
-              "type": "named"
-            },
-            "type": "array"
+            "type": "nullable",
+            "underlying_type": {
+              "element_type": {
+                "name": "Int32",
+                "type": "named"
+              },
+              "type": "array"
+            }
           },
           "http": {
             "type": [
@@ -1038,8 +1047,11 @@
         "logprobs": {
           "description": "Log probability information for the choice.",
           "type": {
-            "name": "CreateChatCompletionResponseChoicesLogprobs",
-            "type": "named"
+            "type": "nullable",
+            "underlying_type": {
+              "name": "CreateChatCompletionResponseChoicesLogprobs",
+              "type": "named"
+            }
           },
           "http": {
             "type": [
@@ -1067,11 +1079,14 @@
         "content": {
           "description": "A list of message content tokens with log probability information.",
           "type": {
-            "element_type": {
-              "name": "ChatCompletionTokenLogprob",
-              "type": "named"
-            },
-            "type": "array"
+            "type": "nullable",
+            "underlying_type": {
+              "element_type": {
+                "name": "ChatCompletionTokenLogprob",
+                "type": "named"
+              },
+              "type": "array"
+            }
           },
           "http": {
             "type": [
@@ -1095,6 +1110,286 @@
           "http": {
             "type": [
               "string"
+            ]
+          }
+        }
+      }
+    },
+    "CreateThreadAndRunRequestInput": {
+      "fields": {
+        "assistant_id": {
+          "description": "The ID of the [assistant](/docs/api-reference/assistants) to use to execute this run.",
+          "type": {
+            "name": "String",
+            "type": "named"
+          },
+          "http": {
+            "type": [
+              "string"
+            ]
+          }
+        },
+        "thread": {
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "CreateThreadRequestInput",
+              "type": "named"
+            }
+          },
+          "http": {
+            "type": [
+              "object"
+            ]
+          }
+        }
+      }
+    },
+    "CreateThreadRequestInput": {
+      "fields": {
+        "tool_resources": {
+          "description": "A set of resources that are made available to the assistant's tools in this thread. The resources are specific to the type of tool. For example, the `code_interpreter` tool requires a list of file IDs, while the `file_search` tool requires a list of vector store IDs.",
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "CreateThreadRequestToolResourcesInput",
+              "type": "named"
+            }
+          },
+          "http": {
+            "type": [
+              "object"
+            ]
+          }
+        }
+      }
+    },
+    "CreateThreadRequestToolResourcesCodeInterpreter": {
+      "fields": {
+        "file_ids": {
+          "description": "A list of [file](/docs/api-reference/files) IDs made available to the `code_interpreter` tool. There can be a maximum of 20 files associated with the tool.",
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "element_type": {
+                "name": "String",
+                "type": "named"
+              },
+              "type": "array"
+            }
+          },
+          "http": {
+            "type": [
+              "array"
+            ],
+            "items": {
+              "type": [
+                "string"
+              ]
+            }
+          }
+        }
+      }
+    },
+    "CreateThreadRequestToolResourcesFileSearchInput": {
+      "fields": {
+        "vector_store_ids": {
+          "description": "The [vector store](/docs/api-reference/vector-stores/object) attached to this thread. There can be a maximum of 1 vector store attached to the thread.",
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "element_type": {
+                "name": "String",
+                "type": "named"
+              },
+              "type": "array"
+            }
+          },
+          "http": {
+            "type": [
+              "array"
+            ],
+            "items": {
+              "type": [
+                "string"
+              ]
+            }
+          }
+        },
+        "vector_stores": {
+          "description": "A helper to create a [vector store](/docs/api-reference/vector-stores/object) with file_ids and attach it to this thread. There can be a maximum of 1 vector store attached to the thread.",
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "element_type": {
+                "name": "CreateThreadRequestToolResourcesFileSearchVectorStoresInput",
+                "type": "named"
+              },
+              "type": "array"
+            }
+          },
+          "http": {
+            "type": [
+              "array"
+            ],
+            "items": {
+              "type": [
+                "object"
+              ]
+            }
+          }
+        }
+      }
+    },
+    "CreateThreadRequestToolResourcesFileSearchVectorStoresChunkingStrategy1Static": {
+      "fields": {
+        "chunk_overlap_tokens": {
+          "description": "The number of tokens that overlap between chunks. The default value is `400`.  Note that the overlap must not exceed half of `max_chunk_size_tokens`.",
+          "type": {
+            "name": "Int32",
+            "type": "named"
+          },
+          "http": {
+            "type": [
+              "integer"
+            ]
+          }
+        },
+        "max_chunk_size_tokens": {
+          "description": "The maximum number of tokens in each chunk. The default value is `800`. The minimum value is `100` and the maximum value is `4096`.",
+          "type": {
+            "name": "Int32",
+            "type": "named"
+          },
+          "http": {
+            "type": [
+              "integer"
+            ],
+            "maximum": 4096,
+            "minimum": 100
+          }
+        }
+      }
+    },
+    "CreateThreadRequestToolResourcesFileSearchVectorStoresChunkingStrategyInput": {
+      "description": "The default strategy. This strategy currently uses a `max_chunk_size_tokens` of `800` and `chunk_overlap_tokens` of `400`.",
+      "fields": {
+        "static": {
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "CreateThreadRequestToolResourcesFileSearchVectorStoresChunkingStrategy1Static",
+              "type": "named"
+            }
+          },
+          "http": {
+            "type": [
+              "object"
+            ]
+          }
+        },
+        "type": {
+          "description": "Always `auto`.",
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "CreateThreadRequestEnum_auto_static",
+              "type": "named"
+            }
+          },
+          "http": {
+            "type": [
+              "string"
+            ]
+          }
+        }
+      }
+    },
+    "CreateThreadRequestToolResourcesFileSearchVectorStoresInput": {
+      "fields": {
+        "chunking_strategy": {
+          "description": "The chunking strategy used to chunk the file(s). If not set, will use the `auto` strategy.",
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "CreateThreadRequestToolResourcesFileSearchVectorStoresChunkingStrategyInput",
+              "type": "named"
+            }
+          },
+          "http": {
+            "type": [
+              "object"
+            ]
+          }
+        },
+        "file_ids": {
+          "description": "A list of [file](/docs/api-reference/files) IDs to add to the vector store. There can be a maximum of 10000 files in a vector store.",
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "element_type": {
+                "name": "String",
+                "type": "named"
+              },
+              "type": "array"
+            }
+          },
+          "http": {
+            "type": [
+              "array"
+            ],
+            "items": {
+              "type": [
+                "string"
+              ]
+            }
+          }
+        },
+        "metadata": {
+          "description": "Set of 16 key-value pairs that can be attached to a vector store. This can be useful for storing additional information about the vector store in a structured format. Keys can be a maximum of 64 characters long and values can be a maximum of 512 characters long.",
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "JSON",
+              "type": "named"
+            }
+          },
+          "http": {
+            "type": [
+              "object"
+            ]
+          }
+        }
+      }
+    },
+    "CreateThreadRequestToolResourcesInput": {
+      "description": "A set of resources that are made available to the assistant's tools in this thread. The resources are specific to the type of tool. For example, the `code_interpreter` tool requires a list of file IDs, while the `file_search` tool requires a list of vector store IDs.",
+      "fields": {
+        "code_interpreter": {
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "CreateThreadRequestToolResourcesCodeInterpreter",
+              "type": "named"
+            }
+          },
+          "http": {
+            "type": [
+              "object"
+            ]
+          }
+        },
+        "file_search": {
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "CreateThreadRequestToolResourcesFileSearchInput",
+              "type": "named"
+            }
+          },
+          "http": {
+            "type": [
+              "object"
             ]
           }
         }
@@ -1209,6 +1504,86 @@
           }
         }
       }
+    },
+    "RunObject": {
+      "description": "Represents an execution run on a [thread](/docs/api-reference/threads).",
+      "fields": {
+        "assistant_id": {
+          "description": "The ID of the [assistant](/docs/api-reference/assistants) used for execution of this run.",
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "String",
+              "type": "named"
+            }
+          },
+          "http": {
+            "type": [
+              "string"
+            ]
+          }
+        },
+        "created_at": {
+          "description": "The Unix timestamp (in seconds) for when the run was created.",
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "Int32",
+              "type": "named"
+            }
+          },
+          "http": {
+            "type": [
+              "integer"
+            ]
+          }
+        },
+        "id": {
+          "description": "The identifier, which can be referenced in API endpoints.",
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "String",
+              "type": "named"
+            }
+          },
+          "http": {
+            "type": [
+              "string"
+            ]
+          }
+        },
+        "object": {
+          "description": "The object type, which is always `thread.run`.",
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "RunObjectObject",
+              "type": "named"
+            }
+          },
+          "http": {
+            "type": [
+              "string"
+            ]
+          }
+        },
+        "thread_id": {
+          "description": "The ID of the [thread](/docs/api-reference/threads) that was executed on as a part of this run.",
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "String",
+              "type": "named"
+            }
+          },
+          "http": {
+            "type": [
+              "string"
+            ]
+          }
+        }
+      }
     }
   },
   "procedures": {
@@ -1270,6 +1645,35 @@
       "description": "Creates a model response for the given chat conversation.",
       "result_type": {
         "name": "CreateChatCompletionResponse",
+        "type": "named"
+      }
+    },
+    "createThreadAndRun": {
+      "request": {
+        "url": "/threads/runs",
+        "method": "post",
+        "requestBody": {
+          "contentType": "application/json"
+        },
+        "response": {
+          "contentType": "application/json"
+        }
+      },
+      "arguments": {
+        "body": {
+          "description": "Request body of POST /threads/runs",
+          "type": {
+            "name": "CreateThreadAndRunRequestInput",
+            "type": "named"
+          },
+          "http": {
+            "in": "body"
+          }
+        }
+      },
+      "description": "Create a thread and run it in one request.",
+      "result_type": {
+        "name": "RunObject",
         "type": "named"
       }
     }
@@ -1390,6 +1794,17 @@
         "type": "enum"
       }
     },
+    "CreateThreadRequestEnum_auto_static": {
+      "aggregate_functions": {},
+      "comparison_operators": {},
+      "representation": {
+        "one_of": [
+          "auto",
+          "static"
+        ],
+        "type": "enum"
+      }
+    },
     "Float64": {
       "aggregate_functions": {},
       "comparison_operators": {},
@@ -1416,6 +1831,16 @@
       "comparison_operators": {},
       "representation": {
         "type": "json"
+      }
+    },
+    "RunObjectObject": {
+      "aggregate_functions": {},
+      "comparison_operators": {},
+      "representation": {
+        "one_of": [
+          "thread.run"
+        ],
+        "type": "enum"
       }
     },
     "String": {
