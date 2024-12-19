@@ -206,7 +206,7 @@
             }
           },
           "http": {
-            "type": null
+            "type": []
           }
         },
         "external_id": {
@@ -533,6 +533,25 @@
             ]
           }
         },
+        "excluded_segments": {
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "JSON",
+              "type": "named"
+            }
+          },
+          "http": {
+            "type": [
+              "array"
+            ],
+            "items": {
+              "type": [
+                "string"
+              ]
+            }
+          }
+        },
         "filters": {
           "type": {
             "type": "nullable",
@@ -578,6 +597,25 @@
             ]
           }
         },
+        "included_segments": {
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "JSON",
+              "type": "named"
+            }
+          },
+          "http": {
+            "type": [
+              "array"
+            ],
+            "items": {
+              "type": [
+                "string"
+              ]
+            }
+          }
+        },
         "send_after": {
           "type": {
             "type": "nullable",
@@ -604,6 +642,20 @@
           "http": {
             "type": [
               "object"
+            ]
+          }
+        },
+        "target_channel": {
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "PlayerNotificationTargetTargetChannel",
+              "type": "named"
+            }
+          },
+          "http": {
+            "type": [
+              "string"
             ]
           }
         }

@@ -208,13 +208,13 @@ func (rqe *RawRequestBuilder) decodeArguments() (*RetryableRequest, error) {
 
 func (rqe *RawRequestBuilder) evalRequestBody(rawBody json.RawMessage, contentType string) (io.ReadSeeker, string, int64, error) {
 	switch {
-	case contentType == rest.ContentTypeJSON || strings.HasSuffix(contentType, "+json"):
+	case restUtils.IsContentTypeJSON(contentType):
 		if !json.Valid(rawBody) {
 			return nil, "", 0, fmt.Errorf("invalid json body: %s", string(rawBody))
 		}
 
 		return bytes.NewReader(rawBody), contentType, int64(len(rawBody)), nil
-	case contentType == rest.ContentTypeXML || strings.HasSuffix(contentType, "+xml"):
+	case restUtils.IsContentTypeXML(contentType):
 		var bodyData any
 		if err := json.Unmarshal(rawBody, &bodyData); err != nil {
 			return nil, "", 0, fmt.Errorf("invalid body: %w", err)
@@ -230,14 +230,14 @@ func (rqe *RawRequestBuilder) evalRequestBody(rawBody json.RawMessage, contentTy
 		}
 
 		return bytes.NewReader(bodyBytes), contentType, int64(len(bodyBytes)), nil
-	case strings.HasPrefix(contentType, "text/"):
+	case restUtils.IsContentTypeText(contentType):
 		var bodyData string
 		if err := json.Unmarshal(rawBody, &bodyData); err != nil {
 			return nil, "", 0, fmt.Errorf("invalid body: %w", err)
 		}
 
 		return strings.NewReader(bodyData), contentType, int64(len(bodyData)), nil
-	case strings.HasPrefix(contentType, "multipart/"):
+	case restUtils.IsContentTypeMultipartForm(contentType):
 		var bodyData any
 		if err := json.Unmarshal(rawBody, &bodyData); err != nil {
 			return nil, "", 0, fmt.Errorf("invalid body: %w", err)

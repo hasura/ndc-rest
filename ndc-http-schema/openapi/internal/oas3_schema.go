@@ -105,48 +105,20 @@ func (oc *oas3SchemaBuilder) getSchemaType(typeSchema *base.Schema, fieldPaths [
 		return nil, nil, nil
 	}
 
-	description := utils.StripHTMLTags(typeSchema.Description)
-	nullable := typeSchema.Nullable != nil && *typeSchema.Nullable
 	if len(typeSchema.AllOf) > 0 {
-		enc, ty, err := oc.buildAllOfAnyOfSchemaType(typeSchema.AllOf, nullable, fieldPaths)
-		if err != nil {
-			return nil, nil, err
-		}
-		if ty != nil {
-			ty.Description = description
-		}
-
-		return enc, ty, nil
+		return oc.buildUnionSchemaType(typeSchema, typeSchema.AllOf, oasAllOf, fieldPaths)
 	}
 
 	if len(typeSchema.AnyOf) > 0 {
-		enc, ty, err := oc.buildAllOfAnyOfSchemaType(typeSchema.AnyOf, true, fieldPaths)
-		if err != nil {
-			return nil, nil, err
-		}
-		if ty != nil {
-			ty.Description = description
-		}
-
-		return enc, ty, nil
+		return oc.buildUnionSchemaType(typeSchema, typeSchema.AnyOf, oasAnyOf, fieldPaths)
 	}
 
-	oneOfLength := len(typeSchema.OneOf)
-	if oneOfLength == 1 {
-		enc, ty, err := oc.getSchemaTypeFromProxy(typeSchema.OneOf[0], nullable, fieldPaths)
-		if err != nil {
-			return nil, nil, err
-		}
-		if ty != nil {
-			ty.Description = description
-		}
-
-		return enc, ty, nil
+	if len(typeSchema.OneOf) > 0 {
+		return oc.buildUnionSchemaType(typeSchema, typeSchema.OneOf, oasOneOf, fieldPaths)
 	}
 
-	typeResult := createSchemaFromOpenAPISchema(typeSchema)
-	if oneOfLength > 0 || (typeSchema.AdditionalProperties != nil && (typeSchema.AdditionalProperties.B || typeSchema.AdditionalProperties.A != nil)) {
-		return oc.builder.buildScalarJSON(), typeResult, nil
+	if typeSchema.AdditionalProperties != nil && (typeSchema.AdditionalProperties.B || typeSchema.AdditionalProperties.A != nil) {
+		return oc.builder.buildScalarJSON(), createSchemaFromOpenAPISchema(typeSchema), nil
 	}
 
 	var result schema.TypeEncoder
@@ -154,132 +126,43 @@ func (oc *oas3SchemaBuilder) getSchemaType(typeSchema *base.Schema, fieldPaths [
 		if oc.builder.Strict {
 			return nil, nil, errParameterSchemaEmpty(fieldPaths)
 		}
-		result = oc.builder.buildScalarJSON()
 
-		return result, typeResult, nil
+		result = oc.builder.buildScalarJSON()
+		if typeSchema.Nullable != nil && *typeSchema.Nullable {
+			result = schema.NewNullableType(result)
+		}
+
+		return result, createSchemaFromOpenAPISchema(typeSchema), nil
 	}
 
 	if len(typeSchema.Type) > 1 || isPrimitiveScalar(typeSchema.Type) {
 		scalarName, nullable := getScalarFromType(oc.builder.schema, typeSchema.Type, typeSchema.Format, typeSchema.Enum, oc.builder.trimPathPrefix(oc.apiPath), fieldPaths)
 		result = schema.NewNamedType(scalarName)
-		if nullable {
+		if nullable || (typeSchema.Nullable != nil && *typeSchema.Nullable) {
 			result = schema.NewNullableType(result)
 		}
 
-		return result, typeResult, nil
+		return result, createSchemaFromOpenAPISchema(typeSchema), nil
 	}
 
 	typeName := typeSchema.Type[0]
 	switch typeName {
 	case "object":
-		refName := utils.StringSliceToPascalCase(fieldPaths)
-		if typeSchema.Properties == nil || typeSchema.Properties.IsZero() {
-			if typeSchema.AdditionalProperties != nil && (typeSchema.AdditionalProperties.A == nil || !typeSchema.AdditionalProperties.B) {
-				return nil, nil, nil
-			}
-			// treat no-property objects as a JSON scalar
-			return oc.builder.buildScalarJSON(), typeResult, nil
-		}
-
-		object := rest.ObjectType{
-			Fields: make(map[string]rest.ObjectField),
-			XML:    typeResult.XML,
-		}
-		readObject := rest.ObjectType{
-			Fields: make(map[string]rest.ObjectField),
-			XML:    typeResult.XML,
-		}
-		writeObject := rest.ObjectType{
-			Fields: make(map[string]rest.ObjectField),
-			XML:    typeResult.XML,
-		}
-
-		if description != "" {
-			object.Description = &description
-			readObject.Description = &description
-			writeObject.Description = &description
-		}
-
-		for prop := typeSchema.Properties.First(); prop != nil; prop = prop.Next() {
-			propName := prop.Key()
-			oc.builder.Logger.Debug(
-				"property",
-				slog.String("name", propName),
-				slog.Any("field", fieldPaths))
-			nullable := !slices.Contains(typeSchema.Required, propName)
-			propType, propApiSchema, err := oc.getSchemaTypeFromProxy(prop.Value(), nullable, append(fieldPaths, propName))
-			if err != nil {
-				return nil, nil, err
-			}
-
-			if propType == nil {
-				continue
-			}
-
-			objField := rest.ObjectField{
-				ObjectField: schema.ObjectField{
-					Type: propType.Encode(),
-				},
-				HTTP: propApiSchema,
-			}
-
-			if propApiSchema == nil {
-				propApiSchema = &rest.TypeSchema{
-					Type: []string{},
-				}
-			}
-
-			if propApiSchema.Description != "" {
-				objField.Description = &propApiSchema.Description
-			}
-
-			switch {
-			case !propApiSchema.ReadOnly && !propApiSchema.WriteOnly:
-				object.Fields[propName] = objField
-			case !oc.writeMode && propApiSchema.ReadOnly:
-				readObject.Fields[propName] = objField
-			default:
-				writeObject.Fields[propName] = objField
-			}
-		}
-
-		if len(readObject.Fields) == 0 && len(writeObject.Fields) == 0 {
-			if len(object.Fields) > 0 && isXMLLeafObject(object) {
-				object.Fields[xmlValueFieldName] = xmlValueField
-			}
-
-			oc.builder.schema.ObjectTypes[refName] = object
-			result = schema.NewNamedType(refName)
-		} else {
-			for key, field := range object.Fields {
-				readObject.Fields[key] = field
-				writeObject.Fields[key] = field
-			}
-
-			if len(readObject.Fields) > 0 && isXMLLeafObject(readObject) {
-				readObject.Fields[xmlValueFieldName] = xmlValueField
-			}
-
-			if len(writeObject.Fields) > 0 && isXMLLeafObject(writeObject) {
-				writeObject.Fields[xmlValueFieldName] = xmlValueField
-			}
-
-			writeRefName := formatWriteObjectName(refName)
-			oc.builder.schema.ObjectTypes[refName] = readObject
-			oc.builder.schema.ObjectTypes[writeRefName] = writeObject
-			if oc.writeMode {
-				result = schema.NewNamedType(writeRefName)
-			} else {
-				result = schema.NewNamedType(refName)
-			}
-		}
+		return oc.evalObjectType(typeSchema, false, fieldPaths)
 	case "array":
+		typeResult := createSchemaFromOpenAPISchema(typeSchema)
+		nullable := (typeSchema.Nullable != nil && *typeSchema.Nullable)
 		if typeSchema.Items == nil || typeSchema.Items.A == nil {
 			if oc.builder.Strict {
 				return nil, nil, fmt.Errorf("%s: array item is empty", strings.Join(fieldPaths, "."))
 			}
 
-			return oc.builder.buildScalarJSON(), typeResult, nil
+			var result schema.TypeEncoder = oc.builder.buildScalarJSON()
+			if nullable {
+				result = schema.NewNullableType(result)
+			}
+
+			return result, typeResult, nil
 		}
 
 		itemName := getSchemaRefTypeNameV3(typeSchema.Items.A.GetReference())
@@ -305,24 +188,179 @@ func (oc *oas3SchemaBuilder) getSchemaType(typeSchema *base.Schema, fieldPaths [
 		if result == nil {
 			return nil, nil, fmt.Errorf("cannot parse type reference name: %s", typeSchema.Items.A.GetReference())
 		}
+
+		if nullable {
+			result = schema.NewNullableType(result)
+		}
+
+		return result, typeResult, nil
 	default:
 		return nil, nil, fmt.Errorf("unsupported schema type %s", typeName)
+	}
+}
+
+func (oc *oas3SchemaBuilder) evalObjectType(baseSchema *base.Schema, forcePropertiesNullable bool, fieldPaths []string) (schema.TypeEncoder, *rest.TypeSchema, error) {
+	typeResult := createSchemaFromOpenAPISchema(baseSchema)
+	refName := utils.StringSliceToPascalCase(fieldPaths)
+	if baseSchema.Properties == nil || baseSchema.Properties.IsZero() {
+		if baseSchema.AdditionalProperties != nil && (baseSchema.AdditionalProperties.A == nil || !baseSchema.AdditionalProperties.B) {
+			return nil, nil, nil
+		}
+		// treat no-property objects as a JSON scalar
+		var scalarType schema.TypeEncoder = oc.builder.buildScalarJSON()
+		if baseSchema.Nullable != nil && *baseSchema.Nullable {
+			scalarType = schema.NewNullableType(scalarType)
+		}
+
+		return scalarType, typeResult, nil
+	}
+
+	var result schema.TypeEncoder
+	object := rest.ObjectType{
+		Fields: make(map[string]rest.ObjectField),
+		XML:    typeResult.XML,
+	}
+	readObject := rest.ObjectType{
+		Fields: make(map[string]rest.ObjectField),
+		XML:    typeResult.XML,
+	}
+	writeObject := rest.ObjectType{
+		Fields: make(map[string]rest.ObjectField),
+		XML:    typeResult.XML,
+	}
+
+	if typeResult.Description != "" {
+		object.Description = &typeResult.Description
+		readObject.Description = &typeResult.Description
+		writeObject.Description = &typeResult.Description
+	}
+
+	for prop := baseSchema.Properties.First(); prop != nil; prop = prop.Next() {
+		propName := prop.Key()
+		oc.builder.Logger.Debug(
+			"property",
+			slog.String("name", propName),
+			slog.Any("field", fieldPaths))
+		nullable := forcePropertiesNullable || !slices.Contains(baseSchema.Required, propName)
+		propType, propApiSchema, err := oc.getSchemaTypeFromProxy(prop.Value(), nullable, append(fieldPaths, propName))
+		if err != nil {
+			return nil, nil, err
+		}
+
+		if propType == nil {
+			continue
+		}
+
+		objField := rest.ObjectField{
+			ObjectField: schema.ObjectField{
+				Type: propType.Encode(),
+			},
+			HTTP: propApiSchema,
+		}
+
+		if propApiSchema == nil {
+			propApiSchema = &rest.TypeSchema{
+				Type: []string{},
+			}
+		}
+
+		if propApiSchema.Description != "" {
+			objField.Description = &propApiSchema.Description
+		}
+
+		switch {
+		case !propApiSchema.ReadOnly && !propApiSchema.WriteOnly:
+			object.Fields[propName] = objField
+		case !oc.writeMode && propApiSchema.ReadOnly:
+			readObject.Fields[propName] = objField
+		default:
+			writeObject.Fields[propName] = objField
+		}
+	}
+
+	writeRefName := formatWriteObjectName(refName)
+	if len(readObject.Fields) == 0 && len(writeObject.Fields) == 0 {
+		if len(object.Fields) > 0 && isXMLLeafObject(object) {
+			object.Fields[xmlValueFieldName] = xmlValueField
+		}
+
+		oc.builder.schema.ObjectTypes[refName] = object
+		result = schema.NewNamedType(refName)
+	} else {
+		for key, field := range object.Fields {
+			readObject.Fields[key] = field
+			writeObject.Fields[key] = field
+		}
+
+		if len(readObject.Fields) > 0 && isXMLLeafObject(readObject) {
+			readObject.Fields[xmlValueFieldName] = xmlValueField
+		}
+
+		if len(writeObject.Fields) > 0 && isXMLLeafObject(writeObject) {
+			writeObject.Fields[xmlValueFieldName] = xmlValueField
+		}
+
+		oc.builder.schema.ObjectTypes[refName] = readObject
+		oc.builder.schema.ObjectTypes[writeRefName] = writeObject
+		if oc.writeMode {
+			result = schema.NewNamedType(writeRefName)
+		} else {
+			result = schema.NewNamedType(refName)
+		}
+	}
+
+	if baseSchema.Nullable != nil && *baseSchema.Nullable {
+		result = schema.NewNullableType(result)
 	}
 
 	return result, typeResult, nil
 }
 
-// Support converting allOf and anyOf to object types with merge strategy
-func (oc *oas3SchemaBuilder) buildAllOfAnyOfSchemaType(schemaProxies []*base.SchemaProxy, nullable bool, fieldPaths []string) (schema.TypeEncoder, *rest.TypeSchema, error) {
+// Support converting oneOf, allOf or anyOf to object types with merge strategy
+func (oc *oas3SchemaBuilder) buildUnionSchemaType(baseSchema *base.Schema, schemaProxies []*base.SchemaProxy, unionType oasUnionType, fieldPaths []string) (schema.TypeEncoder, *rest.TypeSchema, error) {
 	proxies, mergedType, isNullable := evalSchemaProxiesSlice(schemaProxies, oc.location)
-	nullable = nullable || isNullable
-
+	nullable := isNullable || (baseSchema.Nullable != nil && *baseSchema.Nullable)
 	if mergedType != nil {
-		return oc.getSchemaType(mergedType, fieldPaths)
+		typeEncoder, typeSchema, err := oc.getSchemaType(mergedType, fieldPaths)
+		if err != nil {
+			return nil, nil, err
+		}
+		if typeSchema != nil && typeSchema.Description == "" && baseSchema.Description != "" {
+			typeSchema.Description = utils.StripHTMLTags(baseSchema.Description)
+		}
+
+		return typeEncoder, typeSchema, nil
 	}
-	if len(proxies) == 1 {
-		return oc.getSchemaTypeFromProxy(proxies[0], nullable, fieldPaths)
+
+	switch len(proxies) {
+	case 0:
+		if len(baseSchema.Type) > 1 || isPrimitiveScalar(baseSchema.Type) {
+			scalarName, nullable := getScalarFromType(oc.builder.schema, baseSchema.Type, baseSchema.Format, baseSchema.Enum, oc.builder.trimPathPrefix(oc.apiPath), fieldPaths)
+			var result schema.TypeEncoder = schema.NewNamedType(scalarName)
+			if nullable {
+				result = schema.NewNullableType(result)
+			}
+
+			return result, createSchemaFromOpenAPISchema(baseSchema), nil
+		}
+
+		if len(baseSchema.Type) == 1 && baseSchema.Type[0] == "object" {
+			return oc.evalObjectType(baseSchema, true, fieldPaths)
+		}
+
+		return schema.NewNamedType(string(rest.ScalarJSON)), createSchemaFromOpenAPISchema(baseSchema), nil
+	case 1:
+		typeEncoder, typeSchema, err := oc.getSchemaTypeFromProxy(proxies[0], nullable, fieldPaths)
+		if err != nil {
+			return nil, nil, err
+		}
+		if typeSchema != nil && typeSchema.Description == "" && baseSchema.Description != "" {
+			typeSchema.Description = utils.StripHTMLTags(baseSchema.Description)
+		}
+
+		return typeEncoder, typeSchema, nil
 	}
+
 	readObject := rest.ObjectType{
 		Fields: map[string]rest.ObjectField{},
 	}
@@ -333,55 +371,44 @@ func (oc *oas3SchemaBuilder) buildAllOfAnyOfSchemaType(schemaProxies []*base.Sch
 		Type: []string{"object"},
 	}
 
+	if baseSchema.Description != "" {
+		typeSchema.Description = utils.StripHTMLTags(baseSchema.Description)
+	}
+
 	for i, item := range proxies {
-		enc, ty, err := oc.getSchemaTypeFromProxy(item, nullable, append(fieldPaths, strconv.Itoa(i)))
+		enc, ty, err := newOAS3SchemaBuilder(oc.builder, oc.apiPath, oc.location, false).
+			getSchemaTypeFromProxy(item, nullable, append(fieldPaths, strconv.Itoa(i)))
 		if err != nil {
 			return nil, nil, err
 		}
 
-		name := getNamedType(enc, true, "")
-		writeName := formatWriteObjectName(name)
-		isObject := !isPrimitiveScalar(ty.Type) && !slices.Contains(ty.Type, "array")
+		var readObj rest.ObjectType
+		name := getNamedType(enc, false, "")
+		isObject := name != "" && !isPrimitiveScalar(ty.Type) && !slices.Contains(ty.Type, "array")
 		if isObject {
-			if _, ok := oc.builder.schema.ScalarTypes[name]; ok {
-				isObject = false
+			readObj, isObject = oc.builder.schema.ObjectTypes[name]
+			if isObject {
+				mergeUnionObject(oc.builder.schema, &readObject, readObj, ty, unionType, fieldPaths[0])
 			}
 		}
+
 		if !isObject {
 			// TODO: should we keep the original anyOf or allOf type schema
 			ty = &rest.TypeSchema{
-				Description: ty.Description,
+				Description: typeSchema.Description,
 				Type:        []string{},
 			}
 
 			return oc.builder.buildScalarJSON(), ty, nil
 		}
 
-		readObj, ok := oc.builder.schema.ObjectTypes[name]
-		if ok {
-			if readObject.Description == nil && readObj.Description != nil {
-				readObject.Description = readObj.Description
-				if ty.Description == "" {
-					ty.Description = *readObj.Description
-				}
-			}
-			for k, v := range readObj.Fields {
-				if _, ok := readObject.Fields[k]; !ok {
-					readObject.Fields[k] = v
-				}
-			}
-		}
+		writeName := formatWriteObjectName(name)
 		writeObj, ok := oc.builder.schema.ObjectTypes[writeName]
-		if ok {
-			if writeObject.Description == nil && writeObj.Description != nil {
-				writeObject.Description = writeObj.Description
-			}
-			for k, v := range writeObj.Fields {
-				if _, ok := writeObject.Fields[k]; !ok {
-					writeObject.Fields[k] = v
-				}
-			}
+		if !ok {
+			writeObj = readObject
 		}
+
+		mergeUnionObject(oc.builder.schema, &writeObject, writeObj, ty, unionType, fieldPaths[0])
 	}
 
 	refName := utils.ToPascalCase(strings.Join(fieldPaths, " "))
@@ -398,4 +425,35 @@ func (oc *oas3SchemaBuilder) buildAllOfAnyOfSchemaType(schemaProxies []*base.Sch
 	}
 
 	return schema.NewNamedType(refName), typeSchema, nil
+}
+
+func mergeUnionObject(httpSchema *rest.NDCHttpSchema, dest *rest.ObjectType, srcObject rest.ObjectType, ty *rest.TypeSchema, unionType oasUnionType, prefix string) {
+	if dest.Description == nil && srcObject.Description != nil {
+		dest.Description = srcObject.Description
+	}
+	if ty.Description == "" && dest.Description != nil {
+		ty.Description = *dest.Description
+	}
+
+	for k, v := range srcObject.Fields {
+		field := v
+		// In anyOf and oneOf union objects, the API only requires one of union objects, other types are optional.
+		// Because the NDC spec hasn't supported union types yet we make all properties optional to enable autocompletion.
+		destField, ok := dest.Fields[k]
+		if !ok {
+			iType := v.Type.Interface()
+			if unionType != oasAllOf && !isNullableType(iType) {
+				field.ObjectField.Type = schema.NewNullableType(iType).Encode()
+			}
+
+			dest.Fields[k] = field
+
+			continue
+		}
+
+		newTypeEnc, _ := mergeUnionTypes(httpSchema, destField.Type, field.Type, prefix)
+		destField.Type = newTypeEnc.Encode()
+
+		dest.Fields[k] = destField
+	}
 }
