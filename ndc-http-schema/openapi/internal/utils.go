@@ -579,7 +579,7 @@ func evalOperationPath(httpSchema *rest.NDCHttpSchema, rawPath string, arguments
 		}
 	}
 
-	var newQuery url.Values
+	newQuery := url.Values{}
 	q := pathURL.Query()
 	for key, value := range q {
 		if len(value) == 0 || value[0] == "" {
