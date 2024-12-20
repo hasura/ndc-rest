@@ -99,11 +99,10 @@
     "ChatCompletionRequestMessageInput": {
       "fields": {
         "content": {
-          "description": "The contents of the system message.",
           "type": {
             "type": "nullable",
             "underlying_type": {
-              "name": "JSON",
+              "name": "String",
               "type": "named"
             }
           }
@@ -119,11 +118,10 @@
           }
         },
         "name": {
-          "description": "An optional name for the participant. Provides the model information to differentiate between participants of the same role.",
           "type": {
             "type": "nullable",
             "underlying_type": {
-              "name": "String",
+              "name": "JSON",
               "type": "named"
             }
           }
@@ -131,11 +129,8 @@
         "role": {
           "description": "The role of the messages author, in this case `system`.",
           "type": {
-            "type": "nullable",
-            "underlying_type": {
-              "name": "ChatCompletionRequestMessageEnum_assistant_function_system_tool_user",
-              "type": "named"
-            }
+            "name": "ChatCompletionRequestMessageRoleEnum",
+            "type": "named"
           }
         },
         "tool_call_id": {
@@ -153,8 +148,11 @@
           "type": {
             "type": "nullable",
             "underlying_type": {
-              "name": "JSON",
-              "type": "named"
+              "element_type": {
+                "name": "ChatCompletionMessageToolCall",
+                "type": "named"
+              },
+              "type": "array"
             }
           }
         }
@@ -810,7 +808,7 @@
       }
     },
     "CreateThreadRequestToolResourcesFileSearchVectorStoresChunkingStrategyInput": {
-      "description": "The default strategy. This strategy currently uses a `max_chunk_size_tokens` of `800` and `chunk_overlap_tokens` of `400`.",
+      "description": "The chunking strategy used to chunk the file(s). If not set, will use the `auto` strategy.",
       "fields": {
         "static": {
           "type": {
@@ -824,11 +822,8 @@
         "type": {
           "description": "Always `auto`.",
           "type": {
-            "type": "nullable",
-            "underlying_type": {
-              "name": "CreateThreadRequestEnum_auto_static",
-              "type": "named"
-            }
+            "name": "CreateThreadRequestToolResourcesFileSearchVectorStoresChunkingStrategyTypeEnum",
+            "type": "named"
           }
         }
       }
@@ -1098,7 +1093,7 @@
         "type": "enum"
       }
     },
-    "ChatCompletionRequestMessageEnum_assistant_function_system_tool_user": {
+    "ChatCompletionRequestMessageRoleEnum": {
       "aggregate_functions": {},
       "comparison_operators": {},
       "representation": {
@@ -1196,7 +1191,7 @@
         "type": "enum"
       }
     },
-    "CreateThreadRequestEnum_auto_static": {
+    "CreateThreadRequestToolResourcesFileSearchVectorStoresChunkingStrategyTypeEnum": {
       "aggregate_functions": {},
       "comparison_operators": {},
       "representation": {

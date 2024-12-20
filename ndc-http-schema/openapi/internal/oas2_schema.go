@@ -349,12 +349,6 @@ func (oc *oas2SchemaBuilder) buildUnionSchemaType(baseSchema *base.Schema, schem
 		return typeEncoder, typeSchema, nil
 	}
 
-	readObject := rest.ObjectType{
-		Fields: map[string]rest.ObjectField{},
-	}
-	writeObject := rest.ObjectType{
-		Fields: map[string]rest.ObjectField{},
-	}
 	typeSchema := &rest.TypeSchema{
 		Type: []string{"object"},
 	}
@@ -362,6 +356,9 @@ func (oc *oas2SchemaBuilder) buildUnionSchemaType(baseSchema *base.Schema, schem
 	if baseSchema.Description != "" {
 		typeSchema.Description = utils.StripHTMLTags(baseSchema.Description)
 	}
+
+	var readObjectItems []rest.ObjectType
+	var writeObjectItems []rest.ObjectType
 
 	for i, item := range proxies {
 		enc, ty, err := newOAS2SchemaBuilder(oc.builder, oc.apiPath, oc.location).
@@ -376,12 +373,11 @@ func (oc *oas2SchemaBuilder) buildUnionSchemaType(baseSchema *base.Schema, schem
 		if isObject {
 			readObj, isObject = oc.builder.schema.ObjectTypes[name]
 			if isObject {
-				mergeUnionObject(oc.builder.schema, &readObject, readObj, ty, unionType, fieldPaths[0])
+				readObjectItems = append(readObjectItems, readObj)
 			}
 		}
 
 		if !isObject {
-			// TODO: should we keep the original anyOf or allOf type schema
 			ty = &rest.TypeSchema{
 				Description: ty.Description,
 				Type:        []string{},
@@ -393,10 +389,30 @@ func (oc *oas2SchemaBuilder) buildUnionSchemaType(baseSchema *base.Schema, schem
 		writeName := formatWriteObjectName(name)
 		writeObj, ok := oc.builder.schema.ObjectTypes[writeName]
 		if !ok {
-			writeObj = readObject
+			writeObj = readObj
 		}
 
-		mergeUnionObject(oc.builder.schema, &writeObject, writeObj, ty, unionType, fieldPaths[0])
+		writeObjectItems = append(writeObjectItems, writeObj)
+	}
+
+	readObject := rest.ObjectType{
+		Fields: map[string]rest.ObjectField{},
+	}
+	writeObject := rest.ObjectType{
+		Fields: map[string]rest.ObjectField{},
+	}
+
+	if baseSchema.Description != "" {
+		readObject.Description = &baseSchema.Description
+		writeObject.Description = &baseSchema.Description
+	}
+
+	if err := mergeUnionObjects(oc.builder.schema, &readObject, readObjectItems, unionType, fieldPaths); err != nil {
+		return nil, nil, err
+	}
+
+	if err := mergeUnionObjects(oc.builder.schema, &writeObject, writeObjectItems, unionType, fieldPaths); err != nil {
+		return nil, nil, err
 	}
 
 	refName := utils.ToPascalCase(strings.Join(fieldPaths, " "))
