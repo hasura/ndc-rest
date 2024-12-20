@@ -475,39 +475,42 @@ func mergeUnionObjects(httpSchema *rest.NDCHttpSchema, dest *rest.ObjectType, sr
 			}
 
 			newField, ok := mergeUnionTypes(httpSchema, field.Type, nextField.Type, append(fieldPaths, key))
-			if ok {
+			switch {
+			case ok:
 				usField := unionSiblingField{
 					Type:      newField.Type,
 					EnumOneOf: append(siblingField.EnumOneOf, newField.EnumOneOf...),
 				}
 
-				if siblingFieldExist && siblingField.Description != nil {
+				switch {
+				case siblingFieldExist && siblingField.Description != nil:
 					usField.Description = siblingField.Description
-				} else if field.Description != nil {
+				case field.Description != nil:
 					usField.Description = field.Description
-				} else if nextField.Description != nil {
+				case nextField.Description != nil:
 					usField.Description = nextField.Description
 				}
 
-				if len(newField.EnumOneOf) > 0 {
+				switch {
+				case len(newField.EnumOneOf) > 0:
 					usField.HTTP = &rest.TypeSchema{
 						Type: []string{"string"},
 					}
-				} else if siblingFieldExist && siblingField.HTTP != nil {
+				case siblingFieldExist && siblingField.HTTP != nil:
 					usField.HTTP = siblingField.HTTP
-				} else if field.HTTP != nil {
+				case field.HTTP != nil:
 					usField.HTTP = field.HTTP
-				} else if nextField.HTTP != nil {
+				case nextField.HTTP != nil:
 					usField.HTTP = nextField.HTTP
 				}
 
 				siblingFields[key] = usField
-			} else if siblingFieldExist {
+			case siblingFieldExist:
 				newField, _ = mergeUnionTypes(httpSchema, siblingField.Type.Encode(), nextField.Type, append(fieldPaths, key))
 				siblingFields[key] = unionSiblingField{
 					Type: newField.Type,
 				}
-			} else {
+			default:
 				siblingFields[key] = *newField
 			}
 		}
