@@ -205,12 +205,18 @@
           }
         },
         "name": {
+          "description": "An optional name for the participant. Provides the model information to differentiate between participants of the same role.",
           "type": {
             "type": "nullable",
             "underlying_type": {
-              "name": "JSON",
+              "name": "String",
               "type": "named"
             }
+          },
+          "http": {
+            "type": [
+              "string"
+            ]
           }
         },
         "role": {

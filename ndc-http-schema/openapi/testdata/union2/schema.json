@@ -1,26 +1,6 @@
 {
-  "$schema": "https://raw.githubusercontent.com/hasura/ndc-http/refs/heads/main/ndc-http-schema/jsonschema/ndc-http-schema.schema.json",
-  "settings": {
-    "servers": [
-      {
-        "url": {
-          "value": "",
-          "env": "SERVER_URL"
-        }
-      }
-    ],
-    "securitySchemes": {
-      "app_key": {
-        "type": "http",
-        "header": "Authorization",
-        "scheme": "bearer",
-        "value": {
-          "env": "APP_KEY_TOKEN"
-        }
-      }
-    }
-  },
-  "functions": {},
+  "collections": [],
+  "functions": [],
   "object_types": {
     "Pet": {
       "fields": {
@@ -31,11 +11,6 @@
               "name": "Int32",
               "type": "named"
             }
-          },
-          "http": {
-            "type": [
-              "integer"
-            ]
           }
         },
         "icon": {
@@ -45,11 +20,6 @@
               "name": "String",
               "type": "named"
             }
-          },
-          "http": {
-            "type": [
-              "string"
-            ]
           }
         },
         "id": {
@@ -59,11 +29,6 @@
               "name": "String",
               "type": "named"
             }
-          },
-          "http": {
-            "type": [
-              "string"
-            ]
           }
         },
         "metadata": {
@@ -76,14 +41,6 @@
               },
               "type": "array"
             }
-          },
-          "http": {
-            "type": [
-              "array"
-            ],
-            "items": {
-              "type": []
-            }
           }
         },
         "text": {
@@ -93,11 +50,6 @@
               "name": "String",
               "type": "named"
             }
-          },
-          "http": {
-            "type": [
-              "string"
-            ]
           }
         },
         "type": {
@@ -107,11 +59,6 @@
               "name": "PetTypeEnum",
               "type": "named"
             }
-          },
-          "http": {
-            "type": [
-              "string"
-            ]
           }
         },
         "value": {
@@ -122,26 +69,16 @@
               "name": "String",
               "type": "named"
             }
-          },
-          "http": {
-            "type": [
-              "string"
-            ]
           }
         }
       }
     },
-    "PetBodyInput": {
+    "PetBody": {
       "fields": {
         "age": {
           "type": {
             "name": "Int32",
             "type": "named"
-          },
-          "http": {
-            "type": [
-              "integer"
-            ]
           }
         },
         "icon": {
@@ -151,22 +88,12 @@
               "name": "String",
               "type": "named"
             }
-          },
-          "http": {
-            "type": [
-              "string"
-            ]
           }
         },
         "id": {
           "type": {
             "name": "String",
             "type": "named"
-          },
-          "http": {
-            "type": [
-              "string"
-            ]
           }
         },
         "metadata": {
@@ -179,72 +106,42 @@
               },
               "type": "array"
             }
-          },
-          "http": {
-            "type": [
-              "array"
-            ],
-            "items": {
-              "type": []
-            }
           }
         },
         "text": {
           "type": {
             "name": "String",
             "type": "named"
-          },
-          "http": {
-            "type": [
-              "string"
-            ]
           }
         },
         "type": {
           "type": {
             "name": "PetBodyTypeEnum",
             "type": "named"
-          },
-          "http": {
-            "type": [
-              "string"
-            ]
           }
         }
       }
     }
   },
-  "procedures": {
-    "postPets": {
-      "request": {
-        "url": "/pets",
-        "method": "post",
-        "requestBody": {
-          "contentType": "application/json"
-        },
-        "response": {
-          "contentType": "application/json"
-        }
-      },
+  "procedures": [
+    {
       "arguments": {
         "body": {
-          "description": "Request body of POST /pets",
+          "description": "Pet object that needs to be added to the store",
           "type": {
-            "name": "PetBodyInput",
+            "name": "PetBody",
             "type": "named"
-          },
-          "http": {
-            "in": "body"
           }
         }
       },
-      "description": "POST /pets",
+      "description": "Add a new pet to the store",
+      "name": "addPet",
       "result_type": {
         "name": "Pet",
         "type": "named"
       }
     }
-  },
+  ],
   "scalar_types": {
     "Int32": {
       "aggregate_functions": {},

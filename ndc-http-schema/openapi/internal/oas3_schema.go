@@ -450,9 +450,9 @@ type unionSiblingField struct {
 	HTTP        *rest.TypeSchema
 }
 
+// Find common fields in all objects to merge the type.
+// If they have the same type, we don't need to wrap it with the nullable type.
 func mergeUnionObjects(httpSchema *rest.NDCHttpSchema, dest *rest.ObjectType, srcObjects []rest.ObjectType, unionType oasUnionType, fieldPaths []string) error {
-	// Find common fields in all objects to merge the type.
-	// If they have the same type, we don't need to wrap it with the nullable type.
 	objectItemLength := len(srcObjects)
 	siblingFields := make(map[string]unionSiblingField)
 	for i, object := range srcObjects {
@@ -465,10 +465,9 @@ func mergeUnionObjects(httpSchema *rest.NDCHttpSchema, dest *rest.ObjectType, sr
 			nextField, ok := srcObjects[i+1].Fields[key]
 
 			if !ok {
-				if siblingFieldExist {
-					siblingFields[key] = unionSiblingField{
-						Type: schema.NewNullableType(schema.NewNamedType(string(rest.ScalarJSON))),
-					}
+				if siblingFieldExist && unionType != oasAllOf && !isNullableType(siblingField.Type) {
+					siblingField.Type = schema.NewNullableType(siblingField.Type)
+					siblingFields[key] = siblingField
 				}
 
 				continue

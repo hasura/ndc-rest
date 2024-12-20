@@ -60,6 +60,14 @@ func TestOpenAPIv2ToRESTSchema(t *testing.T) {
 				Prefix: "hasura_mock_json",
 			},
 		},
+		// go run ./ndc-http-schema convert -f ./ndc-http-schema/openapi/testdata/union2/source.json -o ./ndc-http-schema/openapi/testdata/union2/expected.json --spec oas2
+		// go run ./ndc-http-schema convert -f ./ndc-http-schema/openapi/testdata/union2/source.json -o ./ndc-http-schema/openapi/testdata/union2/schema.json --pure --spec oas2
+		{
+			Name:     "union2",
+			Source:   "testdata/union2/source.json",
+			Expected: "testdata/union2/expected.json",
+			Schema:   "testdata/union2/schema.json",
+		},
 	}
 
 	for _, tc := range testCases {

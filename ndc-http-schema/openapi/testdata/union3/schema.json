@@ -24,8 +24,23 @@
         },
         "id": {
           "type": {
-            "name": "String",
-            "type": "named"
+            "type": "nullable",
+            "underlying_type": {
+              "name": "String",
+              "type": "named"
+            }
+          }
+        },
+        "metadata": {
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "element_type": {
+                "name": "JSON",
+                "type": "named"
+              },
+              "type": "array"
+            }
           }
         },
         "text": {
@@ -39,8 +54,21 @@
         },
         "type": {
           "type": {
-            "name": "PetTypeEnum",
-            "type": "named"
+            "type": "nullable",
+            "underlying_type": {
+              "name": "PetTypeEnum",
+              "type": "named"
+            }
+          }
+        },
+        "value": {
+          "description": "The value of this recipient's custom field",
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "String",
+              "type": "named"
+            }
           }
         }
       }
@@ -66,6 +94,18 @@
           "type": {
             "name": "String",
             "type": "named"
+          }
+        },
+        "metadata": {
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "element_type": {
+                "name": "JSON",
+                "type": "named"
+              },
+              "type": "array"
+            }
           }
         },
         "text": {
@@ -108,6 +148,13 @@
       "comparison_operators": {},
       "representation": {
         "type": "int32"
+      }
+    },
+    "JSON": {
+      "aggregate_functions": {},
+      "comparison_operators": {},
+      "representation": {
+        "type": "json"
       }
     },
     "PetBodyTypeEnum": {

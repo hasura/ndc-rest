@@ -4,18 +4,18 @@
     "servers": [
       {
         "url": {
-          "value": "",
+          "value": "https://example.com/v1",
           "env": "SERVER_URL"
         }
       }
     ],
     "securitySchemes": {
-      "app_key": {
-        "type": "http",
-        "header": "Authorization",
-        "scheme": "bearer",
+      "api_key": {
+        "type": "apiKey",
+        "in": "header",
+        "name": "api_key",
         "value": {
-          "env": "APP_KEY_TOKEN"
+          "env": "API_KEY"
         }
       }
     }
@@ -131,7 +131,7 @@
         }
       }
     },
-    "PetBodyInput": {
+    "PetBody": {
       "fields": {
         "age": {
           "type": {
@@ -215,9 +215,9 @@
     }
   },
   "procedures": {
-    "postPets": {
+    "addPet": {
       "request": {
-        "url": "/pets",
+        "url": "/pet",
         "method": "post",
         "requestBody": {
           "contentType": "application/json"
@@ -228,17 +228,22 @@
       },
       "arguments": {
         "body": {
-          "description": "Request body of POST /pets",
+          "description": "Pet object that needs to be added to the store",
           "type": {
-            "name": "PetBodyInput",
+            "name": "PetBody",
             "type": "named"
           },
           "http": {
-            "in": "body"
+            "in": "body",
+            "schema": {
+              "type": [
+                "object"
+              ]
+            }
           }
         }
       },
-      "description": "POST /pets",
+      "description": "Add a new pet to the store",
       "result_type": {
         "name": "Pet",
         "type": "named"

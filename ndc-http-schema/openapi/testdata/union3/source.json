@@ -30,6 +30,15 @@
           },
           {
             "$ref": "#/components/schemas/Cat"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "value": {
+                "type": ["string", "null"],
+                "description": "The value of this recipient's custom field"
+              }
+            }
           }
         ]
       },
@@ -64,6 +73,19 @@
           },
           "age": {
             "type": "integer"
+          },
+          "metadata": {
+            "type": "array",
+            "items": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "integer"
+                }
+              ]
+            }
           }
         },
         "required": ["id", "type", "age"]
