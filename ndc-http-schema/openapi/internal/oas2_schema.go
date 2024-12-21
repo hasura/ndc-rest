@@ -164,7 +164,6 @@ func (oc *oas2SchemaBuilder) evalObjectType(baseSchema *base.Schema, forceProper
 
 	if baseSchema.Properties == nil || baseSchema.Properties.IsZero() {
 		// treat no-property objects as a JSON scalar
-		// treat no-property objects as a JSON scalar
 		var scalarType schema.TypeEncoder = oc.builder.buildScalarJSON()
 		if baseSchema.Nullable != nil && *baseSchema.Nullable {
 			scalarType = schema.NewNullableType(scalarType)
