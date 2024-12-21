@@ -1,10 +1,8 @@
 package contenttype
 
 import (
-	"bytes"
 	"encoding/json"
 	"fmt"
-	"io"
 	"net/http"
 	"net/url"
 	"reflect"
@@ -33,7 +31,8 @@ func NewURLParameterEncoder(schema *rest.NDCHttpSchema, contentType string) *URL
 	}
 }
 
-func (c *URLParameterEncoder) Encode(bodyInfo *rest.ArgumentInfo, bodyData any) (io.ReadSeeker, int64, error) {
+// Encode URL parameters.
+func (c *URLParameterEncoder) Encode(bodyInfo *rest.ArgumentInfo, bodyData any) ([]byte, error) {
 	queryParams, err := c.EncodeParameterValues(&rest.ObjectField{
 		ObjectField: schema.ObjectField{
 			Type: bodyInfo.Type,
@@ -41,11 +40,11 @@ func (c *URLParameterEncoder) Encode(bodyInfo *rest.ArgumentInfo, bodyData any) 
 		HTTP: bodyInfo.HTTP.Schema,
 	}, reflect.ValueOf(bodyData), []string{"body"})
 	if err != nil {
-		return nil, 0, err
+		return nil, err
 	}
 
 	if len(queryParams) == 0 {
-		return nil, 0, nil
+		return nil, nil
 	}
 	q := url.Values{}
 	for _, qp := range queryParams {
@@ -53,20 +52,19 @@ func (c *URLParameterEncoder) Encode(bodyInfo *rest.ArgumentInfo, bodyData any) 
 		EvalQueryParameterURL(&q, "", bodyInfo.HTTP.EncodingObject, keys, qp.Values())
 	}
 	rawQuery := EncodeQueryValues(q, true)
-	result := bytes.NewReader([]byte(rawQuery))
 
-	return result, result.Size(), nil
+	return []byte(rawQuery), nil
 }
 
 // Encode marshals the arbitrary body to xml bytes.
-func (c *URLParameterEncoder) EncodeArbitrary(bodyData any) (io.ReadSeeker, int64, error) {
+func (c *URLParameterEncoder) EncodeArbitrary(bodyData any) ([]byte, error) {
 	queryParams, err := c.encodeParameterReflectionValues(reflect.ValueOf(bodyData), []string{"body"})
 	if err != nil {
-		return nil, 0, err
+		return nil, err
 	}
 
 	if len(queryParams) == 0 {
-		return nil, 0, nil
+		return nil, nil
 	}
 	q := url.Values{}
 	encObject := rest.EncodingObject{}
@@ -75,9 +73,8 @@ func (c *URLParameterEncoder) EncodeArbitrary(bodyData any) (io.ReadSeeker, int6
 		EvalQueryParameterURL(&q, "", encObject, keys, qp.Values())
 	}
 	rawQuery := EncodeQueryValues(q, true)
-	result := bytes.NewReader([]byte(rawQuery))
 
-	return result, result.Size(), nil
+	return []byte(rawQuery), nil
 }
 
 func (c *URLParameterEncoder) EncodeParameterValues(objectField *rest.ObjectField, reflectValue reflect.Value, fieldPaths []string) (ParameterItems, error) {

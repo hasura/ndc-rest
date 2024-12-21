@@ -1,6 +1,7 @@
 package internal
 
 import (
+	"bytes"
 	"context"
 	"io"
 	"net/http"
@@ -13,24 +14,21 @@ import (
 
 // RetryableRequest wraps the raw request with retryable
 type RetryableRequest struct {
-	RawRequest    *rest.Request
-	URL           url.URL
-	Namespace     string
-	ServerID      string
-	ContentType   string
-	ContentLength int64
-	Headers       http.Header
-	Body          io.ReadSeeker
-	Runtime       rest.RuntimeSettings
+	RawRequest  *rest.Request
+	URL         url.URL
+	Namespace   string
+	ServerID    string
+	ContentType string
+	Headers     http.Header
+	Body        []byte
+	Runtime     rest.RuntimeSettings
 }
 
 // CreateRequest creates an HTTP request with body copied
 func (r *RetryableRequest) CreateRequest(ctx context.Context) (*http.Request, context.CancelFunc, error) {
-	if r.Body != nil {
-		_, err := r.Body.Seek(0, io.SeekStart)
-		if err != nil {
-			return nil, nil, err
-		}
+	var body io.Reader
+	if len(r.Body) > 0 {
+		body = bytes.NewBuffer(r.Body)
 	}
 
 	timeout := r.Runtime.Timeout
@@ -39,7 +37,7 @@ func (r *RetryableRequest) CreateRequest(ctx context.Context) (*http.Request, co
 	}
 
 	ctxR, cancel := context.WithTimeout(ctx, time.Duration(timeout)*time.Second)
-	request, err := http.NewRequestWithContext(ctxR, strings.ToUpper(r.RawRequest.Method), r.URL.String(), r.Body)
+	request, err := http.NewRequestWithContext(ctxR, strings.ToUpper(r.RawRequest.Method), r.URL.String(), body)
 	if err != nil {
 		cancel()
 

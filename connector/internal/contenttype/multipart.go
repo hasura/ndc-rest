@@ -30,7 +30,7 @@ func NewMultipartFormEncoder(schema *rest.NDCHttpSchema, operation *rest.Operati
 }
 
 // Encode the multipart form.
-func (c *MultipartFormEncoder) Encode(bodyData any) (*bytes.Reader, string, error) {
+func (c *MultipartFormEncoder) Encode(bodyData any) ([]byte, string, error) {
 	bodyInfo, ok := c.operation.Arguments[rest.BodyKey]
 	if !ok {
 		return nil, "", errRequestBodyTypeRequired
@@ -46,10 +46,7 @@ func (c *MultipartFormEncoder) Encode(bodyData any) (*bytes.Reader, string, erro
 		return nil, "", err
 	}
 
-	reader := bytes.NewReader(buffer.Bytes())
-	buffer.Reset()
-
-	return reader, writer.FormDataContentType(), nil
+	return buffer.Bytes(), writer.FormDataContentType(), nil
 }
 
 func (mfb *MultipartFormEncoder) evalMultipartForm(w *MultipartWriter, bodyInfo *rest.ArgumentInfo, bodyData reflect.Value) error {
@@ -280,7 +277,7 @@ func (mfb *MultipartFormEncoder) evalEncodingHeaders(encHeaders map[string]rest.
 }
 
 // EncodeArbitrary encodes the unknown data to multipart/form.
-func (c *MultipartFormEncoder) EncodeArbitrary(bodyData any) (*bytes.Reader, string, error) {
+func (c *MultipartFormEncoder) EncodeArbitrary(bodyData any) ([]byte, string, error) {
 	buffer := new(bytes.Buffer)
 	writer := NewMultipartWriter(buffer)
 
@@ -302,10 +299,7 @@ func (c *MultipartFormEncoder) EncodeArbitrary(bodyData any) (*bytes.Reader, str
 		return nil, "", err
 	}
 
-	reader := bytes.NewReader(buffer.Bytes())
-	buffer.Reset()
-
-	return reader, writer.FormDataContentType(), nil
+	return buffer.Bytes(), writer.FormDataContentType(), nil
 }
 
 func (c *MultipartFormEncoder) evalFormDataReflection(w *MultipartWriter, key string, reflectValue reflect.Value) error {

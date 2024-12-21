@@ -4,7 +4,6 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"io"
 
 	"github.com/hasura/ndc-http/connector/internal"
 	"github.com/hasura/ndc-http/ndc-http-schema/configuration"
@@ -131,7 +130,7 @@ func (c *HTTPConnector) execQuery(ctx context.Context, state *State, request *sc
 		return nil, err
 	}
 
-	client := internal.NewHTTPClient(c.upstreams, requests, c.config.ForwardHeaders)
+	client := c.upstreams.CreateHTTPClient(requests)
 	result, _, err := client.Send(ctx, queryFields)
 	if err != nil {
 		span.SetStatus(codes.Error, "failed to execute the http request")
@@ -149,14 +148,8 @@ func (c *HTTPConnector) serializeExplainResponse(ctx context.Context, requests *
 	}
 	httpRequest := requests.Requests[0]
 	if httpRequest.Body != nil {
-		bodyBytes, err := io.ReadAll(httpRequest.Body)
-		if err != nil {
-			return nil, schema.InternalServerError("failed to read request body", map[string]any{
-				"cause": err.Error(),
-			})
-		}
+		explainResp.Details["body"] = string(httpRequest.Body)
 		httpRequest.Body = nil
-		explainResp.Details["body"] = string(bodyBytes)
 	}
 
 	req, cancel, err := httpRequest.CreateRequest(ctx)

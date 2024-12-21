@@ -8,6 +8,7 @@ import (
 	"strconv"
 
 	"github.com/hasura/ndc-http/connector/internal/argument"
+	"github.com/hasura/ndc-http/connector/internal/compression"
 	"github.com/hasura/ndc-http/connector/internal/security"
 	"github.com/hasura/ndc-http/ndc-http-schema/configuration"
 	"github.com/hasura/ndc-http/ndc-http-schema/schema"
@@ -15,6 +16,8 @@ import (
 	"github.com/hasura/ndc-http/ndc-http-schema/version"
 	"github.com/hasura/ndc-sdk-go/connector"
 	"github.com/hasura/ndc-sdk-go/utils"
+	"go.opentelemetry.io/otel"
+	"go.opentelemetry.io/otel/propagation"
 )
 
 // UpstreamManager represents a manager for an upstream.
@@ -22,6 +25,8 @@ type UpstreamManager struct {
 	config        *configuration.Configuration
 	defaultClient *http.Client
 	upstreams     map[string]UpstreamSetting
+	compressors   *compression.Compressors
+	propagator    propagation.TextMapPropagator
 }
 
 // NewUpstreamManager creates a new UpstreamManager instance.
@@ -30,6 +35,8 @@ func NewUpstreamManager(httpClient *http.Client, config *configuration.Configura
 		config:        config,
 		defaultClient: httpClient,
 		upstreams:     make(map[string]UpstreamSetting),
+		compressors:   compression.NewCompressors(),
+		propagator:    otel.GetTextMapPropagator(),
 	}
 }
 
@@ -117,6 +124,14 @@ func (um *UpstreamManager) Register(ctx context.Context, runtimeSchema *configur
 	return nil
 }
 
+// CreateHTTPClient create an HTTP client with requests.
+func (um *UpstreamManager) CreateHTTPClient(requests *RequestBuilderResults) *HTTPClient {
+	return &HTTPClient{
+		manager:  um,
+		requests: requests,
+	}
+}
+
 // ExecuteRequest executes a request to the upstream server.
 func (um *UpstreamManager) ExecuteRequest(ctx context.Context, request *RetryableRequest, namespace string) (*http.Response, context.CancelFunc, error) {
 	req, cancel, err := request.CreateRequest(ctx)
@@ -131,6 +146,7 @@ func (um *UpstreamManager) ExecuteRequest(ctx context.Context, request *Retryabl
 		return nil, nil, err
 	}
 
+	req.Header.Set(acceptEncodingHeader, um.compressors.AcceptEncoding())
 	req.Header.Set("User-Agent", "ndc-http/"+version.BuildVersion)
 	resp, err := httpClient.Do(req)
 	if err != nil {

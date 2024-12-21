@@ -18,13 +18,11 @@ import (
 	"time"
 
 	"github.com/hasura/ndc-http/connector/internal/contenttype"
-	"github.com/hasura/ndc-http/ndc-http-schema/configuration"
 	rest "github.com/hasura/ndc-http/ndc-http-schema/schema"
 	restUtils "github.com/hasura/ndc-http/ndc-http-schema/utils"
 	"github.com/hasura/ndc-sdk-go/connector"
 	"github.com/hasura/ndc-sdk-go/schema"
 	"github.com/hasura/ndc-sdk-go/utils"
-	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/attribute"
 	"go.opentelemetry.io/otel/codes"
 	"go.opentelemetry.io/otel/propagation"
@@ -36,20 +34,8 @@ var tracer = connector.NewTracer("HTTPClient")
 
 // HTTPClient represents a http client wrapper with advanced methods
 type HTTPClient struct {
-	manager        *UpstreamManager
-	requests       *RequestBuilderResults
-	forwardHeaders configuration.ForwardHeadersSettings
-	propagator     propagation.TextMapPropagator
-}
-
-// NewHTTPClient creates a http client wrapper
-func NewHTTPClient(upstreams *UpstreamManager, requests *RequestBuilderResults, forwardHeaders configuration.ForwardHeadersSettings) *HTTPClient {
-	return &HTTPClient{
-		manager:        upstreams,
-		requests:       requests,
-		forwardHeaders: forwardHeaders,
-		propagator:     otel.GetTextMapPropagator(),
-	}
+	manager  *UpstreamManager
+	requests *RequestBuilderResults
 }
 
 // Send creates and executes the request and evaluate response selection
@@ -184,10 +170,23 @@ func (client *HTTPClient) sendSingle(ctx context.Context, request *RetryableRequ
 		}
 
 		if request.Body != nil {
-			bs, _ := io.ReadAll(request.Body)
-			logAttrs = append(logAttrs, slog.String("request_body", string(bs)))
+			logAttrs = append(logAttrs, slog.String("request_body", string(request.Body)))
 		}
 		logger.Debug("sending request to remote server...", logAttrs...)
+	}
+
+	contentEncoding := request.Headers.Get(rest.ContentEncodingHeader)
+	if len(request.Body) > 0 && client.manager.compressors.IsEncodingSupported(contentEncoding) {
+		var buf bytes.Buffer
+		_, err := client.manager.compressors.Compress(&buf, contentEncoding, request.Body)
+		if err != nil {
+			span.SetStatus(codes.Error, "failed to execute the request")
+			span.RecordError(err)
+
+			return nil, nil, schema.NewConnectorError(http.StatusInternalServerError, err.Error(), nil)
+		}
+
+		request.Body = buf.Bytes()
 	}
 
 	var resp *http.Response
@@ -225,7 +224,7 @@ func (client *HTTPClient) sendSingle(ctx context.Context, request *RetryableRequ
 
 	defer cancel()
 
-	contentType := parseContentType(resp.Header.Get(contentTypeHeader))
+	contentType := parseContentType(resp.Header.Get(rest.ContentTypeHeader))
 	if resp.StatusCode >= 400 {
 		details := make(map[string]any)
 		switch contentType {
@@ -298,15 +297,15 @@ func (client *HTTPClient) doRequest(ctx context.Context, request *RetryableReque
 		span.SetAttributes(attribute.String("db.namespace", namespace))
 	}
 
-	if request.ContentLength > 0 {
-		span.SetAttributes(attribute.Int64("http.request.body.size", request.ContentLength))
+	if len(request.Body) > 0 {
+		span.SetAttributes(attribute.Int("http.request.body.size", len(request.Body)))
 	}
 	if retryCount > 0 {
 		span.SetAttributes(attribute.Int("http.request.resend_count", retryCount))
 	}
 	setHeaderAttributes(span, "http.request.header.", request.Headers)
 
-	client.propagator.Inject(ctx, propagation.HeaderCarrier(request.Headers))
+	client.manager.propagator.Inject(ctx, propagation.HeaderCarrier(request.Headers))
 	resp, cancel, err := client.manager.ExecuteRequest(ctx, request, namespace)
 	if err != nil {
 		span.SetStatus(codes.Error, "error happened when executing the request")
@@ -317,6 +316,18 @@ func (client *HTTPClient) doRequest(ctx context.Context, request *RetryableReque
 
 	span.SetAttributes(attribute.Int("http.response.status_code", resp.StatusCode))
 	setHeaderAttributes(span, "http.response.header.", resp.Header)
+
+	if resp.ContentLength >= 0 {
+		span.SetAttributes(attribute.Int64("http.response.size", resp.ContentLength))
+	}
+
+	resp.Body, err = client.manager.compressors.Decompress(resp.Body, resp.Header.Get(rest.ContentEncodingHeader))
+	if err != nil {
+		span.SetStatus(codes.Error, "error happened when decompressing the response body")
+		span.RecordError(err)
+
+		return nil, nil, nil, err
+	}
 
 	if resp.StatusCode < 300 {
 		return resp, nil, cancel, nil
@@ -329,6 +340,7 @@ func (client *HTTPClient) doRequest(ctx context.Context, request *RetryableReque
 		span.RecordError(err)
 	} else {
 		span.RecordError(errors.New(string(body)))
+		span.SetAttributes(attribute.Int64("http.response.size", int64(len(body))))
 	}
 
 	return resp, body, cancel, nil
@@ -471,7 +483,7 @@ func (client *HTTPClient) evalHTTPResponse(ctx context.Context, span trace.Span,
 }
 
 func (client *HTTPClient) extractResultType(resultType schema.Type) (schema.Type, *schema.ConnectorError) {
-	if !client.forwardHeaders.Enabled || client.forwardHeaders.ResponseHeaders == nil || client.forwardHeaders.ResponseHeaders.ResultField == "" {
+	if !client.manager.config.ForwardHeaders.Enabled || client.manager.config.ForwardHeaders.ResponseHeaders == nil || client.manager.config.ForwardHeaders.ResponseHeaders.ResultField == "" {
 		return resultType, nil
 	}
 
@@ -500,9 +512,9 @@ func (client *HTTPClient) extractForwardedHeadersResultType(resultType schema.Ty
 			return nil, fmt.Errorf("%s: empty object field", t.Name)
 		}
 
-		resultField, ok := objectType.Fields[client.forwardHeaders.ResponseHeaders.ResultField]
+		resultField, ok := objectType.Fields[client.manager.config.ForwardHeaders.ResponseHeaders.ResultField]
 		if !ok {
-			return nil, fmt.Errorf("%s: result field %s does not exist", t.Name, client.forwardHeaders.ResponseHeaders.ResultField)
+			return nil, fmt.Errorf("%s: result field %s does not exist", t.Name, client.manager.config.ForwardHeaders.ResponseHeaders.ResultField)
 		}
 
 		return resultField.Type, nil
@@ -514,13 +526,14 @@ func (client *HTTPClient) extractForwardedHeadersResultType(resultType schema.Ty
 }
 
 func (client *HTTPClient) createHeaderForwardingResponse(result any, rawHeaders http.Header) any {
-	if !client.forwardHeaders.Enabled || client.forwardHeaders.ResponseHeaders == nil {
+	forwardHeaders := client.manager.config.ForwardHeaders
+	if !forwardHeaders.Enabled || forwardHeaders.ResponseHeaders == nil {
 		return result
 	}
 
 	headers := make(map[string]string)
 	for key, values := range rawHeaders {
-		if len(client.forwardHeaders.ResponseHeaders.ForwardHeaders) > 0 && !slices.Contains(client.forwardHeaders.ResponseHeaders.ForwardHeaders, key) {
+		if len(forwardHeaders.ResponseHeaders.ForwardHeaders) > 0 && !slices.Contains(forwardHeaders.ResponseHeaders.ForwardHeaders, key) {
 			continue
 		}
 		if len(values) > 0 && values[0] != "" {
@@ -529,8 +542,8 @@ func (client *HTTPClient) createHeaderForwardingResponse(result any, rawHeaders 
 	}
 
 	return map[string]any{
-		client.forwardHeaders.ResponseHeaders.HeadersField: headers,
-		client.forwardHeaders.ResponseHeaders.ResultField:  result,
+		forwardHeaders.ResponseHeaders.HeadersField: headers,
+		forwardHeaders.ResponseHeaders.ResultField:  result,
 	}
 }
 

@@ -1,0 +1,11 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/SchemaStore/schemastore/master/src/schemas/json/json-patch.json
+- op: add
+  path: /procedures/createPostGzip/request/headers
+  value:
+    Content-Encoding:
+      value: gzip
+- op: add
+  path: /procedures/createPostDeflate/request/headers
+  value:
+    Content-Encoding:
+      value: deflate

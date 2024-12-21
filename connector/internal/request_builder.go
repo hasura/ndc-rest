@@ -107,15 +107,15 @@ func (c *RequestBuilder) buildRequestBody(request *RetryableRequest, rawRequest 
 			if err != nil {
 				return err
 			}
-			r := bytes.NewReader([]byte(dataURI.Data))
-			request.ContentLength = r.Size()
-			request.Body = r
+			request.Body = []byte(dataURI.Data)
 
 			return nil
 		case restUtils.IsContentTypeText(contentType):
-			r := bytes.NewReader([]byte(fmt.Sprint(bodyData)))
-			request.ContentLength = r.Size()
-			request.Body = r
+			bodyStr, err := utils.DecodeString(bodyData)
+			if err != nil {
+				return err
+			}
+			request.Body = []byte(bodyStr)
 
 			return nil
 		case restUtils.IsContentTypeMultipartForm(contentType):
@@ -125,17 +125,15 @@ func (c *RequestBuilder) buildRequestBody(request *RetryableRequest, rawRequest 
 			}
 
 			request.ContentType = contentType
-			request.ContentLength = r.Size()
 			request.Body = r
 
 			return nil
 		case contentType == rest.ContentTypeFormURLEncoded:
-			r, size, err := contenttype.NewURLParameterEncoder(c.Schema, rest.ContentTypeFormURLEncoded).Encode(&bodyInfo, bodyData)
+			r, err := contenttype.NewURLParameterEncoder(c.Schema, rest.ContentTypeFormURLEncoded).Encode(&bodyInfo, bodyData)
 			if err != nil {
 				return err
 			}
 			request.Body = r
-			request.ContentLength = size
 
 			return nil
 		case contentType == "" || restUtils.IsContentTypeJSON(contentType):
@@ -147,8 +145,7 @@ func (c *RequestBuilder) buildRequestBody(request *RetryableRequest, rawRequest 
 				return err
 			}
 
-			request.ContentLength = int64(buf.Len())
-			request.Body = bytes.NewReader(buf.Bytes())
+			request.Body = buf.Bytes()
 
 			return nil
 		case restUtils.IsContentTypeXML(contentType):
@@ -157,8 +154,7 @@ func (c *RequestBuilder) buildRequestBody(request *RetryableRequest, rawRequest 
 				return err
 			}
 
-			request.ContentLength = int64(len(bodyBytes))
-			request.Body = bytes.NewReader(bodyBytes)
+			request.Body = bodyBytes
 
 			return nil
 		default:

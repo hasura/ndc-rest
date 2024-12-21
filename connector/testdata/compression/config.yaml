@@ -1,0 +1,16 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/hasura/ndc-http/refs/heads/main/ndc-http-schema/jsonschema/configuration.schema.json
+strict: true
+forwardHeaders:
+  enabled: false
+  argumentField: null
+  responseHeaders: null
+concurrency:
+  query: 1
+  mutation: 1
+  http: 1
+files:
+  - file: swagger.json
+    spec: openapi2
+    patchAfter:
+      - path: patch-after.yaml
+        strategy: json6902
