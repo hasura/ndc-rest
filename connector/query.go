@@ -131,7 +131,7 @@ func (c *HTTPConnector) execQuery(ctx context.Context, state *State, request *sc
 		return nil, err
 	}
 
-	client := internal.NewHTTPClient(c.upstreams, requests, c.config.ForwardHeaders)
+	client := c.upstreams.CreateHTTPClient(requests)
 	result, _, err := client.Send(ctx, queryFields)
 	if err != nil {
 		span.SetStatus(codes.Error, "failed to execute the http request")

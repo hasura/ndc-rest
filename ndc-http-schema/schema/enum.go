@@ -216,6 +216,7 @@ func IsDefaultScalar(name string) bool {
 }
 
 const (
+	ContentEncodingHeader        = "Content-Encoding"
 	ContentTypeHeader            = "Content-Type"
 	ContentTypeJSON              = "application/json"
 	ContentTypeNdJSON            = "application/x-ndjson"

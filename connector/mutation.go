@@ -125,7 +125,7 @@ func (c *HTTPConnector) execMutationOperation(parentCtx context.Context, state *
 		return nil, err
 	}
 
-	client := internal.NewHTTPClient(c.upstreams, requests, c.config.ForwardHeaders)
+	client := c.upstreams.CreateHTTPClient(requests)
 	result, _, err := client.Send(ctx, operation.Fields)
 	if err != nil {
 		span.SetStatus(codes.Error, "failed to execute mutation")
