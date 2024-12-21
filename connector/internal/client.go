@@ -170,10 +170,23 @@ func (client *HTTPClient) sendSingle(ctx context.Context, request *RetryableRequ
 		}
 
 		if request.Body != nil {
-			bs, _ := io.ReadAll(request.Body)
-			logAttrs = append(logAttrs, slog.String("request_body", string(bs)))
+			logAttrs = append(logAttrs, slog.String("request_body", string(request.Body)))
 		}
 		logger.Debug("sending request to remote server...", logAttrs...)
+	}
+
+	contentEncoding := request.Headers.Get(rest.ContentEncodingHeader)
+	if len(request.Body) > 0 && client.manager.compressors.IsEncodingSupported(contentEncoding) {
+		var buf bytes.Buffer
+		_, err := client.manager.compressors.Compress(&buf, contentEncoding, request.Body)
+		if err != nil {
+			span.SetStatus(codes.Error, "failed to execute the request")
+			span.RecordError(err)
+
+			return nil, nil, schema.NewConnectorError(http.StatusInternalServerError, err.Error(), nil)
+		}
+
+		request.Body = buf.Bytes()
 	}
 
 	var resp *http.Response
@@ -284,8 +297,8 @@ func (client *HTTPClient) doRequest(ctx context.Context, request *RetryableReque
 		span.SetAttributes(attribute.String("db.namespace", namespace))
 	}
 
-	if request.ContentLength > 0 {
-		span.SetAttributes(attribute.Int64("http.request.body.size", request.ContentLength))
+	if len(request.Body) > 0 {
+		span.SetAttributes(attribute.Int("http.request.body.size", len(request.Body)))
 	}
 	if retryCount > 0 {
 		span.SetAttributes(attribute.Int("http.request.resend_count", retryCount))

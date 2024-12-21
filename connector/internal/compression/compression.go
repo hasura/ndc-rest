@@ -36,7 +36,24 @@ func (c Compressors) AcceptEncoding() string {
 	return c.acceptEncoding
 }
 
-// ReadAll reads the decompresses the reader with equivalent the content encoding
+// IsEncodingSupported checks if the input encoding is supported.
+func (c Compressors) IsEncodingSupported(encoding string) bool {
+	_, ok := c.compressors[encoding]
+
+	return ok
+}
+
+// Compress writes compressed data.
+func (c Compressors) Compress(w io.Writer, encoding string, data []byte) (int, error) {
+	compressor, ok := c.compressors[strings.ToLower(strings.TrimSpace(encoding))]
+	if !ok {
+		return w.Write(data)
+	}
+
+	return compressor.Compress(w, data)
+}
+
+// Decompress reads and decompresses the reader with equivalent the content encoding
 func (c Compressors) Decompress(reader io.ReadCloser, encoding string) (io.ReadCloser, error) {
 	compressor, ok := c.compressors[strings.ToLower(strings.TrimSpace(encoding))]
 	if !ok {
@@ -57,6 +74,6 @@ func (rcw readCloserWrapper) Close() error {
 	return rcw.CompressionReader.Close()
 }
 
-func (rcw readCloserWrapper) Read(p []byte) (n int, err error) {
+func (rcw readCloserWrapper) Read(p []byte) (int, error) {
 	return rcw.CompressionReader.Read(p)
 }

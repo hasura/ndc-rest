@@ -1,6 +1,7 @@
 package contenttype
 
 import (
+	"bytes"
 	"encoding/json"
 	"io"
 	"mime"
@@ -94,7 +95,7 @@ func TestCreateMultipartForm(t *testing.T) {
 			_, params, err := mime.ParseMediaType(mediaType)
 			assert.NilError(t, err)
 
-			reader := multipart.NewReader(buf, params["boundary"])
+			reader := multipart.NewReader(bytes.NewBuffer(buf), params["boundary"])
 			var count int
 			results := make(map[string]string)
 			for {

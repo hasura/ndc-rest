@@ -2,7 +2,6 @@ package internal
 
 import (
 	"encoding/json"
-	"io"
 	"net/url"
 	"os"
 	"testing"
@@ -140,11 +139,9 @@ func TestMutationEvalURLAndHeaderParameters(t *testing.T) {
 				assert.Equal(t, v, result.Headers.Get(k))
 			}
 
-			bodyBytes, err := io.ReadAll(result.Body)
-			assert.NilError(t, err)
 			expected, err := url.ParseQuery(tc.expectedBody)
 			assert.NilError(t, err)
-			body, err := url.ParseQuery(string(bodyBytes))
+			body, err := url.ParseQuery(string(result.Body))
 			assert.NilError(t, err)
 
 			assert.DeepEqual(t, expected, body)

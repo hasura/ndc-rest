@@ -1,11 +1,9 @@
 package internal
 
 import (
-	"bytes"
 	"encoding/json"
 	"errors"
 	"fmt"
-	"io"
 	"net/http"
 	"slices"
 	"strings"
@@ -42,14 +40,8 @@ func (rqe *RawRequestBuilder) Explain() (*schema.ExplainResponse, error) {
 	}
 
 	if httpRequest.Body != nil {
-		bodyBytes, err := io.ReadAll(httpRequest.Body)
-		if err != nil {
-			return nil, schema.InternalServerError("failed to read request body", map[string]any{
-				"cause": err.Error(),
-			})
-		}
+		explainResp.Details["body"] = string(httpRequest.Body)
 		httpRequest.Body = nil
-		explainResp.Details["body"] = string(bodyBytes)
 	}
 
 	// mask sensitive forwarded headers if exists
@@ -194,84 +186,82 @@ func (rqe *RawRequestBuilder) decodeArguments() (*RetryableRequest, error) {
 	}
 
 	if rawBody, ok := rawArguments["body"]; ok && len(rawBody) > 0 {
-		reader, contentType, contentLength, err := rqe.evalRequestBody(rawBody, contentType)
+		bodyBytes, contentType, err := rqe.evalRequestBody(rawBody, contentType)
 		if err != nil {
 			return nil, fmt.Errorf("body: %w", err)
 		}
 		request.ContentType = contentType
-		request.ContentLength = contentLength
-		request.Body = reader
+		request.Body = bodyBytes
 	}
 
 	return request, nil
 }
 
-func (rqe *RawRequestBuilder) evalRequestBody(rawBody json.RawMessage, contentType string) (io.ReadSeeker, string, int64, error) {
+func (rqe *RawRequestBuilder) evalRequestBody(rawBody json.RawMessage, contentType string) ([]byte, string, error) {
 	switch {
 	case restUtils.IsContentTypeJSON(contentType):
 		if !json.Valid(rawBody) {
-			return nil, "", 0, fmt.Errorf("invalid json body: %s", string(rawBody))
+			return nil, "", fmt.Errorf("invalid json body: %s", string(rawBody))
 		}
 
-		return bytes.NewReader(rawBody), contentType, int64(len(rawBody)), nil
+		return rawBody, contentType, nil
 	case restUtils.IsContentTypeXML(contentType):
 		var bodyData any
 		if err := json.Unmarshal(rawBody, &bodyData); err != nil {
-			return nil, "", 0, fmt.Errorf("invalid body: %w", err)
+			return nil, "", fmt.Errorf("invalid body: %w", err)
 		}
 
 		if bodyStr, ok := bodyData.(string); ok {
-			return strings.NewReader(bodyStr), contentType, int64(len(bodyStr)), nil
+			return []byte(bodyStr), contentType, nil
 		}
 
 		bodyBytes, err := contenttype.NewXMLEncoder(nil).EncodeArbitrary(bodyData)
 		if err != nil {
-			return nil, "", 0, err
+			return nil, "", err
 		}
 
-		return bytes.NewReader(bodyBytes), contentType, int64(len(bodyBytes)), nil
+		return bodyBytes, contentType, nil
 	case restUtils.IsContentTypeText(contentType):
 		var bodyData string
 		if err := json.Unmarshal(rawBody, &bodyData); err != nil {
-			return nil, "", 0, fmt.Errorf("invalid body: %w", err)
+			return nil, "", fmt.Errorf("invalid body: %w", err)
 		}
 
-		return strings.NewReader(bodyData), contentType, int64(len(bodyData)), nil
+		return []byte(bodyData), contentType, nil
 	case restUtils.IsContentTypeMultipartForm(contentType):
 		var bodyData any
 		if err := json.Unmarshal(rawBody, &bodyData); err != nil {
-			return nil, "", 0, fmt.Errorf("invalid body: %w", err)
+			return nil, "", fmt.Errorf("invalid body: %w", err)
 		}
 		r, contentType, err := contenttype.NewMultipartFormEncoder(nil, nil, nil).EncodeArbitrary(bodyData)
 		if err != nil {
-			return nil, "", 0, err
+			return nil, "", err
 		}
 
-		return r, contentType, r.Size(), nil
+		return r, contentType, nil
 	case contentType == rest.ContentTypeFormURLEncoded:
 		var bodyData any
 		if err := json.Unmarshal(rawBody, &bodyData); err != nil {
-			return nil, "", 0, fmt.Errorf("invalid body: %w", err)
+			return nil, "", fmt.Errorf("invalid body: %w", err)
 		}
 
 		if bodyStr, ok := bodyData.(string); ok {
-			return strings.NewReader(bodyStr), contentType, int64(len(bodyStr)), nil
+			return []byte(bodyStr), contentType, nil
 		}
 
-		r, size, err := contenttype.NewURLParameterEncoder(nil, rest.ContentTypeFormURLEncoded).EncodeArbitrary(bodyData)
+		r, err := contenttype.NewURLParameterEncoder(nil, rest.ContentTypeFormURLEncoded).EncodeArbitrary(bodyData)
 
-		return r, contentType, size, err
+		return r, contentType, err
 	default:
 		var bodyData string
 		if err := json.Unmarshal(rawBody, &bodyData); err != nil {
-			return nil, "", 0, fmt.Errorf("invalid body: %w", err)
+			return nil, "", fmt.Errorf("invalid body: %w", err)
 		}
 		dataURI, err := contenttype.DecodeDataURI(bodyData)
 		if err != nil {
-			return nil, "", 0, err
+			return nil, "", err
 		}
-		r := bytes.NewReader([]byte(dataURI.Data))
 
-		return r, contentType, r.Size(), nil
+		return []byte(dataURI.Data), contentType, nil
 	}
 }
