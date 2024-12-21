@@ -212,6 +212,18 @@
             }
           }
         },
+        "excluded_segments": {
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "element_type": {
+                "name": "String",
+                "type": "named"
+              },
+              "type": "array"
+            }
+          }
+        },
         "filters": {
           "type": {
             "type": "nullable",
@@ -242,6 +254,30 @@
             }
           }
         },
+        "include_player_ids": {
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "element_type": {
+                "name": "String",
+                "type": "named"
+              },
+              "type": "array"
+            }
+          }
+        },
+        "included_segments": {
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "element_type": {
+                "name": "String",
+                "type": "named"
+              },
+              "type": "array"
+            }
+          }
+        },
         "send_after": {
           "type": {
             "type": "nullable",
@@ -256,6 +292,15 @@
             "type": "nullable",
             "underlying_type": {
               "name": "HasuraStringMap",
+              "type": "named"
+            }
+          }
+        },
+        "target_channel": {
+          "type": {
+            "type": "nullable",
+            "underlying_type": {
+              "name": "HasuraPlayerNotificationTargetTargetChannel",
               "type": "named"
             }
           }
@@ -327,7 +372,7 @@
           }
         },
         "converted": {
-          "description": "Number of messages that were clicked.",
+          "description": "Number of users who have clicked / tapped on your notification.",
           "type": {
             "type": "nullable",
             "underlying_type": {
@@ -337,7 +382,7 @@
           }
         },
         "errored": {
-          "description": "Number of errors reported.",
+          "description": "Number of notifications that could not be delivered due to an error. You can find more information by viewing the notification in the dashboard.",
           "type": {
             "type": "nullable",
             "underlying_type": {
@@ -359,7 +404,7 @@
           }
         },
         "failed": {
-          "description": "Number of messages sent to unsubscribed devices.",
+          "description": "Number of notifications that could not be delivered due to those devices being unsubscribed.",
           "type": {
             "type": "nullable",
             "underlying_type": {
@@ -455,7 +500,7 @@
           }
         },
         "received": {
-          "description": "Number of devices that received the message.",
+          "description": "Confirmed Deliveries number of devices that received the push notification. Paid Feature Only. Free accounts will see 0.",
           "type": {
             "type": "nullable",
             "underlying_type": {
@@ -494,7 +539,7 @@
           }
         },
         "successful": {
-          "description": "Number of messages delivered to push servers, mobile carriers, or email service providers.",
+          "description": "Number of notifications that were successfully delivered.",
           "type": {
             "type": "nullable",
             "underlying_type": {
@@ -663,8 +708,8 @@
       "comparison_operators": {},
       "representation": {
         "one_of": [
-          "\u003e",
-          "\u003c",
+          ">",
+          "<",
           "=",
           "!=",
           "exists",

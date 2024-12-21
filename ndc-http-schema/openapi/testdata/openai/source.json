@@ -138,6 +138,35 @@
           ]
         }
       }
+    },
+    "/threads/runs": {
+      "post": {
+        "operationId": "createThreadAndRun",
+        "tags": ["Assistants"],
+        "summary": "Create a thread and run it in one request.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateThreadAndRunRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RunObject"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
@@ -1059,6 +1088,175 @@
           "completed": {
             "type": "integer",
             "description": "The completed size of the task"
+          }
+        }
+      },
+      "CreateThreadRequest": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "tool_resources": {
+            "type": "object",
+            "description": "A set of resources that are made available to the assistant's tools in this thread. The resources are specific to the type of tool. For example, the `code_interpreter` tool requires a list of file IDs, while the `file_search` tool requires a list of vector store IDs.\n",
+            "properties": {
+              "code_interpreter": {
+                "type": "object",
+                "properties": {
+                  "file_ids": {
+                    "type": "array",
+                    "description": "A list of [file](/docs/api-reference/files) IDs made available to the `code_interpreter` tool. There can be a maximum of 20 files associated with the tool.\n",
+                    "default": [],
+                    "maxItems": 20,
+                    "items": {
+                      "type": "string"
+                    }
+                  }
+                }
+              },
+              "file_search": {
+                "type": "object",
+                "properties": {
+                  "vector_store_ids": {
+                    "type": "array",
+                    "description": "The [vector store](/docs/api-reference/vector-stores/object) attached to this thread. There can be a maximum of 1 vector store attached to the thread.\n",
+                    "maxItems": 1,
+                    "items": {
+                      "type": "string"
+                    }
+                  },
+                  "vector_stores": {
+                    "type": "array",
+                    "description": "A helper to create a [vector store](/docs/api-reference/vector-stores/object) with file_ids and attach it to this thread. There can be a maximum of 1 vector store attached to the thread.\n",
+                    "maxItems": 1,
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "file_ids": {
+                          "type": "array",
+                          "description": "A list of [file](/docs/api-reference/files) IDs to add to the vector store. There can be a maximum of 10000 files in a vector store.\n",
+                          "maxItems": 10000,
+                          "items": {
+                            "type": "string"
+                          }
+                        },
+                        "chunking_strategy": {
+                          "type": "object",
+                          "description": "The chunking strategy used to chunk the file(s). If not set, will use the `auto` strategy.",
+                          "oneOf": [
+                            {
+                              "type": "object",
+                              "title": "Auto Chunking Strategy",
+                              "description": "The default strategy. This strategy currently uses a `max_chunk_size_tokens` of `800` and `chunk_overlap_tokens` of `400`.",
+                              "additionalProperties": false,
+                              "properties": {
+                                "type": {
+                                  "type": "string",
+                                  "description": "Always `auto`.",
+                                  "enum": ["auto"]
+                                }
+                              },
+                              "required": ["type"]
+                            },
+                            {
+                              "type": "object",
+                              "title": "Static Chunking Strategy",
+                              "additionalProperties": false,
+                              "properties": {
+                                "type": {
+                                  "type": "string",
+                                  "description": "Always `static`.",
+                                  "enum": ["static"]
+                                },
+                                "static": {
+                                  "type": "object",
+                                  "additionalProperties": false,
+                                  "properties": {
+                                    "max_chunk_size_tokens": {
+                                      "type": "integer",
+                                      "minimum": 100,
+                                      "maximum": 4096,
+                                      "description": "The maximum number of tokens in each chunk. The default value is `800`. The minimum value is `100` and the maximum value is `4096`."
+                                    },
+                                    "chunk_overlap_tokens": {
+                                      "type": "integer",
+                                      "description": "The number of tokens that overlap between chunks. The default value is `400`.\n\nNote that the overlap must not exceed half of `max_chunk_size_tokens`.\n"
+                                    }
+                                  },
+                                  "required": [
+                                    "max_chunk_size_tokens",
+                                    "chunk_overlap_tokens"
+                                  ]
+                                }
+                              },
+                              "required": ["type", "static"]
+                            }
+                          ],
+                          "x-oaiExpandable": true
+                        },
+                        "metadata": {
+                          "type": "object",
+                          "description": "Set of 16 key-value pairs that can be attached to a vector store. This can be useful for storing additional information about the vector store in a structured format. Keys can be a maximum of 64 characters long and values can be a maximum of 512 characters long.\n",
+                          "x-oaiTypeLabel": "map"
+                        }
+                      },
+                      "x-oaiExpandable": true
+                    }
+                  }
+                },
+                "oneOf": [
+                  {
+                    "required": ["vector_store_ids"]
+                  },
+                  {
+                    "required": ["vector_stores"]
+                  }
+                ]
+              }
+            },
+            "nullable": true
+          }
+        }
+      },
+      "CreateThreadAndRunRequest": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "assistant_id": {
+            "description": "The ID of the [assistant](/docs/api-reference/assistants) to use to execute this run.",
+            "type": "string"
+          },
+          "thread": {
+            "$ref": "#/components/schemas/CreateThreadRequest",
+            "description": "If no thread is provided, an empty thread will be created."
+          }
+        },
+        "required": ["assistant_id"]
+      },
+      "RunObject": {
+        "type": "object",
+        "title": "A run on a thread",
+        "description": "Represents an execution run on a [thread](/docs/api-reference/threads).",
+        "properties": {
+          "id": {
+            "description": "The identifier, which can be referenced in API endpoints.",
+            "type": "string"
+          },
+          "object": {
+            "description": "The object type, which is always `thread.run`.",
+            "type": "string",
+            "enum": ["thread.run"]
+          },
+          "created_at": {
+            "description": "The Unix timestamp (in seconds) for when the run was created.",
+            "type": "integer"
+          },
+          "thread_id": {
+            "description": "The ID of the [thread](/docs/api-reference/threads) that was executed on as a part of this run.",
+            "type": "string"
+          },
+          "assistant_id": {
+            "description": "The ID of the [assistant](/docs/api-reference/assistants) used for execution of this run.",
+            "type": "string"
           }
         }
       }

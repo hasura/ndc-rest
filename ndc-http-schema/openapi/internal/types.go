@@ -143,3 +143,11 @@ type ConvertOptions struct {
 	NoDeprecation       bool
 	Logger              *slog.Logger
 }
+
+type oasUnionType string
+
+const (
+	oasOneOf oasUnionType = "oneOf"
+	oasAnyOf oasUnionType = "anyOf"
+	oasAllOf oasUnionType = "allOf"
+)

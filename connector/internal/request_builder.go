@@ -12,6 +12,7 @@ import (
 
 	"github.com/hasura/ndc-http/connector/internal/contenttype"
 	rest "github.com/hasura/ndc-http/ndc-http-schema/schema"
+	restUtils "github.com/hasura/ndc-http/ndc-http-schema/utils"
 	"github.com/hasura/ndc-sdk-go/schema"
 	"github.com/hasura/ndc-sdk-go/utils"
 )
@@ -111,13 +112,13 @@ func (c *RequestBuilder) buildRequestBody(request *RetryableRequest, rawRequest 
 			request.Body = r
 
 			return nil
-		case strings.HasPrefix(contentType, "text/"):
+		case restUtils.IsContentTypeText(contentType):
 			r := bytes.NewReader([]byte(fmt.Sprint(bodyData)))
 			request.ContentLength = r.Size()
 			request.Body = r
 
 			return nil
-		case strings.HasPrefix(contentType, "multipart/"):
+		case restUtils.IsContentTypeMultipartForm(contentType):
 			r, contentType, err := contenttype.NewMultipartFormEncoder(c.Schema, c.Operation, c.Arguments).Encode(bodyData)
 			if err != nil {
 				return err
@@ -137,7 +138,7 @@ func (c *RequestBuilder) buildRequestBody(request *RetryableRequest, rawRequest 
 			request.ContentLength = size
 
 			return nil
-		case contentType == rest.ContentTypeJSON || contentType == "" || strings.HasSuffix(contentType, "+json"):
+		case contentType == "" || restUtils.IsContentTypeJSON(contentType):
 			var buf bytes.Buffer
 			enc := json.NewEncoder(&buf)
 			enc.SetEscapeHTML(false)
@@ -150,7 +151,7 @@ func (c *RequestBuilder) buildRequestBody(request *RetryableRequest, rawRequest 
 			request.Body = bytes.NewReader(buf.Bytes())
 
 			return nil
-		case contentType == rest.ContentTypeXML || strings.HasSuffix(contentType, "+xml"):
+		case restUtils.IsContentTypeXML(contentType):
 			bodyBytes, err := contenttype.NewXMLEncoder(c.Schema).Encode(&bodyInfo, bodyData)
 			if err != nil {
 				return err

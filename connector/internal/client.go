@@ -376,14 +376,14 @@ func (client *HTTPClient) evalHTTPResponse(ctx context.Context, span trace.Span,
 
 	var result any
 	switch {
-	case strings.HasPrefix(contentType, "text/") || strings.HasPrefix(contentType, "image/svg"):
+	case restUtils.IsContentTypeText(contentType):
 		respBody, err := io.ReadAll(resp.Body)
 		if err != nil {
 			return nil, nil, schema.NewConnectorError(http.StatusInternalServerError, err.Error(), nil)
 		}
 
 		result = string(respBody)
-	case contentType == rest.ContentTypeXML || strings.HasSuffix(contentType, "+xml"):
+	case restUtils.IsContentTypeXML(contentType):
 		field, extractErr := client.extractResultType(resultType)
 		if extractErr != nil {
 			return nil, nil, extractErr
@@ -394,7 +394,7 @@ func (client *HTTPClient) evalHTTPResponse(ctx context.Context, span trace.Span,
 		if err != nil {
 			return nil, nil, schema.NewConnectorError(http.StatusInternalServerError, err.Error(), nil)
 		}
-	case contentType == rest.ContentTypeJSON || strings.HasSuffix(contentType, "+json"):
+	case restUtils.IsContentTypeJSON(contentType):
 		if len(resultType) > 0 {
 			namedType, err := resultType.AsNamed()
 			if err == nil && namedType.Name == string(rest.ScalarString) {
@@ -445,7 +445,7 @@ func (client *HTTPClient) evalHTTPResponse(ctx context.Context, span trace.Span,
 		}
 
 		result = results
-	case strings.HasPrefix(contentType, "application/") || strings.HasPrefix(contentType, "image/") || strings.HasPrefix(contentType, "video/"):
+	case restUtils.IsContentTypeBinary(contentType):
 		rawBytes, err := io.ReadAll(resp.Body)
 		if err != nil {
 			return nil, nil, schema.NewConnectorError(http.StatusInternalServerError, err.Error(), nil)

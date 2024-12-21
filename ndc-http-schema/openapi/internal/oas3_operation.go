@@ -3,6 +3,7 @@ package internal
 import (
 	"fmt"
 	"log/slog"
+	"net/http"
 	"slices"
 	"strconv"
 	"strings"
@@ -387,7 +388,7 @@ func (oc *oas3OperationBuilder) convertResponse(responses *v3.Responses, apiPath
 	// return nullable JSON type if the response content is null
 	if resp == nil || resp.Content == nil {
 		scalarName := rest.ScalarJSON
-		if statusCode == 204 {
+		if statusCode == http.StatusNoContent {
 			scalarName = rest.ScalarBoolean
 		}
 		oc.builder.schema.AddScalar(string(scalarName), *defaultScalarTypes[scalarName])
@@ -399,12 +400,21 @@ func (oc *oas3OperationBuilder) convertResponse(responses *v3.Responses, apiPath
 
 	contentType, bodyContent := oc.getContentType(resp.Content)
 	if bodyContent == nil {
-		if statusCode == 204 {
-			scalarName := string(rest.ScalarBoolean)
-			oc.builder.schema.AddScalar(scalarName, *defaultScalarTypes[rest.ScalarBoolean])
+		if statusCode == http.StatusNoContent {
+			scalarName := rest.ScalarBoolean
+			oc.builder.schema.AddScalar(string(scalarName), *defaultScalarTypes[scalarName])
 
-			return schema.NewNullableNamedType(scalarName), &rest.Response{
+			return schema.NewNullableNamedType(string(scalarName)), &rest.Response{
 				ContentType: rest.ContentTypeJSON,
+			}, nil
+		}
+
+		if contentType != "" {
+			scalarName := guessScalarResultTypeFromContentType(contentType)
+			oc.builder.schema.AddScalar(string(scalarName), *defaultScalarTypes[scalarName])
+
+			return schema.NewNamedType(string(scalarName)), &rest.Response{
+				ContentType: contentType,
 			}, nil
 		}
 

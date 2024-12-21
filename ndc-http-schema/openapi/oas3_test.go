@@ -72,6 +72,15 @@ func TestOpenAPIv3ToRESTSchema(t *testing.T) {
 				Prefix: "hasura_one_signal",
 			},
 		},
+		// go run ./ndc-http-schema convert -f ./ndc-http-schema/openapi/testdata/union3/source.json -o ./ndc-http-schema/openapi/testdata/union3/expected.json --spec openapi3
+		// go run ./ndc-http-schema convert -f ./ndc-http-schema/openapi/testdata/union3/source.json -o ./ndc-http-schema/openapi/testdata/union3/schema.json --pure --spec openapi3
+		{
+			Name:     "union",
+			Source:   "testdata/union3/source.json",
+			Expected: "testdata/union3/expected.json",
+			Schema:   "testdata/union3/schema.json",
+			Options:  ConvertOptions{},
+		},
 	}
 
 	for _, tc := range testCases {

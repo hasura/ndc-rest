@@ -335,6 +335,98 @@ func isNullableType(input schema.TypeEncoder) bool {
 	return ok
 }
 
+func mergeUnionTypes(httpSchema *rest.NDCHttpSchema, a schema.Type, b schema.Type, fieldPaths []string) (*unionSiblingField, bool) {
+	switch at := a.Interface().(type) {
+	case *schema.NullableType:
+		bt, err := b.AsNullable()
+		buType := b
+		if err == nil {
+			buType = bt.UnderlyingType
+		}
+
+		ut, ok := mergeUnionTypes(httpSchema, at.UnderlyingType, buType, fieldPaths)
+		if !ok {
+			return &unionSiblingField{
+				Type: schema.NewNullableType(schema.NewNamedType(string(rest.ScalarJSON))),
+			}, false
+		}
+
+		ut.Type = schema.NewNullableType(ut.Type)
+
+		return ut, true
+	case *schema.ArrayType:
+		bt, err := b.AsArray()
+		if err != nil {
+			return &unionSiblingField{
+				Type: schema.NewNullableType(schema.NewNamedType(string(rest.ScalarJSON))),
+			}, false
+		}
+
+		ut, ok := mergeUnionTypes(httpSchema, at.ElementType, bt.ElementType, fieldPaths)
+		if !ok {
+			return &unionSiblingField{
+				Type: schema.NewArrayType(schema.NewNamedType(string(rest.ScalarJSON))),
+			}, false
+		}
+
+		ut.Type = schema.NewArrayType(ut.Type)
+
+		return ut, true
+	case *schema.NamedType:
+		bt, err := b.AsNamed()
+		if err != nil {
+			return &unionSiblingField{
+				Type: schema.NewNamedType(string(rest.ScalarJSON)),
+			}, false
+		}
+
+		// if both types are enum scalars, a new enum scalar is created with the merged value set of both enums.
+		var enumA, enumB *schema.TypeRepresentationEnum
+		scalarA, ok := httpSchema.ScalarTypes[at.Name]
+		if ok {
+			enumA, _ = scalarA.Representation.AsEnum()
+		}
+
+		scalarB, ok := httpSchema.ScalarTypes[bt.Name]
+		if ok {
+			enumB, _ = scalarB.Representation.AsEnum()
+		}
+
+		if at.Name == bt.Name {
+			result := &unionSiblingField{
+				Type: at,
+			}
+			if enumA != nil {
+				result.EnumOneOf = enumA.OneOf
+			}
+
+			return result, true
+		}
+
+		if enumA == nil || enumB == nil {
+			return &unionSiblingField{
+				Type: schema.NewNamedType(string(rest.ScalarJSON)),
+			}, false
+		}
+
+		enumValues := append(enumA.OneOf, enumB.OneOf...)
+		newScalar := schema.NewScalarType()
+		newScalar.Representation = schema.NewTypeRepresentationEnum(enumValues).Encode()
+
+		newName := utils.StringSliceToPascalCase(append(fieldPaths, "Enum")) + "_" + strings.Join(enumValues, "_")
+		httpSchema.ScalarTypes[newName] = *newScalar
+
+		return &unionSiblingField{
+			Type:      schema.NewNamedType(newName),
+			EnumOneOf: enumValues,
+		}, true
+	}
+
+	return &unionSiblingField{
+		Type: schema.NewNullableType(schema.NewNamedType(string(rest.ScalarJSON))),
+	}, false
+}
+
 // encodeHeaderArgumentName encodes header key to NDC schema field name
 func encodeHeaderArgumentName(name string) string {
 	return "header" + utils.ToPascalCase(name)
@@ -507,7 +599,7 @@ func evalOperationPath(httpSchema *rest.NDCHttpSchema, rawPath string, arguments
 		}
 	}
 
-	var newQuery url.Values
+	newQuery := url.Values{}
 	q := pathURL.Query()
 	for key, value := range q {
 		if len(value) == 0 || value[0] == "" {
@@ -559,4 +651,39 @@ func evalOperationPath(httpSchema *rest.NDCHttpSchema, rawPath string, arguments
 	}
 
 	return pathURL.Path + queryString + fragment, arguments, nil
+}
+
+func guessScalarResultTypeFromContentType(contentType string) rest.ScalarName {
+	ct := strings.TrimSpace(strings.Split(contentType, ";")[0])
+	switch {
+	case utils.IsContentTypeJSON(ct) || utils.IsContentTypeXML(ct) || ct == rest.ContentTypeNdJSON:
+		return rest.ScalarJSON
+	case utils.IsContentTypeText(ct):
+		return rest.ScalarString
+	default:
+		return rest.ScalarBinary
+	}
+}
+
+func replaceNamedType(schemaType schema.Type, name string) (schema.TypeEncoder, error) {
+	switch t := schemaType.Interface().(type) {
+	case *schema.NullableType:
+		newType, err := replaceNamedType(t.UnderlyingType, name)
+		if err != nil {
+			return nil, err
+		}
+
+		return schema.NewNullableType(newType), nil
+	case *schema.ArrayType:
+		newType, err := replaceNamedType(t.ElementType, name)
+		if err != nil {
+			return nil, err
+		}
+
+		return schema.NewArrayType(newType), nil
+	case *schema.NamedType:
+		return schema.NewNamedType(name), nil
+	default:
+		return nil, fmt.Errorf("invalid type: %v", schemaType)
+	}
 }
